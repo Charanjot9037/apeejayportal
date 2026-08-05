@@ -42,7 +42,7 @@ const handleSubmit = async (e) => {
       console.log("User:", data.user);
       console.log("Token:", data.accessToken);
 
-      // Store access token (optional)
+      // Store access token (optional)//harhsal remove krdae
       localStorage.setItem(
         "accessToken",
         data.accessToken

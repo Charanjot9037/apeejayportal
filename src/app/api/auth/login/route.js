@@ -66,8 +66,8 @@ export async function POST(req) {
 
     const refreshToken = createRefreshToken(user);
 
+//etho sida token add kr deo cookies ch 
 
-    // Save refresh token
     user.refreshToken = refreshToken;
     await user.save();
 
@@ -75,7 +75,7 @@ export async function POST(req) {
     return NextResponse.json(
       {
         message: "Login successful",
-        accessToken,
+        accessToken,//remove from here also
         user: {
           id: user._id,
           name: user.name,
