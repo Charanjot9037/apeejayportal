@@ -1,5 +1,6 @@
 import Image from "next/image";
-import Login from "../components/login";
+import Signup from "../components/signup"
+
 export default function Page() {
   return (
  <div className="flex justify-center items-center h-screen ">
@@ -8,7 +9,7 @@ export default function Page() {
         <span className="text-2xl text-white font-inter ">Soaring High Is My Nature</span>
     </div>
     <div className="w-1/2 h-full ">
-      <Login/>
+      <Signup/>
     </div>
  </div>  
     )}
