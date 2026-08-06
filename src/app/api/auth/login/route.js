@@ -14,7 +14,7 @@ export async function POST(req) {
     const { email, password } = body;
 
 
-    // Validation
+    
     if (!email || !password) {
       return NextResponse.json(
         {
@@ -27,7 +27,7 @@ export async function POST(req) {
     }
 
 
-    // Find user
+
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -42,7 +42,6 @@ export async function POST(req) {
     }
 
 
-    // Compare password
     const isPasswordMatch = await bcrypt.compare(
       password,
       user.password
@@ -61,21 +60,18 @@ export async function POST(req) {
     }
 
 
-    // Create tokens
+
     const accessToken = createAccessToken(user);
 
     const refreshToken = createRefreshToken(user);
-
-//etho sida token add kr deo cookies ch 
 
     user.refreshToken = refreshToken;
     await user.save();
 
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         message: "Login successful",
-        accessToken,//remove from here also
         user: {
           id: user._id,
           name: user.name,
@@ -87,6 +83,37 @@ export async function POST(req) {
         status: 200,
       }
     );
+
+
+   
+    response.cookies.set(
+      "accessToken",
+      accessToken,
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 15,
+        path: "/",
+      }
+    );
+
+
+   
+    response.cookies.set(
+      "refreshToken",
+      refreshToken,
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+      }
+    );
+
+
+    return response;
 
 
   } catch (error) {

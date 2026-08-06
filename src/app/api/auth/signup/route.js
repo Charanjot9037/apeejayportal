@@ -8,7 +8,6 @@ import {NextResponse} from "next/server";
 export async function POST(req){
 
 try{
-
 await connectDB();
 
 
@@ -26,22 +25,22 @@ password
 
 
 
-// const existingUser =
-// await User.findOne({email});
+const existingUser =
+await User.findOne({email});
 
 
-// if(existingUser){
+if(existingUser){
 
-// return NextResponse.json(
-// {
-// message:"User already exists"
-// },
-// {
-// status:400
-// }
-// );
+return NextResponse.json(
+{
+message:"User already exists"
+},
+{
+status:400
+}
+);
 
-// }
+}
 
 
 
