@@ -43,10 +43,7 @@ const handleSubmit = async (e) => {
       console.log("Token:", data.accessToken);
 
       // Store access token (optional)//harhsal remove krdae
-      localStorage.setItem(
-        "accessToken",
-        data.accessToken
-      );
+     
 
       // Redirect after login
       // window.location.href = "/dashboard";
