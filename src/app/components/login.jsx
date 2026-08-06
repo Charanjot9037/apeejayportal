@@ -7,6 +7,7 @@ import {loginSchema} from "@/validations/loginSchema";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import GoogleButton from "./elements/GoogleButton";
 
 const Login = () => {
   const router = useRouter();
@@ -156,9 +157,18 @@ const Login = () => {
           <Button
             type="submit"
             className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-          >
-            Login
+          > Login
           </Button>
+          <div className="relative my-5">
+  <div className="absolute inset-0 flex items-center">
+    <span className="w-full border-t" />
+  </div>
+
+  <div className="relative flex justify-center text-xs uppercase">
+    <span className="bg-white px-2 text-gray-500"> OR </span>
+  </div>
+</div>
+<GoogleButton />
 
         </form>
 
