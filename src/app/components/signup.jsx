@@ -45,8 +45,11 @@ const Signup = () => {
 
     const data = await response.json();
 
+  console.log(response.status);
+  console.log(data);
 
     if(!response.ok){
+      
       throw new Error(data.message);
     }
 
