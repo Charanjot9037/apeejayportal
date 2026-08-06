@@ -1,65 +1,58 @@
 "use client";
-import { useState } from "react";
+
 import React from "react";
-import { Input,Label,Button } from "@/components/ui";
+import { Input, Label, Button } from "@/components/ui";
+import { useFormik } from "formik";
+import {loginSchema} from "@/validations/loginSchema";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 
+const Login = () => {
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
 
+    validationSchema: loginSchema,
 
+    onSubmit: async (values) => {
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        });
 
-const Login =() => {
+        const data = await response.json();
 
-    const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
+        if (!response.ok) {
+          throw new Error(data.message);
+        }
 
-const[formData,setFormData]=useState({
-  email:"",
-  password:"",
-});
-const handleSubmit = async (e) => {
-  e.preventDefault();
+        alert(data.message);
 
-  try {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-      }),
-    });
+        console.log("User:", data.user);
 
-    const data = await response.json();
+        // Redirect after login
+        router.push("/dashboard");
 
-    if (response.ok) {
-      alert(data.message);
+      } catch (error) {
+        console.log(error.message);
+        alert(error.message);
+      }
+    },
+  });
 
-      console.log("User:", data.user);
-      console.log("Token:", data.accessToken);
-
-      // Store access token (optional)//harhsal remove krdae
-     
-
-      // Redirect after login
-      // window.location.href = "/dashboard";
-
-    } else {
-      alert(data.message || "Login failed");
-    }
-
-  } catch (error) {
-    console.log("Login error:", error);
-    alert("Something went wrong. Please try again.");
-  }
-};
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-md rounded-2xl border border-gray-200 shadow-xl shadow-blue-300/40 p-8">
+
         <div className="flex flex-col items-start gap-2 mb-6">
           <h1 className="text-3xl font-bold text-black">
             Welcome Back
@@ -70,30 +63,84 @@ const handleSubmit = async (e) => {
           </p>
         </div>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form
+          onSubmit={formik.handleSubmit}
+          className="space-y-5"
+        >
+
+          {/* Email */}
+
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+
+            <Label htmlFor="email" required>
+              Email 
+            </Label>
 
             <Input
               id="email"
-              value={formData.email}
-             onChange={handleChange}
+              name="email"
               type="email"
               placeholder="Enter your email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              required
             />
+
+            {formik.touched.email &&
+              formik.errors.email && (
+                <p className="text-red-500 text-sm">
+                  {formik.errors.email}
+                </p>
+              )}
+
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+          {/* Password */}
+<div className="space-y-2">
 
-            <Input
-              id="password"
-              type="password"
-              onChange={handleChange}
-              value={formData.password}
-              placeholder="Enter your password"
-            />
-          </div>
+  <Label htmlFor="password" required>
+    Password 
+  </Label>
+
+  <div className="relative">
+
+    <Input
+      id="password"
+      name="password"
+      type={showPassword ? "text" : "password"}
+      placeholder="Enter your password"
+      value={formik.values.password}
+      onChange={formik.handleChange}
+      onBlur={formik.handleBlur}
+      className="pr-10"
+    />
+
+    <button
+      type="button"
+      onClick={() =>
+        setShowPassword(!showPassword)
+      }
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+    >
+      {showPassword ? (
+        <EyeOff size={20} />
+      ) : (
+        <Eye size={20} />
+      )}
+    </button>
+
+  </div>
+
+  {formik.touched.password &&
+    formik.errors.password && (
+      <p className="text-red-500 text-sm">
+        {formik.errors.password}
+      </p>
+    )}
+
+</div>
+          {/* Forgot Password */}
 
           <div className="text-right">
             <a
@@ -104,23 +151,29 @@ const handleSubmit = async (e) => {
             </a>
           </div>
 
+          {/* Login Button */}
+
           <Button
             type="submit"
             className="w-full bg-orange-500 hover:bg-orange-600 text-white"
           >
             Login
           </Button>
+
         </form>
 
         <p className="mt-6 text-center text-gray-700">
           Don't have an account?{" "}
+
           <a
             href="/signup"
             className="font-semibold text-orange-500 hover:underline"
           >
             Sign Up
           </a>
+
         </p>
+
       </div>
     </div>
   );
