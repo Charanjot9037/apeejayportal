@@ -22,11 +22,7 @@ function Label({
 
       {required && (
         <span
-          className="
-            text-orange-500
-            font-bold
-            text-base
-          " >
+          className=" text-orange-500 font-bold text-base" >
           *
         </span>
       )}
