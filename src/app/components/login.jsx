@@ -8,9 +8,11 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import GoogleButton from "./elements/GoogleButton";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "@/redux/authSlice";
 
 const Login = () => {
-  const router = useRouter();
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const formik = useFormik({
     initialValues: {
@@ -37,11 +39,15 @@ const Login = () => {
         }
 
         alert(data.message);
+       dispatch(loginSuccess({
+          user: data.user,
+          name: data.name,
+          email: data.email,
+          profileImage: data.profileImage,
+       }));
+        console.log("User:", data.profileImage);
 
-        console.log("User:", data.user);
-
-        // Redirect after login
-        router.push("/dashboard");
+  
 
       } catch (error) {
         console.log(error.message);

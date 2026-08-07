@@ -16,22 +16,6 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    mobile: {
-      type: String,
-      default: "",
-    },
-
-    className: {
-      type: String,
-      default: "",
-    },
-
-    category: {
-      type: String,
-      default: "",
-    },
-
-    // Password is optional for Google users
     password: {
       type: String,
       default: null,
@@ -39,6 +23,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
+      enum: ["student", "teacher", "admin"],
       default: "student",
     },
 
@@ -47,20 +32,17 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    // NEW: Login provider
     provider: {
       type: String,
       enum: ["credentials", "google"],
       default: "credentials",
     },
 
-    // NEW: Google Account ID
     googleId: {
       type: String,
       default: null,
     },
 
-    // NEW: Google Profile Picture
     image: {
       type: String,
       default: "",
