@@ -1,55 +1,75 @@
 import mongoose from "mongoose";
 
-
 const userSchema = new mongoose.Schema(
-{
-  name:{
-    type:String,
-    required:true
-  },
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-  email:{
-    type:String,
-    required:true,
-    unique:true
-  },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
 
-  mobile:{
-    type:String,
-    required:true
-  },
+    mobile: {
+      type: String,
+      default: "",
+    },
 
-  className:{
-    type:String,
+    className: {
+      type: String,
+      default: "",
+    },
 
-  },
+    category: {
+      type: String,
+      default: "",
+    },
 
-  category:{
-    type:String,
-  
-  },
+    // Password is optional for Google users
+    password: {
+      type: String,
+      default: null,
+    },
 
-  password:{
-    type:String,
-    required:true
+    role: {
+      type: String,
+      default: "student",
+    },
+
+    refreshToken: {
+      type: String,
+      default: null,
+    },
+
+    // NEW: Login provider
+    provider: {
+      type: String,
+      enum: ["credentials", "google"],
+      default: "credentials",
+    },
+
+    // NEW: Google Account ID
+    googleId: {
+      type: String,
+      default: null,
+    },
+
+    // NEW: Google Profile Picture
+    image: {
+      type: String,
+      default: "",
+    },
   },
-   role:{
-    type:String,
-    required:true,
-     default: "student",
-  },
-  refreshToken:{
-    type:String,
-    default:null
-    
+  {
+    timestamps: true,
   }
-
-},
-
-{
- timestamps:true
-}
 );
 
-
-export default mongoose.models.User ||mongoose.model("User",userSchema);
+export default mongoose.models.User ||
+  mongoose.model("User", userSchema);
