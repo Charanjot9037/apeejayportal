@@ -40,7 +40,17 @@ export async function POST(req) {
         }
       );
     }
-
+   if (user.provider === "google") {
+  return NextResponse.json(
+    {
+      message:
+        "This account was created using Google. Please sign in with Google.",
+    },
+    {
+      status: 400,
+    }
+  );
+}
 
     const isPasswordMatch = await bcrypt.compare(
       password,
@@ -77,6 +87,7 @@ export async function POST(req) {
           name: user.name,
           email: user.email,
           role: user.role,
+          profileImage: user.image || null,
         },
       },
       {
