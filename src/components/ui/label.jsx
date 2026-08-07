@@ -26,8 +26,7 @@ function Label({
             text-orange-500
             font-bold
             text-base
-          " >
-          *
+          " >*
         </span>
       )}
     </label>
