@@ -47,7 +47,7 @@ const Signup = () => {
         const data = await response.json();
 
         console.log(response.status);
-        console.log(data);
+        console.log(data?.user?.id);
 
         if (!response.ok) {
           throw new Error(data.message);
@@ -55,7 +55,7 @@ const Signup = () => {
 
         alert("Signup Successful");
 
-        router.push("/login");
+          router.push("/login");
       } catch (error) {
         console.log(error.message);
         alert(error.message);
