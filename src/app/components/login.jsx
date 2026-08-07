@@ -73,9 +73,7 @@ const Login = () => {
 
           <div className="space-y-2">
 
-            <Label htmlFor="email" required>
-              Email 
-            </Label>
+            <Label htmlFor="email" required>Email </Label>
 
             <Input
               id="email"
@@ -100,8 +98,7 @@ const Login = () => {
           {/* Password */}
 <div className="space-y-2">
 
-  <Label htmlFor="password" required>
-    Password 
+  <Label htmlFor="password" required> Password 
   </Label>
 
   <div className="relative">
@@ -147,9 +144,7 @@ const Login = () => {
             <a
               href="/reset-password"
               className="text-sm text-blue-600 hover:underline"
-            >
-              Forgot Password?
-            </a>
+            >Forgot Password?</a>
           </div>
 
           {/* Login Button */}
@@ -172,14 +167,10 @@ const Login = () => {
 
         </form>
 
-        <p className="mt-6 text-center text-gray-700">
-          Don't have an account?{" "}
-
-          <a
+        <p className="mt-6 text-center text-gray-700">Don't have an account?{" "}
+         <a
             href="/signup"
-            className="font-semibold text-orange-500 hover:underline"
-          >
-            Sign Up
+            className="font-semibold text-orange-500 hover:underline">Sign Up
           </a>
 
         </p>
