@@ -24,12 +24,14 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
     
-      <body className="min-h-full flex flex-col">
-         <Providers>
-          <Navbar/>
-          {children}
-        </Providers>
-      </body>
+   <body className="h-screen flex flex-col overflow-hidden">
+  <Providers>
+    <Navbar />                         {/* shrink-0, natural height */}
+    <div className="flex-1 overflow-hidden">
+      {children}                       {/* MentorLayout renders here */}
+    </div>
+  </Providers>
+</body>
     </html>
   );
 }

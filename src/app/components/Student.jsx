@@ -3,6 +3,7 @@ import { TrendingUp, CheckCircle2, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import DashboardCards from '@/app/components/dashboardCards';
 import {
   projects,
   events,
@@ -13,41 +14,6 @@ function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-
-function CircularProgress({ value = 85, size = 132, stroke = 10 }) {
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (value / 100) * circumference;
-
-  return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="#FDE7D3"
-          strokeWidth={stroke}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="#F2903F"
-          strokeWidth={stroke}
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-3xl font-semibold text-slate-800">{value}%</span>
-      </div>
-    </div>
-  );
-}
 
 
 export default function DashboardContent() {
@@ -63,43 +29,14 @@ export default function DashboardContent() {
             Here is your academic and placement overview for today.
           </p>
         </div>
+        <DashboardCards />
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
           {/* Left column */}
-          <div className="flex flex-col gap-5 lg:col-span-1">
-            <Card>
-              <CardContent className="flex flex-col items-center text-center">
-                <h2 className="mb-4 self-start text-base font-semibold text-blue-900">
-                  Profile Strength
-                </h2>
-                <CircularProgress value={dashboardStats.profileStrength} />{" "}
-                <p className="mt-4 text-sm text-slate-500">
-                  Your profile is almost ready for top recruiters. Complete your
-                  project portfolio.
-                </p>
-                <Button className="mt-4 w-full bg-orange-500 text-white hover:bg-orange-600">
-                  Complete Profile
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">Current CGPA</p>
-                  <p className="mt-2 text-3xl font-semibold text-orange-500">
-                    {dashboardStats.cgpa}{" "}
-                  </p>
-                </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
-                  <TrendingUp className="h-5 w-5 text-orange-500" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        
 
           {/* Right column */}
-          <div className="flex flex-col gap-5 lg:col-span-2">
+          <div className="flex flex-col gap-5 lg:col-span-4">
             <Card className="border-none bg-blue-950">
               <CardContent className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
