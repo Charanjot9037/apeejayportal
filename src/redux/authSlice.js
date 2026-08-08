@@ -5,6 +5,7 @@ const initialState = {
 name:null,
 email:null,
 profileImage:null,
+role:null,
 };
 
 const authSlice = createSlice({
@@ -16,6 +17,7 @@ const authSlice = createSlice({
       state.name=action.payload.name;
       state.email=action.payload.email;
       state.profileImage=action.payload.profileImage;
+      state.role=action.payload.role
     },
 
     logout: (state) => {
@@ -23,6 +25,7 @@ const authSlice = createSlice({
       state.name = null;
       state.email = null;   
       state.profileImage = null;
+      state.role=null;
     },
   },
 });

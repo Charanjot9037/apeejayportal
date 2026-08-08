@@ -1,7 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "./provider";
 import "./globals.css";
-import Navbar from "./components/elements/Navbar";
+import ConditionalNavbar from "./components/elements/ConditionalNavbar";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -24,12 +24,14 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
     
-      <body className="min-h-full flex flex-col">
-         <Providers>
-          <Navbar/>
-          {children}
-        </Providers>
-      </body>
+   <body className="h-screen flex flex-col overflow-hidden">
+  <Providers>
+    <ConditionalNavbar />                  
+    <div className="flex-1 overflow-hidden">
+      {children}                       {/* MentorLayout renders here */}
+    </div>
+  </Providers>
+</body>
     </html>
   );
 }
