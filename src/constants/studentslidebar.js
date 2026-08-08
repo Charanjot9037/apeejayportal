@@ -3,7 +3,7 @@ import {
   LayoutDashboard,
   BookOpen,
   Calendar,
-  Trophy,
+  Trophy,User,
   LogOut,
 } from 'lucide-react';
 import StudentProfileCard from '../app/components/elements/StudentProfileCard';
@@ -35,6 +35,11 @@ export const studentSidebarData = {
       href: "/student/achievements",
       icon: Trophy,
     },
+      {
+      label:"profile",
+      href: "/student/profile",
+      icon: User,
+    },
   ],
     customComponent: (
     <StudentProfileCard strength={dashboardStats.profileStrength} />
@@ -48,12 +53,6 @@ export const studentSidebarData = {
         label: "Help Center",
         href: "/student/help",
         icon: HelpCircle,
-      },
-      {
-        label: "Logout",
-        href: "/logout",
-        icon: LogOut,
-      },
-    ],
+      },    ],
   },
 };

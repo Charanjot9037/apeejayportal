@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/redux/authSlice";
 
 const Login = () => {
+  const router =useRouter();
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const formik = useFormik({
@@ -38,14 +39,19 @@ const Login = () => {
           throw new Error(data.message);
         }
 
-        alert(data.message);
+       
        dispatch(loginSuccess({
           user: data.user,
           name: data.name,
           email: data.email,
+          role:data.role,
           profileImage: data.profileImage,
        }));
-        console.log("User:", data.profileImage);
+       if(data.user.role=="student"){
+        router.push("/student")
+       }else{
+        router.push("/");
+       }
 
   
 

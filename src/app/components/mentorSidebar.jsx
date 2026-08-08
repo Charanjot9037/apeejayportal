@@ -2,12 +2,34 @@
 
 import SidebarItem from "./sidebarItem";
 import SidebarOverlay from "./sidebarOverlay";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
 
+import {logout} from "@/redux/authSlice";
+import{  LogOut} from 'lucide-react';
 export default function MentorSidebar({
   sidebarOpen,
   setSidebarOpen,
   sidebarData,
 }) {
+const dispatch=useDispatch();
+const router=useRouter();
+  const handleLogout = async () => {
+      try {
+    
+  
+        await fetch("/api/auth/logout", {
+          method: "POST",
+        });
+  
+        dispatch(logout());
+  
+      router.push("/login");
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+    };
   return (
     <>
       <SidebarOverlay
@@ -21,31 +43,36 @@ export default function MentorSidebar({
   }`}
 >
 
-  <div className="flex shrink-0 items-center gap-2 border-b px-6 py-5">
-    <span className="text-lg font-bold text-orange-500">
+  <div className="flex shrink-0 justify-center  py-5 items-center ">
+    <Image src="/profile.png" height={100} width={100} alt="img" className="rounded-full "/>
+    {/* <span className="text-lg font-bold text-orange-500">
       {sidebarData.title}
-    </span>
+    </span> */}
   </div>
 
   <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
     {sidebarData.navItems.map((item) => (
       <SidebarItem key={item.label} {...item} />
     ))}
+      {sidebarData.customComponent}
   </nav>
 
-  {sidebarData.customComponent}
+
 
   <div className="shrink-0 border-t px-3 py-4">
-    <p className="mb-4 text-sm">
-      Placement Readiness
-      <span className="ml-2 font-bold text-orange-500">
-        {sidebarData.footer.readiness}%
-      </span>
-    </p>
 
     {sidebarData.footer.items.map((item) => (
-      <SidebarItem key={item.label} {...item} />
+      <SidebarItem key={item.label} {...item} onClick={item.label === "Logout" ? handleLogout : handleLogout} />
     ))}
+    <button onClick={handleLogout}>
+    <p         
+          className={`flex text-gray-600 hover:bg-gray-50 hover:text-gray-900 items-center  gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors `}
+        >
+          <LogOut size={18} />
+          logout
+        </p>
+    </button>
+ 
   </div>
 </aside>
     </>

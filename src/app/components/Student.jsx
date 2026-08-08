@@ -1,9 +1,10 @@
-import React from "react";
+"use client";
 import { TrendingUp, CheckCircle2, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import DashboardCards from '@/app/components/dashboardCards';
+import { useSelector } from "react-redux";
 import {
   projects,
   events,
@@ -17,13 +18,14 @@ function cn(...classes) {
 
 
 export default function DashboardContent() {
+  const auth = useSelector((state) => state.auth);
   return (
-    <div className="min-h-screen w-full bg-[#F7F5F0] p-6 md:p-8">
-      <div className="mx-auto max-w-5xl">
+    <div className="min-h-screen w-full bg-[#F7F5F0] ">
+      <div className=" ">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-blue-900">
-            Welcome back, {dashboardStats.userName}.{" "}
+            Welcome back, {auth?.user?.name || "login"}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
             Here is your academic and placement overview for today.
