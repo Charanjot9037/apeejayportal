@@ -1,24 +1,90 @@
 "use client";
-import { TrendingUp, CheckCircle2, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { TrendingUp, CheckCircle2, Plus, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import DashboardCards from '@/app/components/dashboardCards';
+import DashboardCards from "@/app/components/dashboardCards";
 import { useSelector } from "react-redux";
 import {
-  projects,
+  projects as initialProjects,
   events,
   statusStyles,
   dashboardStats,
 } from "@/constants/studentdashboard";
+
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-
-
 export default function DashboardContent() {
   const auth = useSelector((state) => state.auth);
+  const [projects, setProjects] = useState(initialProjects);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const studentId = auth?.user?._id || auth?.user?.id;
+
+        if (!studentId) {
+          setLoadingProjects(false);
+          return;
+        }
+
+        const response = await fetch(`/api/projects?studentId=${studentId}`);
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || "Failed to fetch projects");
+        }
+
+        setProjects([
+          ...result.projects.map((project) => ({
+            ...project,
+
+            // MongoDB uses _id
+            id: project._id,
+
+            // Keep compatibility with your existing UI
+            title: project.title,
+
+            subtitle: project.subtitle,
+
+            status: project.status,
+          })),
+
+          ...initialProjects,
+        ]);
+      } catch (error) {
+        console.error("FETCH_PROJECTS_ERROR:", error);
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+
+    fetchProjects();
+  }, [auth?.user?._id, auth?.user?.id]);
+  console.log("AUTH:", auth);
+  console.log("USER:", auth?.user);
+
+  const handleAddProject = async (formData, values) => {
+    const newProject = {
+      title: values.title,
+      subtitle: values.subtitle,
+      description: values.description,
+      techStack: values.techStack,
+      status: values.status,
+      githubLink: values.githubLink,
+      liveLink: values.liveLink,
+      synopsisFile: values.synopsisFile,
+      reportFile: values.reportFile,
+    };
+
+    setProjects((prev) => [newProject, ...prev]);
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#F7F5F0] ">
       <div className=" ">
@@ -34,10 +100,6 @@ export default function DashboardContent() {
         <DashboardCards />
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {/* Left column */}
-        
-
-          {/* Right column */}
           <div className="flex flex-col gap-5 lg:col-span-4">
             <Card className="border-none bg-blue-950">
               <CardContent className="flex items-center justify-between">
@@ -66,29 +128,64 @@ export default function DashboardContent() {
                   <h2 className="text-base font-semibold text-blue-900">
                     Featured Projects Portfolio
                   </h2>
-                  <button className="flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600">
-                    Add Now <Plus className="h-4 w-4" />
-                  </button>
+                  <Link href="/student/projects/add">
+                    <Button
+                      variant="ghost"
+                      className="flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600"
+                    >
+                      Add Now
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </Link>
                 </div>
                 <div className="divide-y divide-slate-100">
-                  {projects.map((project) => (
-                    <div
-                      key={project.title}
-                      className="flex items-center justify-between py-3"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-slate-800">
-                          {project.title}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {project.subtitle}
-                        </p>
-                      </div>
-                      <Badge className={statusStyles[project.status]}>
-                        {project.status}
-                      </Badge>
+                  {loadingProjects ? (
+                    <div className="py-6 text-center text-sm text-slate-400">
+                      Loading projects...
                     </div>
-                  ))}
+                  ) : projects.length === 0 ? (
+                    <div className="py-6 text-center text-sm text-slate-400">
+                      No projects added yet.
+                    </div>
+                  ) : (
+                    projects.map((project) => (
+                      <div
+                        key={project._id || project.id || project.title}
+                        className="flex items-center justify-between py-3"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-slate-800">
+                            {project.title}
+                          </p>
+
+                          <p className="text-xs text-slate-500">
+                            {project.subtitle}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            className={
+                              statusStyles[project.status] ||
+                              "bg-slate-100 text-slate-600"
+                            }
+                          >
+                            {project.status}
+                          </Badge>
+
+                          <Link href={`/student/projects/${project._id}`}>
+                            <Button
+                              variant="ghost"
+                              className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-orange-500"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -147,6 +244,8 @@ export default function DashboardContent() {
           </Card>
         </div>
       </div>
+
+     
     </div>
   );
 }
