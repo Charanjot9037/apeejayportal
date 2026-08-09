@@ -15,7 +15,6 @@ import { MENTORS } from '@/constants/adminData';
 import Roster from '@/app/components/elements/roaster';
 import { useRouter } from 'next/navigation';
 import RosterTable from '@/app/components/elements/roaster';
-import { MENTOR_COLUMNS } from '@/constants/adminData';
 import { MENTOR_COLUMNS, STUDENT_COLUMNS } from '@/constants/adminData';
 export default function AdminDashboardPage() {
 const dispatch=useDispatch();
