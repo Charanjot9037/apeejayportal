@@ -24,10 +24,10 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
     
-   <body className="h-screen flex flex-col overflow-hidden">
+   <body className="h-screen flex flex-col">
   <Providers>
     <ConditionalNavbar />                  
-    <div className="flex-1 overflow-hidden">
+    <div className="flex-1">
       {children}                       {/* MentorLayout renders here */}
     </div>
   </Providers>

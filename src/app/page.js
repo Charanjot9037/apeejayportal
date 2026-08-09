@@ -1,13 +1,12 @@
-import Image from "next/image";
 import HeroSection from "./components/landing/hersection";
+import VerifiedProjects from "./components/landing/VerifiedProjects";
 
 export default function Home() {
   return (
-    <div>
-    <HeroSection/>
-    </div>
-    
-      
-  
+    <main className="w-full">
+      <HeroSection />
+
+      <VerifiedProjects />
+    </main>
   );
 }
