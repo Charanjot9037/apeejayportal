@@ -45,22 +45,6 @@ export const NAV_ITEMS = [
   },
 ];
 
-export const MENTORS = [
-  {
-    name: 'Dr. A.K. Singh',
-    departmene: 'Prof. CSE',
-    specialization: 'AI & ML',
-    mentees: '12 / 15',
-  },
-  {
-    name: 'Ms. Neha Gupta',
-    role: 'Industry Expert',
-    specialization: 'Cloud Computing',
-    mentees: '8 / 10',
-    highlight: true,
-  },
-];
-
 export const STAT_CARDS = [
   {
     id: 'students',
@@ -107,6 +91,14 @@ export const STAT_CARDS = [
   },
 ];
 
+export const STUDENT_STATUS_STYLES = {
+  Placed: 'bg-emerald-50 text-emerald-600',
+  Looking: 'bg-orange-50 text-[#f2792a]',
+  Pending: 'bg-slate-100 text-slate-600',
+};
+
+import Avatar from '../app/components/elements/avatar';
+
 export const STUDENTS = [
   {
     id: 'STU001',
@@ -128,18 +120,79 @@ export const STUDENTS = [
   },
 ];
 
-export const STUDENT_STATUS_STYLES = {
-  Placed: 'bg-emerald-50 text-emerald-600',
-  Looking: 'bg-orange-50 text-[#f2792a]',
-  Pending: 'bg-slate-100 text-slate-600',
-};
+export const MENTORS = [
+  {
+    id: 'MEN001',
+    name: 'Dr. A.K. Singh',
+    role: 'Prof. CSE',
+    specialization: 'AI & ML',
+    mentees: '12 / 15',
+  },
+  {
+    id: 'MEN002',
+    name: 'Ms. Neha Gupta',
+    role: 'Industry Expert',
+    specialization: 'Cloud Computing',
+    mentees: '8 / 10',
+    highlight: true,
+  },
 
-import Avatar from '../app/components/elements/avatar';
+  {
+    id: 'MEN004',
+    name: 'Ms. Anjali Mehta',
+    role: 'Industry Expert',
+    specialization: 'Data Science',
+    mentees: '7 / 10',
+  },
+];
+
+export const STUDENT_COLUMNS = [
+  {
+    key: 'name',
+    label: 'Name',
+
+    render: (student) => (
+      <div className="flex items-center gap-3">
+        <Avatar name={student.name} />
+
+        <div>
+          <p className="font-semibold text-slate-700">{student.name}</p>
+
+          <p className="text-xs text-slate-400">{student.id}</p>
+        </div>
+      </div>
+    ),
+  },
+
+  {
+    key: 'department',
+    label: 'Department',
+  },
+
+  {
+    key: 'status',
+    label: 'Status',
+
+    render: (student) => (
+      <span
+        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+          student.status === 'Placed'
+            ? 'bg-emerald-50 text-emerald-600'
+            : student.status === 'Looking'
+              ? 'bg-orange-50 text-[#f2792a]'
+              : 'bg-slate-100 text-slate-600'
+        }`}
+      >
+        {student.status}
+      </span>
+    ),
+  },
+];
 
 export const MENTOR_COLUMNS = [
   {
     key: 'name',
-    label: 'Mentor',
+    label: 'Name',
 
     render: (mentor) => (
       <div className="flex items-center gap-3">
@@ -157,7 +210,6 @@ export const MENTOR_COLUMNS = [
   {
     key: 'specialization',
     label: 'Specialization',
-    cellClassName: 'text-slate-600',
   },
 
   {

@@ -12,8 +12,7 @@ import { STUDENTS } from '@/constants/adminData';
 import { STUDENT_STATUS_STYLES } from '@/constants/adminData';
 import { MENTORS } from '@/constants/adminData';
 import Roster from '@/app/components/elements/roaster';
-import RosterTable from '@/app/components/elements/roaster';
-import { MENTOR_COLUMNS } from '@/constants/adminData';
+import { MENTOR_COLUMNS, STUDENT_COLUMNS } from '@/constants/adminData';
 export default function AdminDashboardPage() {
   return (
     <div className="flex min-h-screen bg-slate-100">
@@ -37,7 +36,7 @@ export default function AdminDashboardPage() {
         />
         <StatCards cards={STAT_CARDS} />
         <div className="grid grid-cols-1 mt-4 gap-6 xl:grid-cols-2">
-          <Roster
+          {/* <Roster
             title="Student Roster"
             students={STUDENTS}
             statusStyles={STUDENT_STATUS_STYLES}
@@ -67,6 +66,32 @@ export default function AdminDashboardPage() {
             onViewAll={() => {
               console.log('View all mentors');
             }}
+          /> */}
+          <Roster
+            title="Student Roster"
+            data={STUDENTS}
+            columns={STUDENT_COLUMNS}
+            searchPlaceholder="Search students by name or ID..."
+            onRowClick={(student) => {
+              console.log('Student:', student);
+            }}
+            onViewAll={() => {
+              console.log('View all students');
+            }}
+            viewAllLabel="View All Students"
+          />
+          <Roster
+            title="Mentor Roster"
+            data={MENTORS}
+            columns={MENTOR_COLUMNS}
+            searchPlaceholder="Search mentors..."
+            onRowClick={(mentor) => {
+              console.log('Mentor:', mentor);
+            }}
+            onViewAll={() => {
+              console.log('View all mentors');
+            }}
+            viewAllLabel="View All Mentors"
           />
         </div>
       </main>

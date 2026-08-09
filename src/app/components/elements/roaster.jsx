@@ -2,26 +2,22 @@
 
 import { Search, ChevronRight } from 'lucide-react';
 
-import Avatar from './avatar';
-
 export default function Roster({
-  title,
-  students = [],
-  statusStyles = {},
-  searchPlaceholder = 'Search students by name or ID...',
-  onStudentClick,
+  title = 'Roster',
+  data = [],
+  columns = [],
+  searchPlaceholder = 'Search...',
+  onRowClick,
   onViewAll,
-  viewAllLabel = 'View All Students',
+  viewAllLabel = 'View All',
 }) {
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-5">
-        <div>
-          <h2 className="text-lg font-bold text-[#1c3a5e]">{title}</h2>
+      {/* Table Title */}
+      <div className="px-5 pt-5">
+        <h2 className="text-lg font-bold text-[#1c3a5e]">{title}</h2>
 
-          <div className="mt-1 h-0.5 w-8 bg-[#f2792a]" />
-        </div>
+        <div className="mt-1 h-0.5 w-8 bg-[#f2792a]" />
       </div>
 
       {/* Search */}
@@ -40,63 +36,38 @@ export default function Roster({
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="mt-4 w-full min-w-[600px] text-left text-sm">
-          {/* Table Header */}
+          {/* Dynamic Table Headings */}
           <thead>
             <tr className="border-y border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-              <th className="px-5 py-2 font-medium">Name</th>
+              {columns.map((column) => (
+                <th key={column.key} className="px-2 py-2 font-medium">
+                  {column.label}
+                </th>
+              ))}
 
-              <th className="px-2 py-2 font-medium">Department</th>
-
-              <th className="px-2 py-2 font-medium">Status</th>
-
+              {/* Dynamic Action Heading */}
               <th className="px-5 py-2 text-right font-medium">Action</th>
             </tr>
           </thead>
 
           {/* Table Body */}
           <tbody>
-            {students.map((student) => (
+            {data.map((item, index) => (
               <tr
-                key={student.id}
+                key={item.id || index}
                 className="border-b border-slate-50 last:border-0"
               >
-                {/* Student */}
-                <td className="px-5 py-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar name={student.name} />
-
-                    <div>
-                      <p className="font-semibold text-slate-700">
-                        {student.name}
-                      </p>
-
-                      <p className="text-xs text-slate-400">{student.id}</p>
-                    </div>
-                  </div>
-                </td>
-
-                {/* Department */}
-                <td className="px-2 py-3 text-slate-600">
-                  {student.department}
-                </td>
-
-                {/* Status */}
-                <td className="px-2 py-3">
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      statusStyles[student.status] ||
-                      'bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    {student.status}
-                  </span>
-                </td>
+                {columns.map((column) => (
+                  <td key={column.key} className="px-2 py-3 text-slate-600">
+                    {column.render ? column.render(item) : item[column.key]}
+                  </td>
+                ))}
 
                 {/* Action */}
                 <td className="px-5 py-3 text-right">
                   <button
                     type="button"
-                    onClick={() => onStudentClick?.(student)}
+                    onClick={() => onRowClick?.(item)}
                     className="text-slate-300 hover:text-slate-500"
                   >
                     <ChevronRight className="ml-auto h-4 w-4" />
