@@ -1,4 +1,4 @@
-import CreateStudentProfile from "@/app/components/profile/CreateProfile"
+import CreateStudentProfile from "@/app/components/createProfile/CreateProfile"
 
 const page = () => {
   return (
