@@ -1,21 +1,73 @@
-import AdminSidebar from '@/app/components/admin/adminSidebar';
-import DashboardHeader from '@/app/components/admin/dashboardHeader';
-import StatCards from '@/app/components/admin/statCard';
-import StudentRoster from '@/app/components/admin/studentRoster';
-import MentorRoster from '@/app/components/admin/mentorRoster';
+'use client';
+
+import { ClipboardCheck } from 'lucide-react';
+
+import Dashboard from '@/app/components/elements/dashboard';
+import StatCards from '@/app/components/elements/statCard';
+
+import DashboardHeader from '@/app/components/elements/dashboardHeader';
+import { NAV_ITEMS } from '@/constants/adminData';
+import { STAT_CARDS } from '@/constants/adminData';
+import { STUDENTS } from '@/constants/adminData';
+import { STUDENT_STATUS_STYLES } from '@/constants/adminData';
+import { MENTORS } from '@/constants/adminData';
+import Roster from '@/app/components/elements/roaster';
+import RosterTable from '@/app/components/elements/roaster';
+import { MENTOR_COLUMNS } from '@/constants/adminData';
 export default function AdminDashboardPage() {
   return (
     <div className="flex min-h-screen bg-slate-100">
-      <AdminSidebar />
+      <Dashboard
+        title="Admin Portal"
+        subtitle="Academic Year 2024-25"
+        profileUrl="/images/admin.png"
+        navItems={NAV_ITEMS}
+        placementReadiness={85}
+        onHelp={() => console.log('Help')}
+        onLogout={() => console.log('Logout')}
+      />
 
       <main className="flex-1 px-8 py-8">
-        <DashboardHeader />
+        <DashboardHeader
+          title="Admin Dashboard"
+          description="Overview of institutional metrics and student management."
+          actionLabel="12 Pending Approvals"
+          actionIcon={ClipboardCheck}
+          onAction={() => console.log('Pending Approvals')}
+        />
+        <StatCards cards={STAT_CARDS} />
+        <div className="grid grid-cols-1 mt-4 gap-6 xl:grid-cols-2">
+          <Roster
+            title="Student Roster"
+            students={STUDENTS}
+            statusStyles={STUDENT_STATUS_STYLES}
+            searchPlaceholder="Search students by name or ID..."
+            onStudentClick={(student) =>
+              console.log('Student clicked:', students)
+            }
+            onViewAll={() => console.log('View All Students')}
+            viewAllLabel="View All Students"
+          />
 
-        <StatCards />
+          <Roster
+            title="Mentor Roster"
+            data={MENTORS}
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <StudentRoster />
-          <MentorRoster />
+            searchPlaceholder="Search mentors..."
+            viewAllLabel="View All Mentors"
+            headerAction={{
+              // icon: UserPlus,
+              onClick: () => {
+                console.log('Add mentor');
+              },
+            }}
+            onRowClick={(mentor) => {
+              console.log('Mentor:', mentor);
+            }}
+            onViewAll={() => {
+              console.log('View all mentors');
+            }}
+          />
         </div>
       </main>
     </div>

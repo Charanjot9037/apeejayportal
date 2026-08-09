@@ -2,7 +2,7 @@
 
 import { Search, UserPlus, ChevronRight } from 'lucide-react';
 
-import Avatar from './avatar';
+import Avatar from '../elements/avatar';
 import { MENTORS } from '@/constants/adminData';
 
 export default function MentorRoster() {
