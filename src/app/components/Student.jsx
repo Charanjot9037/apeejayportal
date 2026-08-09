@@ -1,12 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { TrendingUp, CheckCircle2, Plus, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import DashboardCards from "@/app/components/dashboardCards";
-import AddProjectModal from "@/app/components/AddProjectModal"; // adjust path to wherever you save it
-import ProjectDetailsModal from "@/app/components/ProjectDetailsModal"; // adjust path to wherever you save it
 import { useSelector } from "react-redux";
 import {
   projects as initialProjects,
@@ -22,18 +21,55 @@ function cn(...classes) {
 export default function DashboardContent() {
   const auth = useSelector((state) => state.auth);
   const [projects, setProjects] = useState(initialProjects);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const studentId = auth?.user?._id || auth?.user?.id;
 
-  // Called by the Add modal on submit. `formData` is a FormData instance
-  // (ready to POST to an API route) and `values` is the same data as a
-  // plain object, which is handy for optimistic UI updates like below.
+        if (!studentId) {
+          setLoadingProjects(false);
+          return;
+        }
+
+        const response = await fetch(`/api/projects?studentId=${studentId}`);
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || "Failed to fetch projects");
+        }
+
+        setProjects([
+          ...result.projects.map((project) => ({
+            ...project,
+
+            // MongoDB uses _id
+            id: project._id,
+
+            // Keep compatibility with your existing UI
+            title: project.title,
+
+            subtitle: project.subtitle,
+
+            status: project.status,
+          })),
+
+          ...initialProjects,
+        ]);
+      } catch (error) {
+        console.error("FETCH_PROJECTS_ERROR:", error);
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+
+    fetchProjects();
+  }, [auth?.user?._id, auth?.user?.id]);
+  console.log("AUTH:", auth);
+  console.log("USER:", auth?.user);
+
   const handleAddProject = async (formData, values) => {
-    // Example wiring to an API route — swap the URL for your real endpoint:
-    // const res = await fetch("/api/projects", { method: "POST", body: formData });
-    // if (!res.ok) throw new Error("Failed to save project");
-    // const saved = await res.json();
-
     const newProject = {
       title: values.title,
       subtitle: values.subtitle,
@@ -92,42 +128,64 @@ export default function DashboardContent() {
                   <h2 className="text-base font-semibold text-blue-900">
                     Featured Projects Portfolio
                   </h2>
-                  <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600"
-                  >
-                    Add Now <Plus className="h-4 w-4" />
-                  </button>
+                  <Link href="/student/projects/add">
+                    <Button
+                      variant="ghost"
+                      className="flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600"
+                    >
+                      Add Now
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </Link>
                 </div>
                 <div className="divide-y divide-slate-100">
-                  {projects.map((project) => (
-                    <div
-                      key={project.title}
-                      className="flex items-center justify-between py-3"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-slate-800">
-                          {project.title}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {project.subtitle}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge className={statusStyles[project.status]}>
-                          {project.status}
-                        </Badge>
-                        <button
-                          onClick={() => setSelectedProject(project)}
-                          className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-orange-500"
-                          title="View project details"
-                        >
-                          <Eye className="h-4 w-4" />
-                          View
-                        </button>
-                      </div>
+                  {loadingProjects ? (
+                    <div className="py-6 text-center text-sm text-slate-400">
+                      Loading projects...
                     </div>
-                  ))}
+                  ) : projects.length === 0 ? (
+                    <div className="py-6 text-center text-sm text-slate-400">
+                      No projects added yet.
+                    </div>
+                  ) : (
+                    projects.map((project) => (
+                      <div
+                        key={project._id || project.id || project.title}
+                        className="flex items-center justify-between py-3"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-slate-800">
+                            {project.title}
+                          </p>
+
+                          <p className="text-xs text-slate-500">
+                            {project.subtitle}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            className={
+                              statusStyles[project.status] ||
+                              "bg-slate-100 text-slate-600"
+                            }
+                          >
+                            {project.status}
+                          </Badge>
+
+                          <Link href={`/student/projects/${project._id}`}>
+                            <Button
+                              variant="ghost"
+                              className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-orange-500"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -187,17 +245,7 @@ export default function DashboardContent() {
         </div>
       </div>
 
-      <AddProjectModal
-        open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
-        onSubmit={handleAddProject}
-      />
-
-      <ProjectDetailsModal
-        open={!!selectedProject}
-        onOpenChange={(open) => !open && setSelectedProject(null)}
-        project={selectedProject}
-      />
+     
     </div>
   );
 }
