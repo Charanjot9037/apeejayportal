@@ -11,12 +11,12 @@ import DashboardHeader from '@/app/components/elements/dashboardHeader';
 import { NAV_ITEMS } from '@/constants/adminData';
 import { STAT_CARDS } from '@/constants/adminData';
 import { STUDENTS } from '@/constants/adminData';
-import { STUDENT_STATUS_STYLES } from '@/constants/adminData';
 import { MENTORS } from '@/constants/adminData';
 import Roster from '@/app/components/elements/roaster';
 import { useRouter } from 'next/navigation';
 import RosterTable from '@/app/components/elements/roaster';
 import { MENTOR_COLUMNS } from '@/constants/adminData';
+import { MENTOR_COLUMNS, STUDENT_COLUMNS } from '@/constants/adminData';
 export default function AdminDashboardPage() {
 const dispatch=useDispatch();
 const router=useRouter();
@@ -60,34 +60,29 @@ const router=useRouter();
         <div className="grid grid-cols-1 mt-4 gap-6 xl:grid-cols-2">
           <Roster
             title="Student Roster"
-            students={STUDENTS}
-            statusStyles={STUDENT_STATUS_STYLES}
+            data={STUDENTS}
+            columns={STUDENT_COLUMNS}
             searchPlaceholder="Search students by name or ID..."
-            onStudentClick={(student) =>
-              console.log('Student clicked:', students)
-            }
-            onViewAll={() => console.log('View All Students')}
+            onRowClick={(student) => {
+              console.log('Student:', student);
+            }}
+            onViewAll={() => {
+              console.log('View all students');
+            }}
             viewAllLabel="View All Students"
           />
-
           <Roster
             title="Mentor Roster"
             data={MENTORS}
-
+            columns={MENTOR_COLUMNS}
             searchPlaceholder="Search mentors..."
-            viewAllLabel="View All Mentors"
-            headerAction={{
-              // icon: UserPlus,
-              onClick: () => {
-                console.log('Add mentor');
-              },
-            }}
             onRowClick={(mentor) => {
               console.log('Mentor:', mentor);
             }}
             onViewAll={() => {
               console.log('View all mentors');
             }}
+            viewAllLabel="View All Mentors"
           />
         </div>
       </main>
