@@ -12,7 +12,7 @@ const InputField=({
     <div>
       <Label
         htmlFor={name}
-        className="mb-1.5 block text-xs font-medium text-black"
+        className="mb-1.5 block text-xs font-medium text-gray-500"
       >
         {label}
         {required && ( <span className="ml-1 text-main-blue">*</span> )}

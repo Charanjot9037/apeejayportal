@@ -4,7 +4,7 @@ import { User } from "lucide-react";
 
 import InputField from "../elements/InputField";
 import SelectField from "../elements/SelectFiled";
-
+import TextAreaField from "../elements/TextField";
 export default function PersonalInformationTab({
   formik,
   getError,
@@ -14,33 +14,23 @@ export default function PersonalInformationTab({
   onNext,
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
 
       {/* HEADER */}
 
-      <div>
-        <div className="flex items-center gap-2 text-main-blue">
-          <User size={18} />
-
-          <h2 className="text-xl font-semibold">
-            Personal Information
-          </h2>
-        </div>
-
-        <div className="mt-1 h-0.5 w-6 bg-orange-500" />
-      </div>
+   
 
       {/* CONTENT */}
 
-      <div className="mt-6 flex flex-col gap-8 md:flex-row">
+      <div className=" flex flex-col  gap-8 md:flex-row">
 
         {/* PROFILE IMAGE */}
 
-        <div className="flex shrink-0 flex-col items-center">
+        <div className="flex shrink-0 w-1/3 flex-col gap-2 justify-center items-center">
 
           <div className="relative">
 
-            <div className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-gray-200 bg-gray-100">
+            <div className="flex h-35 w-35 items-center justify-center rounded-full border-2 border-gray-500 bg-gray-100">
 
               {formik.values.profileImage ? (
                 <img
@@ -53,7 +43,7 @@ export default function PersonalInformationTab({
               ) : (
                 <User
                   size={42}
-                  className="text-gray-400"
+                  className="text-gray-500"
                 />
               )}
 
@@ -84,12 +74,12 @@ export default function PersonalInformationTab({
             onClick={() =>
               imageInputRef.current?.click()
             }
-            className="mt-3 rounded-md border border-orange-500 px-3 py-1.5 text-xs font-medium text-orange-500 transition hover:bg-orange-50"
+            className=" rounded-md border border-orange-500 px-3 py-1.5 text-sm font-medium text-orange-500 transition hover:bg-orange-50"
           >
             Upload Photo
           </button>
 
-          <p className="mt-1 text-[10px] text-gray-400">
+          <p className=" text-text-gray-500">
             JPG or PNG · Max 2MB
           </p>
 
@@ -103,10 +93,10 @@ export default function PersonalInformationTab({
 
         {/* PERSONAL FIELDS */}
 
-        <div className="grid flex-1 grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
+        <div className="flex w-full px-5 flex-col gap-2">
 
           <InputField
-            label="FULL NAME"
+            label="Full Name"
             name="fullName"
             required
             placeholder="Enter your full name"
@@ -114,18 +104,10 @@ export default function PersonalInformationTab({
             error={getError("fullName")}
           />
 
-          <InputField
-            label="EMAIL"
-            name="email"
-            type="email"
-            required
-            placeholder="Enter your email"
-            formik={formik}
-            error={getError("email")}
-          />
-
-          <InputField
-            label="PHONE"
+       <div>
+        <div>
+  <InputField
+            label="Phone"
             name="phone"
             required
             placeholder="+91 98765 43210"
@@ -133,17 +115,12 @@ export default function PersonalInformationTab({
             error={getError("phone")}
           />
 
-          <InputField
-            label="DATE OF BIRTH"
-            name="dateOfBirth"
-            required
-            type="date"
-            formik={formik}
-            error={getError("dateOfBirth")}
-          />
+        </div>
+       </div>
 
+      
           <SelectField
-            label="GENDER"
+            label="Gender"
             required
             name="gender"
             value={formik.values.gender}
@@ -170,8 +147,8 @@ export default function PersonalInformationTab({
             ]}
           />
 
-          <InputField
-            label="ADDRESS"
+          <TextAreaField
+            label="Address"
             required
             name="address"
             placeholder="Enter your address"
