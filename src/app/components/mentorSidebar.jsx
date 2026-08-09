@@ -17,7 +17,7 @@ const dispatch=useDispatch();
 const router=useRouter();
   const handleLogout = async () => {
       try {
-    
+    alert("going to log out");
   
         await fetch("/api/auth/logout", {
           method: "POST",

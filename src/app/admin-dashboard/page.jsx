@@ -4,7 +4,9 @@ import { ClipboardCheck } from 'lucide-react';
 
 import Dashboard from '@/app/components/elements/dashboard';
 import StatCards from '@/app/components/elements/statCard';
+import { useDispatch } from "react-redux";
 
+import {logout} from "@/redux/authSlice";
 import DashboardHeader from '@/app/components/elements/dashboardHeader';
 import { NAV_ITEMS } from '@/constants/adminData';
 import { STAT_CARDS } from '@/constants/adminData';
@@ -12,9 +14,28 @@ import { STUDENTS } from '@/constants/adminData';
 import { STUDENT_STATUS_STYLES } from '@/constants/adminData';
 import { MENTORS } from '@/constants/adminData';
 import Roster from '@/app/components/elements/roaster';
+import { useRouter } from 'next/navigation';
 import RosterTable from '@/app/components/elements/roaster';
 import { MENTOR_COLUMNS } from '@/constants/adminData';
 export default function AdminDashboardPage() {
+const dispatch=useDispatch();
+const router=useRouter();
+  const handleLogout = async () => {
+      try {
+
+  
+        await fetch("/api/auth/logout", {
+          method: "POST",
+        });
+  
+        dispatch(logout());
+  
+      router.push("/login");
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+    };
+
   return (
     <div className="flex min-h-screen bg-slate-100">
       <Dashboard
@@ -24,7 +45,7 @@ export default function AdminDashboardPage() {
         navItems={NAV_ITEMS}
         placementReadiness={85}
         onHelp={() => console.log('Help')}
-        onLogout={() => console.log('Logout')}
+        onLogout={handleLogout}
       />
 
       <main className="flex-1 px-8 py-8">
