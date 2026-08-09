@@ -6,9 +6,7 @@ export const studentProfileSchema = Yup.object({
     .trim()
     .required("Full name is required"),
 
-  email: Yup.string()
-    .email("Enter a valid email")
-    .required("Email is required"),
+
 
   phone: Yup.string()
     .matches(
@@ -17,8 +15,6 @@ export const studentProfileSchema = Yup.object({
     )
     .required("Phone number is required"),
 
-  dateOfBirth: Yup.string()
-    .required("Date of birth is required"),
 
   gender: Yup.string()
     .oneOf(
@@ -41,9 +37,7 @@ export const studentProfileSchema = Yup.object({
     .required("Please enter your interests"),
 
   // Academic
-  university: Yup.string()
-    .trim()
-    .required("University is required"),
+  
 
   department: Yup.string()
     .trim()
@@ -61,11 +55,7 @@ export const studentProfileSchema = Yup.object({
     .trim()
     .required("Roll number is required"),
 
-  cumulativeGPA: Yup.number()
-    .typeError("CGPA must be a number")
-    .min(0, "CGPA cannot be negative")
-    .max(10, "CGPA cannot be greater than 10")
-    .required("CGPA is required"),
+
 
   academicBatch: Yup.string()
     .trim()
@@ -109,7 +99,7 @@ export const studentProfileSchema = Yup.object({
       }
     ),
 
-  resume: Yup.mixed()
+  resumeFile: Yup.mixed()
     .required("Resume is required")
     .test(
       "fileSize",
@@ -142,9 +132,6 @@ export const personalInformationSchema = Yup.object({
     .required("Full name is required")
     .min(2, "Full name must be at least 2 characters"),
 
-  email: Yup.string()
-    .email("Enter a valid email address")
-    .required("Email is required"),
 
   phone: Yup.string()
     .required("Phone number is required")
