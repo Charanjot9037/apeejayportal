@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import ProjectHeader from "@/app/components/elements/ProjectHeader";
 import ProjectFilters from "@/app/components/elements/ProjectFilters";
 import ProjectCard from "@/app/components/elements/ProjectCard";
-import { projects } from "@/constants/projectData"
+import { projects} from "@/constants/projectData"
 
 import { Button } from "@/components/ui/button";
 
@@ -15,14 +15,14 @@ const VerifiedProjects = () => {
   const [visibleProjects, setVisibleProjects] = useState(3);
 
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
+    return projects.filter((projects) => {
       const departmentMatch =
-        department === "all" || project.department === department;
+        department === "all" || projects.department === department;
 
       const skillMatch =
-        skill === "all" || project.skills.includes(skill);
+        skill === "all" || projects.skills.includes(skill);
 
-      return departmentMatch && skillMatch && project.verified;
+      return departmentMatch && skillMatch && projects.verified;
     });
   }, [department, skill]);
 
@@ -37,9 +37,9 @@ const VerifiedProjects = () => {
   };
 
   return (
-    <div className=" flex w-full flex-col bg-white gap-2 px-5 py-12 md:px-10">
+    <div className=" flex w-full flex-col  bg-[#fafafa] gap-2 px-5 py-12 md:px-10">
       {/* Header */}
-      <ProjectHeader />
+      <ProjectHeader title="Verified Projects" />
 
       {/* Filters */}
       <div className="mt-5">

@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "./provider";
 import "./globals.css";
 import ConditionalNavbar from "./components/elements/ConditionalNavbar";
+import ConditionalFooter from "./components/elements/ConditionalFooter";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
     <div className="flex-1">
       {children}                       {/* MentorLayout renders here */}
     </div>
+    <ConditionalFooter/>
   </Providers>
 </body>
     </html>

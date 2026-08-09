@@ -2,11 +2,18 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Link } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const ProjectCard = ({ project }) => {
+  const router=useRouter();
+    const handleClick = () => {
+    router.push("/studentSearch");
+  };
+
   return (
+
     <div
       className="
         group
@@ -28,6 +35,7 @@ const ProjectCard = ({ project }) => {
         hover:border-slate-300
         hover:shadow-xl
       "
+      onClick={handleClick}
     >
       {/* ================= IMAGE ================= */}
       <div className="relative overflow-hidden">
@@ -148,7 +156,7 @@ const ProjectCard = ({ project }) => {
         </p>
 
         {/* Student */}
-        <div className="mt-auto pt-4">
+        <div className="mt-auto  hover:cursor-pointer pt-4">
           <div
             className="
               h-px
@@ -160,7 +168,7 @@ const ProjectCard = ({ project }) => {
             "
           />
 
-          <div className="mt-4 bg-orange-500 py-2 rounded-md  text-white  flex items-center justify-center gap-2.5">
+          <div className="mt-4 bg-orange-500 py-2 rounded-md hover:bg-orange-500/90  text-white  flex items-center justify-center gap-2.5">
             {/* Initials */}
             <div
               className="
@@ -199,6 +207,7 @@ const ProjectCard = ({ project }) => {
         </div>
       </div>
     </div>
+
   );
 };
 

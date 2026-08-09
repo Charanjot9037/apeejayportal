@@ -30,7 +30,7 @@ const router=useRouter();
     }
   };
   return (
-    <nav className="flex flex-col  md:flex-row items-center border justify-between px-2 md:px-8 py-4   shadow">
+    <nav className="flex flex-col  md:flex-row items-center border justify-between px-2 md:px-8 py-4 ">
     <div className="flex gap-7">
     <Image
           src="/logo.png"
