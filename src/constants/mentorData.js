@@ -7,37 +7,8 @@ import {
   GraduationCap,
   Briefcase,
   Settings,
-  CheckCircle2,
+  BadgeCheck,
 } from 'lucide-react';
-export const cards = [
-  {
-    title: 'Assigned Students',
-    value: 24,
-    subtitle: '+2 this semester',
-    icon: Users,
-    border: 'border-gray-200',
-    iconColor: 'text-[#1E3A5F]',
-    textColor: 'text-[#1E3A5F]',
-  },
-  {
-    title: 'Pending Approvals',
-    value: 7,
-    subtitle: 'Needs your attention',
-    icon: ClipboardCheck,
-    border: 'border-orange-500',
-    iconColor: 'text-orange-500',
-    textColor: 'text-orange-500',
-  },
-  {
-    title: 'Approved Profiles',
-    value: 15,
-    subtitle: 'Ready for placement',
-    icon: CheckCircle2,
-    border: 'border-gray-200',
-    iconColor: 'text-[#1E3A5F]',
-    textColor: 'text-[#1E3A5F]',
-  },
-];
 
 export const students = [
   {
@@ -103,5 +74,129 @@ export const navItems = [
     label: 'Settings',
     href: '#',
     icon: Settings,
+  },
+];
+
+export const MENTOR_STAT_CARDS = [
+  {
+    id: 'assigned-students',
+    title: 'Assigned Students',
+    value: '24',
+    icon: Users,
+    iconBg: 'bg-blue-50',
+    iconColor: 'text-[#00509d]',
+    description: '+2 this semester',
+    descriptionColor: 'text-slate-500',
+  },
+
+  {
+    id: 'pending-approvals',
+    title: 'Pending Approvals',
+    value: '7',
+    icon: ClipboardCheck,
+    iconBg: 'bg-orange-50',
+    iconColor: 'text-[#f2792a]',
+    description: 'Needs your attention',
+    descriptionColor: 'text-[#f2792a]',
+    highlighted: true,
+  },
+
+  {
+    id: 'approved-profiles',
+    title: 'Approved Profiles',
+    value: '15',
+    icon: BadgeCheck,
+    iconBg: 'bg-blue-50',
+    iconColor: 'text-[#00509d]',
+    description: 'Ready for placement',
+    descriptionColor: 'text-slate-500',
+  },
+];
+
+import Avatar from '@/app/components/elements/avatar';
+
+export const MENTOR_STUDENTS = [
+  {
+    id: 'STU001',
+    name: 'Alex Mercer',
+    email: 'alex.m@student.edu',
+    major: 'Computer Science',
+    status: 'Pending Review',
+    action: 'Review Profile',
+  },
+  {
+    id: 'STU002',
+    name: 'Sarah Jenkins',
+    email: 'sarah.j@student.edu',
+    major: 'Business Admin',
+    status: 'Pending Review',
+    action: 'Review Resume',
+  },
+  {
+    id: 'STU003',
+    name: 'David Chen',
+    email: 'david.c@student.edu',
+    major: 'Engineering',
+    status: 'Approved',
+    action: 'View',
+  },
+];
+
+export const MENTOR_STUDENT_COLUMNS = [
+  {
+    key: 'student',
+    label: 'Student',
+
+    render: (student) => (
+      <div className="flex items-center gap-3">
+        <Avatar name={student.name} />
+
+        <div>
+          <p className="font-semibold text-slate-700">{student.name}</p>
+
+          <p className="text-xs text-slate-400">{student.email}</p>
+        </div>
+      </div>
+    ),
+  },
+
+  {
+    key: 'major',
+    label: 'Major',
+  },
+
+  {
+    key: 'status',
+    label: 'Status',
+
+    render: (student) => (
+      <span
+        className={`rounded-full px-3 py-1 text-xs font-medium ${
+          student.status === 'Approved'
+            ? 'bg-blue-100 text-blue-600'
+            : 'bg-orange-500 text-white'
+        }`}
+      >
+        {student.status}
+      </span>
+    ),
+  },
+
+  {
+    key: 'action',
+    label: 'Actions',
+
+    render: (student) => (
+      <button
+        type="button"
+        className={
+          student.status === 'Approved'
+            ? 'text-sm font-medium text-blue-600 hover:underline'
+            : 'rounded-md border border-[#f2792a] px-3 py-1.5 text-xs font-medium text-[#f2792a] hover:bg-orange-50'
+        }
+      >
+        {student.action}
+      </button>
+    ),
   },
 ];

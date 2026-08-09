@@ -1,93 +1,73 @@
-// constants/mentorSidebarData.js
-
 import {
-
-  
   BookOpen,
   Calendar,
   Trophy,
-  
   HelpCircle,
   LayoutDashboard,
   Users,
-  
-  
   LogOut,
-} from "lucide-react";
+} from 'lucide-react';
 
-export const mentorSidebarData = {
-  title: "Mentor Portal",
+export const MENTOR_SIDEBAR_DATA = {
+  title: 'Mentor Portal',
+
+  subtitle: 'Academic Year 2024-25',
+
+  profileUrl: '/profile.png',
+
+  placementReadiness: 85,
 
   navItems: [
     {
-      label: "Dashboard",
-      href: "/mentor/dashboard",
+      label: 'Dashboard',
       icon: LayoutDashboard,
+      href: '/mentor/dashboard',
     },
     {
-      label: "Students",
-      href: "/mentor/students",
+      label: 'Students',
       icon: Users,
+      href: '/mentor/students',
     },
     {
-      label: "Sessions",
-      href: "/mentor/sessions",
+      label: 'Sessions',
       icon: Calendar,
+      href: '/mentor/sessions',
     },
     {
-      label: "Resources",
-      href: "/mentor/resources",
+      label: 'Resources',
       icon: BookOpen,
+      href: '/mentor/resources',
     },
   ],
-
-  footer: {
-    readiness: 85,
-
-    items: [
-      {
-        label: "Help Center",
-        href: "/mentor/help",
-        icon: HelpCircle,
-      },
-      {
-        label: "Logout",
-        href: "/logout",
-        icon: LogOut,
-      },
-    ],
-  },
 };
-
-
 
 export const studentSidebarData = {
-  title: "Mentor Portal",
+  title: 'Mentor Portal',
 
   navItems: [
     {
-      label: "Dashboard",
-      href: "/mentor/dashboard",
-      icon: LayoutDashboard,
-    },
-      {
-      label: "Profile",
-      href: "/profile",
+      label: 'Dashboard',
+      href: '/mentor/dashboard',
       icon: LayoutDashboard,
     },
     {
-      label: "Students",
-      href: "/mentor/students",
+      label: 'Profile',
+      href: '/profile',
+      icon: LayoutDashboard,
+    },
+    {
+      label: 'Students',
+      href: '/mentor/students',
       icon: Users,
     },
     {
-      label: "Sessions",
-      href: "/mentor/sessions",
+      label: 'Sessions',
+      href: '/mentor/sessions',
       icon: Calendar,
     },
     {
-      label: "Resources",
-      href: "/mentor/resources",
+      label: 'Resources',
+      href: '/mentor/resources',
       icon: BookOpen,
     },
   ],
@@ -97,15 +77,10 @@ export const studentSidebarData = {
 
     items: [
       {
-        label: "Help Center",
-        href: "/mentor/help",
+        label: 'Help Center',
+        href: '/mentor/help',
         icon: HelpCircle,
       },
-    
     ],
   },
 };
-
-
-
-

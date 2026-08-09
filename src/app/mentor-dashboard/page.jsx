@@ -1,13 +1,37 @@
-import DashboardHeader from '@/app/components/dashboardHeader';
-import DashboardCards from '@/app/components/dashboardCards';
-import StudentTable from '@/app/components/studentTable';
-
+'use client';
+import { StatCards, Roster, DashboardHeader } from '@/app/components/elements';
+import {
+  MENTOR_STAT_CARDS,
+  MENTOR_STUDENTS,
+  MENTOR_STUDENT_COLUMNS,
+} from '@/constants/mentorData';
+import { ClipboardCheck } from 'lucide-react';
 export default function MentorDashboard() {
   return (
     <div className="p-8">
-      <DashboardHeader />
-      <DashboardCards />
-      <StudentTable />
+      <DashboardHeader
+        title="Mentor Dashboard"
+        description="Overview of institutional metrics and student management."
+        actionLabel="12 Pending Approvals"
+        actionIcon={ClipboardCheck}
+        onAction={() => console.log('Pending Approvals')}
+      />
+      <StatCards cards={MENTOR_STAT_CARDS} />
+
+      <Roster
+        title="Student Roster"
+        data={MENTOR_STUDENTS}
+        columns={MENTOR_STUDENT_COLUMNS}
+        searchPlaceholder="Search students..."
+        onRowClick={(student) => {
+          console.log('Student:', student);
+        }}
+        onViewAll={() => {
+          console.log('View all students');
+        }}
+        viewAllLabel="View All Students"
+        className={'mt-4'}
+      />
     </div>
   );
 }

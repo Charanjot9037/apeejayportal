@@ -12,39 +12,43 @@ import {
   Plus,
 } from 'lucide-react';
 
-export const NAV_ITEMS = [
-  {
-    label: 'Dashboard',
-    icon: LayoutGrid,
-    href: '#',
-  },
-  {
-    label: 'Portfolio',
-    icon: User,
-    href: '#',
-  },
-  {
-    label: 'Applications',
-    icon: FileText,
-    href: '#',
-  },
-  {
-    label: 'Mentorship',
-    icon: Users,
-    href: '#',
-  },
-  {
-    label: 'Placements',
-    icon: Briefcase,
-    href: '#',
-  },
-  {
-    label: 'Settings',
-    icon: Settings,
-    href: '#',
-  },
-];
+export const NAV_ITEMS = {
+  title: 'Admin Portal',
 
+  subtitle: 'Academic Year 2024-25',
+
+  profileUrl: '/profile.png',
+
+  placementReadiness: 85,
+
+  navItems: [
+    {
+      label: 'Dashboard',
+      icon: LayoutGrid,
+      href: '/admin-dashboard',
+    },
+    {
+      label: 'Students',
+      icon: Users,
+      href: '/mentor-dashboard',
+    },
+    {
+      label: 'Applications',
+      icon: FileText,
+      href: '/mentor-dashboard/applications',
+    },
+    {
+      label: 'Profile',
+      icon: UserRound,
+      href: '/mentor-dashboard/profile',
+    },
+    {
+      label: 'Settings',
+      icon: Settings,
+      href: '/mentor-dashboard/settings',
+    },
+  ],
+};
 export const STAT_CARDS = [
   {
     id: 'students',

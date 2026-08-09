@@ -2,49 +2,19 @@
 
 import { ClipboardCheck } from 'lucide-react';
 
-import Dashboard from '@/app/components/elements/dashboard';
-import StatCards from '@/app/components/elements/statCard';
-import { useDispatch } from "react-redux";
+import { StatCards, Roster, DashboardHeader } from '@/app/components/elements';
 
-import {logout} from "@/redux/authSlice";
-import DashboardHeader from '@/app/components/elements/dashboardHeader';
-import { NAV_ITEMS } from '@/constants/adminData';
-import { STAT_CARDS } from '@/constants/adminData';
-import { STUDENTS } from '@/constants/adminData';
-import { MENTORS } from '@/constants/adminData';
-import Roster from '@/app/components/elements/roaster';
-import { useRouter } from 'next/navigation';
-import RosterTable from '@/app/components/elements/roaster';
-import { MENTOR_COLUMNS, STUDENT_COLUMNS } from '@/constants/adminData';
+import {
+  STAT_CARDS,
+  STUDENTS,
+  MENTORS,
+  MENTOR_COLUMNS,
+  STUDENT_COLUMNS,
+} from '@/constants/adminData';
+
 export default function AdminDashboardPage() {
-const dispatch=useDispatch();
-const router=useRouter();
-  const handleLogout = async () => {
-      try {
-        await fetch("/api/auth/logout", {
-          method: "POST",
-        });
-  
-        dispatch(logout());
-  
-      router.push("/login");
-      } catch (error) {
-        console.error("Logout failed:", error);
-      }
-    };
-
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      <Dashboard
-        title="Admin Portal"
-        subtitle="Academic Year 2024-25"
-        profileUrl="/images/admin.png"
-        navItems={NAV_ITEMS}
-        placementReadiness={85}
-        onHelp={() => console.log('Help')}
-        onLogout={handleLogout}
-      />
-
+    <div className="flex h-full">
       <main className="flex-1 px-8 py-8">
         <DashboardHeader
           title="Admin Dashboard"
