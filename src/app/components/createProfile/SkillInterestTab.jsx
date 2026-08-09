@@ -37,7 +37,7 @@ export default function SkillsInterestsTab({
           required
           label="SKILLS"
           name="skills"
-          placeholder="React, Next.js, MongoDB, Node.js..."
+          placeholder="React, Next.js."
           formik={formik}
           error={getError("skills")}
         />
