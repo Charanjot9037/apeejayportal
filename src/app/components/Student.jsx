@@ -1,24 +1,54 @@
 "use client";
-import { TrendingUp, CheckCircle2, Plus } from "lucide-react";
+import { useState } from "react";
+import { TrendingUp, CheckCircle2, Plus, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import DashboardCards from '@/app/components/dashboardCards';
+import DashboardCards from "@/app/components/dashboardCards";
+import AddProjectModal from "@/app/components/AddProjectModal"; // adjust path to wherever you save it
+import ProjectDetailsModal from "@/app/components/ProjectDetailsModal"; // adjust path to wherever you save it
 import { useSelector } from "react-redux";
 import {
-  projects,
+  projects as initialProjects,
   events,
   statusStyles,
   dashboardStats,
 } from "@/constants/studentdashboard";
+
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-
-
 export default function DashboardContent() {
   const auth = useSelector((state) => state.auth);
+  const [projects, setProjects] = useState(initialProjects);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+
+  // Called by the Add modal on submit. `formData` is a FormData instance
+  // (ready to POST to an API route) and `values` is the same data as a
+  // plain object, which is handy for optimistic UI updates like below.
+  const handleAddProject = async (formData, values) => {
+    // Example wiring to an API route — swap the URL for your real endpoint:
+    // const res = await fetch("/api/projects", { method: "POST", body: formData });
+    // if (!res.ok) throw new Error("Failed to save project");
+    // const saved = await res.json();
+
+    const newProject = {
+      title: values.title,
+      subtitle: values.subtitle,
+      description: values.description,
+      techStack: values.techStack,
+      status: values.status,
+      githubLink: values.githubLink,
+      liveLink: values.liveLink,
+      synopsisFile: values.synopsisFile,
+      reportFile: values.reportFile,
+    };
+
+    setProjects((prev) => [newProject, ...prev]);
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#F7F5F0] ">
       <div className=" ">
@@ -34,10 +64,6 @@ export default function DashboardContent() {
         <DashboardCards />
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {/* Left column */}
-        
-
-          {/* Right column */}
           <div className="flex flex-col gap-5 lg:col-span-4">
             <Card className="border-none bg-blue-950">
               <CardContent className="flex items-center justify-between">
@@ -66,7 +92,10 @@ export default function DashboardContent() {
                   <h2 className="text-base font-semibold text-blue-900">
                     Featured Projects Portfolio
                   </h2>
-                  <button className="flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600">
+                  <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600"
+                  >
                     Add Now <Plus className="h-4 w-4" />
                   </button>
                 </div>
@@ -84,9 +113,19 @@ export default function DashboardContent() {
                           {project.subtitle}
                         </p>
                       </div>
-                      <Badge className={statusStyles[project.status]}>
-                        {project.status}
-                      </Badge>
+                      <div className="flex items-center gap-3">
+                        <Badge className={statusStyles[project.status]}>
+                          {project.status}
+                        </Badge>
+                        <button
+                          onClick={() => setSelectedProject(project)}
+                          className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-orange-500"
+                          title="View project details"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -147,6 +186,18 @@ export default function DashboardContent() {
           </Card>
         </div>
       </div>
+
+      <AddProjectModal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        onSubmit={handleAddProject}
+      />
+
+      <ProjectDetailsModal
+        open={!!selectedProject}
+        onOpenChange={(open) => !open && setSelectedProject(null)}
+        project={selectedProject}
+      />
     </div>
   );
 }
