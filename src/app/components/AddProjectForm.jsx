@@ -1,6 +1,6 @@
 "use client";
 
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Link as LinkIcon, Code2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -16,11 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function AddProjectForm({ mode = "create",
-  project = null,}) {
-      const router = useRouter();
-        const auth = useSelector((state) => state.auth);
-          const isEdit = mode === "edit";
+export default function AddProjectForm({ mode = "create", project = null }) {
+  const router = useRouter();
+  const isEdit = mode === "edit";
 
   const [projectType, setProjectType] = useState("individual");
 
@@ -34,39 +32,36 @@ export default function AddProjectForm({ mode = "create",
     semester: "",
     mentor: "",
   });
+
   useEffect(() => {
-  if (!project || !isEdit) return;
+    if (!project || !isEdit) return;
 
-  setFormData({
-    projectName: project.title || "",
-    description: project.description || "",
-    githubLink: project.githubLink || "",
-    liveDemoLink: project.liveLink || "",
-    semester: project.semester || "",
-    mentor: project.mentor || "",
-  });
+    setFormData({
+      projectName: project.title || "",
+      description: project.description || "",
+      githubLink: project.githubLink || "",
+      liveDemoLink: project.liveLink || "",
+      semester: project.semester || "",
+      mentor: project.mentor || "",
+    });
 
-  setProjectType(
-    project.projectType || "individual"
-  );
+    setProjectType(project.projectType || "individual");
 
-  setTechStack(
-    project.techStack || []
-  );
+    setTechStack(project.techStack || []);
 
-  setTeamMembers(
-    project.teamMembers?.length
-      ? project.teamMembers
-      : [
-          {
-            name: "",
-            enrollment: "",
-            email: "",
-            role: "",
-          },
-        ]
-  );
-}, [project, isEdit]);
+    setTeamMembers(
+      project.teamMembers?.length
+        ? project.teamMembers
+        : [
+            {
+              name: "",
+              enrollment: "",
+              email: "",
+              role: "",
+            },
+          ],
+    );
+  }, [project, isEdit]);
 
   const [presentationFile, setPresentationFile] = useState(null);
   const [synopsisFile, setSynopsisFile] = useState(null);
@@ -88,109 +83,71 @@ export default function AddProjectForm({ mode = "create",
     }));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const studentId =
-      auth?.user?._id ||
-      auth?.user?.id;
+    try {
+      const projectData = {
+        projectName: formData.projectName,
 
-    if (!studentId) {
+        description: formData.description,
+
+        techStack,
+
+        githubLink: formData.githubLink,
+
+        liveDemoLink: formData.liveDemoLink,
+
+        projectType,
+
+        teamMembers: projectType === "team" ? teamMembers : [],
+
+        semester: formData.semester,
+
+        mentor: formData.mentor,
+      };
+
+      const url = isEdit ? `/api/projects/${project._id}` : "/api/projects";
+
+      const method = isEdit ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify(projectData),
+      });
+
+      const result = await response.json();
+      console.log("response", response);
+      if (response.status === 401) {//need to be fixed
+        window.location.href = "/login";
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to save project");
+      }
+
       alert(
-        "Student information not found."
+        isEdit
+          ? "Project updated successfully."
+          : "Project submitted for approval successfully.",
       );
-      return;
+
+      if (isEdit) {
+        router.push(`/student/projects/${project._id}`);
+      } else {
+        router.push("/student");
+      }
+    } catch (error) {
+      console.error("PROJECT SAVE ERROR:", error);
+
+      alert(error.message || "Something went wrong.");
     }
-
-    const projectData = {
-      projectName:
-        formData.projectName,
-
-      description:
-        formData.description,
-
-      techStack,
-
-      githubLink:
-        formData.githubLink,
-
-      liveDemoLink:
-        formData.liveDemoLink,
-
-      projectType,
-
-      teamMembers:
-        projectType === "team"
-          ? teamMembers
-          : [],
-
-      semester:
-        formData.semester,
-
-      mentor:
-        formData.mentor,
-
-      studentId,
-    };
-
-    const url = isEdit
-      ? `/api/projects/${project._id}`
-      : "/api/projects";
-
-    const method = isEdit
-      ? "PUT"
-      : "POST";
-
-    const response = await fetch(url, {
-      method,
-
-      headers: {
-        "Content-Type":
-          "application/json",
-      },
-
-      body: JSON.stringify(
-        projectData
-      ),
-    });
-
-    const result =
-      await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result.message ||
-          "Failed to save project"
-      );
-    }
-
-    alert(
-      isEdit
-        ? "Project updated successfully."
-        : "Project submitted for approval successfully."
-    );
-
-    if (isEdit) {
-      router.push(
-        `/student/projects/${project._id}`
-      );
-    } else {
-      router.push("/student");
-    }
-
-  } catch (error) {
-    console.error(
-      "PROJECT SAVE ERROR:",
-      error
-    );
-
-    alert(
-      error.message ||
-        "Something went wrong."
-    );
-  }
-};
+  };
 
   const addTechnology = () => {
     const technology = window.prompt("Enter technology");
@@ -706,14 +663,12 @@ const handleSubmit = async (e) => {
             >
               Save Draft
             </Button>
-<Button
-  type="submit"
-  className="bg-orange-500 text-white hover:bg-orange-600"
->
-  {isEdit
-    ? "Save Changes"
-    : "Send for Approval"}
-</Button>
+            <Button
+              type="submit"
+              className="bg-orange-500 text-white hover:bg-orange-600"
+            >
+              {isEdit ? "Save Changes" : "Send for Approval"}
+            </Button>
           </div>
         </form>
       </div>

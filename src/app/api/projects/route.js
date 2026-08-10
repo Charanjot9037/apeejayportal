@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {connectDB} from "@/lib/db";
 import Project from "@/models/projects";
+import { authenticateUser } from "@/lib/authentication";
 
 export async function POST(request) {
   try {
@@ -21,10 +22,9 @@ export async function POST(request) {
       synopsisFile,
       reportFile,
       presentationFile,
-      studentId,
     } = body;
 
-    if (!projectName || !description || !studentId) {
+    if (!projectName || !description ) {
       return NextResponse.json(
         {
           success: false,
@@ -47,6 +47,36 @@ export async function POST(request) {
         { status: 400 }
       );
     }
+
+  const auth = await authenticateUser();
+
+  if (!auth.success) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: auth.message,
+      },
+      {
+        status: auth.status,
+      },
+    );
+  }
+
+  const user = auth.user;
+//authorization
+  if (user.role !== "student") {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Access denied. Students only are allowed.",
+      },
+      {
+        status: 403,
+      },
+    );
+  }
+
+ const studentId = user._id;
 
     const project = await Project.create({
       title: projectName,
@@ -82,7 +112,6 @@ export async function POST(request) {
       presentationFile,
 
       status: "Pending Approval",
-
       student: studentId,
     });
 
@@ -90,7 +119,7 @@ export async function POST(request) {
       {
         success: true,
         message: "Project submitted for approval.",
-        project,
+        // project,
       },
       { status: 201 }
     );

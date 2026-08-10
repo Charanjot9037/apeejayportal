@@ -9,10 +9,6 @@ const studentSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-
-    // =========================
-    // PERSONAL INFORMATION
-    // =========================
     fullName: {
       type: String,
       required: true,
@@ -42,10 +38,6 @@ const studentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-
-    // =========================
-    // SKILLS
-    // =========================
     skills: {
       type: [String],
       default: [],
