@@ -31,14 +31,9 @@ export const NAV_ITEMS = {
       href: '/mentor-dashboard',
     },
     {
-      label: 'Applications',
+      label: 'Mentor',
       icon: FileText,
       href: '/mentor-dashboard/applications',
-    },
-    {
-      label: 'Profile',
-      icon: UserRound,
-      href: '/mentor-dashboard/profile',
     },
     {
       label: 'Settings',

@@ -1,8 +1,12 @@
 'use client';
-import { TrendingUp, CheckCircle2, Plus } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { TrendingUp, CheckCircle2, Plus, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { STAT_CARDS } from '@/constants/studentdashboard';
+import { StatCards } from './elements';
+import Link from 'next/link';
 
 import { useSelector } from 'react-redux';
 import {
@@ -97,7 +101,7 @@ export default function DashboardContent() {
         {/* <DashboardCards /> */}
         <StatCards cards={STAT_CARDS} />
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className="grid grid-cols-1 mt-4 gap-5 lg:grid-cols-3">
           {/* Left column */}
 
           {/* Right column */}
