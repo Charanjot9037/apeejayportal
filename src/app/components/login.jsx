@@ -39,7 +39,7 @@ const Login = () => {
           throw new Error(data.message);
         }
 
-       
+       console.log("studentid",data.user.studentId);
        dispatch(loginSuccess({
           user: data.user,
           name: data.name,
@@ -47,10 +47,11 @@ const Login = () => {
           role:data.role,
           profileImage: data.profileImage,
        }));
-       if(data.user.role=="student"){
-        router.push("/student")
+
+       if(data.user.role=="student" && data?.user?.studentId){
+        router.push("/student");
        }else{
-        router.push("/");
+        router.push("/create-profile");
        }
 
   
