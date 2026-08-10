@@ -10,14 +10,17 @@ export default function Roster({
   onRowClick,
   onViewAll,
   viewAllLabel = 'View All',
+  className,
 }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div
+      className={`flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}
+    >
       {/* Table Title */}
       <div className="px-5 pt-5">
         <h2 className="text-lg font-bold text-[#1c3a5e]">{title}</h2>
 
-        <div className="mt-1 h-0.5 w-8 bg-[#f2792a]" />
+        <div className="mt-1 h-0.5 w-8 bg-primary-orange" />
       </div>
 
       {/* Search */}

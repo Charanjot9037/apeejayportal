@@ -1,20 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import MentorSidebar from '../components/mentorSidebar';
-import { mentorSidebarData } from '@/constants/sidepannel';
+import Sidebar from '@/app/components/elements/sidebar';
+import { MENTOR_SIDEBAR_DATA } from '@/constants/sidepannel';
 export default function MentorLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-full bg-[#f7f6f4]">
-      <MentorSidebar
+    <div className="flex min-h-screen bg-slate-100">
+      <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        sidebarData={mentorSidebarData}
+        sidebarData={MENTOR_SIDEBAR_DATA}
       />
 
-      <main className="flex-1 overflow-y-auto p-8">{children}</main>
+      <main className="min-w-0 flex-1">{children}</main>
     </div>
   );
 }
