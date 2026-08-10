@@ -1,21 +1,22 @@
-"use client";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { TrendingUp, CheckCircle2, Plus, Eye } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import DashboardCards from "@/app/components/dashboardCards";
-import { useSelector } from "react-redux";
+'use client';
+import { useState, useEffect } from 'react';
+import { TrendingUp, CheckCircle2, Plus, Eye } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { STAT_CARDS } from '@/constants/studentdashboard';
+import { StatCards } from './elements';
+import Link from 'next/link';
+
+import { useSelector } from 'react-redux';
 import {
   projects as initialProjects,
   events,
   statusStyles,
   dashboardStats,
-} from "@/constants/studentdashboard";
-
+} from '@/constants/studentdashboard';
 function cn(...classes) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
 export default function DashboardContent() {
@@ -37,7 +38,7 @@ export default function DashboardContent() {
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(result.message || "Failed to fetch projects");
+          throw new Error(result.message || 'Failed to fetch projects');
         }
 
         setProjects([
@@ -58,7 +59,7 @@ export default function DashboardContent() {
           ...initialProjects,
         ]);
       } catch (error) {
-        console.error("FETCH_PROJECTS_ERROR:", error);
+        console.error('FETCH_PROJECTS_ERROR:', error);
       } finally {
         setLoadingProjects(false);
       }
@@ -66,8 +67,8 @@ export default function DashboardContent() {
 
     fetchProjects();
   }, [auth?.user?._id, auth?.user?.id]);
-  console.log("AUTH:", auth);
-  console.log("USER:", auth?.user);
+  console.log('AUTH:', auth);
+  console.log('USER:', auth?.user);
 
   const handleAddProject = async (formData, values) => {
     const newProject = {
@@ -91,15 +92,19 @@ export default function DashboardContent() {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-blue-900">
-            Welcome back, {auth?.user?.name || "login"}
+            Welcome back, {auth?.user?.name || 'login'}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
             Here is your academic and placement overview for today.
           </p>
         </div>
-        <DashboardCards />
+        {/* <DashboardCards /> */}
+        <StatCards cards={STAT_CARDS} />
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className="grid grid-cols-1 mt-4 gap-5 lg:grid-cols-3">
+          {/* Left column */}
+
+          {/* Right column */}
           <div className="flex flex-col gap-5 lg:col-span-4">
             <Card className="border-none bg-blue-950">
               <CardContent className="flex items-center justify-between">
@@ -109,7 +114,7 @@ export default function DashboardContent() {
                   </div>
                   <div>
                     <p className="font-semibold text-white">
-                      {dashboardStats.resume.status}{" "}
+                      {dashboardStats.resume.status}{' '}
                     </p>
                     <p className="text-sm text-blue-200">
                       {dashboardStats.resume.description}
@@ -167,7 +172,7 @@ export default function DashboardContent() {
                           <Badge
                             className={
                               statusStyles[project.status] ||
-                              "bg-slate-100 text-slate-600"
+                              'bg-slate-100 text-slate-600'
                             }
                           >
                             {project.status}
@@ -202,7 +207,7 @@ export default function DashboardContent() {
               <blockquote className="rounded-lg border-l-4 border-orange-400 bg-slate-50 p-4 text-sm italic text-slate-600">
                 {dashboardStats.mentorFeedback.message}
                 <footer className="mt-2 text-xs font-medium not-italic text-orange-500">
-                  — {dashboardStats.mentorFeedback.mentor}{" "}
+                  — {dashboardStats.mentorFeedback.mentor}{' '}
                 </footer>
               </blockquote>
             </CardContent>
@@ -218,10 +223,10 @@ export default function DashboardContent() {
                   <div key={event.title} className="flex items-center gap-3">
                     <div
                       className={cn(
-                        "flex h-12 w-12 flex-col items-center justify-center rounded-lg text-xs font-semibold",
+                        'flex h-12 w-12 flex-col items-center justify-center rounded-lg text-xs font-semibold',
                         event.highlighted
-                          ? "bg-orange-500 text-white"
-                          : "bg-slate-100 text-slate-600",
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-slate-100 text-slate-600',
                       )}
                     >
                       <span className="text-[10px] uppercase">
@@ -244,8 +249,6 @@ export default function DashboardContent() {
           </Card>
         </div>
       </div>
-
-     
     </div>
   );
 }
