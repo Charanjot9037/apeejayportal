@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "./provider";
 import "./globals.css";
 import ConditionalNavbar from "./components/elements/ConditionalNavbar";
+import ConditionalFooter from "./components/elements/ConditionalFooter";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -24,12 +25,13 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
     
-   <body className="h-screen flex flex-col overflow-hidden">
+   <body className="h-screen flex flex-col">
   <Providers>
     <ConditionalNavbar />                  
-    <div className="flex-1 overflow-hidden">
+    <div className="flex-1">
       {children}                       {/* MentorLayout renders here */}
     </div>
+    <ConditionalFooter/>
   </Providers>
 </body>
     </html>

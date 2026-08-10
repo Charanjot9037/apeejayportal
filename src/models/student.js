@@ -2,50 +2,130 @@ import mongoose from "mongoose";
 
 const studentSchema = new mongoose.Schema(
   {
-    user: {
+    // Link Student to User
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
-      unique: true, // One student profile per user
-    },
-
-    rollNo: {
-      type: String,
       required: true,
       unique: true,
     },
 
-    name: {
+    // =========================
+    // PERSONAL INFORMATION
+    // =========================
+    fullName: {
       type: String,
       required: true,
       trim: true,
     },
 
-    className: {
+
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+  
+
+    gender: {
       type: String,
       required: true,
     },
 
-    batch: {
+    address: {
       type: String,
       required: true,
     },
 
-    mobile: {
+    profileImage: {
       type: String,
       default: "",
     },
 
-   category: {
-  type: String,
-  enum: ["engineering", "management","it"],
-  required: true,
-},
+    // =========================
+    // SKILLS
+    // =========================
+    skills: {
+      type: [String],
+      default: [],
+    },
+
+    interests: {
+      type: [String],
+      default: [],
+    },
+
+    // =========================
+    // ACADEMIC
+    // =========================
+   
+
+    department: {
+      type: String,
+      default: "",
+    },
+
+    program: {
+      type: String,
+      default: "",
+    },
+
+    currentSemester: {
+      type: String,
+      default: "",
+    },
+
+    rollNumber: {
+      type: String,
+      default: "",
+    },
+
+    academicBatch: {
+      type: String,
+      default: "",
+    },
+
+    lastYear: {
+      type: String,
+      default: "",
+    },
+
+  specialiZation:{
+    type:String,
+    default:"",
+  },
+
+    // =========================
+    // PROFILES
+    // =========================
+    linkedin: {
+      type: String,
+      default: "",
+    },
+
+    github: {
+      type: String,
+      default: "",
+    },
+
+    portfolio: {
+      type: String,
+      default: "",
+    },
+
+    resume: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,
   }
 );
 
-export default mongoose.models.Student ||
+const Student =
+  mongoose.models.Student ||
   mongoose.model("Student", studentSchema);
+
+export default Student;
