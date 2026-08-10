@@ -3,13 +3,15 @@ import { TrendingUp, CheckCircle2, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import DashboardCards from '@/app/components/dashboardCards';
+
+import { StatCards } from './elements';
 import { useSelector } from 'react-redux';
 import {
   projects,
   events,
   statusStyles,
   dashboardStats,
+  STAT_CARDS,
 } from '@/constants/studentdashboard';
 function cn(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -29,9 +31,10 @@ export default function DashboardContent() {
             Here is your academic and placement overview for today.
           </p>
         </div>
-        <DashboardCards />
+        {/* <DashboardCards /> */}
+        <StatCards cards={STAT_CARDS} />
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className="grid grid-cols-1 mt-4 gap-5 lg:grid-cols-3">
           {/* Left column */}
 
           {/* Right column */}

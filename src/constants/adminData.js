@@ -1,9 +1,7 @@
 import {
   LayoutGrid,
-  User,
   FileText,
   Users,
-  Briefcase,
   Settings,
   GraduationCap,
   UserRound,

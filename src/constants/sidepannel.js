@@ -43,6 +43,9 @@ export const MENTOR_SIDEBAR_DATA = {
 
 export const studentSidebarData = {
   title: 'Mentor Portal',
+  subtitle: 'Academic Year 2024-25',
+
+  profileUrl: '/profile.png',
 
   navItems: [
     {
