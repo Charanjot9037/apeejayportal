@@ -122,9 +122,9 @@ export default function AddProjectForm({ mode = "create", project = null }) {
       });
 
       const result = await response.json();
-      console.log("response", response);
-      if (response.status === 401) {//need to be fixed
-        window.location.href = "/login";
+         if (response.status === 401) {//need to be 
+        alert("no authenticated");
+      router.push("/login");
         return;
       }
       if (!response.ok) {
