@@ -1,37 +1,31 @@
+
+
 "use client";
 
 import Link from "next/link";
+import { getSkillList } from "@/utils/skillHandler";
 
 import {
-  CalendarDays,
   BriefcaseBusiness,
   CheckCircle2,
-  Bookmark,
 } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
 
 const StudentCard = ({ student, onSave }) => {
   const {
-    id,
-    student: name,
-    image,
-    course,
-    year,
-    status,
-    match,
-    skills,
-    projects,
-    intake,
-    verified,
+    _id,
+    fullName,
+    profileImage,
+    program,
+    currentSemester,
+    skills = [],
   } = student;
-
-  const isInterviewing = status === "Interviewing";
+  const skillList = getSkillList(skills);
 
   return (
     <div
       className="
         group
+        w-full
         overflow-hidden
         rounded-xl
         border
@@ -50,14 +44,23 @@ const StudentCard = ({ student, onSave }) => {
     >
       {/* ================= Image ================= */}
 
-      <div className="relative h-1/2 overflow-hidden">
+      <div
+        className="
+          relative
+          aspect-[4/3]
+          w-full
+          overflow-hidden
+          bg-slate-100
+        "
+      >
         <img
-          src={image}
-          alt={name}
+          src={profileImage}
+          alt={fullName}
           className="
-            h-full
+            h-75
             w-full
-            object-cover
+            object-contain
+            object-top
 
             transition-transform
             duration-500
@@ -68,7 +71,6 @@ const StudentCard = ({ student, onSave }) => {
         />
 
         {/* Image Overlay */}
-
         <div
           className="
             pointer-events-none
@@ -80,21 +82,20 @@ const StudentCard = ({ student, onSave }) => {
             to-transparent
           "
         />
-
       </div>
 
       {/* ================= Content ================= */}
 
-      <div className="p-3">
+      <div className="p-4">
         {/* Name */}
 
-        <div className="flex items-center   gap-1.5">
+        <div className="flex items-center gap-1.5">
           <p
             className="
               truncate
+              text-lg
               font-semibold
               text-[#064a82]
-              text-md
 
               transition-colors
               duration-200
@@ -102,20 +103,18 @@ const StudentCard = ({ student, onSave }) => {
               group-hover:text-[#053b68]
             "
           >
-            {name}
+            {fullName}
           </p>
 
-          {verified && (
-            <CheckCircle2
-              className="
-                h-3.5
-                w-3.5
-                shrink-0
-                fill-[#064a82]
-                text-white
-              "
-            />
-          )}
+          <CheckCircle2
+            className="
+              h-3.5
+              w-3.5
+              shrink-0
+              fill-[#064a82]
+              text-white
+            "
+          />
         </div>
 
         {/* Course */}
@@ -128,105 +127,85 @@ const StudentCard = ({ student, onSave }) => {
             text-slate-500
           "
         >
-          {course} • {year}
+          {program} • Semester {currentSemester}
         </p>
 
         {/* ================= Skills ================= */}
+{/* ================= Skills ================= */}
 
-        <div className="mt-3  text-xs flex flex-wrap gap-1.5">
-          {skills.slice(0, 4).map((skill) => (
-            <span
-              key={skill}
-              className="
-                rounded-full
-                border
-                border-slate-200
-                bg-slate-50
-                px-2
-                py-1
-                font-medium
-                text-slate-600
+<div className="mt-3 flex flex-wrap gap-1.5">
+  {skillList.slice(0, 4).map((skill, index) => (
+    <span
+      key={`${skill}-${index}`}
+      className="
+        rounded-full
+        border
+        border-slate-200
+        bg-slate-50
+        px-2.5
+        py-1
+        text-xs
+        font-medium
+        text-slate-600
+      "
+    >
+      {skill}
+    </span>
+  ))}
 
-                transition-all
-                duration-200
-
-                hover:border-[#064a82]/20
-                hover:bg-[#064a82]/5
-                hover:text-[#064a82]
-              "
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-
-        {/* ================= Meta ================= */}
-
-        <div
-          className="
-            mt-3
-            flex
-            items-center
-            justify-between
-            border-t
-            border-slate-100
-            pt-3
-          "
-        >
-          <div
-            className="
-              flex
-              items-center
-              gap-1.5
-              text-xs
-              text-slate-500
-            "
-          >
-            <BriefcaseBusiness className="h-3 w-3" />
-
-            <p>{projects} projects</p>
-          </div>
-
-
+  {skillList.length > 4 && (
+    <span
+      className="
+        rounded-full
+        border
+        border-[#064a82]/10
+        bg-[#064a82]/5
+        px-2.5
+        py-1
+        text-xs
+        font-medium
+        text-[#064a82]
+      "
+    >
+      +{skillList.length - 4}
+    </span>
+  )}
+</div>
         {/* ================= Actions ================= */}
 
-
-   
-
-         
-        </div>
         <div className="pt-3">
-               <Link
-  href={`/students/${id}`}
-  className="
-    flex
-    h-8
-    items-center
-    justify-center
-    rounded-md
-    bg-[#064a82]
-    px-3
-    text-sm
-    font-medium
-    text-white
+          <Link
+            href={`/students/${_id}`}
+            className="
+              flex
+              h-10
+              w-full
+              items-center
+              justify-center
+              rounded-md
+              bg-[#064a82]
+              px-3
+              text-sm
+              font-semibold
+              text-white
 
-    transition-all
-    duration-300
-    ease-out
+              transition-all
+              duration-300
+              ease-out
 
-    hover:bg-[#053b68]
-    hover:shadow-md
+              hover:bg-[#053b68]
+              hover:shadow-md
 
-    active:scale-[0.98]
+              active:scale-[0.98]
 
-    focus:outline-none
-    focus:ring-2
-    focus:ring-[#064a82]/20
-  "
->
-  View Profile
-</Link>
-</div>
+              focus:outline-none
+              focus:ring-2
+              focus:ring-[#064a82]/20
+            "
+          >
+            View Profile
+          </Link>
+        </div>
       </div>
     </div>
   );
