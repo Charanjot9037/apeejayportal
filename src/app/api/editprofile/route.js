@@ -1,21 +1,67 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Student from "@/models/student";
+import { authenticateUser } from "@/lib/authentication";
 
 export async function PATCH(req) {
   try {
     await connectDB();
 
-    const { section, data, userId } = await req.json();
+    // =========================
+    // AUTHENTICATION
+    // =========================
+
+    const auth = await authenticateUser();
+
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        {
+          status: auth.status,
+        },
+      );
+    }
+
+    const user = auth.user;
+
+    // =========================
+    // STUDENT ONLY
+    // =========================
+
+    if (user.role !== "student") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Access denied. Students only are allowed.",
+        },
+        {
+          status: 403,
+        },
+      );
+    }
+
+    const userId = user._id;
+
     if (!userId) {
       return NextResponse.json(
         {
           success: false,
           message: "User ID is required",
         },
-        { status: 400 }
+        {
+          status: 400,
+        },
       );
     }
+
+    // =========================
+    // REQUEST BODY
+    // =========================
+
+    const { section, data } = await req.json();
 
     if (!section || !data) {
       return NextResponse.json(
@@ -23,69 +69,99 @@ export async function PATCH(req) {
           success: false,
           message: "Section and data are required",
         },
-        { status: 400 }
+        {
+          status: 400,
+        },
       );
     }
 
     let updateData = {};
 
-    switch (section) {
- 
+    // =========================
+    // PERSONAL INFORMATION
+    // =========================
 
-      case "skills":
+    switch (section) {
+      case "profile":
         updateData = {
-          skills: data.skills,
-          interests: data.interests,
+          profileImage: data.profileImage,
+        };
+        break;
+      case "personal":
+        updateData = {
+          fullName: data.fullName,
+          phone: data.phone,
+          gender: data.gender,
+          address: data.address,
+          profileImage: data.profileImage || "",
         };
         break;
 
- case "academic": {
-  const programDuration = {
-    MBA: 2,
-    MCA: 2,
-    BTECH: 4,
-    BCA: 3,
-    BBA: 3,
-    BCOM: 3,
-  };
+      // =========================
+      // SKILLS & INTERESTS
+      // =========================
 
-  const duration = programDuration[data.program];
+      case "skills":
+        updateData = {
+          skills: data.technicalSkills || [],
+          interests: data.interests || [],
+        };
+        break;
 
-  if (!duration) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Invalid program",
-      },
-      { status: 400 }
-    );
-  }
+      // =========================
+      // ACADEMIC
+      // =========================
 
-  if (!data.academicBatch) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Academic batch is required",
-      },
-      { status: 400 }
-    );
-  }
+      case "academic": {
+        const programDuration = {
+          MBA: 2,
+          MCA: 2,
+          BTECH: 4,
+          BCA: 3,
+          BBA: 3,
+          BCOM: 3,
+        };
 
-  const lastYear =
-    Number(data.academicBatch) + duration;
+        const duration = programDuration[data.program];
 
-  updateData = {
-    department: data.department,
-    program: data.program,
-    specialization:data.specialization,
-    currentSemester: data.currentSemester,
-    rollNumber: data.rollNumber,
-    academicBatch: data.academicBatch,
-    lastYear: String(lastYear),
-  };
+        if (!duration) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: "Invalid program",
+            },
+            {
+              status: 400,
+            },
+          );
+        }
 
-  break;
-}
+        if (!data.academicBatch) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: "Academic batch is required",
+            },
+            {
+              status: 400,
+            },
+          );
+        }
+
+        const lastYear = Number(data.academicBatch) + duration;
+
+        updateData = {
+          department: data.department,
+          program: data.program,
+          specialization: data.specialization || "",
+          currentSemester: data.currentSemester,
+          rollNumber: data.rollNumber,
+          academicBatch: data.academicBatch,
+          lastYear: String(lastYear),
+        };
+
+        break;
+      }
 
       // =========================
       // ONLINE PROFILES
@@ -93,10 +169,20 @@ export async function PATCH(req) {
 
       case "onlineProfiles":
         updateData = {
-          linkedin: data.linkedin,
-          github: data.github,
-          portfolio: data.portfolio,
-          resume: data.resume,
+          linkedin: data.linkedin || "",
+          github: data.github || "",
+          portfolio: data.portfolio || "",
+        };
+        break;
+
+      // =========================
+      // RESUME
+      // =========================
+
+      case "resume":
+        updateData = {
+          resume: data.resume || "",
+          resumeName: data.resumeName || "",
         };
         break;
 
@@ -106,12 +192,14 @@ export async function PATCH(req) {
             success: false,
             message: "Invalid profile section",
           },
-          { status: 400 }
+          {
+            status: 400,
+          },
         );
     }
 
     // =========================
-    // UPDATE STUDENT
+    // UPDATE PROFILE
     // =========================
 
     const profile = await Student.findOneAndUpdate(
@@ -120,12 +208,8 @@ export async function PATCH(req) {
       {
         new: true,
         runValidators: true,
-      }
-    );
-
-    // =========================
-    // PROFILE NOT FOUND
-    // =========================
+      },
+    ).lean();
 
     if (!profile) {
       return NextResponse.json(
@@ -133,13 +217,11 @@ export async function PATCH(req) {
           success: false,
           message: "Student profile not found",
         },
-        { status: 404 }
+        {
+          status: 404,
+        },
       );
     }
-
-    // =========================
-    // SUCCESS
-    // =========================
 
     return NextResponse.json(
       {
@@ -147,7 +229,9 @@ export async function PATCH(req) {
         message: `${section} updated successfully`,
         profile,
       },
-      { status: 200 }
+      {
+        status: 200,
+      },
     );
   } catch (error) {
     console.error("Edit student error:", error);
@@ -157,7 +241,9 @@ export async function PATCH(req) {
         success: false,
         message: error.message || "Failed to update student profile",
       },
-      { status: 500 }
+      {
+        status: 500,
+      },
     );
   }
 }

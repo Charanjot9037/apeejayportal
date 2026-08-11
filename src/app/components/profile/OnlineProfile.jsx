@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useFormik } from "formik";
-import {
-  Pencil, Check,X,Globe,Code2,} from "lucide-react";
+import { Pencil, Check, X, Globe, Code2 } from "lucide-react";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 
 import { onlineProfilesSchema } from "@/validations/profileSchema";
 
@@ -15,10 +15,7 @@ const defaultData = {
   twitter: "https://twitter.com/alexjohnson_dev",
 };
 
-export default function OnlineProfiles({
-  data = defaultData,
-  onSave,
-}) {
+export default function OnlineProfiles({ data = defaultData, onSave }) {
   const [isEditing, setIsEditing] = useState(false);
 
   const formik = useFormik({
@@ -42,25 +39,14 @@ export default function OnlineProfiles({
 
         setIsEditing(false);
       } catch (error) {
-        console.error(
-          "Failed to save online profiles:",
-          error
-        );
+        console.error("Failed to save online profiles:", error);
       }
     },
   });
 
-  /* ================================================
-     EDIT
-  ================================================ */
-
   function handleEdit() {
     setIsEditing(true);
   }
-
-  /* ================================================
-     CANCEL
-  ================================================ */
 
   function handleCancel() {
     formik.resetForm();
@@ -69,10 +55,6 @@ export default function OnlineProfiles({
 
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
-      {/* ============================================
-          HEADER
-      ============================================ */}
-
       <div className="mb-5 flex items-start justify-between">
         <div>
           <h2 className="text-xl font-semibold text-gray-700">
@@ -81,10 +63,6 @@ export default function OnlineProfiles({
 
           <div className="mt-1 h-0.5 w-6 bg-orange-500" />
         </div>
-
-        {/* ==========================================
-            ACTION BUTTONS
-        ========================================== */}
 
         {!isEditing ? (
           <button
@@ -129,25 +107,19 @@ export default function OnlineProfiles({
           FORM
       ============================================ */}
 
-      <form
-        id="online-profiles-form"
-        onSubmit={formik.handleSubmit}
-      >
+      <form id="online-profiles-form" onSubmit={formik.handleSubmit}>
         <div className="space-y-3">
           {/* GITHUB */}
 
           <ProfileField
             label="GitHub"
             name="github"
-            // icon={<Github size={14} />}
+            icon={<FaGithub size={14} />}
             value={formik.values.github}
             editing={isEditing}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={
-              formik.touched.github &&
-              formik.errors.github
-            }
+            error={formik.touched.github && formik.errors.github}
           />
 
           {/* LINKEDIN */}
@@ -155,15 +127,12 @@ export default function OnlineProfiles({
           <ProfileField
             label="LinkedIn"
             name="linkedin"
-            // icon={<Linkedin size={14} />}
+            icon={<FaLinkedin size={14} />}
             value={formik.values.linkedin}
             editing={isEditing}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={
-              formik.touched.linkedin &&
-              formik.errors.linkedin
-            }
+            error={formik.touched.linkedin && formik.errors.linkedin}
           />
 
           {/* PORTFOLIO */}
@@ -176,42 +145,7 @@ export default function OnlineProfiles({
             editing={isEditing}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={
-              formik.touched.portfolio &&
-              formik.errors.portfolio
-            }
-          />
-
-          {/* LEETCODE */}
-
-          <ProfileField
-            label="LeetCode"
-            name="leetcode"
-            icon={<Code2 size={14} />}
-            value={formik.values.leetcode}
-            editing={isEditing}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.leetcode &&
-              formik.errors.leetcode
-            }
-          />
-
-          {/* TWITTER */}
-
-          <ProfileField
-            label="Twitter / X"
-            name="twitter"
-            // icon={<Twitter size={14} />}
-            value={formik.values.twitter}
-            editing={isEditing}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.twitter &&
-              formik.errors.twitter
-            }
+            error={formik.touched.portfolio && formik.errors.portfolio}
           />
         </div>
       </form>
@@ -239,7 +173,7 @@ function ProfileField({
           ICON
       ========================================== */}
 
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-700">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-orange-50 text-primary">
         {icon}
       </div>
 
@@ -278,11 +212,7 @@ function ProfileField({
               }`}
             />
 
-            {error && (
-              <p className="mt-1 text-xs text-red-500">
-                {error}
-              </p>
-            )}
+            {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
           </>
         ) : (
           /* ========================================
@@ -294,9 +224,7 @@ function ProfileField({
             target="_blank"
             rel="noopener noreferrer"
             className={`block truncate text-xs ${
-              value
-                ? "text-orange-500 hover:underline"
-                : "text-gray-400"
+              value ? "text-orange-500 hover:underline" : "text-gray-400"
             }`}
           >
             {value || "-"}
