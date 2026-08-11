@@ -26,7 +26,7 @@ export default function PersonalInformationTab({
 
         {/* PROFILE IMAGE */}
 
-        <div className="flex shrink-0 w-1/3 flex-col gap-2 justify-center items-center">
+        <div className="flex shrink-0 w-full md:w-1/3 flex-col gap-2 justify-center items-center">
 
           <div className="relative">
 

@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { Sidebar } from '../components/elements';
-import { studentSidebarData } from '@/constants/sidepannel';
+import { studentSidebarData } from '@/constants/studentslidebar';
 export default function MentorLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-full bg-[#f7f6f4]">
+    <div className="flex h-full  bg-slate-100">
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
