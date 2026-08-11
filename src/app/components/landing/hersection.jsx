@@ -5,6 +5,8 @@ import { Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+
 
 const HeroSection = ({
   backgroundImage = "/landing-page/image.png",
@@ -33,11 +35,57 @@ const HeroSection = ({
 }) => {
   const [search, setSearch] = useState("");
 
-  const handleSearch = () => {
-    if (onSearch) {
-      onSearch(search);
+  const router = useRouter();
+
+  // Discover Student Talent
+
+  const handlePrimaryClick = () => {
+    if (onPrimaryClick) {
+      onPrimaryClick();
+      return;
+    }
+
+    router.push("/studentSearch");
+  };
+
+  // Explore Verified Projects
+
+  const handleSecondaryClick = () => {
+    if (onSecondaryClick) {
+      onSecondaryClick();
+      return;
+    }
+
+    const section = document.getElementById("projects");
+
+    if (section) {
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
+
+
+  const handleSearch = () => {
+    const searchValue = search.trim();
+
+    if (!searchValue) {
+      router.push("/studentSearch");
+      return;
+    }
+
+    if (onSearch) {
+      onSearch(searchValue);
+    }
+
+    router.push(
+      `/studentSearch?search=${encodeURIComponent(searchValue)}`
+    );
+  };
+
+
+   
 
   return (
     <div className="relative w-full  min-h-screen bg-cover bg-center"  style={{
@@ -81,7 +129,7 @@ const HeroSection = ({
 
   {/* Primary Button */}
   <Button
-    onClick={onPrimaryClick}
+    onClick={handlePrimaryClick}
     className="
       h-10
       rounded-none
@@ -110,7 +158,7 @@ const HeroSection = ({
 
   {/* Secondary Button */}
   <Button
-    onClick={onSecondaryClick}
+    onClick={handleSecondaryClick}
     className="
       h-10
       rounded-none

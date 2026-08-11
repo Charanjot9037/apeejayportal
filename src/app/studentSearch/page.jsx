@@ -2,6 +2,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+
 import StudentFilters from "../components/elements/StudentFilter";
 import StudentCard from "../components/elements/StudentCard";
 
@@ -9,12 +11,17 @@ import { students } from "@/constants/studentData";
 import ProjectHeader from "../components/elements/ProjectHeader";
 
 const StudentSearch = () => {
-  const [search, setSearch] = useState("");
+  const searchParams = useSearchParams();
+
+  // Get search value from URL
+  const initialSearch = searchParams.get("search") || "";
+
+  const [search, setSearch] = useState(initialSearch);
   const [department, setDepartment] = useState("all");
   const [skill, setSkill] = useState("all");
 
   const [appliedFilters, setAppliedFilters] = useState({
-    search: "",
+    search: initialSearch,
     department: "all",
     skill: "all",
   });
@@ -49,14 +56,11 @@ const StudentSearch = () => {
 
       const matchesDepartment =
         appliedFilters.department === "all" ||
-        student.department ===
-          appliedFilters.department;
+        student.department === appliedFilters.department;
 
       const matchesSkill =
         appliedFilters.skill === "all" ||
-        student.skills.includes(
-          appliedFilters.skill
-        );
+        student.skills.includes(appliedFilters.skill);
 
       return (
         matchesSearch &&
@@ -71,16 +75,20 @@ const StudentSearch = () => {
   };
 
   return (
-
     <section
       className="
         w-full
         bg-[#fafafa]
         sm:py-12
       "
-    >  <div className="py-5">
-        <ProjectHeader title="Discover Student Talent" subtitle="Explore verified student profiles, skills, projects, and technical expertise" />
+    >
+      <div className="py-5">
+        <ProjectHeader
+          title="Discover Student Talent"
+          subtitle="Explore verified student profiles, skills, projects, and technical expertise"
+        />
       </div>
+
       <div
         className="
           mx-auto
@@ -131,8 +139,7 @@ const StudentSearch = () => {
                 text-slate-500
               "
             >
-              {filteredStudents.length} students
-              found
+              {filteredStudents.length} students found
             </p>
           </div>
         </div>
@@ -146,9 +153,7 @@ const StudentSearch = () => {
               grid
               grid-cols-1
               gap-5
-
               sm:grid-cols-2
-
               lg:grid-cols-3
             "
           >

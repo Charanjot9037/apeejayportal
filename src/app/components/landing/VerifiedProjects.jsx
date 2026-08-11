@@ -37,7 +37,7 @@ const VerifiedProjects = () => {
   };
 
   return (
-    <div className=" flex w-full flex-col  bg-[#fafafa] gap-2 px-5 py-12 md:px-10">
+    <div  id="projects" className=" flex w-full flex-col bg-[#fafafa] gap-2 px-5 py-12 md:px-10">
       {/* Header */}
       <ProjectHeader title="Verified Projects" />
 
