@@ -1895,27 +1895,19 @@ if (values.synopsisFile) {
             >
               Save Draft
             </Button>
-<<<<<<< HEAD
 
             <Button
               type="submit"
               disabled={
                 formik.isSubmitting
               }
-              className="bg-orange-500 text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="bg-orange-500 text-white hover:bg-orange-600"
             >
               {formik.isSubmitting
                 ? "Uploading..."
                 : isEdit
                   ? "Save Changes"
                   : "Send for Approval"}
-=======
-            <Button
-              type="submit"
-              className="bg-orange-500 text-white hover:bg-orange-600"
-            >
-              {isEdit ? "Save Changes" : "Send for Approval"}
->>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
             </Button>
           </div>
         </form>
