@@ -1,5 +1,5 @@
 "use client";
-
+import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -133,21 +133,16 @@ export default function ProjectDetail() {
         );
       }
 
-      alert(
-        "Project deleted successfully."
-      );
-
-      router.push("/student");
+    // Success
+toast.success("Project deleted successfully.");
+router.push("/student");
     } catch (error) {
       console.error(
         "DELETE ERROR:",
         error
       );
 
-      alert(
-        error.message ||
-          "Failed to delete project."
-      );
+    toast.error(error.message || "Failed to delete project.");
     } finally {
       setDeleting(false);
     }
@@ -574,9 +569,7 @@ export default function ProjectDetail() {
               <Button
                 className="mt-4 h-8 w-full bg-orange-500 text-[10px] text-white hover:bg-orange-600"
                 onClick={() =>
-                  alert(
-                    "Mentor contact functionality can be added here."
-                  )
+                   toast.info("Mentor contact functionality can be added here.")
                 }
               >
                 Contact Mentor

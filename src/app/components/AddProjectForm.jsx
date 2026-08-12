@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Link as LinkIcon,
@@ -460,13 +460,10 @@ existingPresentationFile:
           auth?.user?._id ||
           auth?.user?.id;
 
-        if (!studentId) {
-          alert(
-            "Student information not found."
-          );
-
-          return;
-        }
+     if (!studentId) {
+  toast.error("Student information not found.");
+  return;
+}
 
         /* ================================================
            CREATE FORMDATA
@@ -569,11 +566,11 @@ if (values.synopsisFile) {
         const result =
           await response.json();
 
-        if (response.status === 401) {//need to be 
-        alert("no authenticated");
-      router.push("/login");
-        return;
-      }
+    if (response.status === 401) {
+  toast.error("You are not authenticated. Please log in again.");
+  router.push("/login");
+  return;
+}
       if (!response.ok) {
         throw new Error(result.message || "Failed to save project");
       }
@@ -583,11 +580,12 @@ if (values.synopsisFile) {
            SUCCESS
         ================================================ */
 
-        alert(
-          isEdit
-            ? "Project updated successfully."
-            : "Project submitted for approval successfully."
-        );
+       // 3. Success
+toast.success(
+  isEdit
+    ? "Project updated successfully."
+    : "Project submitted for approval successfully."
+);
 
         if (isEdit) {
           router.push(
@@ -604,10 +602,7 @@ if (values.synopsisFile) {
           error
         );
 
-        alert(
-          error.message ||
-            "Something went wrong."
-        );
+      toast.error(error.message || "Something went wrong.");
       } finally {
         setSubmitting(false);
       }
