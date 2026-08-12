@@ -47,7 +47,7 @@ const StudentCard = ({ student, onSave }) => {
       <div
         className="
           relative
-          aspect-[4/3]
+          aspect-[6/4]
           w-full
           overflow-hidden
           bg-slate-100

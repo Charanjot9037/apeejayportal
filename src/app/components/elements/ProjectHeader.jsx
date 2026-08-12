@@ -12,6 +12,8 @@ const ProjectHeader = ({
       <h2
         className={`
           ${titleSize}
+          text-md 
+          md:text-4xl
           font-bold
           text-primary
           transition-all
@@ -24,7 +26,7 @@ const ProjectHeader = ({
       </h2>
 
       {subtitle && (
-        <p className={`${subtitleSize} mt-2 text-slate-500`}>
+        <p className={`${subtitleSize} mt-2 text-sm md:text-lg  text-slate-500`}>
           {subtitle}
         </p>
       )}
