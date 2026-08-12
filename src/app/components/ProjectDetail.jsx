@@ -879,7 +879,7 @@ console.log("download ural",downloadUrl)
         {/* VIEW */}
 
         <a
-          href={downloadUrl}
+          href={fileUrl}
           target="_blank"
           rel="noopener noreferrer"
           title="View"
@@ -891,8 +891,8 @@ console.log("download ural",downloadUrl)
         {/* DOWNLOAD */}
 
         <a
-          href={"https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fres.cloudinary.com%2Fdoy5pqwbw%2Fraw%2Fupload%2Fv1786436182%2Fstudent-projects%2F6a73959bb233fa210a783c19%2Fdocuments%2Furbanclothing_presentation_7c7df4d1.pptx&wdOrigin=BROWSELINK"}
-          download={"https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fres.cloudinary.com%2Fdoy5pqwbw%2Fraw%2Fupload%2Fv1786436182%2Fstudent-projects%2F6a73959bb233fa210a783c19%2Fdocuments%2Furbanclothing_presentation_7c7df4d1.pptx&wdOrigin=BROWSELINK"}
+          href={fileUrl}
+          download
           title={`Download ${fileName}`}
           className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-orange-600"
         >
