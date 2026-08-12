@@ -1,12 +1,146 @@
 import { NextResponse } from "next/server";
-import {connectDB} from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import Project from "@/models/projects";
+import cloudinary from "@/lib/cloudinary";
+import crypto from "crypto";
+
+/* =========================================================
+   CLOUDINARY UPLOAD HELPER
+========================================================= */
+
+function uploadToCloudinary(buffer, options) {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      options,
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+
+    uploadStream.end(buffer);
+  });
+}
+
+/* =========================================================
+   FILE -> BUFFER
+========================================================= */
+
+async function fileToBuffer(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  return Buffer.from(arrayBuffer);
+}
+
+/* =========================================================
+   CHECK FILE
+========================================================= */
+
+function isValidFile(file) {
+  return (
+    file &&
+    typeof file === "object" &&
+    typeof file.arrayBuffer === "function" &&
+    file.size > 0
+  );
+}
+
+/* =========================================================
+   SAFE FILE NAME
+========================================================= */
+
+function getSafeFileName(originalName) {
+  if (!originalName) {
+    return `file_${crypto.randomUUID()}`;
+  }
+
+  const extensionIndex =
+    originalName.lastIndexOf(".");
+
+  const hasExtension =
+    extensionIndex > 0;
+
+  const extension = hasExtension
+    ? originalName
+        .substring(extensionIndex)
+        .toLowerCase()
+    : "";
+
+  const nameWithoutExtension =
+    hasExtension
+      ? originalName.substring(
+          0,
+          extensionIndex
+        )
+      : originalName;
+
+  const safeName =
+    nameWithoutExtension
+      .normalize("NFKD")
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "_")
+      .replace(/-+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .toLowerCase();
+
+  const finalName =
+    safeName || "file";
+
+  return `${finalName}_${crypto
+    .randomUUID()
+    .slice(0, 8)}${extension}`;
+}
+
+/* =========================================================
+   POST - CREATE PROJECT
+========================================================= */
 
 export async function POST(request) {
   try {
     await connectDB();
 
-    const body = await request.json();
+    /* =====================================================
+       FORM DATA
+    ===================================================== */
+
+    const formData =
+      await request.formData();
+
+    /* =====================================================
+       PROJECT DATA
+    ===================================================== */
+
+    const projectDataRaw =
+      formData.get("projectData");
+
+    if (!projectDataRaw) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Project data is required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    let projectData;
+
+    try {
+      projectData =
+        JSON.parse(projectDataRaw);
+    } catch (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Invalid project data.",
+        },
+        { status: 400 }
+      );
+    }
 
     const {
       projectName,
@@ -18,13 +152,18 @@ export async function POST(request) {
       teamMembers,
       semester,
       mentor,
-      synopsisFile,
-      reportFile,
-      presentationFile,
       studentId,
-    } = body;
+    } = projectData;
 
-    if (!projectName || !description || !studentId) {
+    /* =====================================================
+       BASIC VALIDATION
+    ===================================================== */
+
+    if (
+      !projectName ||
+      !description ||
+      !studentId
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -35,115 +174,338 @@ export async function POST(request) {
       );
     }
 
+    /* =====================================================
+       TEAM VALIDATION
+    ===================================================== */
+
     if (
       projectType === "team" &&
-      (!teamMembers || teamMembers.length === 0)
+      (!teamMembers ||
+        teamMembers.length === 0)
     ) {
       return NextResponse.json(
         {
           success: false,
-          message: "Team project must have at least one team member.",
+          message:
+            "Team project must have at least one team member.",
         },
         { status: 400 }
       );
     }
 
-    const project = await Project.create({
-      title: projectName,
+    /* =====================================================
+       CLOUDINARY FOLDER
+    ===================================================== */
 
-      subtitle:
-        projectType === "team"
-          ? `Team Project • ${teamMembers.length} Members`
-          : "Individual Project",
+    const baseFolder =
+      `student-projects/${studentId}`;
 
-      description,
+    /* =====================================================
+       PROJECT IMAGES
+    ===================================================== */
 
-      techStack: techStack || [],
+    const imageFiles =
+      formData.getAll(
+        "projectImages"
+      );
 
-      githubLink,
+    const projectImages = [];
 
-      liveLink: liveDemoLink,
+    for (const file of imageFiles) {
+      if (!isValidFile(file)) {
+        continue;
+      }
 
-      projectType,
+      const buffer =
+        await fileToBuffer(file);
 
-      teamMembers:
-        projectType === "team"
-          ? teamMembers
-          : [],
+      const safeFileName =
+        getSafeFileName(file.name);
 
-      semester,
+      /*
+       * For images:
+       * Cloudinary normally adds the image
+       * extension to the delivery URL.
+       *
+       * We therefore remove the extension
+       * from public_id.
+       */
 
-      mentor,
+      const imagePublicId =
+        safeFileName.replace(
+          /\.[^/.]+$/,
+          ""
+        );
 
-      synopsisFile,
+      const result =
+        await uploadToCloudinary(
+          buffer,
+          {
+            folder:
+              `${baseFolder}/images`,
 
-      reportFile,
+            resource_type:
+              "image",
 
-      presentationFile,
+            public_id:
+              imagePublicId,
 
-      status: "Pending Approval",
+            overwrite: false,
+          }
+        );
 
-      student: studentId,
-    });
+      projectImages.push({
+        url:
+          result.secure_url,
+
+        publicId:
+          result.public_id,
+
+        originalName:
+          file.name,
+
+        resourceType:
+          result.resource_type,
+      });
+    }
+
+    /* =====================================================
+       HELPER FOR RAW DOCUMENTS
+    ===================================================== */
+
+    async function uploadDocument(
+      file
+    ) {
+      if (!isValidFile(file)) {
+        return null;
+      }
+
+      const buffer =
+        await fileToBuffer(file);
+
+      /*
+       * IMPORTANT:
+       *
+       * For raw files the extension MUST
+       * be included in public_id.
+       */
+
+      const safeFileName =
+        getSafeFileName(file.name);
+
+      const result =
+        await uploadToCloudinary(
+          buffer,
+          {
+            folder:
+              `${baseFolder}/documents`,
+
+            resource_type:
+              "raw",
+
+            public_id:
+              safeFileName,
+
+            overwrite: false,
+          }
+        );
+
+      return {
+        url:
+          result.secure_url,
+
+        publicId:
+          result.public_id,
+
+        originalName:
+          file.name,
+
+        resourceType:
+          result.resource_type,
+      };
+    }
+
+    /* =====================================================
+       PRESENTATION
+    ===================================================== */
+
+    const presentationFile =
+      formData.get(
+        "presentationFile"
+      );
+
+    const presentationData =
+      await uploadDocument(
+        presentationFile
+      );
+
+    /* =====================================================
+       SYNOPSIS
+    ===================================================== */
+
+    const synopsisFile =
+      formData.get(
+        "synopsisFile"
+      );
+
+    const synopsisData =
+      await uploadDocument(
+        synopsisFile
+      );
+
+    /* =====================================================
+       FINAL REPORT
+    ===================================================== */
+
+    const reportFile =
+      formData.get(
+        "reportFile"
+      );
+
+    const reportData =
+      await uploadDocument(
+        reportFile
+      );
+
+    /* =====================================================
+       CREATE PROJECT
+    ===================================================== */
+
+    const project =
+      await Project.create({
+        title:
+          projectName,
+
+        subtitle:
+          projectType === "team"
+            ? `Team Project • ${
+                teamMembers?.length || 0
+              } Members`
+            : "Individual Project",
+
+        description,
+
+        techStack:
+          techStack || [],
+
+        githubLink,
+
+        liveLink:
+          liveDemoLink,
+
+        projectType,
+
+        teamMembers:
+          projectType === "team"
+            ? teamMembers || []
+            : [],
+
+        semester,
+
+        mentor,
+
+        projectImages,
+
+        synopsisFile:
+          synopsisData,
+
+        reportFile:
+          reportData,
+
+        presentationFile:
+          presentationData,
+
+        status:
+          "Pending Approval",
+
+        student:
+          studentId,
+      });
+
+    /* =====================================================
+       RESPONSE
+    ===================================================== */
 
     return NextResponse.json(
       {
         success: true,
-        message: "Project submitted for approval.",
+
+        message:
+          "Project submitted for approval.",
+
         project,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("PROJECT_CREATE_ERROR:", error);
+    console.error(
+      "PROJECT_CREATE_ERROR:",
+      error
+    );
 
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to create project.",
+
+        message:
+          error.message ||
+          "Failed to create project.",
       },
       { status: 500 }
     );
   }
 }
 
-//GET
+/* =========================================================
+   GET
+========================================================= */
 
 export async function GET(request) {
   try {
     await connectDB();
 
-    const { searchParams } = new URL(request.url);
+    const {
+      searchParams,
+    } = new URL(request.url);
 
-    const studentId = searchParams.get("studentId");
+    const studentId =
+      searchParams.get(
+        "studentId"
+      );
 
     if (!studentId) {
       return NextResponse.json(
         {
           success: false,
-          message: "Student ID is required.",
+          message:
+            "Student ID is required.",
         },
         { status: 400 }
       );
     }
 
-    const projects = await Project.find({
-      student: studentId,
-    }).sort({
-      createdAt: -1,
-    });
+    const projects =
+      await Project.find({
+        student: studentId,
+      }).sort({
+        createdAt: -1,
+      });
 
     return NextResponse.json({
       success: true,
       projects,
     });
   } catch (error) {
-    console.error("PROJECT_GET_ERROR:", error);
+    console.error(
+      "PROJECT_GET_ERROR:",
+      error
+    );
 
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to fetch projects.",
+        message:
+          "Failed to fetch projects.",
       },
       { status: 500 }
     );

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
-import AddProjectForm from '@/app/components/AddProjectForm'
+import AddProjectForm from "@/app/components/AddProjectForm";
 
 export default function EditProjectPage() {
   const params = useParams();
@@ -14,23 +14,29 @@ export default function EditProjectPage() {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(
-          `/api/projects/${params.id}`
-        );
+        const response = await fetch(`/api/projects/${params.id}`);
 
-        const result =
-          await response.json();
+        const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            result.message ||
-              "Failed to fetch project"
-          );
+          throw new Error(result.message || "Failed to fetch project");
         }
+
+        console.log("PROJECT LOADED FOR EDIT:", result.project);
+
+        console.log("PROJECT FROM API:", result.project);
+
+        console.log("PROJECT IMAGES:", result.project?.projectImages);
+
+        console.log("SYNOPSIS:", result.project?.synopsisFile);
+
+        console.log("REPORT:", result.project?.reportFile);
+
+        console.log("PRESENTATION:", result.project?.presentationFile);
 
         setProject(result.project);
       } catch (error) {
-        console.error(error);
+        console.error("EDIT_PROJECT_ERROR:", error);
       } finally {
         setLoading(false);
       }
@@ -41,28 +47,33 @@ export default function EditProjectPage() {
     }
   }, [params.id]);
 
+  /* ============================================
+     LOADING
+  ============================================ */
+
   if (loading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <p className="text-sm text-slate-500">
-          Loading project...
-        </p>
+      <div className="flex min-h-[500px] items-center justify-center">
+        <p className="text-sm text-slate-500">Loading project...</p>
       </div>
     );
   }
+
+  /* ============================================
+     PROJECT NOT FOUND
+  ============================================ */
 
   if (!project) {
     return (
-      <div className="p-6 text-center text-sm text-red-500">
-        Project not found.
+      <div className="flex min-h-[500px] items-center justify-center">
+        <p className="text-sm text-red-500">Project not found.</p>
       </div>
     );
   }
 
-  return (
-    <AddProjectForm
-      mode="edit"
-      project={project}
-    />
-  );
+  /* ============================================
+     EDIT FORM
+  ============================================ */
+
+  return <AddProjectForm mode="edit" project={project} />;
 }
