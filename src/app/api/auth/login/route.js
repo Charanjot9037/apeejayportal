@@ -1,9 +1,9 @@
 import { connectDB } from "@/lib/db";
 import User from "@/models/user";
 import bcrypt from "bcrypt";
+import Student from "@/models/student";
 import { createAccessToken, createRefreshToken } from "@/lib/jwt";
 import { NextResponse } from "next/server";
-
 
 export async function POST(req) {
   try {
@@ -13,8 +13,6 @@ export async function POST(req) {
 
     const { email, password } = body;
 
-
-    
     if (!email || !password) {
       return NextResponse.json(
         {
@@ -22,11 +20,9 @@ export async function POST(req) {
         },
         {
           status: 400,
-        }
+        },
       );
     }
-
-
 
     const user = await User.findOne({ email });
 
@@ -37,26 +33,22 @@ export async function POST(req) {
         },
         {
           status: 401,
-        }
+        },
       );
     }
-   if (user.provider === "google") {
-  return NextResponse.json(
-    {
-      message:
-        "This account was created using Google. Please sign in with Google.",
-    },
-    {
-      status: 400,
+    if (user.provider === "google") {
+      return NextResponse.json(
+        {
+          message:
+            "This account was created using Google. Please sign in with Google.",
+        },
+        {
+          status: 400,
+        },
+      );
     }
-  );
-}
 
-    const isPasswordMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
-
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatch) {
       return NextResponse.json(
@@ -65,19 +57,19 @@ export async function POST(req) {
         },
         {
           status: 401,
-        }
+        },
       );
     }
 
-
-
+    const student = await Student.findOne({
+      userId: user._id,
+    }).select("_id");
     const accessToken = createAccessToken(user);
 
     const refreshToken = createRefreshToken(user);
 
     user.refreshToken = refreshToken;
     await user.save();
-
 
     const response = NextResponse.json(
       {
@@ -88,55 +80,39 @@ export async function POST(req) {
           email: user.email,
           role: user.role,
           profileImage: user.image || null,
+          studentId: !!student,
         },
       },
       {
         status: 200,
-      }
+      },
     );
 
+    response.cookies.set("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 15,
+      path: "/",
+    });
 
-   
-    response.cookies.set(
-      "accessToken",
-      accessToken,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 60 * 15,
-        path: "/",
-      }
-    );
-
-
-   
-    response.cookies.set(
-      "refreshToken",
-      refreshToken,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/",
-      }
-    );
-
+    response.cookies.set("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    });
 
     return response;
-
-
   } catch (error) {
-
     return NextResponse.json(
       {
         message: error.message || "Something went wrong",
       },
       {
         status: 500,
-      }
+      },
     );
-
   }
 }

@@ -39,20 +39,23 @@ const Login = () => {
           throw new Error(data.message);
         }
 
-        dispatch(
-          loginSuccess({
-            user: data.user,
-            name: data.name,
-            email: data.email,
-            role: data.role,
-            profileImage: data.profileImage,
-          }),
-        );
-        if (data.user.role == 'student') {
-          router.push('/student');
-        } else {
-          router.push('/');
-        }
+       console.log("studentid",data.user.studentId);
+       dispatch(loginSuccess({
+          user: data.user,
+          name: data.name,
+          email: data.email,
+          role:data.role,
+          profileImage: data.profileImage,
+       }));
+
+       if(data.user.role=="student" && data?.user?.studentId){
+        router.push("/student");
+       }else{
+        router.push("/create-profile");
+       }
+
+  
+
       } catch (error) {
         console.log(error.message);
         alert(error.message);

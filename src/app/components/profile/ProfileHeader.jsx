@@ -7,19 +7,17 @@ export default function ProfileHeader({
   name = "Alex Johnson",
   subtitle = "Computer Science Student | Class of 2025",
   image = "",
-  completion = 85,
+  completion = "86",
   editable = true,
   onImageChange,
+  imageLoading = false,
 }) {
   const fileInputRef = useRef(null);
 
-  const safeCompletion = Math.min(
-    100,
-    Math.max(0, completion)
-  );
+  const safeCompletion = Math.min(100, Math.max(0, Number(completion) || 0));
 
   const handleImageClick = () => {
-    if (!editable) return;
+    if (!editable || imageLoading) return;
 
     fileInputRef.current?.click();
   };
@@ -29,52 +27,52 @@ export default function ProfileHeader({
 
     if (!file) return;
 
-    // Optional: send file to parent
     if (onImageChange) {
       onImageChange(file);
     }
+
+    // Allow selecting the same image again
+    event.target.value = "";
   };
 
   return (
     <div className="w-full rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-center justify-between gap-4">
-        {/* =========================================
-            LEFT SIDE
-        ========================================== */}
-
+        {/* LEFT SIDE */}
         <div className="flex min-w-0 items-center gap-3.5">
-          {/* =======================================
-              PROFILE IMAGE
-          ======================================== */}
-
+          {/* PROFILE IMAGE */}
           <div className="relative shrink-0">
-            <div className="h-14 w-14 overflow-hidden rounded-full bg-gray-100 sm:h-15 sm:w-15">
-              {image ? (
-                <img
-                  src={image}
-                  alt={`${name} profile`}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-gray-400">
-                  {getInitials(name)}
-                </div>
-              )}
+            <div className="relative h-16 w-16 shrink-0">
+              <div className="h-full w-full overflow-hidden rounded-full bg-gray-100">
+                {image ? (
+                  <img
+                    src={image}
+                    alt={`${name} profile`}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-gray-400">
+                    {getInitials(name)}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* =====================================
-                IMAGE EDIT PEN
-            ====================================== */}
-
+            {/* IMAGE EDIT BUTTON */}
             {editable && (
               <>
                 <button
                   type="button"
                   onClick={handleImageClick}
-                  className="absolute bottom-0 right-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-orange-500 text-white shadow-sm transition hover:bg-orange-600"
+                  disabled={imageLoading}
+                  className="absolute bottom-0 right-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-orange-500 text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
                   aria-label="Change profile image"
                 >
-                  <Pencil size={10} strokeWidth={2.5} />
+                  {imageLoading ? (
+                    <span className="h-2.5 w-2.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    <Pencil size={10} strokeWidth={2.5} />
+                  )}
                 </button>
 
                 <input
@@ -82,16 +80,14 @@ export default function ProfileHeader({
                   type="file"
                   accept="image/png,image/jpeg,image/jpg,image/webp"
                   onChange={handleImageChange}
+                  disabled={imageLoading}
                   className="hidden"
                 />
               </>
             )}
           </div>
 
-          {/* =======================================
-              NAME + SUBTITLE
-          ======================================== */}
-
+          {/* NAME + SUBTITLE */}
           <div className="flex min-w-0 flex-col gap-1">
             <h2 className="truncate text-xl font-semibold leading-6 text-blue-900 sm:text-2xl">
               {name || "Your Name"}
@@ -103,27 +99,17 @@ export default function ProfileHeader({
           </div>
         </div>
 
-        {/* =========================================
-            RIGHT SIDE
-            ONLY PROFILE COMPLETION
-        ========================================== */}
-
+        {/* PROFILE COMPLETION */}
         <div className="hidden w-48 shrink-0 sm:block">
           <div className="mb-1 flex items-center justify-between gap-2">
-            <span className="text-xs text-gray-700">
-              Profile Completion
-            </span>
+            <span className="text-xs text-gray-700">Profile Completion</span>
 
             <span className="text-sm font-medium text-orange-500">
               {safeCompletion}%
             </span>
           </div>
 
-          {/* PROGRESS BACKGROUND */}
-
           <div className="h-1 w-full overflow-hidden rounded-full bg-[#e8e8e8]">
-            {/* PROGRESS */}
-
             <div
               className="h-full rounded-full bg-[#ff8b24] transition-all duration-500"
               style={{
@@ -134,15 +120,10 @@ export default function ProfileHeader({
         </div>
       </div>
 
-      {/* =========================================
-          MOBILE COMPLETION
-      ========================================== */}
-
+      {/* MOBILE COMPLETION */}
       <div className="mt-3 block sm:hidden">
         <div className="mb-1 flex items-center justify-between">
-          <span className="text-xs text-gray-700">
-            Profile Completion
-          </span>
+          <span className="text-xs text-gray-700">Profile Completion</span>
 
           <span className="text-sm font-medium text-orange-500">
             {safeCompletion}%

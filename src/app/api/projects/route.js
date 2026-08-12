@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/projects";
+<<<<<<< HEAD
 import cloudinary from "@/lib/cloudinary";
 import crypto from "crypto";
 
@@ -96,6 +97,9 @@ function getSafeFileName(originalName) {
 /* =========================================================
    POST - CREATE PROJECT
 ========================================================= */
+=======
+import { authenticateUser } from "@/lib/authentication";
+>>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
 
 export async function POST(request) {
   try {
@@ -152,6 +156,7 @@ export async function POST(request) {
       teamMembers,
       semester,
       mentor,
+<<<<<<< HEAD
       studentId,
     } = projectData;
 
@@ -164,6 +169,14 @@ export async function POST(request) {
       !description ||
       !studentId
     ) {
+=======
+      synopsisFile,
+      reportFile,
+      presentationFile,
+    } = body;
+
+    if (!projectName || !description ) {
+>>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
       return NextResponse.json(
         {
           success: false,
@@ -193,9 +206,44 @@ export async function POST(request) {
       );
     }
 
+<<<<<<< HEAD
     /* =====================================================
        CLOUDINARY FOLDER
     ===================================================== */
+=======
+  const auth = await authenticateUser();
+
+  if (!auth.success) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: auth.message,
+      },
+      {
+        status: auth.status,
+      },
+    );
+  }
+
+  const user = auth.user;
+//authorization
+  if (user.role !== "student") {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Access denied. Students only are allowed.",
+      },
+      {
+        status: 403,
+      },
+    );
+  }
+
+ const studentId = user._id;
+
+    const project = await Project.create({
+      title: projectName,
+>>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
 
     const baseFolder =
       `student-projects/${studentId}`;
@@ -250,6 +298,7 @@ export async function POST(request) {
             public_id:
               imagePublicId,
 
+<<<<<<< HEAD
             overwrite: false,
           }
         );
@@ -425,15 +474,25 @@ export async function POST(request) {
     /* =====================================================
        RESPONSE
     ===================================================== */
+=======
+      status: "Pending Approval",
+      student: studentId,
+    });
+>>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
 
     return NextResponse.json(
       {
         success: true,
+<<<<<<< HEAD
 
         message:
           "Project submitted for approval.",
 
         project,
+=======
+        message: "Project submitted for approval.",
+        // project,
+>>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
       },
       { status: 201 }
     );

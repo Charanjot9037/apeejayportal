@@ -32,7 +32,6 @@ export default function PersonalInformation({
       fullName: data.fullName || "",
       email: data.email || "",
       phone: data.phone || "",
-      dateOfBirth: data.dateOfBirth || "",
       gender: data.gender || "",
       address: data.address || "",
     },
@@ -43,6 +42,7 @@ export default function PersonalInformation({
 
     onSubmit: async (values) => {
       try {
+        alert("alert");
         if (onSave) {
           await onSave(values);
         }
@@ -170,18 +170,7 @@ export default function PersonalInformation({
           />
 
           {/* DATE OF BIRTH */}
-          <InformationField
-            label="DATE OF BIRTH"
-            name="dateOfBirth"
-            value={formik.values.dateOfBirth}
-            editing={isEditing}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.dateOfBirth &&
-              formik.errors.dateOfBirth
-            }
-          />
+       
 
           {/* GENDER */}
           <GenderField

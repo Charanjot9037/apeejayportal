@@ -76,7 +76,8 @@ body {
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #0056a6;
+  --primary:#1c3a5e;
+  --primarybg:#f1f5f9;
   --light-primary: #003f7c;
   --main-blue: #1c398e;
   --primary-foreground: oklch(0.985 0 0);

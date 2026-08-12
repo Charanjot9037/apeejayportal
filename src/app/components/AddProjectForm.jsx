@@ -1,6 +1,10 @@
 "use client";
 
+<<<<<<< HEAD
 import { useEffect } from "react";
+=======
+import { useState, useEffect } from "react";
+>>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
@@ -30,9 +34,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+<<<<<<< HEAD
 /* =========================================================
    CONSTANTS
 ========================================================= */
+=======
+export default function AddProjectForm({ mode = "create", project = null }) {
+  const router = useRouter();
+  const isEdit = mode === "edit";
+>>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_PRESENTATION_SIZE = 10 * 1024 * 1024; // 10MB
@@ -41,6 +51,7 @@ const MAX_REPORT_SIZE = 20 * 1024 * 1024; // 20MB
 
 const MAX_PROJECT_IMAGES = 6;
 
+<<<<<<< HEAD
 const emptyTeamMember = {
   name: "",
   enrollment: "",
@@ -72,6 +83,46 @@ const validationSchema = Yup.object({
       "Project name must not exceed 100 characters"
     )
     .required("Project name is required"),
+=======
+  const [formData, setFormData] = useState({
+    projectName: "",
+    description: "",
+    githubLink: "",
+    liveDemoLink: "",
+    semester: "",
+    mentor: "",
+  });
+
+  useEffect(() => {
+    if (!project || !isEdit) return;
+
+    setFormData({
+      projectName: project.title || "",
+      description: project.description || "",
+      githubLink: project.githubLink || "",
+      liveDemoLink: project.liveLink || "",
+      semester: project.semester || "",
+      mentor: project.mentor || "",
+    });
+
+    setProjectType(project.projectType || "individual");
+
+    setTechStack(project.techStack || []);
+
+    setTeamMembers(
+      project.teamMembers?.length
+        ? project.teamMembers
+        : [
+            {
+              name: "",
+              enrollment: "",
+              email: "",
+              role: "",
+            },
+          ],
+    );
+  }, [project, isEdit]);
+>>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
 
   description: Yup.string()
     .trim()
@@ -139,6 +190,7 @@ const validationSchema = Yup.object({
                   "Member name is required"
                 ),
 
+<<<<<<< HEAD
               enrollment: Yup.string()
                 .trim()
                 .required(
@@ -708,6 +760,73 @@ if (values.synopsisFile) {
   /* =======================================================
      ADD TECHNOLOGY
   ======================================================= */
+=======
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const projectData = {
+        projectName: formData.projectName,
+
+        description: formData.description,
+
+        techStack,
+
+        githubLink: formData.githubLink,
+
+        liveDemoLink: formData.liveDemoLink,
+
+        projectType,
+
+        teamMembers: projectType === "team" ? teamMembers : [],
+
+        semester: formData.semester,
+
+        mentor: formData.mentor,
+      };
+
+      const url = isEdit ? `/api/projects/${project._id}` : "/api/projects";
+
+      const method = isEdit ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify(projectData),
+      });
+
+      const result = await response.json();
+         if (response.status === 401) {//need to be 
+        alert("no authenticated");
+      router.push("/login");
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to save project");
+      }
+
+      alert(
+        isEdit
+          ? "Project updated successfully."
+          : "Project submitted for approval successfully.",
+      );
+
+      if (isEdit) {
+        router.push(`/student/projects/${project._id}`);
+      } else {
+        router.push("/student");
+      }
+    } catch (error) {
+      console.error("PROJECT SAVE ERROR:", error);
+
+      alert(error.message || "Something went wrong.");
+    }
+  };
+>>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
 
   const addTechnology = () => {
     const technology =
@@ -1892,6 +2011,7 @@ if (values.synopsisFile) {
             >
               Save Draft
             </Button>
+<<<<<<< HEAD
 
             <Button
               type="submit"
@@ -1905,6 +2025,13 @@ if (values.synopsisFile) {
                 : isEdit
                   ? "Save Changes"
                   : "Send for Approval"}
+=======
+            <Button
+              type="submit"
+              className="bg-orange-500 text-white hover:bg-orange-600"
+            >
+              {isEdit ? "Save Changes" : "Send for Approval"}
+>>>>>>> 70eaf316b73f2da9b2b3fb58855934c835ab95cc
             </Button>
           </div>
         </form>

@@ -9,24 +9,17 @@ const studentSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-
-    // =========================
-    // PERSONAL INFORMATION
-    // =========================
     fullName: {
       type: String,
       required: true,
       trim: true,
     },
 
-
     phone: {
       type: String,
       required: true,
       trim: true,
     },
-
-  
 
     gender: {
       type: String,
@@ -42,10 +35,6 @@ const studentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-
-    // =========================
-    // SKILLS
-    // =========================
     skills: {
       type: [String],
       default: [],
@@ -59,7 +48,6 @@ const studentSchema = new mongoose.Schema(
     // =========================
     // ACADEMIC
     // =========================
-   
 
     department: {
       type: String,
@@ -91,10 +79,10 @@ const studentSchema = new mongoose.Schema(
       default: "",
     },
 
-  specialiZation:{
-    type:String,
-    default:"",
-  },
+    specialiZation: {
+      type: String,
+      default: "",
+    },
 
     // =========================
     // PROFILES
@@ -118,14 +106,17 @@ const studentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    resumeName: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Student =
-  mongoose.models.Student ||
-  mongoose.model("Student", studentSchema);
+  mongoose.models.Student || mongoose.model("Student", studentSchema);
 
 export default Student;

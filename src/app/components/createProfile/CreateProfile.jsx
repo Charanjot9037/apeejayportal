@@ -12,12 +12,13 @@ import PersonalInformationTab from "./PersonalInformationTab";
 import SkillsInterestsTab from "./SkillInterestTab";
 import AcademicInformationTab from "./AcadamicTab";
 import OnlineProfilesTab from "./OnlineProfileTab";
-
+import { DashboardHeader } from "../elements";
+import { resume } from "react-dom/server";
 
 export default function CreateStudentProfile() {
   const imageInputRef = useRef(null);
   const resumeInputRef = useRef(null);
-const router=useRouter();
+  const router = useRouter();
   const user = useSelector((state) => state.auth.user);
 
   const [activeTab, setActiveTab] = useState("personal");
@@ -28,7 +29,7 @@ const router=useRouter();
   const formik = useFormik({
     initialValues: {
       profileImage: null,
-      profileImageUrl:"",
+      profileImageUrl: "",
       fullName: user?.name || "",
       email: "",
       phone: "",
@@ -42,91 +43,84 @@ const router=useRouter();
       currentSemester: "",
       rollNumber: "",
       academicBatch: "",
-      lastYear:"",
+      lastYear: "",
       linkedin: "",
       github: "",
       portfolio: "",
-      specialization:"",
+      specialization: "",
       resume: "",
-      resumeFile:null,
+      resumeName: "",
+      resumeFile: null,
     },
 
     validationSchema: studentProfileSchema,
-
- 
   });
 
+  const handleProfileImage = async (event) => {
+    const file = event.currentTarget.files?.[0];
 
+    if (!file) return;
 
-const handleProfileImage = async (event) => {
-  const file = event.currentTarget.files?.[0];
+    formik.setFieldValue("profileImageFile", file);
 
-  if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
 
-  formik.setFieldValue("profileImageFile", file);
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-  const formData = new FormData();
-  formData.append("file", file);
+      const data = await response.json();
 
-  try {
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+      if (!response.ok) {
+        throw new Error(data.message || "Upload failed");
+      }
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Upload failed");
+      console.log(data.url);
+      formik.setFieldValue("profileImage", file);
+      formik.setFieldValue("profileImageUrl", data.url);
+    } catch (error) {
+      console.error("Image upload failed:", error);
     }
+  };
 
-    console.log(data.url)
-   formik.setFieldValue("profileImage", file);
-formik.setFieldValue("profileImageUrl", data.url);
+  const handleResume = async (event) => {
+    const file = event.currentTarget.files?.[0];
 
-  } catch (error) {
-    console.error("Image upload failed:", error);
-  }
-};
+    if (!file) return;
 
+    // Store actual file for displaying filename
+    formik.setFieldValue("resumeFile", file);
 
+    const formData = new FormData();
+    formData.append("file", file);
 
-const handleResume = async (event) => {
-  const file = event.currentTarget.files?.[0];
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-  if (!file) return;
+      const data = await response.json();
 
-  // Store actual file for displaying filename
-  formik.setFieldValue("resumeFile", file);
+      if (!response.ok) {
+        throw new Error(data.message || "Resume upload failed");
+      }
 
-  const formData = new FormData();
-  formData.append("file", file);
+      console.log("Resume Cloudinary URL:", data.url);
 
-  try {
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+      // Store Cloudinary URL for database
+      formik.setFieldValue("resume", data.url);
+    } catch (error) {
+      console.error("Resume upload failed:", error);
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Resume upload failed");
+      // Clear values if upload fails
+      formik.setFieldValue("resumeFile", null);
+      formik.setFieldValue("resume", "");
     }
-
-    console.log("Resume Cloudinary URL:", data.url);
-
-    // Store Cloudinary URL for database
-    formik.setFieldValue("resume", data.url);
-
-  } catch (error) {
-    console.error("Resume upload failed:", error);
-
-    // Clear values if upload fails
-    formik.setFieldValue("resumeFile", null);
-    formik.setFieldValue("resume", "");
-  }
-};
+  };
   function removeProfileImage() {
     formik.setFieldValue("profileImage", null);
 
@@ -142,14 +136,11 @@ const handleResume = async (event) => {
     }
   }
 
-
   const getError = (field) => {
     return formik.touched[field] && formik.errors[field]
       ? formik.errors[field]
       : "";
   };
-
-
 
   const validateStep = async (fields) => {
     const errors = await formik.validateForm();
@@ -166,246 +157,201 @@ const handleResume = async (event) => {
     return !stepHasErrors;
   };
 
-
-
- const handlePersonalNext = async () => {
-  try {
-    const response = await fetch("/api/createstudent", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user.id,
-        fullName: formik.values.fullName,
-        phone: formik.values.phone,
-
-        gender: formik.values.gender,
-        address: formik.values.address,
-        profileImage: formik.values.profileImageUrl,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error(data.message);
-      return;
-    }
-
-    console.log("Student created:", data);
-
-    // Store Student's own _id
-    setStudentId(data.studentId);
-
-    setActiveTab("academic");
-  } catch (error) {
-    console.error("Create student error:", error);
-  }
-};
-
-const handleSkillsNext = async () => {
-  const fields = ["skills", "interests"];
-
-  const isValid = await validateStep(fields);
-
-  if (!isValid) {
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/editprofile", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId:user?.id,
-        section: "skills",
-        data: {
-          skills: formik.values.skills,
-          interests: formik.values.interests,
+  const handlePersonalNext = async () => {
+    try {
+      const response = await fetch("/api/createstudent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      }),
-    });
+        body: JSON.stringify({
+          userId: user.id,
+          fullName: formik.values.fullName,
+          phone: formik.values.phone,
 
-    const result = await response.json();
+          gender: formik.values.gender,
+          address: formik.values.address,
+          profileImage: formik.values.profileImageUrl,
+        }),
+      });
 
-    if (!response.ok) {
-      console.error("Skills update failed:", result.message);
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error(data.message);
+        return;
+      }
+
+      console.log("Student created:", data);
+
+      // Store Student's own _id
+      setStudentId(data.studentId);
+
+      setActiveTab("academic");
+    } catch (error) {
+      console.error("Create student error:", error);
+    }
+  };
+
+  const handleSkillsNext = async () => {
+    const fields = ["skills", "interests"];
+
+    const isValid = await validateStep(fields);
+
+    if (!isValid) {
       return;
     }
 
-    console.log("Skills updated successfully:", result);
+    try {
+      const response = await fetch("/api/createstudent", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          section: "skills",
+          data: {
+            skills: formik.values.skills,
+            interests: formik.values.interests,
+          },
+        }),
+      });
 
-    alert("Successful");
+      const result = await response.json();
 
-    setActiveTab("profiles");
-  } catch (error) {
-    console.error("Skills API error:", error);
-  }
-};
+      if (!response.ok) {
+        console.error("Skills update failed:", result.message);
+        return;
+      }
+
+      console.log("Skills updated successfully:", result);
+
+      alert("Successful");
+
+      setActiveTab("profiles");
+    } catch (error) {
+      console.error("Skills API error:", error);
+    }
+  };
 
   const handleAcademicNext = async () => {
-  const fields = [
-    "university",
-    "department",
-    "program",
-    "currentSemester",
-    "rollNumber",
-    "lastYear",
-    "cumulativeGPA",
-    "academicBatch",
-    "specialization"
-  ];
+    const fields = [
+      "university",
+      "department",
+      "program",
+      "currentSemester",
+      "rollNumber",
+      "lastYear",
+      "cumulativeGPA",
+      "academicBatch",
+      "specialization",
+    ];
 
-  const isValid = await validateStep(fields);
+    const isValid = await validateStep(fields);
 
-  if (!isValid) {
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/editprofile", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId:user.id,
-        section: "academic",
-        data: {
-          university: formik.values.university,
-          department: formik.values.department,
-          program: formik.values.program,
-          currentSemester: formik.values.currentSemester,
-          rollNumber: formik.values.rollNumber,
-          cumulativeGPA: formik.values.cumulativeGPA,
-          academicBatch: formik.values.academicBatch,
-          specialization: formik.values.specialization,
-        },
-      }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      console.error("Academic update failed:", result.message);
+    if (!isValid) {
       return;
     }
 
-    alert("Academic information updated:", result);
+    try {
+      const response = await fetch("/api/createstudent", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          section: "academic",
+          data: {
+            university: formik.values.university,
+            department: formik.values.department,
+            program: formik.values.program,
+            currentSemester: formik.values.currentSemester,
+            rollNumber: formik.values.rollNumber,
+            cumulativeGPA: formik.values.cumulativeGPA,
+            academicBatch: formik.values.academicBatch,
+            specialization: formik.values.specialization,
+          },
+        }),
+      });
 
-    setActiveTab("skills");
-  } catch (error) {
-    console.error("Academic API error:", error);
-  }
-};
+      const result = await response.json();
 
+      if (!response.ok) {
+        console.error("Academic update failed:", result.message);
+        return;
+      }
+
+      alert("Academic information updated:", result);
+
+      setActiveTab("skills");
+    } catch (error) {
+      console.error("Academic API error:", error);
+    }
+  };
 
   const handleFinalSubmit = async () => {
-  const fields = [
-    "linkedin",
-    "github",
-    "portfolio",
-    "resume",
-  ];
+    const fields = ["linkedin", "github", "portfolio", "resume"];
 
-  const isValid = await validateStep(fields);
+    const isValid = await validateStep(fields);
 
-  if (!isValid) {
-    return;
-  }
-
-  try {
-    console.log("=================================");
-    console.log("EDIT STUDENT - FINAL");
-    console.log("=================================");
-
-    console.log("Student ID:", studentId);
-
-    const response = await fetch("/api/editprofile", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId:user.id,
-        section: "onlineProfiles",
-        data: {
-          linkedin: formik.values.linkedin,
-          github: formik.values.github,
-          portfolio: formik.values.portfolio,
-          resume: formik.values.resume,
-        },
-      }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      console.error(
-        "Profile update failed:",
-        result.message
-      );
+    if (!isValid) {
       return;
     }
 
+    try {
+      console.log("=================================");
+      console.log("EDIT STUDENT - FINAL");
+      console.log("=================================");
 
-    alert("Student profile completed successfully!");
-router.push("/student");
-  } catch (error) {
-    console.error(
-      "Final profile update error:",
-      error
-    );
-  }
-};
+      console.log("Student ID:", studentId);
+
+      const response = await fetch("/api/createstudent", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          section: "onlineProfiles",
+          data: {
+            linkedin: formik.values.linkedin,
+            github: formik.values.github,
+            portfolio: formik.values.portfolio,
+            resume: formik.values.resume,
+            resumeName: formik.values.resumeFile.name,
+          },
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error("Profile update failed:", result.message);
+        return;
+      }
+
+      alert("Student profile completed successfully!");
+      router.push("/student");
+    } catch (error) {
+      console.error("Final profile update error:", error);
+    }
+  };
 
   return (
     <main className="h-screen overflow-y-auto bg-gray-50 px-4 py-8">
       <div className="mx-auto max-w-6xl">
-
         {/* ==========================================
             HEADER
         ========================================== */}
-
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-main-blue">
-            Create Your Profile
-          </h1>
-
-          <p className="mt-1 text-sm text-gray-700">
-            Complete your profile with your personal, academic,
-            professional and career information.
-          </p>
-
-          <div className="mt-2 h-0.5 w-8 bg-orange-500" />
+        <div className="py-3">
+          <DashboardHeader
+            title="Create Your Profile"
+            description=" Complete your profile with your personal, academic, professional and
+            career information"
+          />
         </div>
-
-        {/* ==========================================
-            HIDDEN FILE INPUTS
-        ========================================== */}
-
-        <Input
-          ref={imageInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/jpg"
-          onChange={handleProfileImage}
-          className="hidden"
-        />
-
-        <Input
-          ref={resumeInputRef}
-          type="file"
-          accept=".pdf,.doc,.docx"
-          onChange={handleResume}
-          className="hidden"
-        />
-
-        {/* ==========================================
-            TABS
-        ========================================== */}
 
         <Tabs
           value={activeTab}
@@ -419,33 +365,23 @@ router.push("/student");
           }}
           className="w-full"
         >
-
-
-
-          <TabsList className="py-5 bg-white text-orange-500  w-full ">
-
+          <TabsList className="py-5 bg-white text-black   w-full ">
             <TabsTrigger
               value="personal"
-              className="py-3 "
+              className="py-3 data-active:bg-primary-orange data-active:text-white"
             >
               Personal Information
             </TabsTrigger>
-    <TabsTrigger
+            <TabsTrigger
               value="academic"
               disabled={!studentId}
               className="py-3"
             >
               Academic Information
             </TabsTrigger>
-            <TabsTrigger
-              value="skills"
-              disabled={!studentId}
-              className="py-3"
-            >
+            <TabsTrigger value="skills" disabled={!studentId} className="py-3">
               Skills & Interests
             </TabsTrigger>
-
-        
 
             <TabsTrigger
               value="profiles"
@@ -454,7 +390,6 @@ router.push("/student");
             >
               Profiles & Resume
             </TabsTrigger>
-
           </TabsList>
 
           {/* ==========================================
@@ -471,8 +406,6 @@ router.push("/student");
               onNext={handlePersonalNext}
             />
           </TabsContent>
-
-  
 
           <TabsContent value="skills">
             <SkillsInterestsTab
@@ -511,10 +444,8 @@ router.push("/student");
               onSubmit={handleFinalSubmit}
             />
           </TabsContent>
-
         </Tabs>
       </div>
     </main>
   );
 }
-
