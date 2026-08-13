@@ -9,7 +9,6 @@ export async function GET() {
 
     // Authenticate user
     const auth = await authenticateUser();
-
     if (!auth.success) {
       return NextResponse.json(
         {
@@ -25,7 +24,6 @@ export async function GET() {
     const user = auth.user;
     const userId = user._id;
 
-    // Only students can access student profile
     if (user.role !== "student") {
       return NextResponse.json(
         {
@@ -50,7 +48,6 @@ export async function GET() {
       );
     }
 
-    // Find student profile
     const student = await Student.findOne({ userId }).lean();
 
     if (!student) {
