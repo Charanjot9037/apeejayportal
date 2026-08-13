@@ -9,7 +9,7 @@ export async function GET() {
 
     // Authenticate user
     const auth = await authenticateUser();
-
+console.log("auth",auth);
     if (!auth.success) {
       return NextResponse.json(
         {
@@ -24,7 +24,6 @@ export async function GET() {
 
     const user = auth.user;
     const userId = user._id;
-
     // Only students can access student profile
     if (user.role !== "student") {
       return NextResponse.json(

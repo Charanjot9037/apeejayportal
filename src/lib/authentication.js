@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import User from "@/models/user";
 import { connectDB } from "@/lib/db";
+import { createAccessToken } from "@/lib/jwt";
 
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
@@ -15,9 +16,6 @@ export async function authenticateUser() {
     const accessToken = cookieStore.get("accessToken")?.value;
     const refreshToken = cookieStore.get("refreshToken")?.value;
 
-    // --------------------------------
-    // No tokens
-    // --------------------------------
     if (!accessToken && !refreshToken) {
       return {
         success: false,
@@ -26,15 +24,10 @@ export async function authenticateUser() {
       };
     }
 
-    // --------------------------------
-    // 1. Try Access Token
-    // --------------------------------
     if (accessToken) {
       try {
         const decoded = jwt.verify(accessToken, ACCESS_SECRET);
-
         const user = await User.findById(decoded.id);
-
         if (!user) {
           return {
             success: false,
@@ -80,9 +73,7 @@ export async function authenticateUser() {
     if (refreshToken) {
       try {
         const decodedRefresh = jwt.verify(refreshToken, REFRESH_SECRET);
-
         const user = await User.findById(decodedRefresh.id);
-
         if (!user) {
           return {
             success: false,
@@ -93,8 +84,7 @@ export async function authenticateUser() {
 
         // --------------------------------
         // Verify refresh token from DB
-        // --------------------------------
-
+        // // --------------------------------
         if (user.refreshToken !== refreshToken) {
           return {
             success: false,
@@ -103,24 +93,7 @@ export async function authenticateUser() {
           };
         }
 
-        // --------------------------------
-        // Generate new Access Token
-        // --------------------------------
-
-        const newAccessToken = jwt.sign(
-          {
-            id: user._id.toString(),
-            role: user.role,
-          },
-          ACCESS_SECRET,
-          {
-            expiresIn: "15m",
-          },
-        );
-
-        // --------------------------------
-        // Store new access token
-        // --------------------------------
+        const newAccessToken = createAccessToken(user);
 
         cookieStore.set("accessToken", newAccessToken, {
           httpOnly: true,
