@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Project from "@/models/projects";
 import cloudinary from "@/lib/cloudinary";
 import crypto from "crypto";
+import { authenticateUser } from "@/lib/authentication";
 
 /* =========================================================
    CLOUDINARY UPLOAD HELPER
@@ -18,7 +19,7 @@ function uploadToCloudinary(buffer, options) {
         } else {
           resolve(result);
         }
-      }
+      },
     );
 
     uploadStream.end(buffer);
@@ -56,41 +57,29 @@ function getSafeFileName(originalName) {
     return `file_${crypto.randomUUID()}`;
   }
 
-  const extensionIndex =
-    originalName.lastIndexOf(".");
+  const extensionIndex = originalName.lastIndexOf(".");
 
-  const hasExtension =
-    extensionIndex > 0;
+  const hasExtension = extensionIndex > 0;
 
   const extension = hasExtension
-    ? originalName
-        .substring(extensionIndex)
-        .toLowerCase()
+    ? originalName.substring(extensionIndex).toLowerCase()
     : "";
 
-  const nameWithoutExtension =
-    hasExtension
-      ? originalName.substring(
-          0,
-          extensionIndex
-        )
-      : originalName;
+  const nameWithoutExtension = hasExtension
+    ? originalName.substring(0, extensionIndex)
+    : originalName;
 
-  const safeName =
-    nameWithoutExtension
-      .normalize("NFKD")
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "_")
-      .replace(/-+/g, "_")
-      .replace(/^_+|_+$/g, "")
-      .toLowerCase();
+  const safeName = nameWithoutExtension
+    .normalize("NFKD")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/-+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .toLowerCase();
 
-  const finalName =
-    safeName || "file";
+  const finalName = safeName || "file";
 
-  return `${finalName}_${crypto
-    .randomUUID()
-    .slice(0, 8)}${extension}`;
+  return `${finalName}_${crypto.randomUUID().slice(0, 8)}${extension}`;
 }
 
 /* =========================================================
@@ -105,40 +94,35 @@ export async function POST(request) {
        FORM DATA
     ===================================================== */
 
-    const formData =
-      await request.formData();
+    const formData = await request.formData();
 
     /* =====================================================
        PROJECT DATA
     ===================================================== */
 
-    const projectDataRaw =
-      formData.get("projectData");
+    const projectDataRaw = formData.get("projectData");
 
     if (!projectDataRaw) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Project data is required.",
+          message: "Project data is required.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     let projectData;
 
     try {
-      projectData =
-        JSON.parse(projectDataRaw);
+      projectData = JSON.parse(projectDataRaw);
     } catch (error) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Invalid project data.",
+          message: "Invalid project data.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -159,37 +143,41 @@ export async function POST(request) {
        BASIC VALIDATION
     ===================================================== */
 
-    if (
-      !projectName ||
-      !description ||
-      !studentId
-    ) {
+    if (!projectName || !description) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Project name, description and student ID are required.",
+          message: "Project name, description  are required.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
-
+    // Authenticate user
+    const auth = await authenticateUser();
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        {
+          status: auth.status,
+        },
+      );
+    }
+    const user = auth.user;
+    const userId = user._id;
     /* =====================================================
        TEAM VALIDATION
     ===================================================== */
 
-    if (
-      projectType === "team" &&
-      (!teamMembers ||
-        teamMembers.length === 0)
-    ) {
+    if (projectType === "team" && (!teamMembers || teamMembers.length === 0)) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Team project must have at least one team member.",
+          message: "Team project must have at least one team member.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -197,17 +185,13 @@ export async function POST(request) {
        CLOUDINARY FOLDER
     ===================================================== */
 
-    const baseFolder =
-      `student-projects/${studentId}`;
+    const baseFolder = `student-projects/${studentId}`;
 
     /* =====================================================
        PROJECT IMAGES
     ===================================================== */
 
-    const imageFiles =
-      formData.getAll(
-        "projectImages"
-      );
+    const imageFiles = formData.getAll("projectImages");
 
     const projectImages = [];
 
@@ -216,11 +200,9 @@ export async function POST(request) {
         continue;
       }
 
-      const buffer =
-        await fileToBuffer(file);
+      const buffer = await fileToBuffer(file);
 
-      const safeFileName =
-        getSafeFileName(file.name);
+      const safeFileName = getSafeFileName(file.name);
 
       /*
        * For images:
@@ -231,41 +213,26 @@ export async function POST(request) {
        * from public_id.
        */
 
-      const imagePublicId =
-        safeFileName.replace(
-          /\.[^/.]+$/,
-          ""
-        );
+      const imagePublicId = safeFileName.replace(/\.[^/.]+$/, "");
 
-      const result =
-        await uploadToCloudinary(
-          buffer,
-          {
-            folder:
-              `${baseFolder}/images`,
+      const result = await uploadToCloudinary(buffer, {
+        folder: `${baseFolder}/images`,
 
-            resource_type:
-              "image",
+        resource_type: "image",
 
-            public_id:
-              imagePublicId,
+        public_id: imagePublicId,
 
-            overwrite: false,
-          }
-        );
+        overwrite: false,
+      });
 
       projectImages.push({
-        url:
-          result.secure_url,
+        url: result.secure_url,
 
-        publicId:
-          result.public_id,
+        publicId: result.public_id,
 
-        originalName:
-          file.name,
+        originalName: file.name,
 
-        resourceType:
-          result.resource_type,
+        resourceType: result.resource_type,
       });
     }
 
@@ -273,15 +240,12 @@ export async function POST(request) {
        HELPER FOR RAW DOCUMENTS
     ===================================================== */
 
-    async function uploadDocument(
-      file
-    ) {
+    async function uploadDocument(file) {
       if (!isValidFile(file)) {
         return null;
       }
 
-      const buffer =
-        await fileToBuffer(file);
+      const buffer = await fileToBuffer(file);
 
       /*
        * IMPORTANT:
@@ -290,38 +254,26 @@ export async function POST(request) {
        * be included in public_id.
        */
 
-      const safeFileName =
-        getSafeFileName(file.name);
+      const safeFileName = getSafeFileName(file.name);
 
-      const result =
-        await uploadToCloudinary(
-          buffer,
-          {
-            folder:
-              `${baseFolder}/documents`,
+      const result = await uploadToCloudinary(buffer, {
+        folder: `${baseFolder}/documents`,
 
-            resource_type:
-              "raw",
+        resource_type: "raw",
 
-            public_id:
-              safeFileName,
+        public_id: safeFileName,
 
-            overwrite: false,
-          }
-        );
+        overwrite: false,
+      });
 
       return {
-        url:
-          result.secure_url,
+        url: result.secure_url,
 
-        publicId:
-          result.public_id,
+        publicId: result.public_id,
 
-        originalName:
-          file.name,
+        originalName: file.name,
 
-        resourceType:
-          result.resource_type,
+        resourceType: result.resource_type,
       };
     }
 
@@ -329,98 +281,66 @@ export async function POST(request) {
        PRESENTATION
     ===================================================== */
 
-    const presentationFile =
-      formData.get(
-        "presentationFile"
-      );
+    const presentationFile = formData.get("presentationFile");
 
-    const presentationData =
-      await uploadDocument(
-        presentationFile
-      );
+    const presentationData = await uploadDocument(presentationFile);
 
     /* =====================================================
        SYNOPSIS
     ===================================================== */
 
-    const synopsisFile =
-      formData.get(
-        "synopsisFile"
-      );
+    const synopsisFile = formData.get("synopsisFile");
 
-    const synopsisData =
-      await uploadDocument(
-        synopsisFile
-      );
+    const synopsisData = await uploadDocument(synopsisFile);
 
     /* =====================================================
        FINAL REPORT
     ===================================================== */
 
-    const reportFile =
-      formData.get(
-        "reportFile"
-      );
+    const reportFile = formData.get("reportFile");
 
-    const reportData =
-      await uploadDocument(
-        reportFile
-      );
+    const reportData = await uploadDocument(reportFile);
 
     /* =====================================================
        CREATE PROJECT
     ===================================================== */
 
-    const project =
-      await Project.create({
-        title:
-          projectName,
+    const project = await Project.create({
+      title: projectName,
 
-        subtitle:
-          projectType === "team"
-            ? `Team Project • ${
-                teamMembers?.length || 0
-              } Members`
-            : "Individual Project",
+      subtitle:
+        projectType === "team"
+          ? `Team Project • ${teamMembers?.length || 0} Members`
+          : "Individual Project",
 
-        description,
+      description,
 
-        techStack:
-          techStack || [],
+      techStack: techStack || [],
 
-        githubLink,
+      githubLink,
 
-        liveLink:
-          liveDemoLink,
+      liveLink: liveDemoLink,
 
-        projectType,
+      projectType,
 
-        teamMembers:
-          projectType === "team"
-            ? teamMembers || []
-            : [],
+      teamMembers: projectType === "team" ? teamMembers || [] : [],
 
-        semester,
+      semester,
 
-        mentor,
+      mentor,
 
-        projectImages,
+      projectImages,
 
-        synopsisFile:
-          synopsisData,
+      synopsisFile: synopsisData,
 
-        reportFile:
-          reportData,
+      reportFile: reportData,
 
-        presentationFile:
-          presentationData,
+      presentationFile: presentationData,
 
-        status:
-          "Pending Approval",
+      status: "Pending Approval",
 
-        student:
-          studentId,
-      });
+      student: userId,
+    });
 
     /* =====================================================
        RESPONSE
@@ -430,28 +350,22 @@ export async function POST(request) {
       {
         success: true,
 
-        message:
-          "Project submitted for approval.",
+        message: "Project submitted for approval.",
 
         project,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
-    console.error(
-      "PROJECT_CREATE_ERROR:",
-      error
-    );
+    console.error("PROJECT_CREATE_ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
 
-        message:
-          error.message ||
-          "Failed to create project.",
+        message: error.message || "Failed to create project.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -464,50 +378,39 @@ export async function GET(request) {
   try {
     await connectDB();
 
-    const {
-      searchParams,
-    } = new URL(request.url);
+    const { searchParams } = new URL(request.url);
 
-    const studentId =
-      searchParams.get(
-        "studentId"
-      );
+    const studentId = searchParams.get("studentId");
 
     if (!studentId) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Student ID is required.",
+          message: "Student ID is required.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const projects =
-      await Project.find({
-        student: studentId,
-      }).sort({
-        createdAt: -1,
-      });
+    const projects = await Project.find({
+      student: studentId,
+    }).sort({
+      createdAt: -1,
+    });
 
     return NextResponse.json({
       success: true,
       projects,
     });
   } catch (error) {
-    console.error(
-      "PROJECT_GET_ERROR:",
-      error
-    );
+    console.error("PROJECT_GET_ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message:
-          "Failed to fetch projects.",
+        message: "Failed to fetch projects.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { useFormik } from "formik";
-import * as Yup from "yup";
+
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -57,7 +57,7 @@ const isEmptyFile = (file) => {
 export default function AddProjectForm({ mode = "create", project = null }) {
   const router = useRouter();
 
-  const auth = useSelector((state) => state.auth);
+
 
   const isEdit = mode === "edit";
 
@@ -139,13 +139,7 @@ export default function AddProjectForm({ mode = "create", project = null }) {
 
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        const studentId = auth?.user?._id || auth?.user?.id;
-
-        if (!studentId) {
-          toast.error("Student information not found.");
-          return;
-        }
-
+   
         /* ================================================
            CREATE FORMDATA
         ================================================ */
@@ -165,7 +159,6 @@ export default function AddProjectForm({ mode = "create", project = null }) {
               values.projectType === "team" ? values.teamMembers : [],
             semester: values.semester,
             mentor: values.mentor,
-            studentId,
             existingProjectImages: values.existingProjectImages || [],
             existingSynopsisFile: values.existingSynopsisFile || null,
             existingReportFile: values.existingReportFile || null,
