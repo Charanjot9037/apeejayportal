@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -23,6 +24,8 @@ const StudentFilters = ({
   skill,
   setSkill,
   onFilter,
+  departments = [],
+  skills = [],
 }) => {
   return (
     <div
@@ -172,17 +175,14 @@ const StudentFilters = ({
                 All Departments
               </SelectItem>
 
-              <SelectItem value="Computer Science">
-                Computer Science
-              </SelectItem>
-
-              <SelectItem value="Electronics">
-                Electronics
-              </SelectItem>
-
-              <SelectItem value="Management">
-                Management
-              </SelectItem>
+              {departments.map((item) => (
+                <SelectItem
+                  key={item}
+                  value={item}
+                >
+                  {item}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -245,33 +245,14 @@ const StudentFilters = ({
                 All Skills
               </SelectItem>
 
-              <SelectItem value="Machine Learning">
-                Machine Learning
-              </SelectItem>
-
-              <SelectItem value="IoT">
-                IoT
-              </SelectItem>
-
-              <SelectItem value="Python">
-                Python
-              </SelectItem>
-
-              <SelectItem value="Marketing">
-                Marketing
-              </SelectItem>
-
-              <SelectItem value="Finance">
-                Finance
-              </SelectItem>
-
-              <SelectItem value="Analytics">
-                Analytics
-              </SelectItem>
-
-              <SelectItem value="Next.js">
-                Next.js
-              </SelectItem>
+              {skills.map((item) => (
+                <SelectItem
+                  key={item}
+                  value={item}
+                >
+                  {item}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -316,6 +297,8 @@ const StudentFilters = ({
 
           Filter
         </Button>
+
+        
       </div>
     </div>
   );

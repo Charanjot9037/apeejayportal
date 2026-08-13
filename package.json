@@ -18,6 +18,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "embla-carousel-react": "^8.6.0",
+    "exceljs": "^4.4.0",
     "formik": "^2.4.9",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.29.0",
