@@ -7,7 +7,7 @@ export default function Footer() {
   const { brand, quickLinks, legalLinks } = footerContent;
 
   return (
-    <footer className="w-full bg-blue-900 text-lg  text-white">
+    <footer className="w-full bg-secondary text-lg  text-white">
       <div className="mx-auto w-full px-6 py-10 sm:px-8 lg:px-10">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[1.8fr_1fr_1fr] lg:gap-16">
           

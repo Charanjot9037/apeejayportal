@@ -46,7 +46,7 @@ export default function Navbar() {
         />
 
         <div>
-          <p className="text-primary font-bold text-md md:text-xl">
+          <p className="text-secondary font-bold text-md md:text-xl">
             Apeejay Institute of Management & Engineering
           </p>
 
@@ -63,7 +63,7 @@ export default function Navbar() {
           {!auth?.user?.name ? (
             <button
               onClick={() => router.push("/login")}
-              className="rounded-md hidden lg:flex bg-primary cursor-pointer px-4 py-2 text-white hover:bg-orange-600"
+              className="rounded-md hidden lg:flex bg-secondary cursor-pointer px-4 py-2 text-white hover:bg-orange-600"
             >
               Login
             </button>

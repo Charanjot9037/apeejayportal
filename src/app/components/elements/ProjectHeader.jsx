@@ -15,7 +15,7 @@ const ProjectHeader = ({
           text-md 
           md:text-4xl
           font-bold
-          text-primary
+          text-secondary
           transition-all
           duration-500
           ease-out

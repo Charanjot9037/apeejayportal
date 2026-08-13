@@ -90,7 +90,7 @@ const VerifiedProjects = () => {
             onClick={loadMore}
             className="
               h-8
-              bg-primary
+              bg-secondary
               px-6
               py-5
               cursor-pointer
@@ -101,7 +101,7 @@ const VerifiedProjects = () => {
               text-sm
               font-medium
               text-white
-              hover:bg-blue-600
+              hover:bg-secondary/90
             "
           >
             Load More 

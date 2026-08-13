@@ -162,7 +162,7 @@ const HeroSection = ({
     className="
       h-10
       rounded-none
-      bg-primary
+      bg-secondary
       px-7
       text-sm
       font-medium
@@ -176,7 +176,7 @@ const HeroSection = ({
       ease-out
 
       hover:scale-105
-      hover:bg-primary/90
+      hover:bg-secondary/90
       hover:shadow-lg
 
       animate-button-right
@@ -236,13 +236,13 @@ const HeroSection = ({
               className="
                 h-8
                 rounded-full
-                bg-primary
-                hover-cursor-pointer
+                bg-secondary
+                hover:cursor-pointer
                 px-5
                 text-xs
                 font-medium
                 text-white
-                hover:bg-primary/90
+                hover:bg-secondary/90
               "
             >
               Search

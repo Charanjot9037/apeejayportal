@@ -81,8 +81,8 @@ body {
   --primarybg:#f1f5f9;
   --light-primary: #003f7c;
   --main-blue: #1c398e;
+  --secondary: #064a82;
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);

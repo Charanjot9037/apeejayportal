@@ -764,7 +764,7 @@ const StudentSearch = () => {
       justify-center
       gap-2
       rounded-lg
-      bg-primary
+      bg-secondary
       px-4
       py-2.5
       text-sm
