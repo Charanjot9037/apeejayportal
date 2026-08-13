@@ -7,7 +7,7 @@ export default function MentorLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-full  bg-slate-100">
+    <div className="flex  h-screen overflow-hidden  bg-slate-100">
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}

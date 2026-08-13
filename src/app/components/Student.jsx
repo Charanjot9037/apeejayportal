@@ -72,21 +72,21 @@ export default function DashboardContent() {
   console.log('AUTH:', auth);
   console.log('USER:', auth?.user);
 
-  const handleAddProject = async (formData, values) => {
-    const newProject = {
-      title: values.title,
-      subtitle: values.subtitle,
-      description: values.description,
-      techStack: values.techStack,
-      status: values.status,
-      githubLink: values.githubLink,
-      liveLink: values.liveLink,
-      synopsisFile: values.synopsisFile,
-      reportFile: values.reportFile,
-    };
+  // const handleAddProject = async (formData, values) => {
+  //   const newProject = {
+  //     title: values.title,
+  //     subtitle: values.subtitle,
+  //     description: values.description,
+  //     techStack: values.techStack,
+  //     status: values.status,
+  //     githubLink: values.githubLink,
+  //     liveLink: values.liveLink,
+  //     synopsisFile: values.synopsisFile,
+  //     reportFile: values.reportFile,
+  //   };
 
-    setProjects((prev) => [newProject, ...prev]);
-  };
+  //   setProjects((prev) => [newProject, ...prev]);
+  // };
 
   return (
     <div className="min-h-screen w-full  ">
