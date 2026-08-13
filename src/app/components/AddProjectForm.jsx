@@ -1,6 +1,4 @@
 "use client";
-
-import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
@@ -17,7 +15,7 @@ import {
   Eye,
   FileText,
 } from "lucide-react";
-
+import { projectValidationSchema } from "@/validations/projectSchems";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,291 +46,18 @@ const emptyTeamMember = {
   role: "",
 };
 
-/* =========================================================
-   HELPERS
-========================================================= */
-
 const isEmptyFile = (file) => {
   return !file || typeof file !== "object";
 };
 
 /* =========================================================
-   YUP SCHEMA
-========================================================= */
-
-const validationSchema = Yup.object({
-  projectName: Yup.string()
-    .trim()
-    .min(
-      3,
-      "Project name must be at least 3 characters"
-    )
-    .max(
-      100,
-      "Project name must not exceed 100 characters"
-    )
-    .required("Project name is required"),
-
-  description: Yup.string()
-    .trim()
-    .min(
-      20,
-      "Description must be at least 20 characters"
-    )
-    .max(
-      2000,
-      "Description must not exceed 2000 characters"
-    )
-    .required("Description is required"),
-
-  githubLink: Yup.string()
-    .transform((value) =>
-      value === "" ? null : value
-    )
-    .nullable()
-    .url("Enter a valid GitHub URL"),
-
-  liveDemoLink: Yup.string()
-    .transform((value) =>
-      value === "" ? null : value
-    )
-    .nullable()
-    .url("Enter a valid URL"),
-
-  semester: Yup.string()
-    .required("Please select a semester"),
-
-  mentor: Yup.string()
-    .nullable(),
-
-  projectType: Yup.string()
-    .oneOf(
-      ["individual", "team"],
-      "Invalid project type"
-    )
-    .required("Project type is required"),
-
-  techStack: Yup.array()
-    .of(Yup.string().trim())
-    .min(
-      1,
-      "Add at least one technology"
-    )
-    .required("Tech stack is required"),
-
-  teamMembers: Yup.array().when(
-    "projectType",
-    {
-      is: "team",
-
-      then: (schema) =>
-        schema
-          .min(
-            1,
-            "Add at least one team member"
-          )
-          .of(
-            Yup.object({
-              name: Yup.string()
-                .trim()
-                .required(
-                  "Member name is required"
-                ),
-
-              enrollment: Yup.string()
-                .trim()
-                .required(
-                  "Enrollment / Student ID is required"
-                ),
-
-              email: Yup.string()
-                .transform((value) =>
-                  value === "" ? null : value
-                )
-                .nullable()
-                .email(
-                  "Enter a valid email"
-                ),
-
-              role: Yup.string()
-                .trim()
-                .nullable(),
-            })
-          ),
-
-      otherwise: (schema) =>
-        schema,
-    }
-  ),
-
-  projectImages: Yup.array()
-    .test(
-      "max-images",
-      `Maximum ${MAX_PROJECT_IMAGES} images are allowed`,
-      (files) => {
-        if (!files) return true;
-
-        return files.length <= MAX_PROJECT_IMAGES;
-      }
-    )
-    .test(
-      "image-types",
-      "Only JPG, JPEG, PNG and WEBP images are allowed",
-      (files) => {
-        if (!files || files.length === 0) {
-          return true;
-        }
-
-        const allowedTypes = [
-          "image/jpeg",
-          "image/png",
-          "image/webp",
-        ];
-
-        return files.every((file) => {
-          if (!file?.type) return false;
-
-          return allowedTypes.includes(
-            file.type
-          );
-        });
-      }
-    )
-    .test(
-      "image-size",
-      "Each project image must be smaller than 5MB",
-      (files) => {
-        if (!files || files.length === 0) {
-          return true;
-        }
-
-        return files.every(
-          (file) =>
-            file.size <= MAX_IMAGE_SIZE
-        );
-      }
-    ),
-
-  presentationFile: Yup.mixed()
-    .nullable()
-    .test(
-      "presentation-type",
-      "Only PPT and PPTX files are allowed",
-      (file) => {
-        if (isEmptyFile(file)) {
-          return true;
-        }
-
-        const fileName =
-          file.name?.toLowerCase() || "";
-
-        return (
-          file.type ===
-            "application/vnd.ms-powerpoint" ||
-          file.type ===
-            "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
-          fileName.endsWith(".ppt") ||
-          fileName.endsWith(".pptx")
-        );
-      }
-    )
-    .test(
-      "presentation-size",
-      "Presentation must be smaller than 10MB",
-      (file) => {
-        if (isEmptyFile(file)) {
-          return true;
-        }
-
-        return (
-          file.size <=
-          MAX_PRESENTATION_SIZE
-        );
-      }
-    ),
-
-  synopsisFile: Yup.mixed()
-    .nullable()
-    .test(
-      "synopsis-type",
-      "Only PDF files are allowed",
-      (file) => {
-        if (isEmptyFile(file)) {
-          return true;
-        }
-
-        return (
-          file.type ===
-            "application/pdf" ||
-          file.name
-            ?.toLowerCase()
-            .endsWith(".pdf")
-        );
-      }
-    )
-    .test(
-      "synopsis-size",
-      "Synopsis must be smaller than 5MB",
-      (file) => {
-        if (isEmptyFile(file)) {
-          return true;
-        }
-
-        return (
-          file.size <=
-          MAX_SYNOPSIS_SIZE
-        );
-      }
-    ),
-
-  reportFile: Yup.mixed()
-    .nullable()
-    .test(
-      "report-type",
-      "Only PDF files are allowed",
-      (file) => {
-        if (isEmptyFile(file)) {
-          return true;
-        }
-
-        return (
-          file.type ===
-            "application/pdf" ||
-          file.name
-            ?.toLowerCase()
-            .endsWith(".pdf")
-        );
-      }
-    )
-    .test(
-      "report-size",
-      "Final report must be smaller than 20MB",
-      (file) => {
-        if (isEmptyFile(file)) {
-          return true;
-        }
-
-        return (
-          file.size <=
-          MAX_REPORT_SIZE
-        );
-      }
-    ),
-});
-
-/* =========================================================
    MAIN COMPONENT
 ========================================================= */
 
-export default function AddProjectForm({
-  mode = "create",
-  project = null,
-}) {
+export default function AddProjectForm({ mode = "create", project = null }) {
   const router = useRouter();
 
-  const auth = useSelector(
-    (state) => state.auth
-  );
+  const auth = useSelector((state) => state.auth);
 
   const isEdit = mode === "edit";
 
@@ -344,59 +69,28 @@ export default function AddProjectForm({
     enableReinitialize: true,
 
     initialValues: {
-      projectName:
-        isEdit
-          ? project?.title || ""
-          : "",
+      projectName: isEdit ? project?.title || "" : "",
 
-      description:
-        isEdit
-          ? project?.description || ""
-          : "",
+      description: isEdit ? project?.description || "" : "",
 
-      githubLink:
-        isEdit
-          ? project?.githubLink || ""
-          : "",
+      githubLink: isEdit ? project?.githubLink || "" : "",
 
-      liveDemoLink:
-        isEdit
-          ? project?.liveLink || ""
-          : "",
+      liveDemoLink: isEdit ? project?.liveLink || "" : "",
 
-      semester:
-        isEdit
-          ? project?.semester || ""
-          : "",
+      semester: isEdit ? project?.semester || "" : "",
 
-      mentor:
-        isEdit
-          ? project?.mentor || ""
-          : "",
+      mentor: isEdit ? project?.mentor || "" : "",
 
-      projectType:
-        isEdit
-          ? project?.projectType ||
-            "individual"
-          : "individual",
+      projectType: isEdit ? project?.projectType || "individual" : "individual",
 
       techStack:
-        isEdit &&
-        Array.isArray(
-          project?.techStack
-        )
+        isEdit && Array.isArray(project?.techStack)
           ? project.techStack
-          : [
-              "React",
-              "Node.js",
-              "MongoDB",
-            ],
+          : ["React", "Node.js", "MongoDB"],
 
       teamMembers:
         isEdit &&
-        Array.isArray(
-          project?.teamMembers
-        ) &&
+        Array.isArray(project?.teamMembers) &&
         project.teamMembers.length > 0
           ? project.teamMembers
           : [
@@ -423,186 +117,128 @@ export default function AddProjectForm({
 
       reportFile: null,
 
-     existingProjectImages:
-  isEdit &&
-  Array.isArray(project?.projectImages)
-    ? project.projectImages
-    : [],
+      existingProjectImages:
+        isEdit && Array.isArray(project?.projectImages)
+          ? project.projectImages
+          : [],
 
-existingSynopsisFile:
-  isEdit
-    ? project?.synopsisFile || null
-    : null,
+      existingSynopsisFile: isEdit ? project?.synopsisFile || null : null,
 
-existingReportFile:
-  isEdit
-    ? project?.reportFile || null
-    : null,
+      existingReportFile: isEdit ? project?.reportFile || null : null,
 
-existingPresentationFile:
-  isEdit
-    ? project?.presentationFile || null
-    : null,
+      existingPresentationFile: isEdit
+        ? project?.presentationFile || null
+        : null,
     },
 
-    validationSchema,
+    projectValidationSchema,
 
     /* =====================================================
        SUBMIT
     ===================================================== */
 
-    onSubmit: async (
-      values,
-      { setSubmitting }
-    ) => {
+    onSubmit: async (values, { setSubmitting }) => {
       try {
-        const studentId =
-          auth?.user?._id ||
-          auth?.user?.id;
+        const studentId = auth?.user?._id || auth?.user?.id;
 
-     if (!studentId) {
-  toast.error("Student information not found.");
-  return;
-}
+        if (!studentId) {
+          toast.error("Student information not found.");
+          return;
+        }
 
         /* ================================================
            CREATE FORMDATA
         ================================================ */
 
-const formData = new FormData();
+        const formData = new FormData();
 
-formData.append(
-  "projectData",
-  JSON.stringify({
-    projectName: values.projectName,
-    description: values.description,
-    techStack: values.techStack,
-    githubLink: values.githubLink,
-    liveDemoLink: values.liveDemoLink,
-    projectType: values.projectType,
-    teamMembers:
-      values.projectType === "team"
-        ? values.teamMembers
-        : [],
-    semester: values.semester,
-    mentor: values.mentor,
-    studentId,
-    existingProjectImages:
-        values.existingProjectImages || [],
-    existingSynopsisFile:
-        values.existingSynopsisFile || null,
-    existingReportFile:
-        values.existingReportFile || null,
-    existingPresentationFile:
-        values.existingPresentationFile || null,
-  })
-);
+        formData.append(
+          "projectData",
+          JSON.stringify({
+            projectName: values.projectName,
+            description: values.description,
+            techStack: values.techStack,
+            githubLink: values.githubLink,
+            liveDemoLink: values.liveDemoLink,
+            projectType: values.projectType,
+            teamMembers:
+              values.projectType === "team" ? values.teamMembers : [],
+            semester: values.semester,
+            mentor: values.mentor,
+            studentId,
+            existingProjectImages: values.existingProjectImages || [],
+            existingSynopsisFile: values.existingSynopsisFile || null,
+            existingReportFile: values.existingReportFile || null,
+            existingPresentationFile: values.existingPresentationFile || null,
+          }),
+        );
 
-    if (
-      values.projectImages &&
-      values.projectImages.length > 0
-    ) {
-      values.projectImages.forEach(
-        (file) => {
-          formData.append(
-            "projectImages",
-            file
-          );
+        if (values.projectImages && values.projectImages.length > 0) {
+          values.projectImages.forEach((file) => {
+            formData.append("projectImages", file);
+          });
         }
-      );
-    }
- if (values.presentationFile) {
-      formData.append(
-        "presentationFile",
-        values.presentationFile
-      );
-    }
+        if (values.presentationFile) {
+          formData.append("presentationFile", values.presentationFile);
+        }
 
-if (values.synopsisFile) {
-  formData.append(
-    "synopsisFile",
-    values.synopsisFile
-  );
-}
+        if (values.synopsisFile) {
+          formData.append("synopsisFile", values.synopsisFile);
+        }
 
-   if (values.reportFile) {
-      formData.append(
-        "reportFile",
-        values.reportFile
-      );
-    }
-     /* ================================================
+        if (values.reportFile) {
+          formData.append("reportFile", values.reportFile);
+        }
+        /* ================================================
        CREATE OR UPDATE
     ================================================ */
 
-        const url = isEdit
-      ? `/api/projects/${project._id}`
-      : "/api/projects";
+        const url = isEdit ? `/api/projects/${project._id}` : "/api/projects";
 
-    const method = isEdit
-      ? "PUT"
-      : "POST";
+        const method = isEdit ? "PUT" : "POST";
 
-    console.log(
-      "PROJECT SAVE:",
-      {
-        mode: isEdit
-          ? "UPDATE"
-          : "CREATE",
-        method,
-        url,
-      }
-    );
+        console.log("PROJECT SAVE:", {
+          mode: isEdit ? "UPDATE" : "CREATE",
+          method,
+          url,
+        });
 
+        const response = await fetch(url, {
+          method,
+          body: formData,
+        });
 
-    const response = await fetch(
-      url,
-      {
-        method,
-        body: formData,
-      }
-    );
+        const result = await response.json();
 
-        const result =
-          await response.json();
-
-    if (response.status === 401) {
-  toast.error("You are not authenticated. Please log in again.");
-  router.push("/login");
-  return;
-}
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to save project");
-      }
-
+        if (response.status === 401) {
+          toast.error("You are not authenticated. Please log in again.");
+          router.push("/login");
+          return;
+        }
+        if (!response.ok) {
+          throw new Error(result.message || "Failed to save project");
+        }
 
         /* ================================================
            SUCCESS
         ================================================ */
 
-       // 3. Success
-toast.success(
-  isEdit
-    ? "Project updated successfully."
-    : "Project submitted for approval successfully."
-);
-
-        if (isEdit) {
-          router.push(
-            `/student/projects/${project._id}`
-          );
-        } else {
-          router.push(
-            "/student"
-          );
-        }
-      } catch (error) {
-        console.error(
-          "PROJECT_SAVE_ERROR:",
-          error
+        // 3. Success
+        toast.success(
+          isEdit
+            ? "Project updated successfully."
+            : "Project submitted for approval successfully.",
         );
 
-      toast.error(error.message || "Something went wrong.");
+        if (isEdit) {
+          router.push(`/student/projects/${project._id}`);
+        } else {
+          router.push("/student");
+        }
+      } catch (error) {
+        console.error("PROJECT_SAVE_ERROR:", error);
+
+        toast.error(error.message || "Something went wrong.");
       } finally {
         setSubmitting(false);
       }
@@ -613,68 +249,42 @@ toast.success(
      PROJECT IMAGES
   ======================================================= */
 
-  const handleProjectImages = (
-    event
-  ) => {
-    const files = Array.from(
-      event.target.files || []
-    );
+  const handleProjectImages = (event) => {
+    const files = Array.from(event.target.files || []);
 
     if (files.length === 0) {
       return;
     }
 
-    const currentImages =
-      formik.values.projectImages ||
-      [];
+    const currentImages = formik.values.projectImages || [];
 
-    const combinedImages = [
-      ...currentImages,
-      ...files,
-    ];
+    const combinedImages = [...currentImages, ...files];
 
     /*
      * Remove duplicate files.
      */
 
-    const uniqueImages =
-      combinedImages.filter(
-        (file, index, array) => {
-          return (
-            index ===
-            array.findIndex(
-              (item) =>
-                item.name ===
-                  file.name &&
-                item.size ===
-                  file.size &&
-                item.lastModified ===
-                  file.lastModified
-            )
-          );
-        }
+    const uniqueImages = combinedImages.filter((file, index, array) => {
+      return (
+        index ===
+        array.findIndex(
+          (item) =>
+            item.name === file.name &&
+            item.size === file.size &&
+            item.lastModified === file.lastModified,
+        )
       );
+    });
 
     /*
      * Limit images.
      */
 
-    const limitedImages =
-      uniqueImages.slice(
-        0,
-        MAX_PROJECT_IMAGES
-      );
+    const limitedImages = uniqueImages.slice(0, MAX_PROJECT_IMAGES);
 
-    formik.setFieldValue(
-      "projectImages",
-      limitedImages
-    );
+    formik.setFieldValue("projectImages", limitedImages);
 
-    formik.setFieldTouched(
-      "projectImages",
-      true,
-      false
-    );
+    formik.setFieldTouched("projectImages", true, false);
 
     /*
      * Clear input so same image can
@@ -688,19 +298,12 @@ toast.success(
      REMOVE PROJECT IMAGE
   ======================================================= */
 
-  const removeProjectImage = (
-    index
-  ) => {
-    const updatedImages =
-      formik.values.projectImages.filter(
-        (_, imageIndex) =>
-          imageIndex !== index
-      );
-
-    formik.setFieldValue(
-      "projectImages",
-      updatedImages
+  const removeProjectImage = (index) => {
+    const updatedImages = formik.values.projectImages.filter(
+      (_, imageIndex) => imageIndex !== index,
     );
+
+    formik.setFieldValue("projectImages", updatedImages);
   };
 
   /* =======================================================
@@ -708,31 +311,16 @@ toast.success(
   ======================================================= */
 
   const addTechnology = () => {
-    const technology =
-      window.prompt(
-        "Enter technology"
-      );
+    const technology = window.prompt("Enter technology");
 
-    if (
-      technology &&
-      technology.trim()
-    ) {
-      const cleanTechnology =
-        technology.trim();
+    if (technology && technology.trim()) {
+      const cleanTechnology = technology.trim();
 
-      if (
-        !formik.values.techStack.includes(
-          cleanTechnology
-        )
-      ) {
-        formik.setFieldValue(
-          "techStack",
-          [
-            ...formik.values
-              .techStack,
-            cleanTechnology,
-          ]
-        );
+      if (!formik.values.techStack.includes(cleanTechnology)) {
+        formik.setFieldValue("techStack", [
+          ...formik.values.techStack,
+          cleanTechnology,
+        ]);
       }
     }
   };
@@ -741,15 +329,10 @@ toast.success(
      REMOVE TECHNOLOGY
   ======================================================= */
 
-  const removeTechnology = (
-    technology
-  ) => {
+  const removeTechnology = (technology) => {
     formik.setFieldValue(
       "techStack",
-      formik.values.techStack.filter(
-        (item) =>
-          item !== technology
-      )
+      formik.values.techStack.filter((item) => item !== technology),
     );
   };
 
@@ -758,51 +341,31 @@ toast.success(
   ======================================================= */
 
   const addTeamMember = () => {
-    formik.setFieldValue(
-      "teamMembers",
-      [
-        ...formik.values
-          .teamMembers,
+    formik.setFieldValue("teamMembers", [
+      ...formik.values.teamMembers,
 
-        {
-          ...emptyTeamMember,
-        },
-      ]
-    );
+      {
+        ...emptyTeamMember,
+      },
+    ]);
   };
 
-  const removeTeamMember = (
-    index
-  ) => {
-    const updatedMembers =
-      formik.values.teamMembers.filter(
-        (_, memberIndex) =>
-          memberIndex !== index
-      );
-
-    formik.setFieldValue(
-      "teamMembers",
-      updatedMembers
+  const removeTeamMember = (index) => {
+    const updatedMembers = formik.values.teamMembers.filter(
+      (_, memberIndex) => memberIndex !== index,
     );
+
+    formik.setFieldValue("teamMembers", updatedMembers);
   };
 
   /* =======================================================
      TEAM MEMBER ERROR
   ======================================================= */
 
-  const getTeamError = (
-    index,
-    field
-  ) => {
-    const touched =
-      formik.touched.teamMembers?.[
-        index
-      ]?.[field];
+  const getTeamError = (index, field) => {
+    const touched = formik.touched.teamMembers?.[index]?.[field];
 
-    const error =
-      formik.errors.teamMembers?.[
-        index
-      ]?.[field];
+    const error = formik.errors.teamMembers?.[index]?.[field];
 
     if (touched && error) {
       return error;
@@ -815,12 +378,8 @@ toast.success(
      FILE ERROR
   ======================================================= */
 
-  const getFileError = (
-    field
-  ) => {
-    return formik.touched[field]
-      ? formik.errors[field]
-      : null;
+  const getFileError = (field) => {
+    return formik.touched[field] ? formik.errors[field] : null;
   };
 
   /* =======================================================
@@ -828,9 +387,8 @@ toast.success(
   ======================================================= */
 
   return (
-    <div className="min-h-screen bg-[#faf9f8] px-4 py-8">
-      <div className="mx-auto max-w-5xl">
-
+    <div className="min-h-screen p-5">
+      <div className="mx-auto">
         {/* =================================================
             BACK
         ================================================= */}
@@ -840,7 +398,6 @@ toast.success(
           className="mb-5 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-blue-900"
         >
           <ArrowLeft className="h-4 w-4" />
-
           Back to Dashboard
         </Link>
 
@@ -850,9 +407,7 @@ toast.success(
 
         <div className="mb-5">
           <h1 className="text-2xl font-semibold text-blue-900">
-            {isEdit
-              ? "Update Project"
-              : "Add Project"}
+            {isEdit ? "Update Project" : "Add Project"}
           </h1>
 
           <p className="mt-1 text-sm text-slate-500">
@@ -867,13 +422,10 @@ toast.success(
         ================================================= */}
 
         <form
-          onSubmit={
-            formik.handleSubmit
-          }
+          onSubmit={formik.handleSubmit}
           noValidate
           className="rounded-md border border-slate-300 bg-white p-5 shadow-sm"
         >
-
           {/* =================================================
               BASIC INFORMATION
           ================================================= */}
@@ -886,97 +438,58 @@ toast.success(
             </h2>
 
             <div className="mt-4 space-y-4">
-
               {/* PROJECT NAME */}
 
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-700">
-                  Project Name{" "}
-                  <span className="text-orange-500">
-                    *
-                  </span>
+                  Project Name <span className="text-orange-500">*</span>
                 </label>
 
                 <Input
                   name="projectName"
-                  value={
-                    formik.values
-                      .projectName
-                  }
-                  onChange={
-                    formik.handleChange
-                  }
-                  onBlur={
-                    formik.handleBlur
-                  }
+                  value={formik.values.projectName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   placeholder="Enter project title"
                   className={`h-10 bg-slate-50 text-sm ${
-                    formik.touched
-                      .projectName &&
-                    formik.errors
-                      .projectName
+                    formik.touched.projectName && formik.errors.projectName
                       ? "border-red-500"
                       : ""
                   }`}
                 />
 
-                {formik.touched
-                  .projectName &&
-                  formik.errors
-                    .projectName && (
-                    <p className="mt-1 text-xs text-red-500">
-                      {
-                        formik.errors
-                          .projectName
-                      }
-                    </p>
-                  )}
+                {formik.touched.projectName && formik.errors.projectName && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {formik.errors.projectName}
+                  </p>
+                )}
               </div>
 
               {/* DESCRIPTION */}
 
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-700">
-                  Description{" "}
-                  <span className="text-orange-500">
-                    *
-                  </span>
+                  Description <span className="text-orange-500">*</span>
                 </label>
 
                 <Textarea
                   name="description"
-                  value={
-                    formik.values
-                      .description
-                  }
-                  onChange={
-                    formik.handleChange
-                  }
-                  onBlur={
-                    formik.handleBlur
-                  }
+                  value={formik.values.description}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   placeholder="Provide a detailed overview of your project, its objectives, and outcomes."
                   className={`min-h-[100px] resize-none bg-slate-50 text-sm ${
-                    formik.touched
-                      .description &&
-                    formik.errors
-                      .description
+                    formik.touched.description && formik.errors.description
                       ? "border-red-500"
                       : ""
                   }`}
                 />
 
-                {formik.touched
-                  .description &&
-                  formik.errors
-                    .description && (
-                    <p className="mt-1 text-xs text-red-500">
-                      {
-                        formik.errors
-                          .description
-                      }
-                    </p>
-                  )}
+                {formik.touched.description && formik.errors.description && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {formik.errors.description}
+                  </p>
+                )}
               </div>
             </div>
           </section>
@@ -996,65 +509,46 @@ toast.success(
 
             <div className="mt-4">
               <label className="mb-2 block text-xs font-medium text-slate-700">
-                Tech Stack{" "}
-                <span className="text-orange-500">
-                  *
-                </span>
+                Tech Stack <span className="text-orange-500">*</span>
               </label>
 
               <div className="flex flex-wrap items-center gap-2">
+                {formik.values.techStack.map((tech) => (
+                  <span
+                    key={tech}
+                    className="rounded-full bg-orange-50 px-3 py-1 text-xs text-slate-600"
+                  >
+                    {tech}
 
-                {formik.values.techStack.map(
-                  (tech) => (
-                    <span
-                      key={tech}
-                      className="rounded-full bg-orange-50 px-3 py-1 text-xs text-slate-600"
+                    <button
+                      type="button"
+                      onClick={() => removeTechnology(tech)}
+                      className="ml-1 text-slate-400 hover:text-red-500"
                     >
-                      {tech}
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          removeTechnology(
-                            tech
-                          )
-                        }
-                        className="ml-1 text-slate-400 hover:text-red-500"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  )
-                )}
+                      ×
+                    </button>
+                  </span>
+                ))}
 
                 <button
                   type="button"
-                  onClick={
-                    addTechnology
-                  }
+                  onClick={addTechnology}
                   className="text-xs text-slate-400 hover:text-orange-500"
                 >
                   + Add tech...
                 </button>
               </div>
 
-              {formik.touched
-                .techStack &&
-                formik.errors
-                  .techStack && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {
-                      formik.errors
-                        .techStack
-                    }
-                  </p>
-                )}
+              {formik.touched.techStack && formik.errors.techStack && (
+                <p className="mt-1 text-xs text-red-500">
+                  {formik.errors.techStack}
+                </p>
+              )}
             </div>
 
             {/* LINKS */}
 
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-
               {/* GITHUB */}
 
               <div>
@@ -1067,32 +561,19 @@ toast.success(
 
                   <Input
                     name="githubLink"
-                    value={
-                      formik.values
-                        .githubLink
-                    }
-                    onChange={
-                      formik.handleChange
-                    }
-                    onBlur={
-                      formik.handleBlur
-                    }
+                    value={formik.values.githubLink}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     placeholder="https://github.com/..."
                     className="h-10 bg-slate-50 pl-9 text-sm"
                   />
                 </div>
 
-                {formik.touched
-                  .githubLink &&
-                  formik.errors
-                    .githubLink && (
-                    <p className="mt-1 text-xs text-red-500">
-                      {
-                        formik.errors
-                          .githubLink
-                      }
-                    </p>
-                  )}
+                {formik.touched.githubLink && formik.errors.githubLink && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {formik.errors.githubLink}
+                  </p>
+                )}
               </div>
 
               {/* LIVE DEMO */}
@@ -1107,32 +588,19 @@ toast.success(
 
                   <Input
                     name="liveDemoLink"
-                    value={
-                      formik.values
-                        .liveDemoLink
-                    }
-                    onChange={
-                      formik.handleChange
-                    }
-                    onBlur={
-                      formik.handleBlur
-                    }
+                    value={formik.values.liveDemoLink}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     placeholder="https://..."
                     className="h-10 bg-slate-50 pl-9 text-sm"
                   />
                 </div>
 
-                {formik.touched
-                  .liveDemoLink &&
-                  formik.errors
-                    .liveDemoLink && (
-                    <p className="mt-1 text-xs text-red-500">
-                      {
-                        formik.errors
-                          .liveDemoLink
-                      }
-                    </p>
-                  )}
+                {formik.touched.liveDemoLink && formik.errors.liveDemoLink && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {formik.errors.liveDemoLink}
+                  </p>
+                )}
               </div>
             </div>
           </section>
@@ -1156,23 +624,15 @@ toast.success(
               </label>
 
               <div className="flex gap-5">
-
                 <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
                   <input
                     type="radio"
                     name="projectType"
                     value="individual"
-                    checked={
-                      formik.values
-                        .projectType ===
-                      "individual"
-                    }
-                    onChange={
-                      formik.handleChange
-                    }
+                    checked={formik.values.projectType === "individual"}
+                    onChange={formik.handleChange}
                     className="accent-orange-500"
                   />
-
                   Individual
                 </label>
 
@@ -1181,17 +641,10 @@ toast.success(
                     type="radio"
                     name="projectType"
                     value="team"
-                    checked={
-                      formik.values
-                        .projectType ===
-                      "team"
-                    }
-                    onChange={
-                      formik.handleChange
-                    }
+                    checked={formik.values.projectType === "team"}
+                    onChange={formik.handleChange}
                     className="accent-orange-500"
                   />
-
                   Team
                 </label>
               </div>
@@ -1201,11 +654,8 @@ toast.success(
                 TEAM MEMBERS
             ================================================= */}
 
-            {formik.values
-              .projectType ===
-              "team" && (
+            {formik.values.projectType === "team" && (
               <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4">
-
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-semibold text-blue-900">
@@ -1218,185 +668,132 @@ toast.success(
                   </div>
 
                   <span className="text-xs text-slate-400">
-                    {
-                      formik.values
-                        .teamMembers
-                        .length
-                    }{" "}
-                    {formik.values
-                      .teamMembers
-                      .length === 1
+                    {formik.values.teamMembers.length}{" "}
+                    {formik.values.teamMembers.length === 1
                       ? "Member"
                       : "Members"}
                   </span>
                 </div>
 
                 <div className="space-y-4">
+                  {formik.values.teamMembers.map((member, index) => (
+                    <div
+                      key={index}
+                      className="rounded-md border border-slate-200 bg-white p-4"
+                    >
+                      <div className="mb-4 flex items-center justify-between">
+                        <h4 className="text-xs font-semibold text-slate-700">
+                          Team Member {index + 1}
+                        </h4>
 
-                  {formik.values.teamMembers.map(
-                    (
-                      member,
-                      index
-                    ) => (
-                      <div
-                        key={index}
-                        className="rounded-md border border-slate-200 bg-white p-4"
-                      >
-
-                        <div className="mb-4 flex items-center justify-between">
-                          <h4 className="text-xs font-semibold text-slate-700">
-                            Team Member{" "}
-                            {index + 1}
-                          </h4>
-
-                          {formik
-                            .values
-                            .teamMembers
-                            .length >
-                            1 && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeTeamMember(
-                                  index
-                                )
-                              }
-                              className="text-xs text-red-500 hover:text-red-600"
-                            >
-                              Remove
-                            </button>
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-                          {/* NAME */}
-
-                          <TeamInput
-                            label="Member Name"
-                            required
-                            value={
-                              member.name
-                            }
-                            placeholder="Enter member name"
-                            error={getTeamError(
-                              index,
-                              "name"
-                            )}
-                            onChange={(
-                              value
-                            ) =>
-                              formik.setFieldValue(
-                                `teamMembers[${index}].name`,
-                                value
-                              )
-                            }
-                            onBlur={() =>
-                              formik.setFieldTouched(
-                                `teamMembers[${index}].name`,
-                                true
-                              )
-                            }
-                          />
-
-                          {/* ENROLLMENT */}
-
-                          <TeamInput
-                            label="Enrollment / Student ID"
-                            required
-                            value={
-                              member.enrollment
-                            }
-                            placeholder="Enter enrollment number"
-                            error={getTeamError(
-                              index,
-                              "enrollment"
-                            )}
-                            onChange={(
-                              value
-                            ) =>
-                              formik.setFieldValue(
-                                `teamMembers[${index}].enrollment`,
-                                value
-                              )
-                            }
-                            onBlur={() =>
-                              formik.setFieldTouched(
-                                `teamMembers[${index}].enrollment`,
-                                true
-                              )
-                            }
-                          />
-
-                          {/* EMAIL */}
-
-                          <TeamInput
-                            label="Email"
-                            type="email"
-                            value={
-                              member.email
-                            }
-                            placeholder="member@example.com"
-                            error={getTeamError(
-                              index,
-                              "email"
-                            )}
-                            onChange={(
-                              value
-                            ) =>
-                              formik.setFieldValue(
-                                `teamMembers[${index}].email`,
-                                value
-                              )
-                            }
-                            onBlur={() =>
-                              formik.setFieldTouched(
-                                `teamMembers[${index}].email`,
-                                true
-                              )
-                            }
-                          />
-
-                          {/* ROLE */}
-
-                          <TeamInput
-                            label="Role / Contribution"
-                            value={
-                              member.role
-                            }
-                            placeholder="e.g. Frontend Developer"
-                            onChange={(
-                              value
-                            ) =>
-                              formik.setFieldValue(
-                                `teamMembers[${index}].role`,
-                                value
-                              )
-                            }
-                            onBlur={() =>
-                              formik.setFieldTouched(
-                                `teamMembers[${index}].role`,
-                                true
-                              )
-                            }
-                          />
-                        </div>
+                        {formik.values.teamMembers.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeTeamMember(index)}
+                            className="text-xs text-red-500 hover:text-red-600"
+                          >
+                            Remove
+                          </button>
+                        )}
                       </div>
-                    )
-                  )}
+
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        {/* NAME */}
+
+                        <TeamInput
+                          label="Member Name"
+                          required
+                          value={member.name}
+                          placeholder="Enter member name"
+                          error={getTeamError(index, "name")}
+                          onChange={(value) =>
+                            formik.setFieldValue(
+                              `teamMembers[${index}].name`,
+                              value,
+                            )
+                          }
+                          onBlur={() =>
+                            formik.setFieldTouched(
+                              `teamMembers[${index}].name`,
+                              true,
+                            )
+                          }
+                        />
+
+                        {/* ENROLLMENT */}
+
+                        <TeamInput
+                          label="Enrollment / Student ID"
+                          required
+                          value={member.enrollment}
+                          placeholder="Enter enrollment number"
+                          error={getTeamError(index, "enrollment")}
+                          onChange={(value) =>
+                            formik.setFieldValue(
+                              `teamMembers[${index}].enrollment`,
+                              value,
+                            )
+                          }
+                          onBlur={() =>
+                            formik.setFieldTouched(
+                              `teamMembers[${index}].enrollment`,
+                              true,
+                            )
+                          }
+                        />
+
+                        {/* EMAIL */}
+
+                        <TeamInput
+                          label="Email"
+                          type="email"
+                          value={member.email}
+                          placeholder="member@example.com"
+                          error={getTeamError(index, "email")}
+                          onChange={(value) =>
+                            formik.setFieldValue(
+                              `teamMembers[${index}].email`,
+                              value,
+                            )
+                          }
+                          onBlur={() =>
+                            formik.setFieldTouched(
+                              `teamMembers[${index}].email`,
+                              true,
+                            )
+                          }
+                        />
+
+                        {/* ROLE */}
+
+                        <TeamInput
+                          label="Role / Contribution"
+                          value={member.role}
+                          placeholder="e.g. Frontend Developer"
+                          onChange={(value) =>
+                            formik.setFieldValue(
+                              `teamMembers[${index}].role`,
+                              value,
+                            )
+                          }
+                          onBlur={() =>
+                            formik.setFieldTouched(
+                              `teamMembers[${index}].role`,
+                              true,
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 <button
                   type="button"
-                  onClick={
-                    addTeamMember
-                  }
+                  onClick={addTeamMember}
                   className="mt-4 flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600"
                 >
-                  <span className="text-lg leading-none">
-                    +
-                  </span>
-
+                  <span className="text-lg leading-none">+</span>
                   Add Team Member
                 </button>
               </div>
@@ -1405,35 +802,19 @@ toast.success(
             {/* SEMESTER / MENTOR */}
 
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-
               {/* SEMESTER */}
 
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-700">
-                  Semester{" "}
-                  <span className="text-orange-500">
-                    *
-                  </span>
+                  Semester <span className="text-orange-500">*</span>
                 </label>
 
                 <Select
-                  value={
-                    formik.values
-                      .semester
-                  }
-                  onValueChange={(
-                    value
-                  ) => {
-                    formik.setFieldValue(
-                      "semester",
-                      value
-                    );
+                  value={formik.values.semester}
+                  onValueChange={(value) => {
+                    formik.setFieldValue("semester", value);
 
-                    formik.setFieldTouched(
-                      "semester",
-                      true,
-                      false
-                    );
+                    formik.setFieldTouched("semester", true, false);
                   }}
                 >
                   <SelectTrigger className="h-10 bg-slate-50 text-sm">
@@ -1441,51 +822,29 @@ toast.success(
                   </SelectTrigger>
 
                   <SelectContent>
-                    <SelectItem value="1">
-                      Semester 1
-                    </SelectItem>
+                    <SelectItem value="1">Semester 1</SelectItem>
 
-                    <SelectItem value="2">
-                      Semester 2
-                    </SelectItem>
+                    <SelectItem value="2">Semester 2</SelectItem>
 
-                    <SelectItem value="3">
-                      Semester 3
-                    </SelectItem>
+                    <SelectItem value="3">Semester 3</SelectItem>
 
-                    <SelectItem value="4">
-                      Semester 4
-                    </SelectItem>
+                    <SelectItem value="4">Semester 4</SelectItem>
 
-                    <SelectItem value="5">
-                      Semester 5
-                    </SelectItem>
+                    <SelectItem value="5">Semester 5</SelectItem>
 
-                    <SelectItem value="6">
-                      Semester 6
-                    </SelectItem>
+                    <SelectItem value="6">Semester 6</SelectItem>
 
-                    <SelectItem value="7">
-                      Semester 7
-                    </SelectItem>
+                    <SelectItem value="7">Semester 7</SelectItem>
 
-                    <SelectItem value="8">
-                      Semester 8
-                    </SelectItem>
+                    <SelectItem value="8">Semester 8</SelectItem>
                   </SelectContent>
                 </Select>
 
-                {formik.touched
-                  .semester &&
-                  formik.errors
-                    .semester && (
-                    <p className="mt-1 text-xs text-red-500">
-                      {
-                        formik.errors
-                          .semester
-                      }
-                    </p>
-                  )}
+                {formik.touched.semester && formik.errors.semester && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {formik.errors.semester}
+                  </p>
+                )}
               </div>
 
               {/* MENTOR */}
@@ -1493,23 +852,13 @@ toast.success(
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-700">
                   Assigned Mentor{" "}
-                  <span className="text-slate-400">
-                    (Optional)
-                  </span>
+                  <span className="text-slate-400">(Optional)</span>
                 </label>
 
                 <Select
-                  value={
-                    formik.values
-                      .mentor
-                  }
-                  onValueChange={(
-                    value
-                  ) => {
-                    formik.setFieldValue(
-                      "mentor",
-                      value
-                    );
+                  value={formik.values.mentor}
+                  onValueChange={(value) => {
+                    formik.setFieldValue("mentor", value);
                   }}
                 >
                   <SelectTrigger className="h-10 bg-slate-50 text-sm">
@@ -1547,91 +896,81 @@ toast.success(
 
             <div className="mt-4">
               <p className="mb-3 text-xs text-slate-500">
-                Upload screenshots or images of your project.
-                You can keep existing images, remove them, or add new ones.
-                Maximum {MAX_PROJECT_IMAGES} images in total.
+                Upload screenshots or images of your project. You can keep
+                existing images, remove them, or add new ones. Maximum{" "}
+                {MAX_PROJECT_IMAGES} images in total.
               </p>
 
               {/* EXISTING CLOUDINARY IMAGES */}
-              {isEdit &&
-                formik.values.existingProjectImages?.length > 0 && (
-                  <div className="mb-4">
-                    <p className="mb-2 text-xs font-medium text-slate-700">
-                      Existing Project Images
-                    </p>
+              {isEdit && formik.values.existingProjectImages?.length > 0 && (
+                <div className="mb-4">
+                  <p className="mb-2 text-xs font-medium text-slate-700">
+                    Existing Project Images
+                  </p>
 
-                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                      {formik.values.existingProjectImages.map(
-                        (image, index) => {
-                          const imageUrl =
-                            typeof image === "string"
-                              ? image
-                              : image?.url;
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {formik.values.existingProjectImages.map((image, index) => {
+                      const imageUrl =
+                        typeof image === "string" ? image : image?.url;
 
-                          const imageName =
-                            typeof image === "string"
-                              ? `Project image ${index + 1}`
-                              : image?.originalName ||
-                                `Project image ${index + 1}`;
+                      const imageName =
+                        typeof image === "string"
+                          ? `Project image ${index + 1}`
+                          : image?.originalName || `Project image ${index + 1}`;
 
-                          if (!imageUrl) return null;
+                      if (!imageUrl) return null;
 
-                          return (
-                            <div
-                              key={
-                                image?.publicId ||
-                                imageUrl ||
-                                index
-                              }
-                              className="group relative overflow-hidden rounded-md border border-slate-200 bg-slate-100"
+                      return (
+                        <div
+                          key={image?.publicId || imageUrl || index}
+                          className="group relative overflow-hidden rounded-md border border-slate-200 bg-slate-100"
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={imageName}
+                            className="h-32 w-full object-cover"
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updatedImages =
+                                formik.values.existingProjectImages.filter(
+                                  (_, i) => i !== index,
+                                );
+
+                              formik.setFieldValue(
+                                "existingProjectImages",
+                                updatedImages,
+                              );
+                            }}
+                            className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition group-hover:opacity-100"
+                            title="Remove existing image"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+
+                          <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between gap-2 bg-black/60 px-2 py-1">
+                            <span className="truncate text-[10px] text-white">
+                              {imageName}
+                            </span>
+
+                            <a
+                              href={imageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0 text-white hover:text-orange-300"
+                              title="View image"
                             >
-                              <img
-                                src={imageUrl}
-                                alt={imageName}
-                                className="h-32 w-full object-cover"
-                              />
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updatedImages =
-                                    formik.values.existingProjectImages.filter(
-                                      (_, i) => i !== index
-                                    );
-
-                                  formik.setFieldValue(
-                                    "existingProjectImages",
-                                    updatedImages
-                                  );
-                                }}
-                                className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition group-hover:opacity-100"
-                                title="Remove existing image"
-                              >
-                                <X className="h-3.5 w-3.5" />
-                              </button>
-
-                              <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between gap-2 bg-black/60 px-2 py-1">
-                                <span className="truncate text-[10px] text-white">
-                                  {imageName}
-                                </span>
-
-                                <a
-                                  href={imageUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="shrink-0 text-white hover:text-orange-300"
-                                  title="View image"
-                                >
-                                  <Eye className="h-3 w-3" />
-                                </a>
-                              </div>
-                            </div>
-                          );
-                        }
-                      )}
-                    </div>
+                              <Eye className="h-3 w-3" />
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
+                </div>
+              )}
 
               {/* NEW IMAGE UPLOAD */}
               <label className="flex min-h-[130px] cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 hover:border-orange-400 hover:bg-orange-50">
@@ -1651,25 +990,19 @@ toast.success(
                   accept="image/jpeg,image/png,image/webp"
                   className="hidden"
                   onChange={(event) => {
-                    const files = Array.from(
-                      event.target.files || []
-                    );
+                    const files = Array.from(event.target.files || []);
 
                     const existingCount =
                       formik.values.existingProjectImages?.length || 0;
 
-                    const currentNewImages =
-                      formik.values.projectImages || [];
+                    const currentNewImages = formik.values.projectImages || [];
 
                     const remainingSlots = Math.max(
                       0,
-                      MAX_PROJECT_IMAGES - existingCount
+                      MAX_PROJECT_IMAGES - existingCount,
                     );
 
-                    const combinedImages = [
-                      ...currentNewImages,
-                      ...files,
-                    ];
+                    const combinedImages = [...currentNewImages, ...files];
 
                     const uniqueImages = combinedImages.filter(
                       (file, index, array) =>
@@ -1678,20 +1011,16 @@ toast.success(
                           (item) =>
                             item.name === file.name &&
                             item.size === file.size &&
-                            item.lastModified === file.lastModified
-                        )
+                            item.lastModified === file.lastModified,
+                        ),
                     );
 
                     formik.setFieldValue(
                       "projectImages",
-                      uniqueImages.slice(0, remainingSlots)
+                      uniqueImages.slice(0, remainingSlots),
                     );
 
-                    formik.setFieldTouched(
-                      "projectImages",
-                      true,
-                      false
-                    );
+                    formik.setFieldTouched("projectImages", true, false);
 
                     event.target.value = "";
                   }}
@@ -1706,35 +1035,28 @@ toast.success(
                   </p>
 
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                    {formik.values.projectImages.map(
-                      (file, index) => (
-                        <ProjectImagePreview
-                          key={`${file.name}-${file.size}-${file.lastModified}-${index}`}
-                          file={file}
-                          onRemove={() => {
-                            const updated =
-                              formik.values.projectImages.filter(
-                                (_, i) => i !== index
-                              );
+                    {formik.values.projectImages.map((file, index) => (
+                      <ProjectImagePreview
+                        key={`${file.name}-${file.size}-${file.lastModified}-${index}`}
+                        file={file}
+                        onRemove={() => {
+                          const updated = formik.values.projectImages.filter(
+                            (_, i) => i !== index,
+                          );
 
-                            formik.setFieldValue(
-                              "projectImages",
-                              updated
-                            );
-                          }}
-                        />
-                      )
-                    )}
+                          formik.setFieldValue("projectImages", updated);
+                        }}
+                      />
+                    ))}
                   </div>
                 </div>
               )}
 
-              {formik.touched.projectImages &&
-                formik.errors.projectImages && (
-                  <p className="mt-2 text-xs text-red-500">
-                    {formik.errors.projectImages}
-                  </p>
-                )}
+              {formik.touched.projectImages && formik.errors.projectImages && (
+                <p className="mt-2 text-xs text-red-500">
+                  {formik.errors.projectImages}
+                </p>
+              )}
             </div>
           </section>
 
@@ -1750,40 +1072,24 @@ toast.success(
             </h2>
 
             <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-
               {/* PRESENTATION */}
               <DocumentUpload
                 title="PPT Presentation"
                 description="PPT / PPTX • Max 10MB"
                 accept=".ppt,.pptx"
                 file={formik.values.presentationFile}
-                existingFile={
-                  formik.values.existingPresentationFile
-                }
+                existingFile={formik.values.existingPresentationFile}
                 error={getFileError("presentationFile")}
                 onChange={(file) => {
-                  formik.setFieldValue(
-                    "presentationFile",
-                    file
-                  );
+                  formik.setFieldValue("presentationFile", file);
 
-                  formik.setFieldTouched(
-                    "presentationFile",
-                    true,
-                    false
-                  );
+                  formik.setFieldTouched("presentationFile", true, false);
                 }}
                 onRemove={() => {
-                  formik.setFieldValue(
-                    "presentationFile",
-                    null
-                  );
+                  formik.setFieldValue("presentationFile", null);
                 }}
                 onRemoveExisting={() => {
-                  formik.setFieldValue(
-                    "existingPresentationFile",
-                    null
-                  );
+                  formik.setFieldValue("existingPresentationFile", null);
                 }}
               />
 
@@ -1793,33 +1099,18 @@ toast.success(
                 description="PDF • Max 5MB"
                 accept=".pdf"
                 file={formik.values.synopsisFile}
-                existingFile={
-                  formik.values.existingSynopsisFile
-                }
+                existingFile={formik.values.existingSynopsisFile}
                 error={getFileError("synopsisFile")}
                 onChange={(file) => {
-                  formik.setFieldValue(
-                    "synopsisFile",
-                    file
-                  );
+                  formik.setFieldValue("synopsisFile", file);
 
-                  formik.setFieldTouched(
-                    "synopsisFile",
-                    true,
-                    false
-                  );
+                  formik.setFieldTouched("synopsisFile", true, false);
                 }}
                 onRemove={() => {
-                  formik.setFieldValue(
-                    "synopsisFile",
-                    null
-                  );
+                  formik.setFieldValue("synopsisFile", null);
                 }}
                 onRemoveExisting={() => {
-                  formik.setFieldValue(
-                    "existingSynopsisFile",
-                    null
-                  );
+                  formik.setFieldValue("existingSynopsisFile", null);
                 }}
               />
 
@@ -1829,33 +1120,18 @@ toast.success(
                 description="PDF • Max 20MB"
                 accept=".pdf"
                 file={formik.values.reportFile}
-                existingFile={
-                  formik.values.existingReportFile
-                }
+                existingFile={formik.values.existingReportFile}
                 error={getFileError("reportFile")}
                 onChange={(file) => {
-                  formik.setFieldValue(
-                    "reportFile",
-                    file
-                  );
+                  formik.setFieldValue("reportFile", file);
 
-                  formik.setFieldTouched(
-                    "reportFile",
-                    true,
-                    false
-                  );
+                  formik.setFieldTouched("reportFile", true, false);
                 }}
                 onRemove={() => {
-                  formik.setFieldValue(
-                    "reportFile",
-                    null
-                  );
+                  formik.setFieldValue("reportFile", null);
                 }}
                 onRemoveExisting={() => {
-                  formik.setFieldValue(
-                    "existingReportFile",
-                    null
-                  );
+                  formik.setFieldValue("existingReportFile", null);
                 }}
               />
             </div>
@@ -1866,7 +1142,6 @@ toast.success(
           ================================================= */}
 
           <div className="mt-7 flex justify-end gap-3 border-t border-slate-200 pt-4">
-
             <Link href="/student">
               <Button
                 type="button"
@@ -1882,10 +1157,7 @@ toast.success(
               variant="outline"
               className="border-orange-500 text-orange-500 hover:bg-orange-50"
               onClick={() => {
-                console.log(
-                  "Save draft",
-                  formik.values
-                );
+                console.log("Save draft", formik.values);
               }}
             >
               Save Draft
@@ -1893,9 +1165,7 @@ toast.success(
 
             <Button
               type="submit"
-              disabled={
-                formik.isSubmitting
-              }
+              disabled={formik.isSubmitting}
               className="bg-orange-500 text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {formik.isSubmitting
@@ -1930,36 +1200,19 @@ function TeamInput({
       <label className="mb-1.5 block text-xs font-medium text-slate-700">
         {label}
 
-        {required && (
-          <span className="text-orange-500">
-            {" "}
-            *
-          </span>
-        )}
+        {required && <span className="text-orange-500"> *</span>}
       </label>
 
       <Input
         type={type}
         value={value}
         placeholder={placeholder}
-        onChange={(e) =>
-          onChange(
-            e.target.value
-          )
-        }
+        onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
-        className={`h-10 bg-white text-sm ${
-          error
-            ? "border-red-500"
-            : ""
-        }`}
+        className={`h-10 bg-white text-sm ${error ? "border-red-500" : ""}`}
       />
 
-      {error && (
-        <p className="mt-1 text-xs text-red-500">
-          {error}
-        </p>
-      )}
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
 }
@@ -1968,25 +1221,16 @@ function TeamInput({
    PROJECT IMAGE PREVIEW
 ========================================================= */
 
-function ProjectImagePreview({
-  file,
-  onRemove,
-}) {
-  const imageUrl =
-    URL.createObjectURL(file);
+function ProjectImagePreview({ file, onRemove }) {
+  const imageUrl = URL.createObjectURL(file);
 
   return (
     <div className="group relative min-h-[130px] overflow-hidden rounded-md border border-slate-200 bg-slate-100">
-
       <img
         src={imageUrl}
         alt={file.name}
         className="h-[130px] w-full object-cover"
-        onLoad={() =>
-          URL.revokeObjectURL(
-            imageUrl
-          )
-        }
+        onLoad={() => URL.revokeObjectURL(imageUrl)}
       />
 
       <button
@@ -2020,9 +1264,7 @@ function DocumentUpload({
   onRemoveExisting,
 }) {
   const existingFileUrl =
-    typeof existingFile === "string"
-      ? existingFile
-      : existingFile?.url;
+    typeof existingFile === "string" ? existingFile : existingFile?.url;
 
   const existingFileName =
     typeof existingFile === "string"
@@ -2082,17 +1324,12 @@ function DocumentUpload({
       >
         <Upload
           className={`mb-2 h-5 w-5 ${
-            error
-              ? "text-red-500"
-              : "text-orange-500"
+            error ? "text-red-500" : "text-orange-500"
           }`}
         />
 
         <span className="max-w-full truncate px-2 text-xs font-medium text-slate-700">
-          {currentFileName ||
-            (existingFile
-              ? "Replace file"
-              : title)}
+          {currentFileName || (existingFile ? "Replace file" : title)}
         </span>
 
         <span className="mt-1 text-[10px] text-slate-400">
@@ -2108,8 +1345,7 @@ function DocumentUpload({
           accept={accept}
           className="hidden"
           onChange={(event) => {
-            const selectedFile =
-              event.target.files?.[0] || null;
+            const selectedFile = event.target.files?.[0] || null;
 
             onChange(selectedFile);
 
@@ -2129,11 +1365,7 @@ function DocumentUpload({
         </button>
       )}
 
-      {error && (
-        <p className="mt-1 text-xs text-red-500">
-          {error}
-        </p>
-      )}
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
 }

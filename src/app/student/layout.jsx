@@ -7,7 +7,7 @@ export default function MentorLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex  h-screen overflow-hidden bg-[#f7f6f4]">
+    <div className="flex  h-screen overflow-hidden bg-slate-100">
       {/* <StudentProfileCard strength={dashboardStats.profileStrength} /> */}
       <Sidebar
         sidebarOpen={sidebarOpen}
