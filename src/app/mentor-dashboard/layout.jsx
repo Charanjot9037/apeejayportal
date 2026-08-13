@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Sidebar from '@/app/components/elements/sidebar';
-import { MENTOR_SIDEBAR_DATA } from '@/constants/sidepannel';
+import { mentorDashboardData } from '@/constants/mentorData';
 export default function MentorLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -11,7 +11,7 @@ export default function MentorLayout({ children }) {
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        sidebarData={MENTOR_SIDEBAR_DATA}
+        sidebarData={mentorDashboardData}
       />
 
       <main className="min-w-0 flex-1">{children}</main>

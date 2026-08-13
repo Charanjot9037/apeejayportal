@@ -8,7 +8,86 @@ import {
   Briefcase,
   Settings,
   BadgeCheck,
+  BookOpen,
+  Calendar,
+  HelpCircle,
+  LayoutDashboard,
 } from 'lucide-react';
+
+export const mentorDashboardData = {
+  title: 'Mentor Portal',
+
+  subtitle: 'Academic Year 2024-25',
+
+  profileUrl: '/profile.png',
+
+  // placementReadiness: 85,
+
+  navItems: [
+    {
+      label: 'Dashboard',
+      icon: LayoutDashboard,
+      href: '/mentor/dashboard',
+    },
+    {
+      label: 'Students',
+      icon: Users,
+      href: '/mentor/students',
+    },
+    {
+      label: 'Tools',
+      icon: Calendar,
+      href: '/mentor/sessions',
+    },
+  ],
+};
+
+export const studentSidebarData = {
+  title: 'Mentor Portal',
+  subtitle: 'Academic Year 2024-25',
+
+  profileUrl: '/profile.png',
+
+  navItems: [
+    {
+      label: 'Dashboard',
+      href: '/mentor/dashboard',
+      icon: LayoutDashboard,
+    },
+    {
+      label: 'Profile',
+      href: '/profile',
+      icon: LayoutDashboard,
+    },
+    {
+      label: 'Students',
+      href: '/mentor/students',
+      icon: Users,
+    },
+    {
+      label: 'Sessions',
+      href: '/mentor/sessions',
+      icon: Calendar,
+    },
+    {
+      label: 'Resources',
+      href: '/mentor/resources',
+      icon: BookOpen,
+    },
+  ],
+
+  footer: {
+    readiness: 85,
+
+    items: [
+      {
+        label: 'Help Center',
+        href: '/mentor/help',
+        icon: HelpCircle,
+      },
+    ],
+  },
+};
 
 export const students = [
   {
@@ -192,7 +271,7 @@ export const MENTOR_STUDENT_COLUMNS = [
         className={
           student.status === 'Approved'
             ? 'text-sm font-medium text-blue-600 hover:underline'
-            : 'rounded-md border border-[#f2792a] px-3 py-1.5 text-xs font-medium text-[#f2792a] hover:bg-orange-50'
+            : 'rounded-md border border-primary-orange px-3 py-1.5 text-xs font-medium text-primary-orange hover:bg-orange-50'
         }
       >
         {student.action}

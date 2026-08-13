@@ -29,16 +29,9 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
     }
   };
   function handleHelp() {
-    // Implement your help logic here
     console.log('Help clicked');
   }
-  const {
-    title,
-    subtitle,
-    profileUrl,
-    navItems = [],
-    placementReadiness,
-  } = sidebarData;
+  const { title, subtitle, profileUrl, navItems = [] } = sidebarData;
 
   return (
     <>
@@ -47,8 +40,8 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
         setSidebarOpen={setSidebarOpen}
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-full w-64 shrink-0 flex-col border-r border-slate-100 bg-primary-orange text-white p-5 transition-transform duration-200 lg:static lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 bottom-0 z-40 flex h-screen bg-primary-orange  w-64 shrink-0 flex-col border-r border-slate-100  text-white p-5 transition-transform duration-200 lg:static lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className=" py-5 flex flex-col gap-2 items-center border-b">
@@ -73,11 +66,11 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
           </div>
         </div>
 
-        <nav className="flex py-5 flex-1 flex-col gap-1">
+        <nav className="flex py-4 flex-1 flex-col gap-1">
           {navItems.map(({ label, icon: Icon, href }) => {
             const isActive =
               pathname === href ||
-              (href !== "/" && pathname.startsWith(`${href}/`));
+              (href !== '/' && pathname.startsWith(`${href}/`));
 
             return (
               <Link
@@ -85,8 +78,8 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
                 href={href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-white   text-primary-orange shadow-sm"
-                    : "text-white hover:text-primary hover:bg-white hover:shadow-sm"
+                    ? 'bg-white   text-primary-orange shadow-sm'
+                    : 'text-white hover:text-primary hover:bg-white hover:shadow-sm'
                 }`}
               >
                 <Icon className="h-4 w-4" strokeWidth={2} />
@@ -97,13 +90,7 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
           })}
         </nav>
 
-        {placementReadiness !== undefined && (
-          <div className="mb-4 rounded-lg  mt-34 px-3 py-2 text-center text-xs font-semibold text-primary-orange">
-            Placement Readiness: {placementReadiness}%
-          </div>
-        )}
-
-        <div className="flex flex-col bottom-0 gap-1   bg-primary-orange text-white border-slate-100 p-t-10 mt-4">
+        <div className="flex flex-col gap-1 fixed bottom-0   bg-primary-orange text-white border-slate-100 p-t-10 mt-8">
           <button
             type="button"
             onClick={handleHelp}
