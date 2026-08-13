@@ -42,47 +42,47 @@ const StudentCard = ({ student, onSave }) => {
         hover:shadow-lg
       "
     >
-      {/* ================= Image ================= */}
+    <div
+  className="
+    relative
+    aspect-[6/4]
+    w-full
+    overflow-hidden
+    bg-slate-100
+  "
+>
+  {profileImage ? (
+    <img
+      src={profileImage}
+      alt={fullName || "Student"}
+      sizes="(max-width: 768px) 100vw, 33vw"
+      className="
+        object-contain
+        object-top
+        transition-transform
+        duration-500
+        ease-out
+        group-hover:scale-[1.03]
+      "
+    />
+  ) : (
+    <div className="flex h-full w-full items-center justify-center text-slate-400">
+      No profile image
+    </div>
+  )}
 
-      <div
-        className="
-          relative
-          aspect-[6/4]
-          w-full
-          overflow-hidden
-          bg-slate-100
-        "
-      >
-        <img
-          src={profileImage}
-          alt={fullName}
-          className="
-            h-75
-            w-full
-            object-contain
-            object-top
-
-            transition-transform
-            duration-500
-            ease-out
-
-            group-hover:scale-[1.03]
-          "
-        />
-
-        {/* Image Overlay */}
-        <div
-          className="
-            pointer-events-none
-            absolute
-            inset-0
-            bg-gradient-to-t
-            from-black/10
-            via-transparent
-            to-transparent
-          "
-        />
-      </div>
+  <div
+    className="
+      pointer-events-none
+      absolute
+      inset-0
+      bg-gradient-to-t
+      from-black/10
+      via-transparent
+      to-transparent
+    "
+  />
+</div>
 
       {/* ================= Content ================= */}
 
