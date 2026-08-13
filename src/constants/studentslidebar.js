@@ -13,36 +13,36 @@ const dashboardStats = {
   // ...
 };
 export const studentSidebarData = {
-  title: 'Student Portal',
-  subtitle: 'Academic Year 2024-25',
+  title: "Student Portal",
+  subtitle: "Academic Year 2024-25",
 
-  profileUrl: '/profile.png',
+  profileUrl: "/profile.png",
 
   navItems: [
     {
-      label: 'Dashboard',
-      href: '/student/dashboard',
+      label: "Dashboard",
+      href: "/student",
       icon: LayoutDashboard,
     },
     {
-      label: 'Courses',
-      href: '/student/courses',
+      label: "Projects",
+      href: "/projects",
       icon: BookOpen,
     },
     {
-      label: 'Schedule',
-      href: '/student/schedule',
+      label: "Profile",
+      href: "/profile",
+      icon: User,
+    },
+    {
+      label: "Resume",
+      href: "/student/resume",
       icon: Calendar,
     },
     {
-      label: 'Achievements',
-      href: '/student/achievements',
+      label: "Achievements",
+      href: "/student/achievements",
       icon: Trophy,
-    },
-    {
-      label: 'profile',
-      href: '/student/profile',
-      icon: User,
     },
   ],
   customComponent: (
@@ -54,8 +54,8 @@ export const studentSidebarData = {
 
     items: [
       {
-        label: 'Help Center',
-        href: '/student/help',
+        label: "Help Center",
+        href: "/student/help",
         icon: HelpCircle,
       },
     ],

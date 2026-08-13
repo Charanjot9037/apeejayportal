@@ -25,14 +25,14 @@ const defaultData = {
 };
 
 export default function SkillsAndInterests({
-  data = defaultData,
+  data ,
   onSave,
 }) {
   const [isEditing, setIsEditing] = useState(false);
 
   const formik = useFormik({
     initialValues: {
-      technicalSkills: data.technicalSkills || [],
+      technicalSkills: data.skills || [],
       interests: data.interests || [],
     },
 

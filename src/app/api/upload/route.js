@@ -28,7 +28,7 @@ export async function POST(req) {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: "students/profile-images",
-          resource_type: "image",
+          resource_type: "raw",
         },
         (error, result) => {
           if (error) reject(error);

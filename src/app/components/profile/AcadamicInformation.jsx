@@ -16,19 +16,17 @@ const defaultData = {
 };
 
 export default function AcademicInformation({
-  data = defaultData,
+  data ,
   onSave,
 }) {
   const [isEditing, setIsEditing] = useState(false);
 
   const formik = useFormik({
     initialValues: {
-      university: data.university || "",
       department: data.department || "",
       program: data.program || "",
       currentSemester: data.currentSemester || "",
       rollNumber: data.rollNumber || "",
-      cumulativeGPA: data.cumulativeGPA || "",
       academicBatch: data.academicBatch || "",
     },
 
@@ -136,19 +134,6 @@ export default function AcademicInformation({
         <div className="grid grid-cols-1 gap-x-10 gap-y-5 sm:grid-cols-2">
           {/* UNIVERSITY */}
 
-          <InformationField
-            label="UNIVERSITY"
-            name="university"
-            value={formik.values.university}
-            editing={isEditing}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.university &&
-              formik.errors.university
-            }
-          />
-
           {/* DEPARTMENT */}
 
           <InformationField
@@ -210,20 +195,6 @@ export default function AcademicInformation({
           />
 
           {/* CUMULATIVE GPA */}
-
-          <InformationField
-            label="CUMULATIVE GPA (CGPA)"
-            name="cumulativeGPA"
-            value={formik.values.cumulativeGPA}
-            editing={isEditing}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.cumulativeGPA &&
-              formik.errors.cumulativeGPA
-            }
-          />
-
           {/* ACADEMIC BATCH */}
 
           <InformationField

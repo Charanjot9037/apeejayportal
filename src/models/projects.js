@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 
+/* =========================================================
+   TEAM MEMBER
+========================================================= */
+
 const TeamMemberSchema = new mongoose.Schema(
   {
     name: {
@@ -25,8 +29,46 @@ const TeamMemberSchema = new mongoose.Schema(
       trim: true,
     },
   },
-  { _id: false }
+  {
+    _id: false,
+  }
 );
+
+/* =========================================================
+   CLOUDINARY FILE
+========================================================= */
+
+const CloudinaryFileSchema =
+  new mongoose.Schema(
+    {
+      url: {
+        type: String,
+        trim: true,
+      },
+
+      publicId: {
+        type: String,
+        trim: true,
+      },
+
+      originalName: {
+        type: String,
+        trim: true,
+      },
+
+      resourceType: {
+        type: String,
+        trim: true,
+      },
+    },
+    {
+      _id: false,
+    }
+  );
+
+/* =========================================================
+   PROJECT
+========================================================= */
 
 const ProjectSchema = new mongoose.Schema(
   {
@@ -80,17 +122,37 @@ const ProjectSchema = new mongoose.Schema(
       type: String,
     },
 
+    /* =====================================================
+       PROJECT IMAGES
+    ===================================================== */
+
+    projectImages: {
+      type: [CloudinaryFileSchema],
+      default: [],
+    },
+
+    /* =====================================================
+       DOCUMENTS
+    ===================================================== */
+
     synopsisFile: {
-      type: String,
+      type: CloudinaryFileSchema,
+      default: null,
     },
 
     reportFile: {
-      type: String,
+      type: CloudinaryFileSchema,
+      default: null,
     },
 
     presentationFile: {
-      type: String,
+      type: CloudinaryFileSchema,
+      default: null,
     },
+
+    /* =====================================================
+       STATUS
+    ===================================================== */
 
     status: {
       type: String,
@@ -103,16 +165,24 @@ const ProjectSchema = new mongoose.Schema(
       default: "Pending Approval",
     },
 
+    /* =====================================================
+       STUDENT
+    ===================================================== */
+
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
   },
+
   {
     timestamps: true,
   }
 );
 
 export default mongoose.models.Project ||
-  mongoose.model("Project", ProjectSchema);
+  mongoose.model(
+    "Project",
+    ProjectSchema
+  );
