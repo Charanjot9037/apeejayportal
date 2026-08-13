@@ -9,7 +9,6 @@ export async function GET() {
 
     // Authenticate user
     const auth = await authenticateUser();
-console.log("auth",auth);
     if (!auth.success) {
       return NextResponse.json(
         {
@@ -24,7 +23,7 @@ console.log("auth",auth);
 
     const user = auth.user;
     const userId = user._id;
-    // Only students can access student profile
+
     if (user.role !== "student") {
       return NextResponse.json(
         {
@@ -49,7 +48,6 @@ console.log("auth",auth);
       );
     }
 
-    // Find student profile
     const student = await Student.findOne({ userId }).lean();
 
     if (!student) {
