@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { useFormik } from "formik";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
@@ -13,7 +12,6 @@ import SkillsInterestsTab from "./SkillInterestTab";
 import AcademicInformationTab from "./AcadamicTab";
 import OnlineProfilesTab from "./OnlineProfileTab";
 import { DashboardHeader } from "../elements";
-import { resume } from "react-dom/server";
 
 export default function CreateStudentProfile() {
   const imageInputRef = useRef(null);
@@ -22,7 +20,8 @@ export default function CreateStudentProfile() {
   const user = useSelector((state) => state.auth.user);
 
   const [activeTab, setActiveTab] = useState("personal");
-
+  // This will come from your create student API later
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   // This will come from your create student API later
   const [studentId, setStudentId] = useState(null);
 
@@ -60,7 +59,7 @@ export default function CreateStudentProfile() {
     const file = event.currentTarget.files?.[0];
 
     if (!file) return;
-
+    setIsUploadingImage(true);
     formik.setFieldValue("profileImageFile", file);
 
     const formData = new FormData();
@@ -78,11 +77,12 @@ export default function CreateStudentProfile() {
         throw new Error(data.message || "Upload failed");
       }
 
-      console.log(data.url);
       formik.setFieldValue("profileImage", file);
       formik.setFieldValue("profileImageUrl", data.url);
     } catch (error) {
       console.error("Image upload failed:", error);
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -111,12 +111,10 @@ export default function CreateStudentProfile() {
 
       console.log("Resume Cloudinary URL:", data.url);
 
-      // Store Cloudinary URL for database
       formik.setFieldValue("resume", data.url);
     } catch (error) {
       console.error("Resume upload failed:", error);
 
-      // Clear values if upload fails
       formik.setFieldValue("resumeFile", null);
       formik.setFieldValue("resume", "");
     }
@@ -182,7 +180,7 @@ export default function CreateStudentProfile() {
         return;
       }
 
-      console.log("Student created:", data);
+
 
       // Store Student's own _id
       setStudentId(data.studentId);
@@ -301,12 +299,6 @@ export default function CreateStudentProfile() {
     }
 
     try {
-      console.log("=================================");
-      console.log("EDIT STUDENT - FINAL");
-      console.log("=================================");
-
-      console.log("Student ID:", studentId);
-
       const response = await fetch("/api/createstudent", {
         method: "PATCH",
         headers: {
@@ -340,11 +332,8 @@ export default function CreateStudentProfile() {
   };
 
   return (
-    <main className="h-screen overflow-y-auto bg-gray-50 px-4 py-8">
+    <main className="h-screen overflow-y-auto bg-gray-50 px-4 ">
       <div className="mx-auto max-w-6xl">
-        {/* ==========================================
-            HEADER
-        ========================================== */}
         <div className="py-3">
           <DashboardHeader
             title="Create Your Profile"
@@ -357,15 +346,15 @@ export default function CreateStudentProfile() {
           value={activeTab}
           onValueChange={(value) => {
             // Prevent manually going to future tabs
-            if (!studentId && value !== "personal") {
-              return;
-            }
+            // if (!studentId && value !== "personal") {
+            //   return;
+            // }
 
             setActiveTab(value);
           }}
-          className="w-full"
+          className="w-full flex flex-col gap-4"
         >
-          <TabsList className="py-5 bg-white text-black   w-full ">
+          <TabsList className=" w-full h-10 flex overflow-x-auto no-scrollbar justify-start gap-1   sm:justify-center bg-white border  text-sm text-black">
             <TabsTrigger
               value="personal"
               className="py-3 data-active:bg-primary-orange data-active:text-white"
@@ -375,18 +364,22 @@ export default function CreateStudentProfile() {
             <TabsTrigger
               value="academic"
               disabled={!studentId}
-              className="py-3"
+              className="py-3 data-active:bg-primary-orange data-active:text-white"
             >
               Academic Information
             </TabsTrigger>
-            <TabsTrigger value="skills" disabled={!studentId} className="py-3">
+            <TabsTrigger
+              value="skills"
+              disabled={!studentId}
+              className="py-3 data-active:bg-primary-orange data-active:text-white"
+            >
               Skills & Interests
             </TabsTrigger>
 
             <TabsTrigger
               value="profiles"
               disabled={!studentId}
-              className="py-3"
+              className="py-3 data-active:bg-primary-orange data-active:text-white"
             >
               Profiles & Resume
             </TabsTrigger>
@@ -400,6 +393,7 @@ export default function CreateStudentProfile() {
             <PersonalInformationTab
               formik={formik}
               getError={getError}
+              isUploadingImage={isUploadingImage}
               imageInputRef={imageInputRef}
               handleProfileImage={handleProfileImage}
               removeProfileImage={removeProfileImage}
