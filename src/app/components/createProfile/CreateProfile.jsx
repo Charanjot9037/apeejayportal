@@ -156,6 +156,14 @@ export default function CreateStudentProfile() {
   };
 
   const handlePersonalNext = async () => {
+    const fields = ["fullName", "phone", "gender", "address", "profileImage"];
+
+    const isValid = await validateStep(fields);
+
+    if (!isValid) {
+      return;
+    }
+
     try {
       const response = await fetch("/api/createstudent", {
         method: "POST",
@@ -179,8 +187,6 @@ export default function CreateStudentProfile() {
         console.error(data.message);
         return;
       }
-
-
 
       // Store Student's own _id
       setStudentId(data.studentId);
