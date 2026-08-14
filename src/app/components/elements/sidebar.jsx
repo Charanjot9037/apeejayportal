@@ -40,7 +40,7 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
         setSidebarOpen={setSidebarOpen}
       />
       <aside
-        className={`fixed inset-y-0 left-0 bottom-0 z-40 flex h-screen bg-primary-orange  w-64 shrink-0 flex-col border-r border-slate-100  text-white p-5 transition-transform duration-200 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col bg-primary-orange p-5 text-white transition-transform duration-200 lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -68,10 +68,7 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
 
         <nav className="flex py-4 flex-1 flex-col gap-1">
           {navItems.map(({ label, icon: Icon, href }) => {
-            const isActive =
-              pathname === href ||
-              (href !== '/' && pathname.startsWith(`${href}/`));
-
+            const isActive = pathname === href;
             return (
               <Link
                 key={label}
@@ -90,7 +87,7 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
           })}
         </nav>
 
-        <div className="flex flex-col gap-1 fixed bottom-0   bg-primary-orange text-white border-slate-100 p-t-10 mt-8">
+        <div className="mt-auto flex flex-col gap-1 border-t border-white/20 pt-4">
           <button
             type="button"
             onClick={handleHelp}

@@ -23,23 +23,23 @@ export const adminDashboardData = {
     {
       label: 'Dashboard',
       icon: LayoutGrid,
-      href: '/adminDashboard',
+      href: '/admin-dashboard',
     },
     {
       label: 'Students',
       icon: Users,
-      href: '/mentor-dashboard',
+      href: '/admin-dashboard/student',
     },
     {
       label: 'Mentor',
       icon: FileText,
       href: '/mentor-dashboard/applications',
     },
-    // {
-    //   label: 'Settings',
-    //   icon: Settings,
-    //   href: '/mentor-dashboard/settings',
-    // },
+    {
+      label: 'Tools',
+      icon: FileText,
+      href: '/admin-dashboard/tools',
+    },
   ],
 };
 export const STAT_CARDS = [

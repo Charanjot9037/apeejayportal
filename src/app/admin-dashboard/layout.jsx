@@ -5,14 +5,14 @@ import { useState } from 'react';
 export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div className="min-h-screen">
       <Sidebar
         sidebarData={adminDashboardData}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
 
-      <main className="min-w-0 flex-1">{children}</main>
+      <main className="min-h-screen lg:ml-64">{children}</main>
     </div>
   );
 }
