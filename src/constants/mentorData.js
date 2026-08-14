@@ -27,12 +27,12 @@ export const mentorDashboardData = {
     {
       label: 'Dashboard',
       icon: LayoutDashboard,
-      href: '/mentor/dashboard',
+      href: '/mentor-dashboard',
     },
     {
       label: 'Students',
       icon: Users,
-      href: '/mentor/students',
+      href: '/mentor-dashboard/addStudent',
     },
     {
       label: 'Tools',

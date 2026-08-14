@@ -172,37 +172,85 @@ export default function BulkImport() {
   /* ----------------------------------------
      Final API call
   ----------------------------------------- */
-
   const handleFinalUpload = async () => {
-    const validStudents = validatedStudents.map((student) => ({
-      name: student.name,
-      email: student.email,
-    }));
+    try {
+      const validStudents = validatedStudents
+        .filter((student) => student.isValid)
+        .map((student) => ({
+          name: student.name,
+          email: student.email,
+        }));
 
-    console.log('FINAL DATA:', validStudents);
+      if (validStudents.length === 0) {
+        alert('No valid students to import.');
+        return;
+      }
 
-    /*
-      API CALL WILL COME HERE
+      const response = await fetch('/api/bulkImport', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          students: validStudents,
+        }),
+      });
 
-      Example:
+      const data = await response.json();
 
-      const response = await fetch(
-        '/api/students/bulk-import',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            students: validStudents,
-          }),
-        }
+      if (!response.ok) {
+        console.error('Import failed:', data);
+
+        alert(data.message || 'Failed to import students.');
+
+        return;
+      }
+
+      console.log('Bulk import response:', data);
+
+      console.log('Student credentials:', data.credentials);
+
+      alert(
+        `Import successful!\n\n` +
+          `Imported: ${data.summary.imported}\n` +
+          `Already Exists: ${data.summary.alreadyExists}`,
       );
+    } catch (error) {
+      console.error('Bulk import error:', error);
 
-    */
-
-    alert('Ready to call API');
+      alert('Something went wrong while importing students.');
+    }
   };
+  // const handleFinalUpload = async () => {
+  //   const validStudents = validatedStudents.map((student) => ({
+  //     name: student.name,
+  //     email: student.email,
+  //   }));
+
+  //   console.log('FINAL DATA:', validStudents);
+
+  //   /*
+  //     API CALL WILL COME HERE
+
+  //     Example:
+
+  //     const response = await fetch(
+  //       '/api/students/bulk-import',
+  //       {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify({
+  //           students: validStudents,
+  //         }),
+  //       }
+  //     );
+
+  //   */
+
+  //   alert('Ready to call API');
+  // };
 
   const invalidCount = validatedStudents.filter(
     (student) => !student.isValid,
