@@ -12,7 +12,7 @@ export async function PATCH(req) {
     // =========================
 
     const auth = await authenticateUser();
- 
+
     if (!auth.success) {
       return NextResponse.json(
         {
@@ -43,8 +43,8 @@ export async function PATCH(req) {
       );
     }
 
-    const userId = user._id;
 
+    const userId = user._id;
     if (!userId) {
       return NextResponse.json(
         {
@@ -57,9 +57,6 @@ export async function PATCH(req) {
       );
     }
 
-    // =========================
-    // REQUEST BODY
-    // =========================
 
     const { section, data } = await req.json();
 

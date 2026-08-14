@@ -151,8 +151,6 @@ export default function Profile() {
         );
       }
 
-      console.log("Academic updated:", result.profile);
-
       const updatedProfile = mapStudentToProfile(result.profile);
 
       setStudentData(updatedProfile);
