@@ -79,7 +79,7 @@ const studentSchema = new mongoose.Schema(
       default: "",
     },
 
-    specialiZation: {
+    specialization: {
       type: String,
       default: "",
     },

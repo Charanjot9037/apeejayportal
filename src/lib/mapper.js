@@ -55,7 +55,7 @@ export function mapStudentToProfile(student) {
       rollNumber: student.rollNumber || "",
       academicBatch: student.academicBatch || "",
       lastYear: student.lastYear || "",
-      specialiZation: student.specialiZation || "",
+      specialization: student.specialization || "",
     },
 
     // =========================
