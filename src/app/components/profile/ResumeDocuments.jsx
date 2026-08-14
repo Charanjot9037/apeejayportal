@@ -267,7 +267,7 @@ export default function ResumeDocuments({ data, onSave }) {
           {!isEditing &&
             formik.values.resumeUrl &&
             formik.values.resumeName && (
-              <div className="mt-2.5 border grid grid-cols-2 gap-1.5">
+              <div className="mt-2.5 grid grid-cols-2 gap-1.5">
                 <div>
                   <a
                     href={formik.values.resumeUrl}

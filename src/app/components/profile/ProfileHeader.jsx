@@ -7,7 +7,7 @@ export default function ProfileHeader({
   name = "Alex Johnson",
   subtitle = "Computer Science Student | Class of 2025",
   image = "",
-  completion = "86",
+  completion,
   editable = true,
   onImageChange,
   imageLoading = false,

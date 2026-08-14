@@ -245,61 +245,60 @@ export default function Profile() {
     }
   };
 
+  const handleProfileImageSave = async (file) => {
+    try {
+      setImageLoading(true);
+      const formData = new FormData();
 
-const handleProfileImageSave = async (file) => {
-  try {
-    setImageLoading(true);
-    const formData = new FormData();
+      formData.append("file", file);
 
-    formData.append("file", file);
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    const uploadResponse = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+      const uploadData = await uploadResponse.json();
 
-    const uploadData = await uploadResponse.json();
+      if (!uploadResponse.ok) {
+        throw new Error(uploadData.message || "Image upload failed");
+      }
 
-    if (!uploadResponse.ok) {
-      throw new Error(uploadData.message || "Image upload failed");
-    }
+      console.log("Uploaded image:", uploadData.url);
+      const response = await fetch("/api/editprofile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          section: "profile",
+          data: {
+            profileImage: uploadData.url,
+          },
+        }),
+      });
 
-    console.log("Uploaded image:", uploadData.url);
-    const response = await fetch("/api/editprofile", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        section: "profile",
-        data: {
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to update profile image");
+      }
+
+      setStudentData((prev) => ({
+        ...prev,
+
+        profile: {
+          ...prev.profile,
           profileImage: uploadData.url,
         },
-      }),
-    });
+      }));
 
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || "Failed to update profile image");
+      console.log("Profile image saved:", result.profile);
+    } catch (error) {
+      console.error("Profile image update failed:", error);
+    } finally {
+      setImageLoading(false);
     }
-
-    setStudentData((prev) => ({
-      ...prev,
-
-      profile: {
-        ...prev.profile,
-        profileImage: uploadData.url,
-      },
-    }));
-
-    console.log("Profile image saved:", result.profile);
-  } catch (error) {
-    console.error("Profile image update failed:", error);
-  } finally {
-    setImageLoading(false);
-  }
-};
+  };
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
@@ -327,6 +326,7 @@ const handleProfileImageSave = async (file) => {
           image={studentData?.profile?.profileImage}
           subtitle={`${studentData?.profile?.department} | ${studentData?.profile?.academicBatch}- ${studentData?.profile?.lastYear}`}
           onImageChange={handleProfileImageSave}
+          completion={studentData?.profile?.completion}
           imageLoading={imageLoading}
         />
 
