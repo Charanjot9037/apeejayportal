@@ -312,7 +312,7 @@ const handleProfileImageSave = async (file) => {
 
   return (
     <main className="min-h-screen">
-      <div className="mx-auto flex flex-col gap-3">
+      <div className="mx-auto  flex flex-col gap-3">
         <div>
           <h1 className="text-3xl font-Manrope font-semibold text-blue-900">
             My Profile
@@ -334,15 +334,15 @@ const handleProfileImageSave = async (file) => {
 
         {/* ================= PERSONAL + SKILLS ================= */}
 
-        <div className="flex gap-4">
-          <div className="w-1/2">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="w-full md:w-1/2">
             <PersonalInformation
               data={studentData?.personal}
               onSave={handlePersonalSave}
             />
           </div>
 
-          <div className="w-1/2">
+          <div className="w-full md:w-1/2">
             <SkillsAndInterests
               data={studentData?.skills}
               onSave={handleSkillsSave}
@@ -352,8 +352,8 @@ const handleProfileImageSave = async (file) => {
 
         {/* ================= ACADEMIC + ONLINE ================= */}
 
-        <div className="flex gap-4">
-          <div className="w-1/2">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="w-full md:w-1/2">
             <AcademicInformation
               mode="edit"
               data={studentData?.academic}
@@ -361,7 +361,7 @@ const handleProfileImageSave = async (file) => {
             />
           </div>
 
-          <div className="w-1/2">
+          <div className=" w-full md:w-1/2">
             <OnlineProfiles
               data={studentData?.profiles}
               onSave={handleOnlineProfilesSave}
@@ -371,7 +371,7 @@ const handleProfileImageSave = async (file) => {
 
         {/* ================= RESUME ================= */}
 
-        <div className="w-1/3">
+        <div className="w-full md:w-1/3">
           <ResumeDocuments
             data={studentData?.document}
             onSave={handleResumeSave}
