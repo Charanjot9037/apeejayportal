@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,35 +23,22 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["student", "teacher", "admin"],
       default: "student",
     },
 
     refreshToken: {
       type: String,
-      default: null,
+      default: "",
     },
-
-    provider: {
-      type: String,
-      enum: ["credentials", "google"],
-      default: "credentials",
-    },
-
-    googleId: {
-      type: String,
-      default: null,
-    },
-
-    image: {
+    resetToken: {
       type: String,
       default: "",
     },
   },
+
   {
     timestamps: true,
-  }
+  },
 );
 
-export default mongoose.models.User ||
-  mongoose.model("User", userSchema);
+export default mongoose.models.User || mongoose.model('User', userSchema);

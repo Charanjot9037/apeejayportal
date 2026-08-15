@@ -1,154 +1,20 @@
-// import {connectDB} from "@/lib/db";
-// import User from "../../../../models/user"
-// import bcrypt from "bcrypt";
-// import {createRefreshToken,createAccessToken} from "@/lib/jwt";
-// import {NextResponse} from "next/server";
-
-
-// export async function POST(req){
-
-// try{
-// await connectDB();
-
-
-// const body = await req.json();
-
-
-// const {
-// name,
-// email,
-// mobile,
-// className,
-// category,
-// password
-// }=body;
-
-
-
-// const existingUser =
-// await User.findOne({email});
-
-
-// if(existingUser){
-
-// return NextResponse.json(
-// {
-// message:"User already exists"
-// },
-// {
-// status:400
-// }
-// );
-
-// }
-
-
-
-// const hashedPassword =
-// await bcrypt.hash(password,10);
-
-
-
-// const user =
-// await User.create({
-
-// name,
-// email,
-// mobile,
-// className,
-// category,
-// password:hashedPassword
-
-// });
-
-
-// const accessToken = createAccessToken(user);
-
-// const refreshToken = createRefreshToken(user);
-// console.log("acces token",accessToken);
-// console.log("refresh token",refreshToken);
-// user.refreshToken=refreshToken;
-
-// await user.save();
-
-// const response = NextResponse.json({
-
-// message:"Signup successful",
-
-// user:{
-// id:user._id,
-// name:user.name,
-// email:user.email
-// }
-
-// });
-
-
-// // access token cookie
-
-// response.cookies.set(
-// "accessToken",
-// accessToken,
-// {
-// httpOnly:true,
-// secure:process.env.NODE_ENV==="production",
-// sameSite:"strict",
-// maxAge:60 * 15,
-// path:"/"
-// }
-// );
-
-
-// // refresh token cookie
-
-// response.cookies.set(
-// "refreshToken",
-// refreshToken,
-// {
-// httpOnly:true,
-// secure:process.env.NODE_ENV==="production",
-// sameSite:"strict",
-// maxAge:60 * 60 * 24 * 7,
-// path:"/"
-// }
-// );
-
-
-// return response;
-
-
-// }
-// catch(error){
-
-// return NextResponse.json(
-// {
-// message:error.message
-// },
-// {
-// status:500
-// }
-// )
-
-// }
-
-// }
-import { connectDB } from "@/lib/db";
-import User from "../../../../models/user";
-import bcrypt from "bcrypt";
-import { createRefreshToken, createAccessToken } from "@/lib/jwt";
-import { NextResponse } from "next/server";
+import { connectDB } from '@/lib/db';
+import User from '../../../../models/user';
+import bcrypt from 'bcrypt';
+import { createRefreshToken, createAccessToken } from '@/lib/jwt';
+import { NextResponse } from 'next/server';
 
 export async function POST(req) {
   try {
     await connectDB();
 
-    const { email, password,name } = await req.json();
+    const { email, password, name } = await req.json();
 
     // Validate input
     if (!email || !password) {
       return NextResponse.json(
-        { message: "Email and password are required." },
-        { status: 400 }
+        { message: 'Email and password are required.' },
+        { status: 400 },
       );
     }
 
@@ -157,8 +23,8 @@ export async function POST(req) {
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "User already exists." },
-        { status: 400 }
+        { message: 'User already exists.' },
+        { status: 400 },
       );
     }
 
@@ -180,7 +46,7 @@ export async function POST(req) {
     await user.save();
 
     const response = NextResponse.json({
-      message: "Signup successful",
+      message: 'Signup successful',
       user: {
         id: user._id,
         email: user.email,
@@ -188,21 +54,21 @@ export async function POST(req) {
     });
 
     // Access Token Cookie
-    response.cookies.set("accessToken", accessToken, {
+    response.cookies.set('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: 60 * 15,
-      path: "/",
+      path: '/',
     });
 
     // Refresh Token Cookie
-    response.cookies.set("refreshToken", refreshToken, {
+    response.cookies.set('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 7,
-      path: "/",
+      path: '/',
     });
 
     return response;
@@ -213,7 +79,7 @@ export async function POST(req) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

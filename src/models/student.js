@@ -1,11 +1,12 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import { refresh } from 'next/cache';
 
 const studentSchema = new mongoose.Schema(
   {
     // Link Student to User
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       unique: true,
     },
@@ -33,7 +34,7 @@ const studentSchema = new mongoose.Schema(
 
     profileImage: {
       type: String,
-      default: "",
+      default: '',
     },
     skills: {
       type: [String],
@@ -51,37 +52,37 @@ const studentSchema = new mongoose.Schema(
 
     department: {
       type: String,
-      default: "",
+      default: '',
     },
 
     program: {
       type: String,
-      default: "",
+      default: '',
     },
 
     currentSemester: {
       type: String,
-      default: "",
+      default: '',
     },
 
     rollNumber: {
       type: String,
-      default: "",
+      default: '',
     },
 
     academicBatch: {
       type: String,
-      default: "",
+      default: '',
     },
 
     lastYear: {
       type: String,
-      default: "",
+      default: '',
     },
 
     specialization: {
       type: String,
-      default: "",
+      default: '',
     },
 
     // =========================
@@ -89,34 +90,35 @@ const studentSchema = new mongoose.Schema(
     // =========================
     linkedin: {
       type: String,
-      default: "",
+      default: '',
     },
 
     github: {
       type: String,
-      default: "",
+      default: '',
     },
 
     portfolio: {
       type: String,
-      default: "",
+      default: '',
     },
 
     resume: {
       type: String,
-      default: "",
+      default: '',
     },
     resumeName: {
       type: String,
-      default: "",
+      default: '',
     },
   },
+
   {
     timestamps: true,
   },
 );
 
 const Student =
-  mongoose.models.Student || mongoose.model("Student", studentSchema);
+  mongoose.models.Student || mongoose.model('Student', studentSchema);
 
 export default Student;

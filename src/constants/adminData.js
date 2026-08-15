@@ -10,7 +10,7 @@ import {
   Plus,
 } from 'lucide-react';
 
-export const NAV_ITEMS = {
+export const adminDashboardData = {
   title: 'Admin Portal',
 
   subtitle: 'Academic Year 2024-25',
@@ -28,7 +28,7 @@ export const NAV_ITEMS = {
     {
       label: 'Students',
       icon: Users,
-      href: '/mentor-dashboard',
+      href: '/admin-dashboard/student',
     },
     {
       label: 'Mentor',
@@ -36,9 +36,9 @@ export const NAV_ITEMS = {
       href: '/mentor-dashboard/applications',
     },
     {
-      label: 'Settings',
-      icon: Settings,
-      href: '/mentor-dashboard/settings',
+      label: 'Tools',
+      icon: FileText,
+      href: '/admin-dashboard/tools',
     },
   ],
 };
@@ -222,5 +222,24 @@ export const MENTOR_COLUMNS = [
         {mentor.mentees}
       </span>
     ),
+  },
+];
+
+export const designationOptions = [
+  {
+    value: 'Assistant Professor',
+    label: 'Assistant Professor',
+  },
+  {
+    value: 'HOD',
+    label: 'HOD',
+  },
+  {
+    value: 'Dean',
+    label: 'Dean',
+  },
+  {
+    value: 'TPO',
+    label: 'TPO',
   },
 ];
