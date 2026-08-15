@@ -1,18 +1,18 @@
 'use client';
 import Sidebar from '@/app/components/elements/sidebar';
-import { NAV_ITEMS } from '@/constants/adminData';
+import { adminDashboardData } from '@/constants/adminData';
 import { useState } from 'react';
 export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100">
+    <div className="min-h-screen">
       <Sidebar
-        sidebarData={NAV_ITEMS}
+        sidebarData={adminDashboardData}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
 
-      <main className="min-w-0 overflow-y-auto flex-1">{children}</main>
+      <main className="min-h-screen lg:ml-64">{children}</main>
     </div>
   );
 }

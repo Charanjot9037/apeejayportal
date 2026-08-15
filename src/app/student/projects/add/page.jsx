@@ -1,5 +1,5 @@
 import React from 'react'
-import AddProjectForm from '@/app/components/AddProjectForm'
+import AddProjectForm from '../../../components/addProjectForm'
 
 const page = () => {
   return (

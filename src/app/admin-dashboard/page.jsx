@@ -24,7 +24,7 @@ export default function AdminDashboardPage() {
           onAction={() => console.log('Pending Approvals')}
         />
         <StatCards cards={STAT_CARDS} />
-        <div className="grid grid-cols-1 mt-4 gap-6 xl:grid-cols-2">
+        <div className="grid grid-cols-1  gap-6 xl:grid-cols-2">
           <Roster
             title="Student Roster"
             data={STUDENTS}

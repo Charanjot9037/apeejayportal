@@ -1,5 +1,5 @@
 'use client';
-
+import { ClipboardCheck } from 'lucide-react';
 export default function DashboardHeader({
   title,
   description,
@@ -23,7 +23,7 @@ export default function DashboardHeader({
           onClick={onAction}
           className="flex items-center gap-2 rounded-lg bg-primary-orange px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#e8641a]"
         >
-          {ActionIcon && <ActionIcon className="h-4 w-4" />}
+          {ClipboardCheck && <ActionIcon className="h-4 w-4" />}
 
           {actionLabel}
         </button>

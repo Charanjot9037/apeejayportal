@@ -14,7 +14,7 @@ export default function Roster({
 }) {
   return (
     <div
-      className={`flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}
+      className={`flex flex-col mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}
     >
       {/* Table Title */}
       <div className="px-5 pt-5">
