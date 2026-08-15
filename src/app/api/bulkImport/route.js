@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
+import { NextResponse } from "next/server";
+import bcrypt from "bcrypt";
 
-import { connectDB } from '@/lib/db';
-import user from '@/models/user';
-import { generateTemporaryPassword } from '@/lib/generatePassword';
+import { connectDB } from "@/lib/db";
+import User from "@/models/user";
+import { generateTemporaryPassword } from "@/lib/generatePassword";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -19,7 +19,7 @@ export async function POST(request) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Students must be an array.',
+          message: "Students must be an array.",
         },
         { status: 400 },
       );
@@ -29,7 +29,7 @@ export async function POST(request) {
       return NextResponse.json(
         {
           success: false,
-          message: 'No students provided.',
+          message: "No students provided.",
         },
         { status: 400 },
       );
@@ -45,20 +45,20 @@ export async function POST(request) {
       const errors = [];
 
       if (!name) {
-        errors.push('Name is required');
+        errors.push("Name is required");
       }
 
       if (!email) {
-        errors.push('Email is required');
+        errors.push("Email is required");
       } else if (!emailRegex.test(email)) {
-        errors.push('Invalid email');
+        errors.push("Invalid email");
       }
 
       if (errors.length > 0) {
         invalidStudents.push({
           row: index + 1,
-          name: name || '',
-          email: email || '',
+          name: name || "",
+          email: email || "",
           errors,
         });
       }
@@ -73,7 +73,7 @@ export async function POST(request) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Some students contain invalid data.',
+          message: "Some students contain invalid data.",
           invalidStudents,
         },
         { status: 400 },
@@ -90,11 +90,9 @@ export async function POST(request) {
 
     const emails = uniqueStudents.map((student) => student.email);
 
-    const existingUsers = await user
-      .find({
-        email: { $in: emails },
-      })
-      .select('email');
+    const existingUsers = await User.find({
+      email: { $in: emails },
+    }).select("email");
 
     const existingEmailSet = new Set(
       existingUsers.map((user) => user.email.toLowerCase()),
@@ -128,24 +126,14 @@ export async function POST(request) {
         name: student.name,
         email: student.email,
         password: hashedPassword,
-        role: 'student',
-        refreshToken: null,
-        provider: 'credentials',
-        googleId: null,
-        image: '',
-      });
-
-      credentials.push({
-        name: student.name,
-        email: student.email,
-        temporaryPassword,
+        role: "student",
       });
     }
 
     let insertedStudents = [];
-
+    console.log(studentsToInsert);
     if (studentsToInsert.length > 0) {
-      insertedStudents = await user.insertMany(studentsToInsert, {
+      insertedStudents = await User.insertMany(studentsToInsert, {
         ordered: false,
       });
     }
@@ -154,7 +142,7 @@ export async function POST(request) {
       {
         success: true,
 
-        message: 'Bulk import completed successfully.',
+        message: "Bulk import completed successfully.",
 
         summary: {
           totalReceived: students.length,
@@ -171,12 +159,12 @@ export async function POST(request) {
       { status: 201 },
     );
   } catch (error) {
-    console.error('Bulk import error:', error);
+    console.error("Bulk import error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to import students.',
+        message: "Failed to import students.",
         error: error.message,
       },
       { status: 500 },

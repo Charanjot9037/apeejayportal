@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
-import * as XLSX from 'xlsx';
-import { CloudUpload } from 'lucide-react';
+import { useState } from "react";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
+import * as XLSX from "xlsx";
+import { CloudUpload } from "lucide-react";
 
 const validationSchema = Yup.object({
   file: Yup.mixed()
-    .required('Please select a file')
-    .test('fileType', 'Only CSV or XLSX files are allowed', (value) => {
+    .required("Please select a file")
+    .test("fileType", "Only CSV or XLSX files are allowed", (value) => {
       if (!value) return false;
 
       const fileName = value.name?.toLowerCase();
 
-      return fileName.endsWith('.csv') || fileName.endsWith('.xlsx');
+      return fileName.endsWith(".csv") || fileName.endsWith(".xlsx");
     }),
 });
 
@@ -32,24 +32,24 @@ const validateStudents = (students) => {
   });
 
   return students.map((student) => {
-    const name = student.name?.toString().trim() || '';
+    const name = student.name?.toString().trim() || "";
 
-    const email = student.email?.toString().trim().toLowerCase() || '';
+    const email = student.email?.toString().trim().toLowerCase() || "";
 
     const errors = [];
 
     if (!name) {
-      errors.push('Name is required');
+      errors.push("Name is required");
     }
 
     if (!email) {
-      errors.push('Email is required');
+      errors.push("Email is required");
     } else if (!emailRegex.test(email)) {
-      errors.push('Invalid email');
+      errors.push("Invalid email");
     }
 
     if (email && emailCount[email] > 1) {
-      errors.push('Duplicate email');
+      errors.push("Duplicate email");
     }
 
     return {
@@ -62,18 +62,18 @@ const validateStudents = (students) => {
 };
 
 const downloadTemplate = () => {
-  const csvContent = 'name,email\n' + 'xyz,xyz@example.com\n';
+  const csvContent = "name,email\n" + "xyz,xyz@example.com\n";
 
   const blob = new Blob([csvContent], {
-    type: 'text/csv;charset=utf-8;',
+    type: "text/csv;charset=utf-8;",
   });
 
   const url = URL.createObjectURL(blob);
 
-  const link = document.createElement('a');
+  const link = document.createElement("a");
 
   link.href = url;
-  link.download = 'student-import-template.csv';
+  link.download = "student-import-template.csv";
 
   document.body.appendChild(link);
 
@@ -91,7 +91,7 @@ export default function BulkImport() {
 
   const [isDragging, setIsDragging] = useState(false);
 
-  const [fileName, setFileName] = useState('');
+  const [fileName, setFileName] = useState("");
 
   const handleFileParse = (file) => {
     if (!file) return;
@@ -105,7 +105,7 @@ export default function BulkImport() {
         const data = event.target.result;
 
         const workbook = XLSX.read(data, {
-          type: 'array',
+          type: "array",
         });
 
         if (!workbook.SheetNames.length) {
@@ -126,7 +126,7 @@ export default function BulkImport() {
         // Move to step 2
         setStep(2);
       } catch (error) {
-        console.error('Error reading file:', error);
+        console.error("Error reading file:", error);
 
         setValidatedStudents([]);
       }
@@ -163,14 +163,14 @@ export default function BulkImport() {
         }));
 
       if (validStudents.length === 0) {
-        alert('No valid students to import.');
+        alert("No valid students to import.");
         return;
       }
 
-      const response = await fetch('/api/bulkImport', {
-        method: 'POST',
+      const response = await fetch("/api/bulkImport", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           students: validStudents,
@@ -180,16 +180,16 @@ export default function BulkImport() {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Import failed:', data);
+        console.error("Import failed:", data);
 
-        alert(data.message || 'Failed to import students.');
+        alert(data.message || "Failed to import students.");
 
         return;
       }
 
-      console.log('Bulk import response:', data);
+      console.log("Bulk import response:", data);
 
-      console.log('Student credentials:', data.credentials);
+      console.log("Student credentials:", data.credentials);
 
       alert(
         `Import successful!\n\n` +
@@ -197,9 +197,9 @@ export default function BulkImport() {
           `Already Exists: ${data.summary.alreadyExists}`,
       );
     } catch (error) {
-      console.error('Bulk import error:', error);
+      console.error("Bulk import error:", error);
 
-      alert('Something went wrong while importing students.');
+      alert("Something went wrong while importing students.");
     }
   };
 
@@ -221,13 +221,13 @@ export default function BulkImport() {
     >
       {({ setFieldValue }) => (
         <Form>
-          <div className="mx-auto mt-8  w-full max-w-3xl h-[600px] rounded-xl border border-slate-200  p-6">
+          <div className="mx-auto mt-8  w-full  h-[600px] rounded-xl border border-slate-200  p-6">
             <div className="mb-8 flex items-center">
               <div
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                   step >= 1
-                    ? 'bg-primary-orange text-white'
-                    : 'bg-slate-200 text-slate-500'
+                    ? "bg-primary-orange text-white"
+                    : "bg-slate-200 text-slate-500"
                 }`}
               >
                 1
@@ -238,8 +238,8 @@ export default function BulkImport() {
               <div
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                   step >= 2
-                    ? 'bg-primary-orange text-white'
-                    : 'bg-slate-200 text-slate-500'
+                    ? "bg-primary-orange text-white"
+                    : "bg-slate-200 text-slate-500"
                 }`}
               >
                 2
@@ -250,8 +250,8 @@ export default function BulkImport() {
               <div
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                   step >= 3
-                    ? 'bg-primary-orange text-white'
-                    : 'bg-slate-200 text-slate-500'
+                    ? "bg-primary-orange text-white"
+                    : "bg-slate-200 text-slate-500"
                 }`}
               >
                 3
@@ -264,7 +264,7 @@ export default function BulkImport() {
 
             {step === 1 && (
               <div>
-                <h2 className="text-xl font-semibold text-slate-800">
+                <h2 className="text-xl font-semibold text-main-blue">
                   Bulk Import Students
                 </h2>
 
@@ -273,35 +273,38 @@ export default function BulkImport() {
                 </p>
 
                 {/* Required format */}
-                <div className="mt-2 rounded-lg bg-slate-50 p-4">
-                  <p className="text-sm font-semibold text-slate-700">
-                    Required file format
-                  </p>
 
-                  <p className="mt-2 text-sm text-slate-500">
-                    Your file must contain the following columns:
-                  </p>
+                <div>
+                  <div className="mt-2 rounded-lg bg-slate-50 p-4">
+                    <p className="text-sm font-semibold text-slate-700">
+                      Required file format
+                    </p>
 
-                  <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-slate-100">
-                        <tr>
-                          <th className="px-4 py-3">Name</th>
+                    <p className="mt-2 text-sm text-slate-500">
+                      Your file must contain the following columns:
+                    </p>
 
-                          <th className="px-4 py-3">Email</th>
-                        </tr>
-                      </thead>
+                    <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-slate-100">
+                          <tr>
+                            <th className="px-4 py-3">Name</th>
 
-                      <tbody>
-                        <tr className="border-t">
-                          <td className="px-4 py-3 font-medium">
-                            Simran Bhandari
-                          </td>
+                            <th className="px-4 py-3">Email</th>
+                          </tr>
+                        </thead>
 
-                          <td className="px-4 py-3"> Simran@example.com</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                        <tbody>
+                          <tr className="border-t">
+                            <td className="px-4 py-3 font-medium">
+                              studnet name
+                            </td>
+
+                            <td className="px-4 py-3"> xyz@gmail.com</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
 
@@ -310,7 +313,7 @@ export default function BulkImport() {
                 <button
                   type="button"
                   onClick={downloadTemplate}
-                  className="mt-4 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className="mt-4 rounded-lg border bg-primary-orange px-4 py-2 text-sm font-medium text-white hover:text-primary-orange hover:bg-slate-50"
                 >
                   Download Template
                 </button>
@@ -332,14 +335,14 @@ export default function BulkImport() {
                     const file = event.dataTransfer.files?.[0];
 
                     if (file) {
-                      setFieldValue('file', file);
+                      setFieldValue("file", file);
                       handleFileParse(file);
                     }
                   }}
                   className={`mt-5 flex h-[150px] flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition ${
                     isDragging
-                      ? 'border-primary-orange bg-orange-50'
-                      : 'border-slate-300 bg-slate-50'
+                      ? "border-primary-orange bg-orange-50"
+                      : "border-slate-300 bg-slate-50"
                   }`}
                 >
                   {/* Cloud - Clickable */}
@@ -371,7 +374,7 @@ export default function BulkImport() {
 
                       if (!file) return;
 
-                      setFieldValue('file', file);
+                      setFieldValue("file", file);
                       handleFileParse(file);
                     }}
                   />
@@ -450,16 +453,16 @@ export default function BulkImport() {
                               onChange={(event) =>
                                 handleStudentChange(
                                   index,
-                                  'name',
+                                  "name",
                                   event.target.value,
                                 )
                               }
                               className={`w-full rounded-md border px-3 py-2 outline-none ${
                                 student.errors.some((error) =>
-                                  error.includes('Name'),
+                                  error.includes("Name"),
                                 )
-                                  ? 'border-red-400'
-                                  : 'border-slate-300'
+                                  ? "border-red-400"
+                                  : "border-slate-300"
                               }`}
                             />
                           </td>
@@ -471,18 +474,18 @@ export default function BulkImport() {
                               onChange={(event) =>
                                 handleStudentChange(
                                   index,
-                                  'email',
+                                  "email",
                                   event.target.value,
                                 )
                               }
                               className={`w-full rounded-md border px-3 py-2 outline-none ${
                                 student.errors.some(
                                   (error) =>
-                                    error.includes('email') ||
-                                    error.includes('Email'),
+                                    error.includes("email") ||
+                                    error.includes("Email"),
                                 )
-                                  ? 'border-red-400'
-                                  : 'border-slate-300'
+                                  ? "border-red-400"
+                                  : "border-slate-300"
                               }`}
                             />
                           </td>
@@ -499,7 +502,7 @@ export default function BulkImport() {
                                 </span>
 
                                 <div className="mt-1 text-xs text-red-500">
-                                  {student.errors.join(', ')}
+                                  {student.errors.join(", ")}
                                 </div>
                               </div>
                             )}
