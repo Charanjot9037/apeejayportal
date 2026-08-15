@@ -1,16 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import BulkImport from '@/app/components/bulkImport';
+import BulkImport from '@/app/components/admin/bulkImport';
+import AddMentor from '../../components/admin/addMentorCard';
 
 const AddStudent = () => {
   const [activeTab, setActiveTab] = useState('student');
   const [showBulkImport, setShowBulkImport] = useState(false);
+  const [showAddMentor, setShowAddMentor] = useState(false);
 
   return (
     <div className="p-6">
       {/* Tabs */}
-      <div className="flex gap-2 border-b mb-6">
+      <div className="mb-6 flex gap-2 border-b">
         <button
           onClick={() => {
             setActiveTab('student');
@@ -46,9 +48,9 @@ const AddStudent = () => {
           {!showBulkImport ? (
             <button
               onClick={() => setShowBulkImport(true)}
-              className="px-6 py-3 bg-orange-500 text-white rounded-md hover:bg-orange-600"
+              className="rounded-md bg-orange-500 px-6 py-3 text-white hover:bg-orange-600"
             >
-              Bulk Import
+              Add Student
             </button>
           ) : (
             <BulkImport />
@@ -58,7 +60,18 @@ const AddStudent = () => {
 
       {/* Teacher Tab */}
       {activeTab === 'teacher' && (
-        <div>{/* Teacher content will be added later */}</div>
+        <div>
+          {!showAddMentor ? (
+            <button
+              onClick={() => setShowAddMentor(true)}
+              className="rounded-md bg-orange-500 px-6 py-3 text-white hover:bg-orange-600"
+            >
+              Add Mentor
+            </button>
+          ) : (
+            <AddMentor />
+          )}
+        </div>
       )}
     </div>
   );

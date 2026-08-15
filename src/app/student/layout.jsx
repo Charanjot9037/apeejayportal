@@ -8,7 +8,6 @@ export default function MentorLayout({ children }) {
 
   return (
     <div className="flex h-full bg-slate-100">
-      {/* <StudentProfileCard strength={dashboardStats.profileStrength} /> */}
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}

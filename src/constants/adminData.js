@@ -224,3 +224,22 @@ export const MENTOR_COLUMNS = [
     ),
   },
 ];
+
+export const designationOptions = [
+  {
+    value: 'Assistant Professor',
+    label: 'Assistant Professor',
+  },
+  {
+    value: 'HOD',
+    label: 'HOD',
+  },
+  {
+    value: 'Dean',
+    label: 'Dean',
+  },
+  {
+    value: 'TPO',
+    label: 'TPO',
+  },
+];

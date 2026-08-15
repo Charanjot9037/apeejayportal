@@ -641,7 +641,7 @@ export default function BulkImport() {
                 </div>
 
                 {/* FOOTER - Fixed */}
-                <div className="mt-5 shrink-0 border-t border-slate-200 pt-4">
+                <div className="p-4">
                   <div className="flex justify-end gap-3">
                     {/* Back to Step 2 */}
                     <button

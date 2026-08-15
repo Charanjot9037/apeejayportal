@@ -6,7 +6,7 @@ import {
   MENTOR_STUDENT_COLUMNS,
 } from '@/constants/mentorData';
 import { ClipboardCheck } from 'lucide-react';
-import BulkImport from '../components/bulkImport';
+import BulkImport from '../components/admin/bulkImport';
 
 export default function MentorDashboard() {
   return (
