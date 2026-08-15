@@ -167,7 +167,7 @@ export default function BulkImport() {
         return;
       }
 
-      const response = await fetch("/api/bulkImport", {
+      const response = await fetch("/api/admin/bulkImport", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -220,9 +220,9 @@ export default function BulkImport() {
       onSubmit={() => {}}
     >
       {({ setFieldValue }) => (
-        <Form>
-          <div className="mx-auto mt-8  w-full  h-[600px] rounded-xl border border-slate-200  p-6">
-            <div className="mb-8 flex items-center">
+        <Form className="py-4">
+          <div className="mx-auto   w-full  bg-white rounded-xl border border-slate-200  p-6">
+            <div className="mb-8 flex bg-white items-center">
               <div
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                   step >= 1
