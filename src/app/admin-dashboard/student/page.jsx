@@ -3,7 +3,7 @@
 const page = () => {
   return (
     <div>
-      studnet page
+      studnet page hhhai
     </div>
   )
 }
