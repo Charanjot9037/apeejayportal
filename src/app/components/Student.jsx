@@ -1,13 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { TrendingUp, CheckCircle2, Plus, Eye } from 'lucide-react';
+import { Plus, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { STD_CARDS } from "@/constants/studentdashboard";
+
 import { StatCards } from './elements';
 import { DashboardHeader } from './elements';
-import { ClipboardCheck } from 'lucide-react';
+
 import Link from 'next/link';
 
 import { useSelector } from 'react-redux';
@@ -15,6 +15,8 @@ import {
   projects as initialProjects,
   events,
   statusStyles,
+  STD_CARDS,
+  STUDENT_DASHBOARD_HEADER,
   dashboardStats,
 } from '@/constants/studentdashboard';
 function cn(...classes) {
@@ -93,11 +95,8 @@ export default function DashboardContent() {
       <div className=" ">
         {/* Header */}
         <DashboardHeader
-          title="Student Dashboard"
-          description="Overview of institutional metrics and student management."
-          actionLabel="12 Pending Approvals"
-          actionIcon={ClipboardCheck}
-          onAction={() => console.log("Pending Approvals")}
+          {...STUDENT_DASHBOARD_HEADER}
+          onAction={() => console.log('View My Profile')}
         />
         {/* <DashboardCards /> */}
         <StatCards cards={STD_CARDS} />
@@ -107,8 +106,6 @@ export default function DashboardContent() {
 
           {/* Right column */}
           <div className="flex flex-col  gap-5 lg:col-span-4">
-           
-
             <Card className="flex-1">
               <CardContent>
                 <div className=" flex border-b-2 p-1 items-center justify-between">
@@ -154,7 +151,7 @@ export default function DashboardContent() {
                           <Badge
                             className={
                               statusStyles[project.status] ||
-                              "bg-slate-100 text-slate-600"
+                              'bg-slate-100 text-slate-600'
                             }
                           >
                             {project.status}
@@ -189,7 +186,7 @@ export default function DashboardContent() {
               <blockquote className="rounded-lg border-l-4 border-orange-400 bg-slate-50 p-4 text-sm italic text-slate-600">
                 {dashboardStats.mentorFeedback.message}
                 <footer className="mt-2 text-xs font-medium not-italic text-orange-500">
-                  — {dashboardStats.mentorFeedback.mentor}{" "}
+                  — {dashboardStats.mentorFeedback.mentor}{' '}
                 </footer>
               </blockquote>
             </CardContent>
@@ -205,10 +202,10 @@ export default function DashboardContent() {
                   <div key={event.title} className="flex items-center gap-3">
                     <div
                       className={cn(
-                        "flex h-12 w-12 flex-col items-center justify-center rounded-lg text-xs font-semibold",
+                        'flex h-12 w-12 flex-col items-center justify-center rounded-lg text-xs font-semibold',
                         event.highlighted
-                          ? "bg-orange-500 text-white"
-                          : "bg-slate-100 text-slate-600",
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-slate-100 text-slate-600',
                       )}
                     >
                       <span className="text-[10px] uppercase">
