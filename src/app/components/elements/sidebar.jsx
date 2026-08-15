@@ -40,10 +40,11 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
         setSidebarOpen={setSidebarOpen}
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col bg-primary-orange p-5 text-white transition-transform duration-200 lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
+  className={`fixed inset-y-0 left-0 z-40 flex h-screen overflow-hidden w-64 shrink-0 flex-col bg-primary-orange p-5 text-white transition-transform duration-200
+    lg:static lg:h-screen lg:translate-x-0
+    ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+  `}
+>
         <div className=" py-5 flex flex-col gap-2 items-center border-b">
           <div className=" flex  items-center  justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
             {profileUrl ? (
