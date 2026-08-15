@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
-import AddProjectForm from "@/app/components/AddProjectForm";
+import AddProjectForm from "@/app/components/addProjectForm"
 
 export default function EditProjectPage() {
   const params = useParams();
