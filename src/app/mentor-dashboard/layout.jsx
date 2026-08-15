@@ -7,14 +7,14 @@ export default function MentorLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div className="flex h-screen overflow-hidden bg-slate-100">
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         sidebarData={mentorDashboardData}
       />
 
-      <main className="min-w-0 flex-1">{children}</main>
+      <main className="min-w-0 overflow-y-auto flex-1">{children}</main>
     </div>
   );
 }

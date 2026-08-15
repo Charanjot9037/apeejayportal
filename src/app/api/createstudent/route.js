@@ -8,48 +8,42 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    const {
-      fullName,
-      phone,
-      gender,
-      address,
-      profileImage,
-    } = body;
+    const { fullName, phone, gender, address, profileImage } = body;
 
-     const auth = await authenticateUser();
-    
-      if (!auth.success) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: auth.message,
-          },
-          {
-            status: auth.status,
-          },
-        );
-      }
-        const user = auth.user;
-        const userId = user._id;
-      if (user.role !== "student") {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Access denied. Students only are allowed.",
-          },
-          {
-            status: 403,
-          },
-        );
-      }
-    
+    const auth = await authenticateUser();
+
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        {
+          status: auth.status,
+        },
+      );
+    }
+    const user = auth.user;
+    const userId = user._id;
+    if (user.role !== "student") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Access denied. Students only are allowed.",
+        },
+        {
+          status: 403,
+        },
+      );
+    }
+
     if (!userId) {
       return NextResponse.json(
         {
           success: false,
           message: "User ID is required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -62,7 +56,7 @@ export async function POST(request) {
           success: false,
           message: "Student profile already exists",
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -80,7 +74,7 @@ export async function POST(request) {
         success: true,
         message: "Student profile created successfully",
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Create student error:", error);
@@ -90,13 +84,10 @@ export async function POST(request) {
         success: false,
         message: "Failed to create student profile",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-
-
-
 
 export async function PATCH(req) {
   try {
@@ -114,6 +105,8 @@ export async function PATCH(req) {
         },
       );
     }
+    const user = auth.user;
+    const userId = user._id;
     if (!userId) {
       return NextResponse.json(
         {
@@ -124,8 +117,6 @@ export async function PATCH(req) {
       );
     }
 
-    const user = auth.user;
-    const userId = user._id;
     const { section, data } = await req.json();
 
     if (!section || !data) {

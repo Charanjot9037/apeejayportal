@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "./provider";
+import { Toaster } from "sonner";
 import "./globals.css";
 import ConditionalNavbar from "./components/elements/ConditionalNavbar";
 import ConditionalFooter from "./components/elements/ConditionalFooter";
@@ -29,7 +30,8 @@ export default function RootLayout({ children }) {
   <Providers>
     <ConditionalNavbar />                  
     <div className="flex-1">
-      {children}                       {/* MentorLayout renders here */}
+      {children}  
+      <Toaster richColors position="top-right" />                     {/* MentorLayout renders here */}
     </div>
     <ConditionalFooter/>
   </Providers>

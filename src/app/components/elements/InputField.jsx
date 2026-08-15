@@ -1,13 +1,14 @@
-import { Label,Input } from "@/components/ui";
-const InputField=({
+import { Label, Input } from "@/components/ui";
+const InputField = ({
   label,
   name,
   required,
+  disabled,
   type = "text",
   placeholder,
   formik,
   error,
-}) =>{
+}) => {
   return (
     <div>
       <Label
@@ -15,13 +16,14 @@ const InputField=({
         className="mb-1.5 block text-xs font-medium text-gray-500"
       >
         {label}
-        {required && ( <span className="ml-1 text-main-blue">*</span> )}
+        {required && <span className="ml-1 text-main-blue">*</span>}
       </Label>
 
       <Input
         id={name}
         name={name}
         type={type}
+        disabled={disabled}
         placeholder={placeholder}
         value={formik.values[name]}
         onChange={formik.handleChange}
@@ -33,13 +35,9 @@ const InputField=({
         }`}
       />
 
-      {error && (
-        <p className="mt-1 text-xs text-red-500">
-          {error}
-        </p>
-      )}
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
-}
+};
 
 export default InputField;

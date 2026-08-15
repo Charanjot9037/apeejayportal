@@ -1,10 +1,8 @@
-import { resume } from "react-dom/server";
-
 export function mapStudentToProfile(student) {
   if (!student) {
     return null;
   }
-
+  const complete = calculateProfileCompletion(student);
   return {
     // =========================
     // PERSONAL INFORMATION
@@ -15,6 +13,7 @@ export function mapStudentToProfile(student) {
       department: student.department || "",
       academicBatch: student.academicBatch || "",
       lastYear: student.lastYear || "",
+      completion: complete,
     },
     personal: {
       fullName: student.fullName || "",
@@ -55,7 +54,7 @@ export function mapStudentToProfile(student) {
       rollNumber: student.rollNumber || "",
       academicBatch: student.academicBatch || "",
       lastYear: student.lastYear || "",
-      specialiZation: student.specialiZation || "",
+      specialization: student.specialization || "",
     },
 
     // =========================
@@ -73,4 +72,58 @@ export function mapStudentToProfile(student) {
       resumeName: student.resumeName || " ",
     },
   };
+}
+
+export function calculateProfileCompletion(student) {
+  if (!student) {
+    return 0;
+  }
+
+  const fields = [
+    // Personal Information
+    student.fullName,
+    student.profileImage,
+    student.department,
+    student.academicBatch,
+    student.lastYear,
+    student.phone,
+    student.gender,
+    student.email,
+    student.address,
+
+    // Skills & Interests
+    student.skills?.length > 0,
+    student.interests?.length > 0,
+
+    // Academic Information
+    student.program,
+    student.currentSemester,
+    student.rollNumber,
+    student.specialization,
+
+    // Online Profiles
+    student.linkedin,
+    student.github,
+    student.portfolio,
+
+    // Resume
+    student.resume,
+    student.resumeName,
+  ];
+
+  const completedFields = fields.filter((field) => {
+    if (Array.isArray(field)) {
+      return field.length > 0;
+    }
+
+    if (typeof field === "boolean") {
+      return field;
+    }
+
+    return field !== null && field !== undefined && String(field).trim() !== "";
+  }).length;
+
+  const completion = Math.round((completedFields / fields.length) * 100);
+
+  return Math.min(100, Math.max(0, completion));
 }
