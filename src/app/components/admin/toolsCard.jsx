@@ -8,9 +8,9 @@ const ToolsCard = () => {
   const [activeTab, setActiveTab] = useState("student");
 
   return (
-    <div className="p-6">
+    <div className="p-3">
       {/* Tabs */}
-      <div className="mb-6 flex gap-2 border-b">
+      <div className=" flex gap-2 border-b">
         <button
           onClick={() => {
             setActiveTab("student");

@@ -1,12 +1,3 @@
-// src/constants/dashboardData.js
-import {
-  GraduationCap,
-  UserRound,
-  CalendarClock,
-  ArrowUpRight,
-  Plus,
-} from 'lucide-react';
-import { FolderKanban, Clock3, Send } from "lucide-react";
 export const projects = [
   {
     title: 'AI-Powered Supply Chain Optimizer',
@@ -63,97 +54,41 @@ export const dashboardStats = {
   },
 };
 
-export const STAT_CARDS = [
+export const STD_CARDS = [
   {
     id: 'students',
     title: 'Total Students',
     value: '4,250',
-    icon: GraduationCap,
-    iconBg: 'bg-[#1c3a5e]',
-    iconColor: 'text-white',
+    icon: 'GraduationCap',
     description: '+12% this year',
-    descriptionColor: 'text-emerald-600',
-    trendIcon: ArrowUpRight,
   },
 
   {
     id: 'mentors',
     title: 'Total Mentors',
     value: '185',
-    icon: UserRound,
-    iconBg: 'bg-orange-100',
-    iconColor: 'text-[#f2792a]',
+    icon: 'UserRound',
     description: 'Across 15 departments',
-    descriptionColor: 'text-slate-400',
   },
 
   {
     id: 'recruiters',
     title: 'Active Recruiters',
     value: '342',
-    icon: CalendarClock,
-    iconBg: 'bg-slate-200',
-    iconColor: 'text-slate-600',
+    icon: 'CalendarClock',
     description: '45 new this month',
-    descriptionColor: 'text-emerald-600',
-    trendIcon: Plus,
   },
 
   {
     id: 'placement-rate',
     title: 'Placement Rate',
     value: '88%',
-    progress: 88,
-    progressColor: 'bg-[#f2792a]',
-    target: 'Target: 95%',
+    icon: null,
+    description: 'Target: 95%',
   },
 ];
-
-export const STD_CARDS = [
-  {
-    id: "projects",
-    title: "Total Projetcs",
-    value: "4,250",
-    icon: FolderKanban,
-    iconBg: "bg-[#1c3a5e]",
-    iconColor: "text-white",
-    description: "+12% this year",
-    descriptionColor: "text-emerald-600",
-    trendIcon: ArrowUpRight,
-  },
-
-  {
-    id: "Pending Projects",
-    title: "Pending Projects",
-    value: "185",
-    icon: Clock3,
-    iconBg: "bg-orange-100",
-    iconColor: "text-[#f2792a]",
-    description: "Across 15 departments",
-    descriptionColor: "text-slate-400",
-  },
-
-  {
-    id: "Under Review",
-    title: "Under Review",
-    value: "342",
-    icon: CalendarClock,
-    iconBg: "bg-slate-200",
-    iconColor: "text-slate-600",
-    description: "45 new this month",
-    descriptionColor: "text-emerald-600",
-    trendIcon: Plus,
-  },
-
-  {
-    id: "Submitted",
-    title: "submitted",
-    value: "2",
-    icon: Send,
-    iconBg: "bg-green-100",
-    progressColor: "bg-[#f2792a]",
-    description: "Uploaded on website",
-    descriptionColor: "text-emerald-600",
-    target: "Target: 95%",
-  },
-];
+export const STUDENT_DASHBOARD_HEADER = {
+  title: 'Student Dashboard',
+  description: 'Track your academic progress, projects, and career journey.',
+  actionLabel: 'View My Profile',
+};

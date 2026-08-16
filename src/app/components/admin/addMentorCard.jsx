@@ -1,117 +1,211 @@
-'use client';
+"use client";
 
-import { useFormik } from 'formik';
-import { mentorValidationSchema } from '@/validations/admin/mentorValidationSchema';
-
-import { designationOptions } from '@/constants/adminData';
-import { Button } from '@/components/ui';
+import { useState } from "react";
+import { useFormik } from "formik";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  UserRound,
+  Mail,
+  Phone,
+  Building2,
+  BriefcaseBusiness,
+} from "lucide-react";
 
-import InputField from '../elements/InputField';
-import SelectField from '../elements/SelectFiled';
+import { mentorValidationSchema } from "@/validations/admin/mentorValidationSchema";
+
+import { Card, CardContent } from "@/components/ui/card";
+
+import InputField from "../elements/InputField";
+import SelectField from "../elements/SelectFiled";
+import { DashboardHeader } from "../elements";
 
 const AddMentor = () => {
+  const [loading, setLoading] = useState(false);
+
   const formik = useFormik({
     initialValues: {
-      name: '',
-      email: '',
-      mobileNumber: '',
-      designation: '',
+      name: "",
+      email: "",
+      mobileNumber: "",
+      department: "",
+      designation: "",
     },
 
     validationSchema: mentorValidationSchema,
-    onSubmit: (values) => {
-      console.log('Mentor Form Values:', values);
+
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        setLoading(true);
+
+        const response = await fetch("/api/admin/creatementor", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to create mentor");
+        }
+
+        console.log("Mentor created:", data);
+
+        alert("Mentor added successfully");
+
+        resetForm();
+      } catch (error) {
+        console.error("Add mentor error:", error);
+
+        alert(error.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
     },
   });
 
+  const getError = (field) => {
+    return formik.touched[field] && formik.errors[field]
+      ? formik.errors[field]
+      : "";
+  };
+
   return (
-    <div className="flex items-center justify-center   px-4 py-8">
-      <Card className="w-full max-w-xl border border-primary-orange  shadow-sm">
-        <CardHeader className="border-b  border-primary-orange  ">
-          <CardTitle className="text-lg  text-primary-orange font-semibold">
-            Add Mentor
-          </CardTitle>
+    <div className="min-h-full py-4">
+      <div className="mx-auto w-full rounded-sm border bg-white p-6 flex flex-col gap-3">
+        {/* Header */}
+        <div>
+          <DashboardHeader
+            title="Add New Mentor"
+            description="Enter the details below to register a new mentor into the system."
+          />
+        </div>
 
-          <CardDescription className="text-xs text-black">
-            Enter the mentor's details below.
-          </CardDescription>
-        </CardHeader>
+        <Card className="w-full rounded-sm ">
+          <CardContent>
+            <form
+              onSubmit={formik.handleSubmit}
+              className=" flex flex-col gap-3"
+            >
+              <div className="flex gap-3 flex-col md:flex-row ">
+                <div className="w-full md:w-1/2">
+                  <InputField
+                    label="Full Name"
+                    name="name"
+                    required
+                    type="text"
+                    placeholder="e.g. Dr. Sarah Jenkins"
+                    formik={formik}
+                    icon={<UserRound size={13} />}
+                    error={getError("name")}
+                  />
+                </div>
+                <div className="w-full md:w-1/2">
+                  <InputField
+                    label="Email Address"
+                    name="email"
+                    required
+                    type="email"
+                    placeholder="sarah.jenkins@university.edu"
+                    formik={formik}
+                    icon={<Mail size={13} />}
+                    error={getError("email")}
+                  />
+                </div>
+              </div>
 
-        <CardContent className="pt-6">
-          <form onSubmit={formik.handleSubmit} className="space-y-5">
-            <InputField
-              label="Name"
-              name="name"
-              required
-              placeholder="Enter mentor name"
-              formik={formik}
-              error={
-                formik.touched.name && formik.errors.name
-                  ? formik.errors.name
-                  : ''
-              }
-            />
+              {/* Mobile + Department */}
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="w-full md:w-1/2">
+                  <InputField
+                    label="Mobile Number"
+                    name="mobileNumber"
+                    required
+                    type="tel"
+                    placeholder="+1 (555) 000-0000"
+                    formik={formik}
+                    icon={<Phone size={13} />}
+                    error={getError("mobileNumber")}
+                  />
+                </div>
+                <div className="w-full md:w-1/2">
+                  <SelectField
+                    label="Department"
+                    name="department"
+                    required
+                    value={formik.values.department}
+                    onChange={(value) =>
+                      formik.setFieldValue("department", value)
+                    }
+                    onBlur={() => formik.setFieldTouched("department", true)}
+                    error={getError("department")}
+                    icon={<Building2 size={13} />}
+                    options={[
+                      {
+                        value: "Information Technology",
+                        label: "Information Technology",
+                      },
+                      {
+                        value: "Management",
+                        label: "Management",
+                      },
+                      {
+                        value: "Engineering",
+                        label: "Engineering",
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
 
-            <InputField
-              label="Email"
-              name="email"
-              type="email"
-              required
-              placeholder="Enter mentor email"
-              formik={formik}
-              error={
-                formik.touched.email && formik.errors.email
-                  ? formik.errors.email
-                  : ''
-              }
-            />
+              <SelectField
+                label="Designation / Role"
+                name="designation"
+                required
+                value={formik.values.designation}
+                onChange={(value) => formik.setFieldValue("designation", value)}
+                onBlur={() => formik.setFieldTouched("designation", true)}
+                error={getError("designation")}
+                icon={<BriefcaseBusiness size={13} />}
+                options={[
+                  {
+                    value: "ASSISTANT-PROFESSOR",
+                    label: "Assistant professor",
+                  },
+                  {
+                    value: "HOD",
+                    label: "HOD",
+                  },
+                  {
+                    value: "DEAN",
+                    label: "Dean",
+                  },
+                  {
+                    value: "DIRECTOR",
+                    label: "Director",
+                  },
+                  {
+                    value: "Engineer",
+                    label: "Engineer",
+                  },
+                ]}
+              />
 
-            <InputField
-              label="Mobile Number"
-              name="mobileNumber"
-              type="tel"
-              required
-              placeholder="Enter 10-digit mobile number"
-              formik={formik}
-              error={
-                formik.touched.mobileNumber && formik.errors.mobileNumber
-                  ? formik.errors.mobileNumber
-                  : ''
-              }
-            />
-
-            <SelectField
-              label="Designation"
-              name="designation"
-              value={formik.values.designation}
-              onChange={(value) => formik.setFieldValue('designation', value)}
-              onBlur={() => formik.setFieldTouched('designation', true)}
-              error={
-                formik.touched.designation && formik.errors.designation
-                  ? formik.errors.designation
-                  : ''
-              }
-              options={designationOptions}
-            />
-
-            <div className="flex justify-end pt-3">
-              <Button
-                type="submit"
-                className="h-9 rounded-md bg-primary-orange px-6 text-sm font-medium text-white transition-colors hover:bg-orange-600 focus:ring-2 focus:ring-orange-500/20"
-              >
-                Add Mentor
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+              {/* Submit */}
+              <div className="flex p-4 justify-end">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="rounded-lg bg-primary-orange px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading ? "Adding..." : "Add Mentor"}
+                </button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

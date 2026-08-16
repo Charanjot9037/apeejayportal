@@ -90,7 +90,6 @@ export async function PATCH(req) {
           phone: data.phone,
           gender: data.gender,
           address: data.address,
-          profileImage: data.profileImage || "",
         };
         break;
 
