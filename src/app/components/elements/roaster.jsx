@@ -1,6 +1,7 @@
 'use client';
 
 import { Search, ChevronRight } from 'lucide-react';
+import Avatar from './avatar';
 
 export default function Roster({
   title = 'Roster',
@@ -9,21 +10,52 @@ export default function Roster({
   searchPlaceholder = 'Search...',
   onRowClick,
   onViewAll,
-  viewAllLabel = 'View All',
-  className,
+  className = '',
 }) {
+  const renderCell = (column, item) => {
+    if (column.key === 'name') {
+      return (
+        <div className="flex items-center gap-3">
+          <Avatar name={item.name} />
+
+          <div>
+            <p className="font-semibold text-slate-700">{item.name}</p>
+
+            <p className="text-xs text-slate-400">{item.id}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (column.key === 'status') {
+      return (
+        <span
+          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+            item.status === 'Placed'
+              ? 'bg-emerald-50 text-emerald-600'
+              : item.status === 'Looking'
+                ? 'bg-orange-50 text-orange-primary'
+                : 'bg-slate-100 text-slate-600'
+          }`}
+        >
+          {item.status}
+        </span>
+      );
+    }
+
+    return item[column.key];
+  };
+
   return (
     <div
-      className={`flex flex-col mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}
+      className={`mt-4 flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}
     >
-      {/* Table Title */}
       <div className="px-5 pt-5">
         <h2 className="text-lg font-bold text-[#1c3a5e]">{title}</h2>
 
         <div className="mt-1 h-0.5 w-8 bg-primary-orange" />
       </div>
 
-      {/* Search */}
       <div className="px-5 pt-4">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -36,10 +68,8 @@ export default function Roster({
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="mt-4 w-full min-w-[600px] text-left text-sm">
-          {/* Dynamic Table Headings */}
           <thead>
             <tr className="border-y border-slate-100 text-xs uppercase tracking-wide text-slate-400">
               {columns.map((column) => (
@@ -48,12 +78,10 @@ export default function Roster({
                 </th>
               ))}
 
-              {/* Dynamic Action Heading */}
               <th className="px-5 py-2 text-right font-medium">Action</th>
             </tr>
           </thead>
 
-          {/* Table Body */}
           <tbody>
             {data.map((item, index) => (
               <tr
@@ -62,11 +90,10 @@ export default function Roster({
               >
                 {columns.map((column) => (
                   <td key={column.key} className="px-2 py-3 text-slate-600">
-                    {column.render ? column.render(item) : item[column.key]}
+                    {renderCell(column, item)}
                   </td>
                 ))}
 
-                {/* Action */}
                 <td className="px-5 py-3 text-right">
                   <button
                     type="button"
@@ -82,13 +109,12 @@ export default function Roster({
         </table>
       </div>
 
-      {/* View All */}
       <button
         type="button"
         onClick={onViewAll}
         className="mt-auto rounded-b-xl border-t border-slate-100 py-3 text-center text-sm font-semibold text-[#1c3a5e] hover:bg-slate-50"
       >
-        {viewAllLabel}
+        View All
       </button>
     </div>
   );

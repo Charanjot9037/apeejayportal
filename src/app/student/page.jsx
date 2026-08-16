@@ -1,4 +1,4 @@
-import React from 'react'
+
 import Student from '../components/Student'
 const page = () => {
   return (

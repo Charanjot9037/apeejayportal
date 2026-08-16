@@ -1,5 +1,5 @@
 import React from 'react'
-import ProjectDetail from '@/app/components/ProjectDetail'
+import ProjectDetail from '../../../components/projectDetail/index'
 const page = () => {
   return (
     <div><ProjectDetail/></div>
