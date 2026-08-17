@@ -47,12 +47,12 @@ export default function AddProjectForm({ mode = "create", project = null }) {
             removeTechnology={removeTechnology}
           />
 
-          <CollaborationSection
+           <CollaborationSection
             formik={formik}
             addTeamMember={addTeamMember}
             removeTeamMember={removeTeamMember}
             getTeamError={getTeamError}
-          />
+          /> 
 
           <ProjectImagesSection formik={formik} isEdit={isEdit} />
 

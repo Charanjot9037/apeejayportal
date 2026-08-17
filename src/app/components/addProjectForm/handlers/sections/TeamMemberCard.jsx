@@ -43,34 +43,6 @@ export default function TeamMemberCard({
           onChange={(value) => onFieldChange(index, "name", value)}
           onBlur={() => onFieldBlur(index, "name")}
         />
-
-        <TeamInput
-          label="Enrollment / Student ID"
-          required
-          value={member.enrollment}
-          placeholder="Enter enrollment number"
-          error={getTeamError(index, "enrollment")}
-          onChange={(value) => onFieldChange(index, "enrollment", value)}
-          onBlur={() => onFieldBlur(index, "enrollment")}
-        />
-
-        <TeamInput
-          label="Email"
-          type="email"
-          value={member.email}
-          placeholder="member@example.com"
-          error={getTeamError(index, "email")}
-          onChange={(value) => onFieldChange(index, "email", value)}
-          onBlur={() => onFieldBlur(index, "email")}
-        />
-
-        <TeamInput
-          label="Role / Contribution"
-          value={member.role}
-          placeholder="e.g. Frontend Developer"
-          onChange={(value) => onFieldChange(index, "role", value)}
-          onBlur={() => onFieldBlur(index, "role")}
-        />
       </div>
     </div>
   );

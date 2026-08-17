@@ -67,113 +67,112 @@ export const validationSchema = Yup.object({
             .email("Enter a valid email"),
 
           role: Yup.string().trim().nullable(),
-        })
+        }),
       ),
 
     otherwise: (schema) => schema,
   }),
 
-  projectImages: Yup.array()
-    .test(
-      "max-images",
-      `Maximum ${MAX_PROJECT_IMAGES} images are allowed`,
-      (files) => {
-        if (!files) return true;
+  projectImages: Yup.array(),
+  // .test(
+  //   "max-images",
+  //   `Maximum ${MAX_PROJECT_IMAGES} images are allowed`,
+  //   (files) => {
+  //     if (!files) return true;
 
-        return files.length <= MAX_PROJECT_IMAGES;
-      }
-    )
-    .test(
-      "image-types",
-      "Only JPG, JPEG, PNG and WEBP images are allowed",
-      (files) => {
-        if (!files || files.length === 0) {
-          return true;
-        }
+  //     return files.length <= MAX_PROJECT_IMAGES;
+  //   }
+  // )
+  // .test(
+  //   "image-types",
+  //   "Only JPG, JPEG, PNG and WEBP images are allowed",
+  //   (files) => {
+  //     if (!files || files.length === 0) {
+  //       return true;
+  //     }
 
-        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  //     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-        return files.every((file) => {
-          if (!file?.type) return false;
+  //     return files.every((file) => {
+  //       if (!file?.type) return false;
 
-          return allowedTypes.includes(file.type);
-        });
-      }
-    )
-    .test(
-      "image-size",
-      "Each project image must be smaller than 5MB",
-      (files) => {
-        if (!files || files.length === 0) {
-          return true;
-        }
+  //       return allowedTypes.includes(file.type);
+  //     });
+  //   }
+  // )
+  // .test(
+  //   "image-size",
+  //   "Each project image must be smaller than 5MB",
+  //   (files) => {
+  //     if (!files || files.length === 0) {
+  //       return true;
+  //     }
 
-        return files.every((file) => file.size <= MAX_IMAGE_SIZE);
-      }
-    ),
-
+  //     return files.every((file) => file.size <= MAX_IMAGE_SIZE);
+  //   }
+  // ),
   presentationFile: Yup.mixed()
-    .nullable()
-    .test("presentation-type", "Only PPT and PPTX files are allowed", (file) => {
-      if (isEmptyFile(file)) {
-        return true;
-      }
+    // .nullable()
+    // .test(
+    //   "presentation-type",
+    //   "Only PPT and PPTX files are allowed",
+    //   (file) => {
+    //     if (isEmptyFile(file)) {
+    //       return true;
+    //     }
 
-      const fileName = file.name?.toLowerCase() || "";
+    //     const fileName = file.name?.toLowerCase() || "";
 
-      return (
-        file.type === "application/vnd.ms-powerpoint" ||
-        file.type ===
-          "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
-        fileName.endsWith(".ppt") ||
-        fileName.endsWith(".pptx")
-      );
-    })
-    .test("presentation-size", "Presentation must be smaller than 10MB", (file) => {
-      if (isEmptyFile(file)) {
-        return true;
-      }
-
-      return file.size <= MAX_PRESENTATION_SIZE;
-    }),
+    //     return (
+    //       file.type === "application/vnd.ms-powerpoint" ||
+    //       file.type ===
+    //         "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
+    //       fileName.endsWith(".ppt") ||
+    //       fileName.endsWith(".pptx")
+    //     );
+    //   },
+    // )
+   ,
 
   synopsisFile: Yup.mixed()
-    .nullable()
-    .test("synopsis-type", "Only PDF files are allowed", (file) => {
-      if (isEmptyFile(file)) {
-        return true;
-      }
+    // .nullable()
+    // .test("synopsis-type", "Only PDF files are allowed", (file) => {
+    //   if (isEmptyFile(file)) {
+    //     return true;
+    //   }
 
-      return (
-        file.type === "application/pdf" ||
-        file.name?.toLowerCase().endsWith(".pdf")
-      );
-    })
-    .test("synopsis-size", "Synopsis must be smaller than 5MB", (file) => {
-      if (isEmptyFile(file)) {
-        return true;
-      }
+    //   return (
+    //     file.type === "application/pdf" ||
+    //     file.name?.toLowerCase().endsWith(".pdf")
+    //   );
+    // })
+    // .test("synopsis-size", "Synopsis must be smaller than 5MB", (file) => {
+    //   if (isEmptyFile(file)) {
+    //     return true;
+    //   }
 
-      return file.size <= MAX_SYNOPSIS_SIZE;
-    }),
+    //   return file.size <= MAX_SYNOPSIS_SIZE;
+    // })
+    ,
 
   reportFile: Yup.mixed()
-    .nullable()
-    .test("report-type", "Only PDF files are allowed", (file) => {
-      if (isEmptyFile(file)) {
-        return true;
-      }
+    // .nullable()
+    // .test("report-type", "Only PDF files are allowed", (file) => {
+    //   if (isEmptyFile(file)) {
+    //     return true;
+    //   }
 
-      return (
-        file.type === "application/pdf" ||
-        file.name?.toLowerCase().endsWith(".pdf")
-      );
-    })
-    .test("report-size", "Final report must be smaller than 20MB", (file) => {
-      if (isEmptyFile(file)) {
-        return true;
-      }
+    //   return (
+    //     file.type === "application/pdf" ||
+    //     file.name?.toLowerCase().endsWith(".pdf")
+    //   );
+    // })
+    // .test("report-size", "Final report must be smaller than 20MB", (file) => {
+    //   if (isEmptyFile(file)) {
+    //     return true;
+    //   }
 
-      return file.size <= MAX_REPORT_SIZE;
-    }),
+    //   return file.size <= MAX_REPORT_SIZE;
+    // })
+    ,
 });
