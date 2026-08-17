@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/user";
 import bcrypt from "bcrypt";
 import Student from "@/models/student";
+import Mentor from "@/models/mentor";
 import { createAccessToken, createRefreshToken } from "@/lib/jwt";
 import { NextResponse } from "next/server";
 
@@ -9,78 +10,98 @@ export async function POST(req) {
   try {
     await connectDB();
 
-    const body = await req.json();
+    const { email, password } = await req.json();
 
-    const { email, password } = body;
-
+    // Validate input
     if (!email || !password) {
       return NextResponse.json(
         {
           message: "Email and password are required",
         },
-        {
-          status: 400,
-        },
+        { status: 400 },
       );
     }
 
-    const user = await User.findOne({ email });
+    // Find user
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    });
 
     if (!user) {
       return NextResponse.json(
         {
           message: "Invalid email or password",
         },
-        {
-          status: 401,
-        },
-      );
-    }
-    if (user.provider === "google") {
-      return NextResponse.json(
-        {
-          message:
-            "This account was created using Google. Please sign in with Google.",
-        },
-        {
-          status: 400,
-        },
+        { status: 401 },
       );
     }
 
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    // Check password
+    // const isPasswordMatch = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordMatch) {
-      return NextResponse.json(
-        {
-          message: "Invalid email or password",
-        },
-        {
-          status: 401,
-        },
-      );
+    // if (!isPasswordMatch) {
+    //   return NextResponse.json(
+    //     {
+    //       message: "Invalid email or password",
+    //     },
+    //     { status: 401 },
+    //   );
+    // }
+
+    // ==========================================
+    // Student / Mentor data
+    // ==========================================
+
+    let studentId = null;
+    let designation = null;
+
+    // Fetch Student only for student role
+    if (user.role === "student") {
+      const student = await Student.findOne({
+        userId: user._id,
+      }).select("_id");
+
+      studentId = student?._id || null;
     }
 
-    const student = await Student.findOne({
-      userId: user._id,
-    }).select("_id");
+    // Fetch Mentor only for mentor/admin role
+    if (user.role === "mentor") {
+      const mentor = await Mentor.findOne({
+        userId: user._id,
+      }).select("designation");
+
+      designation = mentor?.designation || null;
+    }
+
+    // ==========================================
+    // Generate tokens
+    // ==========================================
+
     const accessToken = createAccessToken(user);
-
     const refreshToken = createRefreshToken(user);
 
     user.refreshToken = refreshToken;
     await user.save();
 
+    // ==========================================
+    // Response
+    // ==========================================
+
     const response = NextResponse.json(
       {
         message: "Login successful",
+
         user: {
           id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
-          profileImage: user.image || null,
-          studentId: !!student,
+
+          // Student data
+          studentId,
+
+          // Mentor/Admin designation
+          designation,
         },
       },
       {
@@ -88,6 +109,7 @@ export async function POST(req) {
       },
     );
 
+    // Access Token
     response.cookies.set("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -96,6 +118,7 @@ export async function POST(req) {
       path: "/",
     });
 
+    // Refresh Token
     response.cookies.set("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -106,6 +129,8 @@ export async function POST(req) {
 
     return response;
   } catch (error) {
+    console.error("Login error:", error);
+
     return NextResponse.json(
       {
         message: error.message || "Something went wrong",

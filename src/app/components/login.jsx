@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Input, Label, Button } from '@/components/ui';
-import { useFormik } from 'formik';
-import { loginSchema } from '@/validations/loginSchema';
-import { useRouter } from 'next/navigation';
-import { Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
-import GoogleButton from './elements/GoogleButton';
-import { useDispatch } from 'react-redux';
-import { loginSuccess } from '@/redux/authSlice';
+import React from "react";
+import { Input, Label, Button } from "@/components/ui";
+import { useFormik } from "formik";
+import { loginSchema } from "@/validations/loginSchema";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import GoogleButton from "./elements/GoogleButton";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "@/redux/authSlice";
 
 const Login = () => {
   const router = useRouter();
@@ -17,18 +17,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const formik = useFormik({
     initialValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
 
     validationSchema: loginSchema,
 
     onSubmit: async (values) => {
       try {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(values),
         });
@@ -39,23 +39,51 @@ const Login = () => {
           throw new Error(data.message);
         }
 
-       console.log("studentid",data.user.studentId);
-       dispatch(loginSuccess({
-          user: data.user,
-          name: data.name,
-          email: data.email,
-          role:data.role,
-          profileImage: data.profileImage,
-       }));
+        console.log("studentid", data.user.studentId);
+        dispatch(
+          loginSuccess({
+            user: data.user,
+            name: data.name,
+            email: data.email,
+            role: data.role,
+          }),
+        );
 
-       if(data.user.role=="student" && data?.user?.studentId){
-        router.push("/student");
-       }else{
-        router.push("/create-profile");
-       }
+        const role = data?.user?.role;
+        const designation = data?.user?.designation;
 
-  
+        switch (role) {
+          case "student":
+            if (data?.user?.studentId) {
+              router.push("/student");
+            } else {
+              router.push("/create-profile");
+            }
+            break;
 
+          case "mentor":
+            switch (designation?.toLowerCase()) {
+              case "engineer":
+                router.push("/admin-dashboard");
+                break;
+
+              case "dean":
+              case "assistant professor":
+              case "associate professor":
+              case "professor":
+                router.push("/mentor-dashboard");
+                break;
+
+              default:
+                router.push("/mentor-dashboard");
+                break;
+            }
+            break;
+
+          default:
+            router.push("/login");
+            break;
+        }
       } catch (error) {
         console.log(error.message);
         alert(error.message);
@@ -77,7 +105,7 @@ const Login = () => {
 
           <div className="space-y-2">
             <Label htmlFor="email" required>
-              Email{' '}
+              Email{" "}
             </Label>
 
             <Input
@@ -99,7 +127,7 @@ const Login = () => {
           {/* Password */}
           <div className="space-y-2">
             <Label htmlFor="password" required>
-              {' '}
+              {" "}
               Password
             </Label>
 
@@ -107,7 +135,7 @@ const Login = () => {
               <Input
                 id="password"
                 name="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={formik.values.password}
                 onChange={formik.handleChange}
@@ -145,7 +173,7 @@ const Login = () => {
             type="submit"
             className="w-full bg-orange-500 hover:bg-orange-600 text-white"
           >
-            {' '}
+            {" "}
             Login
           </Button>
           <div className="relative my-5">
@@ -161,7 +189,7 @@ const Login = () => {
         </form>
 
         <p className="mt-6 text-center text-gray-700">
-          Don't have an account?{' '}
+          Don't have an account?{" "}
           <a
             href="/signup"
             className="font-semibold text-orange-500 hover:underline"
