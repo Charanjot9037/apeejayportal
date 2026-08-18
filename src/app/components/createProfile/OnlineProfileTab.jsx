@@ -3,7 +3,7 @@
 import { FileText, Link as LinkIcon, Upload, X } from "lucide-react";
 
 import InputField from "../elements/InputField";
-
+import { useSelector } from "react-redux";
 export default function OnlineProfilesTab({
   formik,
   getError,
@@ -13,27 +13,20 @@ export default function OnlineProfilesTab({
   onBack,
   onSubmit,
 }) {
+  const department = formik.values.department;
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-
-
-
       <div>
         <div className="flex items-center gap-2 text-main-blue">
-
           <LinkIcon size={18} />
 
-          <h2 className="text-xl font-semibold">
-            Online Profiles
-          </h2>
-
+          <h2 className="text-xl font-semibold">Online Profiles</h2>
         </div>
 
         <div className="mt-1 h-0.5 w-6 bg-orange-500" />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
-
         <InputField
           label="LINKEDIN"
           name="linkedin"
@@ -41,13 +34,15 @@ export default function OnlineProfilesTab({
           formik={formik}
           error={getError("linkedin")}
         />
-        <InputField
-          label="GITHUB"
-          name="github"
-          placeholder="https://github.com/username"
-          formik={formik}
-          error={getError("github")}
-        />
+        {department?.toLowerCase() !== "management" && (
+          <InputField
+            label="GITHUB"
+            name="github"
+            placeholder="https://github.com/username"
+            formik={formik}
+            error={getError("github")}
+          />
+        )}
 
         <InputField
           label="PORTFOLIO"
@@ -56,7 +51,6 @@ export default function OnlineProfilesTab({
           formik={formik}
           error={getError("portfolio")}
         />
-
       </div>
 
       {/* ==========================================
@@ -64,23 +58,16 @@ export default function OnlineProfilesTab({
       ========================================== */}
 
       <div className="mt-8">
-
         <div className="flex items-center gap-2 text-main-blue">
-
           <FileText size={18} />
 
-          <h2 className="text-xl font-semibold">
-            Resume
-          </h2>
-
+          <h2 className="text-xl font-semibold">Resume</h2>
         </div>
 
         <div className="mt-1 h-0.5 w-6 bg-orange-500" />
-
       </div>
 
       <div className="mt-6">
-
         <input
           ref={resumeInputRef}
           type="file"
@@ -90,57 +77,51 @@ export default function OnlineProfilesTab({
           className="hidden"
         />
 
-      {!formik.values.resumeFile ? (
-  <button
-    type="button"
-    onClick={() => resumeInputRef.current?.click()}
-    className="flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-10 transition hover:border-orange-400 hover:bg-orange-50/30"
-  >
-    <Upload size={28} className="text-gray-400" />
+        {!formik.values.resumeFile ? (
+          <button
+            type="button"
+            onClick={() => resumeInputRef.current?.click()}
+            className="flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-10 transition hover:border-orange-400 hover:bg-orange-50/30"
+          >
+            <Upload size={28} className="text-gray-400" />
 
-    <p className="mt-2 text-sm font-medium text-gray-600">
-      Upload your resume
-    </p>
+            <p className="mt-2 text-sm font-medium text-gray-600">
+              Upload your resume
+            </p>
 
-    <p className="mt-1 text-xs text-gray-400">
-      PDF, DOC or DOCX · Max 5MB
-    </p>
-  </button>
-) : (
-  <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
-    <div className="flex items-center gap-3">
-      <FileText
-        size={22}
-        className="text-main-blue"
-      />
+            <p className="mt-1 text-xs text-gray-400">
+              PDF, DOC or DOCX · Max 5MB
+            </p>
+          </button>
+        ) : (
+          <div className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <FileText size={22} className="text-main-blue" />
 
-      <div>
-        <p className="text-sm font-medium text-gray-700">
-          {formik.values.resumeFile.name}
-        </p>
+              <div>
+                <p className="text-sm font-medium text-gray-700">
+                  {formik.values.resumeFile.name}
+                </p>
 
-        <p className="text-xs text-gray-400">
-          {(formik.values.resumeFile.size / 1024 / 1024).toFixed(2)} MB
-        </p>
-      </div>
-    </div>
+                <p className="text-xs text-gray-400">
+                  {(formik.values.resumeFile.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </div>
+            </div>
 
-    <button
-      type="button"
-      onClick={removeResume}
-      className="flex h-7 w-7 items-center justify-center rounded-md text-gray-500 transition hover:bg-red-50 hover:text-red-500"
-    >
-      <X size={15} />
-    </button>
-  </div>
-)}
-
-        {getError("resume") && (
-          <p className="mt-1 text-xs text-red-500">
-            {getError("resume")}
-          </p>
+            <button
+              type="button"
+              onClick={removeResume}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-500 transition hover:bg-red-50 hover:text-red-500"
+            >
+              <X size={15} />
+            </button>
+          </div>
         )}
 
+        {getError("resume") && (
+          <p className="mt-1 text-xs text-red-500">{getError("resume")}</p>
+        )}
       </div>
 
       {/* ==========================================
@@ -148,7 +129,6 @@ export default function OnlineProfilesTab({
       ========================================== */}
 
       <div className="mt-8 flex justify-between">
-
         <button
           type="button"
           onClick={onBack}
@@ -164,9 +144,7 @@ export default function OnlineProfilesTab({
         >
           Complete Profile
         </button>
-
       </div>
-
     </div>
   );
 }

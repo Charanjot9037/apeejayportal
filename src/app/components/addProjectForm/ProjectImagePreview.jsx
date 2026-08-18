@@ -2,32 +2,25 @@
 
 import { X } from "lucide-react";
 
-/* =========================================================
-   PROJECT IMAGE PREVIEW
-========================================================= */
-
-export default function ProjectImagePreview({ file, onRemove }) {
-  const imageUrl = URL.createObjectURL(file);
-
+export default function ProjectImagePreview({ image, onRemove }) {
   return (
     <div className="group relative min-h-[130px] overflow-hidden rounded-md border border-slate-200 bg-slate-100">
       <img
-        src={imageUrl}
-        alt={file.name}
+        src={image.url}
+        alt={image.originalName || "Project image"}
         className="h-[130px] w-full object-cover"
-        onLoad={() => URL.revokeObjectURL(imageUrl)}
       />
 
       <button
         type="button"
         onClick={onRemove}
-        className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition group-hover:opacity-100"
+        className="absolute right-2 top-2 rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
       >
-        <X className="h-3.5 w-3.5" />
+        <X className="h-4 w-4" />
       </button>
 
-      <div className="absolute bottom-0 left-0 right-0 truncate bg-black/60 px-2 py-1 text-[10px] text-white">
-        {file.name}
+      <div className="absolute bottom-0 left-0 right-0 truncate bg-black/50 px-2 py-1 text-xs text-white">
+        {image.originalName}
       </div>
     </div>
   );

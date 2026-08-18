@@ -3,7 +3,7 @@
 import { Link as LinkIcon, Code2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-
+import { useSelector } from "react-redux";
 /* =========================================================
    TECHNICAL DETAILS SECTION
 ========================================================= */
@@ -13,6 +13,9 @@ export default function TechnicalDetailsSection({
   addTechnology,
   removeTechnology,
 }) {
+  const student = useSelector((state) => state.student);
+  const department = student.department;
+
   return (
     <section className="mt-6">
       <h2 className="border-b border-slate-300 pb-2 text-base font-medium text-blue-900">
@@ -56,69 +59,68 @@ export default function TechnicalDetailsSection({
         </div>
 
         {formik.touched.techStack && formik.errors.techStack && (
-          <p className="mt-1 text-xs text-red-500">
-            {formik.errors.techStack}
-          </p>
+          <p className="mt-1 text-xs text-red-500">{formik.errors.techStack}</p>
         )}
       </div>
 
       {/* LINKS */}
+      {department != "MANAGEMENT" && (
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* GITHUB */}
 
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* GITHUB */}
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-slate-700">
+              GitHub Link
+            </label>
 
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-700">
-            GitHub Link
-          </label>
+            <div className="relative">
+              <Code2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-          <div className="relative">
-            <Code2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
+                name="githubLink"
+                value={formik.values.githubLink}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="https://github.com/..."
+                className="h-10 bg-slate-50 pl-9 text-sm"
+              />
+            </div>
 
-            <Input
-              name="githubLink"
-              value={formik.values.githubLink}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="https://github.com/..."
-              className="h-10 bg-slate-50 pl-9 text-sm"
-            />
+            {formik.touched.githubLink && formik.errors.githubLink && (
+              <p className="mt-1 text-xs text-red-500">
+                {formik.errors.githubLink}
+              </p>
+            )}
           </div>
 
-          {formik.touched.githubLink && formik.errors.githubLink && (
-            <p className="mt-1 text-xs text-red-500">
-              {formik.errors.githubLink}
-            </p>
-          )}
-        </div>
+          {/* LIVE DEMO */}
 
-        {/* LIVE DEMO */}
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-slate-700">
+              Live Demo Link
+            </label>
 
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-700">
-            Live Demo Link
-          </label>
+            <div className="relative">
+              <LinkIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-          <div className="relative">
-            <LinkIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
+                name="liveDemoLink"
+                value={formik.values.liveDemoLink}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="https://..."
+                className="h-10 bg-slate-50 pl-9 text-sm"
+              />
+            </div>
 
-            <Input
-              name="liveDemoLink"
-              value={formik.values.liveDemoLink}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="https://..."
-              className="h-10 bg-slate-50 pl-9 text-sm"
-            />
+            {formik.touched.liveDemoLink && formik.errors.liveDemoLink && (
+              <p className="mt-1 text-xs text-red-500">
+                {formik.errors.liveDemoLink}
+              </p>
+            )}
           </div>
-
-          {formik.touched.liveDemoLink && formik.errors.liveDemoLink && (
-            <p className="mt-1 text-xs text-red-500">
-              {formik.errors.liveDemoLink}
-            </p>
-          )}
         </div>
-      </div>
+      )}
     </section>
   );
 }
