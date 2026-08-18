@@ -115,9 +115,10 @@ const ProjectSchema = new mongoose.Schema(
     semester: {
       type: String,
     },
-
     mentor: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Mentor",
+      default: null,
     },
 
     /* =====================================================
