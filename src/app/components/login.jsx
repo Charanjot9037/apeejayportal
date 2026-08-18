@@ -7,7 +7,6 @@ import { loginSchema } from "@/validations/loginSchema";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import GoogleButton from "./elements/GoogleButton";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/redux/authSlice";
 import { setStudentProfile } from "@/redux/studentSlice";
@@ -164,7 +163,7 @@ const Login = () => {
 
           <div className="text-right">
             <a
-              href="/reset-password"
+              href="/forgot-password"
               className="text-sm text-blue-600 hover:underline"
             >
               Forgot Password?
@@ -189,7 +188,6 @@ const Login = () => {
               <span className="bg-white px-2 text-gray-500"> OR </span>
             </div>
           </div>
-          <GoogleButton />
         </form>
 
         <p className="mt-6 text-center text-gray-700">

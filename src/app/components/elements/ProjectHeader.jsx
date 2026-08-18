@@ -13,7 +13,7 @@ const ProjectHeader = ({
         className={`
           ${titleSize}
           text-md 
-          md:text-4xl
+          md:text-3xl
           font-bold
           text-secondary
           transition-all

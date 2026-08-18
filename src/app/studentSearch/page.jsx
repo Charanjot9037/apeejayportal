@@ -650,7 +650,7 @@ const StudentSearch = () => {
         sm:py-12
       "
     >
-      <div className="  text-center py-3 md:py-5">
+      <div className="  text-center py-3 ">
         <ProjectHeader
           title="Discover Student Talent"
           subtitle="Explore verified student profiles, skills, projects, and technical expertise"
@@ -828,7 +828,7 @@ const StudentSearch = () => {
               grid-cols-1
               gap-5
               sm:grid-cols-2
-              lg:grid-cols-3
+              lg:grid-cols-4
             "
           >
             {filteredStudents.map(

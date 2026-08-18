@@ -30,3 +30,21 @@ process.env.JWT_REFRESH_SECRET,
 );
 
 }
+const RESET_TOKEN_SECRET = process.env.JWT_RESET_SECRET;
+
+export function createPasswordResetToken(user) {
+  return jwt.sign(
+    {
+      id: user._id.toString(),
+      email: user.email,
+      type: "password-reset",
+    },
+    RESET_TOKEN_SECRET,
+    {
+      expiresIn: "15m",
+    },
+  );
+}
+export function verifyPasswordResetToken(token) {
+  return jwt.verify(token, RESET_TOKEN_SECRET);
+}
