@@ -6,6 +6,7 @@ const initialState = {
   profileImage: "",
   department: "",
   program: "",
+  academicBatch: "",
 };
 
 const studentSlice = createSlice({
@@ -13,14 +14,21 @@ const studentSlice = createSlice({
   initialState,
   reducers: {
     setStudentProfile: (state, action) => {
-      const { studentId, userId, profileImage, department, program } =
-        action.payload;
+      const {
+        studentId,
+        userId,
+        profileImage,
+        department,
+        program,
+        academicBatch,
+      } = action.payload;
 
       state.studentId = studentId;
       state.userId = userId;
       state.profileImage = profileImage;
       state.department = department;
       state.program = program;
+      state.academicBatch = academicBatch;
     },
 
     clearStudentProfile: (state) => {
@@ -29,6 +37,7 @@ const studentSlice = createSlice({
       state.profileImage = "";
       state.department = "";
       state.program = "";
+      state.academicBatch = "";
     },
   },
 });

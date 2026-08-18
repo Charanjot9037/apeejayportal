@@ -56,6 +56,7 @@ export async function POST(req) {
     let designation = null;
     let department = null;
     let program = null;
+    let academicBatch = null;
     // Fetch Student only for student role
     if (user.role === "student") {
       const student = await Student.findOne({
@@ -65,6 +66,7 @@ export async function POST(req) {
       studentId = student?._id || null;
       department = student?.department || null;
       program = student?.program || null;
+      academicBatch = student?.academicBatch || null;
     }
     console.log("department", department);
     console.log("program", program);
@@ -107,6 +109,7 @@ export async function POST(req) {
           program,
           // Mentor/Admin designation
           designation,
+          academicBatch,
         },
       },
       {

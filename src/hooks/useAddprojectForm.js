@@ -1,4 +1,3 @@
-
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { useFormik } from "formik";
@@ -50,12 +49,7 @@ export function useAddProjectForm({ mode = "create", project = null }) {
       techStack:
         isEdit && Array.isArray(project?.techStack) ? project.techStack : [""],
 
-      teamMembers:
-        isEdit &&
-        Array.isArray(project?.teamMembers) &&
-        project.teamMembers.length > 0
-          ? project.teamMembers
-          : [{ ...emptyTeamMember }],
+      teamMembers: isEdit ? project?.teamMembers || "" : "",
 
       /* =====================================================
          CLOUDINARY FILE OBJECTS
@@ -73,31 +67,18 @@ export function useAddProjectForm({ mode = "create", project = null }) {
            }
          ]
       ===================================================== */
-
-      projectImages: [],
-
-      presentationFile: null,
-
-      synopsisFile: null,
-
-      reportFile: null,
-
-      /* =====================================================
-         EXISTING FILES - EDIT MODE
-      ===================================================== */
-
-      existingProjectImages:
+      projectImages:
         isEdit && Array.isArray(project?.projectImages)
           ? project.projectImages
           : [],
 
-      existingSynopsisFile: isEdit ? project?.synopsisFile?.url || null : null,
+      presentationFile:
+        isEdit && project?.presentationFile ? project.presentationFile : null,
 
-      existingReportFile: isEdit ? project?.reportFile?.url || null : null,
+      synopsisFile:
+        isEdit && project?.synopsisFile ? project.synopsisFile : null,
 
-      existingPresentationFile: isEdit
-        ? project?.presentationFile?.url || null
-        : null,
+      reportFile: isEdit && project?.reportFile ? project.reportFile : null,
     },
 
     validationSchema,
@@ -121,7 +102,6 @@ export function useAddProjectForm({ mode = "create", project = null }) {
            Everything is already uploaded to Cloudinary.
            Therefore we send JSON directly.
         ================================================= */
-
         const projectData = {
           projectName: values.projectName,
 
@@ -135,17 +115,13 @@ export function useAddProjectForm({ mode = "create", project = null }) {
 
           projectType: values.projectType,
 
-          teamMembers: values.projectType === "team" ? values.teamMembers : [],
+          teamMembers: values.projectType === "team" ? values.teamMembers : "",
 
           semester: values.semester,
 
           mentor: values.mentor || null,
 
           studentId,
-
-          /* =================================================
-             NEW CLOUDINARY FILES
-          ================================================= */
 
           projectImages: values.projectImages || [],
 
@@ -154,20 +130,6 @@ export function useAddProjectForm({ mode = "create", project = null }) {
           synopsisFile: values.synopsisFile || null,
 
           reportFile: values.reportFile || null,
-
-          /* =================================================
-             EXISTING FILES
-
-             Important for EDIT mode.
-          ================================================= */
-
-          existingProjectImages: values.existingProjectImages || [],
-
-          existingSynopsisFile: values.existingSynopsisFile || null,
-
-          existingReportFile: values.existingReportFile || null,
-
-          existingPresentationFile: values.existingPresentationFile || null,
         };
 
         console.log("PROJECT DATA:", projectData);

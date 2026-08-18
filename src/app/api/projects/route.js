@@ -48,7 +48,7 @@ export async function POST(request) {
         { status: 400 },
       );
     }
-
+console.log("teamMembers",teamMembers)
     const project = await Project.create({
       title: projectName,
       subtitle:
@@ -66,7 +66,7 @@ export async function POST(request) {
 
       projectType,
 
-      teamMembers: projectType === "team" ? teamMembers || [] : [],
+      teamMembers: projectType === "team" ? teamMembers || "" : "",
 
       semester,
 

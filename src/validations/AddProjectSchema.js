@@ -48,30 +48,13 @@ export const validationSchema = Yup.object({
     .of(Yup.string().trim())
     .min(1, "Add at least one technology")
     .required("Tech stack is required"),
-
-  teamMembers: Yup.array().when("projectType", {
-    is: "team",
-
-    then: (schema) =>
-      schema.min(1, "Add at least one team member").of(
-        Yup.object({
-          name: Yup.string().trim().required("Member name is required"),
-
-          enrollment: Yup.string()
-            .trim()
-            .required("Enrollment / Student ID is required"),
-
-          email: Yup.string()
-            .transform((value) => (value === "" ? null : value))
-            .nullable()
-            .email("Enter a valid email"),
-
-          role: Yup.string().trim().nullable(),
-        }),
-      ),
-
-    otherwise: (schema) => schema,
-  }),
+  teamMembers: Yup.string()
+    .nullable()
+    .when("projectType", {
+      is: "team",
+      then: (schema) => schema.required("Please select a team member"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
 
   projectImages: Yup.array(),
   // .test(
@@ -111,68 +94,63 @@ export const validationSchema = Yup.object({
   //     return files.every((file) => file.size <= MAX_IMAGE_SIZE);
   //   }
   // ),
-  presentationFile: Yup.mixed()
-    // .nullable()
-    // .test(
-    //   "presentation-type",
-    //   "Only PPT and PPTX files are allowed",
-    //   (file) => {
-    //     if (isEmptyFile(file)) {
-    //       return true;
-    //     }
+  presentationFile: Yup.mixed().nullable(),
+  // .nullable()
+  // .test(
+  //   "presentation-type",
+  //   "Only PPT and PPTX files are allowed",
+  //   (file) => {
+  //     if (isEmptyFile(file)) {
+  //       return true;
+  //     }
 
-    //     const fileName = file.name?.toLowerCase() || "";
+  //     const fileName = file.name?.toLowerCase() || "";
 
-    //     return (
-    //       file.type === "application/vnd.ms-powerpoint" ||
-    //       file.type ===
-    //         "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
-    //       fileName.endsWith(".ppt") ||
-    //       fileName.endsWith(".pptx")
-    //     );
-    //   },
-    // )
-   ,
+  //     return (
+  //       file.type === "application/vnd.ms-powerpoint" ||
+  //       file.type ===
+  //         "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
+  //       fileName.endsWith(".ppt") ||
+  //       fileName.endsWith(".pptx")
+  //     );
+  //   },
+  // )
+  synopsisFile: Yup.mixed(),
+  // .nullable()
+  // .test("synopsis-type", "Only PDF files are allowed", (file) => {
+  //   if (isEmptyFile(file)) {
+  //     return true;
+  //   }
 
-  synopsisFile: Yup.mixed()
-    // .nullable()
-    // .test("synopsis-type", "Only PDF files are allowed", (file) => {
-    //   if (isEmptyFile(file)) {
-    //     return true;
-    //   }
+  //   return (
+  //     file.type === "application/pdf" ||
+  //     file.name?.toLowerCase().endsWith(".pdf")
+  //   );
+  // })
+  // .test("synopsis-size", "Synopsis must be smaller than 5MB", (file) => {
+  //   if (isEmptyFile(file)) {
+  //     return true;
+  //   }
 
-    //   return (
-    //     file.type === "application/pdf" ||
-    //     file.name?.toLowerCase().endsWith(".pdf")
-    //   );
-    // })
-    // .test("synopsis-size", "Synopsis must be smaller than 5MB", (file) => {
-    //   if (isEmptyFile(file)) {
-    //     return true;
-    //   }
+  //   return file.size <= MAX_SYNOPSIS_SIZE;
+  // })
+  reportFile: Yup.mixed().nullable(),
+  // .nullable()
+  // .test("report-type", "Only PDF files are allowed", (file) => {
+  //   if (isEmptyFile(file)) {
+  //     return true;
+  //   }
 
-    //   return file.size <= MAX_SYNOPSIS_SIZE;
-    // })
-    ,
+  //   return (
+  //     file.type === "application/pdf" ||
+  //     file.name?.toLowerCase().endsWith(".pdf")
+  //   );
+  // })
+  // .test("report-size", "Final report must be smaller than 20MB", (file) => {
+  //   if (isEmptyFile(file)) {
+  //     return true;
+  //   }
 
-  reportFile: Yup.mixed()
-    // .nullable()
-    // .test("report-type", "Only PDF files are allowed", (file) => {
-    //   if (isEmptyFile(file)) {
-    //     return true;
-    //   }
-
-    //   return (
-    //     file.type === "application/pdf" ||
-    //     file.name?.toLowerCase().endsWith(".pdf")
-    //   );
-    // })
-    // .test("report-size", "Final report must be smaller than 20MB", (file) => {
-    //   if (isEmptyFile(file)) {
-    //     return true;
-    //   }
-
-    //   return file.size <= MAX_REPORT_SIZE;
-    // })
-    ,
+  //   return file.size <= MAX_REPORT_SIZE;
+  // })
 });

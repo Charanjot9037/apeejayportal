@@ -34,7 +34,7 @@ const Login = () => {
         });
 
         const data = await response.json();
-console.log("data",data);
+        console.log("data", data);
         if (!response.ok) {
           throw new Error(data.message);
         }
@@ -50,6 +50,7 @@ console.log("data",data);
           setStudentProfile({
             department: data.user?.department,
             program: data.user?.program,
+            academicBatch: data?.user?.academicBatch,
           }),
         );
         const role = data?.user?.role;

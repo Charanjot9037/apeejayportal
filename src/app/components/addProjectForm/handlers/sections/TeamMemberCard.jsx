@@ -1,26 +1,76 @@
 "use client";
 
-import TeamInput from "../../TeamInput";
-
-/* =========================================================
-   TEAM MEMBER CARD
-========================================================= */
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function TeamMemberCard({
   member,
-  index,
   canRemove,
+  formik,
   onRemove,
   getTeamError,
-  onFieldChange,
-  onFieldBlur,
 }) {
+  const student = useSelector((state) => state.student);
+
+  const department = "MANAGEMENT";
+  const program = "MBA";
+  const academicBatch = "2023";
+
+  const [students, setStudents] = useState([]);
+  const [studentLoading, setStudentLoading] = useState(false);
+
+  const fetchStudents = async () => {
+    try {
+      setStudentLoading(true);
+
+      const response = await fetch("/api/student/team-member", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          department,
+          program,
+          academicBatch,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch students");
+      }
+
+      setStudents(data.students || []);
+    } catch (error) {
+      console.error("STUDENTS_FETCH_ERROR:", error);
+      setStudents([]);
+    } finally {
+      setStudentLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!department || !program || !academicBatch) return;
+
+    fetchStudents();
+  }, [department, program, academicBatch]);
+
+  const selectedStudent = students.find(
+    (student) => student.userId === formik.values.teamMembers,
+  );
+
   return (
     <div className="rounded-md border border-slate-200 bg-white p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h4 className="text-xs font-semibold text-slate-700">
-          Team Member {index + 1}
-        </h4>
+        <h4 className="text-xs font-semibold text-slate-700">Team Member</h4>
 
         {canRemove && (
           <button
@@ -33,16 +83,41 @@ export default function TeamMemberCard({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <TeamInput
-          label="Member Name"
-          required
-          value={member.name}
-          placeholder="Enter member name"
-          error={getTeamError(index, "name")}
-          onChange={(value) => onFieldChange(index, "name", value)}
-          onBlur={() => onFieldBlur(index, "name")}
-        />
+      <div>
+        <label className="mb-1.5 block text-xs font-medium text-slate-700">
+          Assign Team Member
+        </label>
+
+        <Select
+          value={formik.values.teamMembers || ""}
+          onValueChange={(value) => {
+            formik.setFieldValue("teamMembers", value);
+          }}
+        >
+          <SelectTrigger className="h-10 bg-slate-50 text-sm">
+            <SelectValue placeholder="Select a student">
+              {selectedStudent?.fullName || "Select a student"}
+            </SelectValue>
+          </SelectTrigger>
+
+          <SelectContent>
+            {studentLoading ? (
+              <SelectItem value="loading" disabled>
+                Loading students...
+              </SelectItem>
+            ) : students.length === 0 ? (
+              <SelectItem value="no-student" disabled>
+                No students available
+              </SelectItem>
+            ) : (
+              students.map((student) => (
+                <SelectItem key={student.userId} value={student.userId}>
+                  {student.fullName}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

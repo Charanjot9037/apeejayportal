@@ -32,7 +32,7 @@ export async function POST(req) {
         select: "name email",
       })
       .select("userId mobileNumber department designation");
-
+console.log("mentors");
     return NextResponse.json({
       success: true,
       mentors,

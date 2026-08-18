@@ -57,7 +57,7 @@ export default function CollaborationSection({
 
     fetchMentors();
   }, [department]);
-
+  console.log("mentors", mentors);
   const handleFieldChange = (index, field, value) => {
     formik.setFieldValue(`teamMembers[${index}].${field}`, value);
   };
@@ -117,39 +117,20 @@ export default function CollaborationSection({
               </h3>
 
               <p className="mt-1 text-xs text-slate-500">
-                Add the students who are working on this project.
+                Add the student who are working on this project.
               </p>
             </div>
-
-            <span className="text-xs text-slate-400">
-              {formik.values.teamMembers.length}{" "}
-              {formik.values.teamMembers.length === 1 ? "Member" : "Members"}
-            </span>
           </div>
 
           <div className="space-y-4">
-            {formik.values.teamMembers.map((member, index) => (
-              <TeamMemberCard
-                key={index}
-                member={member}
-                index={index}
-                canRemove={formik.values.teamMembers.length > 1}
-                onRemove={() => removeTeamMember(index)}
-                getTeamError={getTeamError}
-                onFieldChange={handleFieldChange}
-                onFieldBlur={handleFieldBlur}
-              />
-            ))}
-          </div>
+            <TeamMemberCard
+              formik={formik}
 
-          <button
-            type="button"
-            onClick={addTeamMember}
-            className="mt-4 flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600"
-          >
-            <span className="text-lg leading-none">+</span>
-            Add Team Member
-          </button>
+              getTeamError={getTeamError}
+              onFieldChange={handleFieldChange}
+              onFieldBlur={handleFieldBlur}
+            />
+          </div>
         </div>
       )}
 

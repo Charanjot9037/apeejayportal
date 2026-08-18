@@ -31,40 +31,39 @@ const TeamMemberSchema = new mongoose.Schema(
   },
   {
     _id: false,
-  }
+  },
 );
 
 /* =========================================================
    CLOUDINARY FILE
 ========================================================= */
 
-const CloudinaryFileSchema =
-  new mongoose.Schema(
-    {
-      url: {
-        type: String,
-        trim: true,
-      },
-
-      publicId: {
-        type: String,
-        trim: true,
-      },
-
-      originalName: {
-        type: String,
-        trim: true,
-      },
-
-      resourceType: {
-        type: String,
-        trim: true,
-      },
+const CloudinaryFileSchema = new mongoose.Schema(
+  {
+    url: {
+      type: String,
+      trim: true,
     },
-    {
-      _id: false,
-    }
-  );
+
+    publicId: {
+      type: String,
+      trim: true,
+    },
+
+    originalName: {
+      type: String,
+      trim: true,
+    },
+
+    resourceType: {
+      type: String,
+      trim: true,
+    },
+  },
+  {
+    _id: false,
+  },
+);
 
 /* =========================================================
    PROJECT
@@ -108,12 +107,11 @@ const ProjectSchema = new mongoose.Schema(
       enum: ["individual", "team"],
       default: "individual",
     },
-
     teamMembers: {
-      type: [TeamMemberSchema],
-      default: [],
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
     },
-
     semester: {
       type: String,
     },
@@ -156,12 +154,7 @@ const ProjectSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: [
-        "Pending Approval",
-        "Approved",
-        "Rejected",
-        "Draft",
-      ],
+      enum: ["Pending Approval", "Approved", "Rejected", "Draft"],
       default: "Pending Approval",
     },
 
@@ -178,11 +171,8 @@ const ProjectSchema = new mongoose.Schema(
 
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.models.Project ||
-  mongoose.model(
-    "Project",
-    ProjectSchema
-  );
+  mongoose.model("Project", ProjectSchema);

@@ -4,20 +4,16 @@ import { useState } from "react";
 import DocumentUpload from "../../DocumentUpload";
 import { toast } from "sonner";
 
-/* =========================================================
-   MEDIA & DOCUMENTS SECTION
-========================================================= */
-
-export default function MediaDocumentsSection({ formik, getFileError }) {
+export default function MediaDocumentsSection({
+  formik,
+  getFileError,
+  isEdit,
+}) {
   const [uploading, setUploading] = useState({
     presentationFile: false,
     synopsisFile: false,
     reportFile: false,
   });
-
-  /* =========================================================
-     UPLOAD DOCUMENT TO CLOUDINARY
-  ========================================================= */
 
   const uploadDocument = async (file, fieldName) => {
     if (!file) return;
@@ -31,8 +27,6 @@ export default function MediaDocumentsSection({ formik, getFileError }) {
       const formData = new FormData();
 
       formData.append("file", file);
-
-      // Tell API this is a project document
       formData.append("type", "project-document");
 
       const response = await fetch("/api/upload", {
@@ -41,14 +35,10 @@ export default function MediaDocumentsSection({ formik, getFileError }) {
       });
 
       const data = await response.json();
-alert("uploaded");
+
       if (!response.ok || !data.success) {
         throw new Error(data.message || "File upload failed");
       }
-
-      /* ================================================
-         Store Cloudinary response in Formik
-      ================================================ */
 
       formik.setFieldValue(fieldName, {
         url: data.url,
@@ -65,7 +55,7 @@ alert("uploaded");
 
       toast.error(error.message || "File upload failed");
 
-      formik.setFieldValue(fieldName, null);
+      // Don't destroy the old file if upload fails
     } finally {
       setUploading((prev) => ({
         ...prev,
@@ -73,10 +63,6 @@ alert("uploaded");
       }));
     }
   };
-
-  /* =========================================================
-     REMOVE NEW FILE
-  ========================================================= */
 
   const removeFile = (fieldName) => {
     formik.setFieldValue(fieldName, null);
@@ -91,61 +77,46 @@ alert("uploaded");
       </h2>
 
       <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-        {/* =================================================
-            PRESENTATION
-        ================================================= */}
+        {/* PRESENTATION */}
 
         <DocumentUpload
           title="PPT Presentation"
           description="PPT / PPTX • Max 10MB"
           accept=".ppt,.pptx"
           file={formik.values.presentationFile}
-          existingFile={formik.values.existingPresentationFile}
           error={getFileError("presentationFile")}
           loading={uploading.presentationFile}
+
           onChange={(file) => uploadDocument(file, "presentationFile")}
           onRemove={() => removeFile("presentationFile")}
-          onRemoveExisting={() => {
-            formik.setFieldValue("existingPresentationFile", null);
-          }}
         />
 
-        {/* =================================================
-            SYNOPSIS
-        ================================================= */}
+        {/* SYNOPSIS */}
 
         <DocumentUpload
           title="Project Synopsis"
           description="PDF • Max 5MB"
           accept=".pdf"
           file={formik.values.synopsisFile}
-          existingFile={formik.values.existingSynopsisFile}
           error={getFileError("synopsisFile")}
           loading={uploading.synopsisFile}
+
           onChange={(file) => uploadDocument(file, "synopsisFile")}
           onRemove={() => removeFile("synopsisFile")}
-          onRemoveExisting={() => {
-            formik.setFieldValue("existingSynopsisFile", null);
-          }}
         />
 
-        {/* =================================================
-            FINAL REPORT
-        ================================================= */}
+        {/* REPORT */}
 
         <DocumentUpload
           title="Final Project Report"
           description="PDF • Max 20MB"
           accept=".pdf"
           file={formik.values.reportFile}
-          existingFile={formik.values.existingReportFile}
           error={getFileError("reportFile")}
           loading={uploading.reportFile}
+
           onChange={(file) => uploadDocument(file, "reportFile")}
           onRemove={() => removeFile("reportFile")}
-          onRemoveExisting={() => {
-            formik.setFieldValue("existingReportFile", null);
-          }}
         />
       </div>
     </section>
