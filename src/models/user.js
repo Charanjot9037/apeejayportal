@@ -35,10 +35,6 @@ const userSchema = new mongoose.Schema(
   default: null,
 },
 
-resetPasswordExpires: {
-  type: Date,
-  default: null,
-},
   },
   
 
