@@ -28,7 +28,7 @@ export default function AddProjectForm({ mode = "create", project = null }) {
     getTeamError,
     getFileError,
   } = useAddProjectForm({ mode, project });
-
+  console.log("errors", formik.errors);
   return (
     <div className="min-h-screen bg-[#faf9f8] px-4 py-8">
       <div className="mx-auto max-w-5xl">
@@ -56,7 +56,11 @@ export default function AddProjectForm({ mode = "create", project = null }) {
 
           <ProjectImagesSection formik={formik} isEdit={isEdit} />
 
-          <MediaDocumentsSection formik={formik} getFileError={getFileError} />
+          <MediaDocumentsSection
+            formik={formik}
+            isEdit={isEdit}
+            getFileError={getFileError}
+          />
 
           <FormActions formik={formik} isEdit={isEdit} />
         </form>

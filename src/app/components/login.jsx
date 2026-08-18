@@ -10,7 +10,7 @@ import { useState } from "react";
 import GoogleButton from "./elements/GoogleButton";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/redux/authSlice";
-
+import { setStudentProfile } from "@/redux/studentSlice";
 const Login = () => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -34,12 +34,10 @@ const Login = () => {
         });
 
         const data = await response.json();
-
+        console.log("data", data);
         if (!response.ok) {
           throw new Error(data.message);
         }
-
-        console.log("studentid", data.user.studentId);
         dispatch(
           loginSuccess({
             user: data.user,
@@ -48,7 +46,13 @@ const Login = () => {
             role: data.role,
           }),
         );
-
+        dispatch(
+          setStudentProfile({
+            department: data.user?.department,
+            program: data.user?.program,
+            academicBatch: data?.user?.academicBatch,
+          }),
+        );
         const role = data?.user?.role;
         const designation = data?.user?.designation;
 

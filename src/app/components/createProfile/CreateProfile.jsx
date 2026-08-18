@@ -352,9 +352,9 @@ export default function CreateStudentProfile() {
           value={activeTab}
           onValueChange={(value) => {
             // Prevent manually going to future tabs
-            // if (!studentId && value !== "personal") {
-            //   return;
-            // }
+            if (!studentId && value !== "personal") {
+              return;
+            }
 
             setActiveTab(value);
           }}
@@ -363,6 +363,7 @@ export default function CreateStudentProfile() {
           <TabsList className=" w-full h-10 flex overflow-x-auto no-scrollbar justify-start gap-1   sm:justify-center bg-white border  text-sm text-black">
             <TabsTrigger
               value="personal"
+              disabled={studentId}
               className="py-3 data-active:bg-primary-orange data-active:text-white"
             >
               Personal Information
@@ -411,7 +412,7 @@ export default function CreateStudentProfile() {
             <SkillsInterestsTab
               formik={formik}
               getError={getError}
-              onBack={() => setActiveTab("personal")}
+              onBack={() => setActiveTab("academic")}
               onNext={handleSkillsNext}
             />
           </TabsContent>
@@ -440,7 +441,7 @@ export default function CreateStudentProfile() {
               resumeInputRef={resumeInputRef}
               handleResume={handleResume}
               removeResume={removeResume}
-              onBack={() => setActiveTab("academic")}
+              onBack={() => setActiveTab("skills")}
               onSubmit={handleFinalSubmit}
             />
           </TabsContent>

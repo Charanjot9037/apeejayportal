@@ -1,10 +1,6 @@
 "use client";
 
-import { Upload, Eye, FileText } from "lucide-react";
-
-/* =========================================================
-   DOCUMENT UPLOAD
-========================================================= */
+import { Upload, Eye, FileText, Loader2 } from "lucide-react";
 
 export default function DocumentUpload({
   title,
@@ -13,6 +9,7 @@ export default function DocumentUpload({
   file,
   existingFile,
   error,
+  loading,
   onChange,
   onRemove,
   onRemoveExisting,
@@ -25,12 +22,29 @@ export default function DocumentUpload({
       ? title
       : existingFile?.originalName || title;
 
-  const currentFileName = file?.name || null;
+  const currentFileName =
+    typeof file === "string" ? title : file?.originalName || file?.name || null;
+
+  const inputId = `file-upload-${title.toLowerCase().replace(/\s+/g, "-")}`;
+
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files?.[0];
+
+    console.log("SELECTED FILE:", selectedFile);
+
+    if (!selectedFile) return;
+
+    // This MUST call parent's uploadDocument()
+    onChange(selectedFile);
+
+    // Allow selecting same file again
+    event.target.value = "";
+  };
 
   return (
     <div>
-      {/* EXISTING CLOUDINARY FILE */}
-      {existingFile && existingFileUrl && !file && (
+      {/* EXISTING FILE */}
+      {existingFile && existingFileUrl && !file && !loading && (
         <div className="mb-2 rounded-md border border-slate-200 bg-slate-50 p-3">
           <div className="flex items-start gap-2">
             <FileText className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
@@ -68,46 +82,63 @@ export default function DocumentUpload({
         </div>
       )}
 
-      {/* UPLOAD / REPLACE */}
+      {/* UPLOAD AREA */}
       <label
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-md border border-dashed px-4 py-5 text-center transition ${
-          error
-            ? "border-red-400 bg-red-50"
-            : "border-slate-300 bg-slate-50 hover:border-orange-400 hover:bg-orange-50"
+        htmlFor={inputId}
+        className={`flex min-h-[130px] flex-col items-center justify-center rounded-md border border-dashed px-4 py-5 text-center transition ${
+          loading
+            ? "cursor-not-allowed border-blue-300 bg-blue-50"
+            : error
+              ? "cursor-pointer border-red-400 bg-red-50"
+              : "cursor-pointer border-slate-300 bg-slate-50 hover:border-orange-400 hover:bg-orange-50"
         }`}
       >
-        <Upload
-          className={`mb-2 h-5 w-5 ${error ? "text-red-500" : "text-orange-500"}`}
-        />
+        {loading ? (
+          <>
+            <Loader2 className="mb-2 h-6 w-6 animate-spin text-orange-500" />
 
-        <span className="max-w-full truncate px-2 text-xs font-medium text-slate-700">
-          {currentFileName || (existingFile ? "Replace file" : title)}
-        </span>
+            <span className="text-xs font-medium text-blue-700">
+              Uploading...
+            </span>
 
-        <span className="mt-1 text-[10px] text-slate-400">
-          {currentFileName
-            ? "Click to replace"
-            : existingFile
-              ? "Choose a new file to replace the existing one"
-              : description}
-        </span>
+            <span className="mt-1 text-[10px] text-slate-400">
+              Uploading file to Cloudinary
+            </span>
+          </>
+        ) : (
+          <>
+            <Upload
+              className={`mb-2 h-5 w-5 ${
+                error ? "text-red-500" : "text-orange-500"
+              }`}
+            />
+
+            <span className="max-w-full truncate px-2 text-xs font-medium text-slate-700">
+              {currentFileName || (existingFile ? "Replace file" : title)}
+            </span>
+
+            <span className="mt-1 text-[10px] text-slate-400">
+              {currentFileName
+                ? "Click to replace"
+                : existingFile
+                  ? "Choose a new file to replace the existing one"
+                  : description}
+            </span>
+          </>
+        )}
 
         <input
+          id={inputId}
           type="file"
           accept={accept}
+          disabled={loading}
           className="hidden"
-          onChange={(event) => {
-            const selectedFile = event.target.files?.[0] || null;
-
-            onChange(selectedFile);
-
-            event.target.value = "";
-          }}
+          onChange={handleFileChange}
         />
       </label>
 
-      {/* NEW FILE REMOVE */}
-      {file && !error && (
+      {/* REMOVE NEW FILE */}
+      {file && !error && !loading && (
         <button
           type="button"
           onClick={onRemove}
@@ -117,7 +148,10 @@ export default function DocumentUpload({
         </button>
       )}
 
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      {/* ERROR */}
+      {error && !loading && (
+        <p className="mt-1 text-xs text-red-500">{error}</p>
+      )}
     </div>
   );
 }
