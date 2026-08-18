@@ -115,7 +115,6 @@ const ProjectSchema = new mongoose.Schema(
     semester: {
       type: String,
     },
-
     mentor: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Mentor",
