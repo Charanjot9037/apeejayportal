@@ -117,7 +117,9 @@ const ProjectSchema = new mongoose.Schema(
     },
 
     mentor: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Mentor",
+      default: null,
     },
 
     /* =====================================================
