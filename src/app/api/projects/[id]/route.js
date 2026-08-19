@@ -322,7 +322,19 @@ export async function GET(request, context) {
       );
     }
 
-    const project = await Project.findById(id);
+    const project = await Project.findById(id)
+       .populate({
+        path: "mentor",
+        select: "userId designation",
+        populate: {
+          path: "userId",
+          select: "name email",
+        },
+      })
+      .populate({
+        path: "teamMembers",
+        select: "name email",
+      });
 
     if (!project) {
       return NextResponse.json(

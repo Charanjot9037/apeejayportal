@@ -16,7 +16,7 @@ export default function TechnologiesSection({ project }) {
           {project.techStack.map((tech, index) => (
             <span
               key={index}
-              className="rounded bg-slate-100 px-2.5 py-1 text-[10px] font-medium text-slate-700"
+              className="rounded bg-slate-100 px-2.5 py-1 text-sm font-medium text-slate-700"
             >
               {tech}
             </span>

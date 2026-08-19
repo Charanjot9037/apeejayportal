@@ -14,11 +14,11 @@ export default function ApprovalHistorySection({ project }) {
         <div className="relative pb-4">
           <span className="absolute -left-[21px] top-0 h-2 w-2 rounded-full bg-blue-600" />
 
-          <p className="text-[9px] font-medium text-slate-700">
+          <p className="text-sm font-medium text-slate-700">
             Project Submitted
           </p>
 
-          <p className="mt-0.5 text-[8px] text-slate-400">
+          <p className="mt-0.5 text-xs text-slate-400">
             {project.createdAt
               ? formatDate(project.createdAt)
               : "Date unavailable"}
@@ -29,11 +29,13 @@ export default function ApprovalHistorySection({ project }) {
           <div className="relative">
             <span className="absolute -left-[21px] top-0 h-2 w-2 rounded-full bg-green-500" />
 
-            <p className="text-[9px] font-medium text-slate-700">
+            <p className="text-sm font-medium text-slate-700">
               Project Approved
             </p>
 
-            <p className="mt-0.5 text-[8px] text-slate-400">Current Status</p>
+            <p className="mt-0.5 text-xs text-slate-400">
+              Current Status
+            </p>
           </div>
         )}
 
@@ -41,11 +43,13 @@ export default function ApprovalHistorySection({ project }) {
           <div className="relative">
             <span className="absolute -left-[21px] top-0 h-2 w-2 rounded-full bg-red-500" />
 
-            <p className="text-[9px] font-medium text-slate-700">
+            <p className="text-sm font-medium text-slate-700">
               Project Rejected
             </p>
 
-            <p className="mt-0.5 text-[8px] text-slate-400">Current Status</p>
+            <p className="mt-0.5 text-xs text-slate-400">
+              Current Status
+            </p>
           </div>
         )}
 
@@ -53,11 +57,13 @@ export default function ApprovalHistorySection({ project }) {
           <div className="relative">
             <span className="absolute -left-[21px] top-0 h-2 w-2 rounded-full bg-yellow-500" />
 
-            <p className="text-[9px] font-medium text-slate-700">
+            <p className="text-sm font-medium text-slate-700">
               Awaiting Approval
             </p>
 
-            <p className="mt-0.5 text-[8px] text-slate-400">Placement Cell</p>
+            <p className="mt-0.5 text-xs text-slate-400">
+              Placement Cell
+            </p>
           </div>
         )}
       </div>

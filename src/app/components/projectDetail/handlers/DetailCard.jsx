@@ -20,7 +20,7 @@ export default function DetailCard({ title, icon, children }) {
 
           <div className="text-blue-700">{icon}</div>
 
-          <h2 className="text-sm font-semibold text-blue-900">{title}</h2>
+          <h2 className="text-lg font-semibold text-blue-900">{title}</h2>
         </div>
 
         {children}

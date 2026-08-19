@@ -17,8 +17,8 @@ export default function DetailHeader({ project, deleting, onDelete }) {
     <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
       <div>
         {/* Semester */}
-        <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">
-          {project.semester || "Academic Project"}
+        <p className="mb-1 text-sm font-medium uppercase tracking-wide text-slate-500">
+         Semester - {project.semester || "Academic Project"}
         </p>
 
         {/* Project Title */}
@@ -29,7 +29,7 @@ export default function DetailHeader({ project, deleting, onDelete }) {
         {/* Status + project type */}
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
           <Badge
-            className={`rounded-full px-2.5 py-0.5 text-[10px] ${
+            className={`rounded-full px-2.5 py-0.5 text-sm ${
               statusStyles[project.status] || "bg-slate-100 text-slate-600"
             }`}
           >
@@ -37,11 +37,11 @@ export default function DetailHeader({ project, deleting, onDelete }) {
             {project.status}
           </Badge>
 
-          <span className="text-[9px] text-slate-400">
+          {/* <span className="text-[9px] text-slate-400">
             {project.projectType === "team"
               ? `Team Project • ${project.teamMembers?.length || 0} Members`
               : "Individual Project"}
-          </span>
+          </span> */}
         </div>
       </div>
 

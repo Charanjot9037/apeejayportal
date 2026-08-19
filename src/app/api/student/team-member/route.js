@@ -8,29 +8,31 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    const { department, program, academicBatch } = body;
+    const { department, program, academicBatch, excludeUserId } = body;
 
     if (!department || !program || !academicBatch) {
       return NextResponse.json(
         {
           success: false,
-          message: "Department and class are required.",
+          message: "Department, program, and year are required.",
         },
         { status: 400 },
       );
     }
 
-    const students = await Student.find({
-      department: {
-        $regex: `^${department}$`,
-        $options: "i",
-      },
+    const query = {
+      department: { $regex: `^${department.trim()}$`, $options: "i" },
+      program: { $regex: `^${program.trim()}$`, $options: "i" },
+      academicBatch: { $regex: `^${academicBatch.trim()}$`, $options: "i" },
+    };
 
-      program: {
-        $regex: `^${program}$`,
-        $options: "i",
-      },
-    }).select("_id userId fullName");
+    if (excludeUserId) {
+      query.userId = { $ne: excludeUserId };
+    }
+
+    const students = await Student.find(query).select(
+      "_id userId fullName department program academicBatch",
+    );
 
     return NextResponse.json(
       {
