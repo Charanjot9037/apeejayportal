@@ -111,80 +111,81 @@ const ForgotPassword = () => {
             send you a secure password reset link.
           </p>
         </div>
+<form onSubmit={handleSubmit} className="space-y-5">
+  {!message && (
+    <div className="space-y-2">
+      <Label htmlFor="email" required>
+        Email Address
+      </Label>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="email" required>
-              Email Address
-            </Label>
+      <Input
+        id="email"
+        name="email"
+        type="email"
+        placeholder="you@example.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+        className="
+          h-12
+          border-gray-300
+          bg-white/80
+          px-4
+          transition
+          focus:border-blue-500
+          focus:ring-2
+          focus:ring-blue-500/20
+        "
+      />
+    </div>
+  )}
 
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="
-                h-12
-                rounded-xl
-                border-gray-300
-                bg-white/80
-                px-4
-                transition
-                focus:border-blue-500
-                focus:ring-2
-                focus:ring-blue-500/20
-              "
-            />
-          </div>
+  {/* Success Message */}
+  {message && (
+    <div className="rounded-xl border-2 border-orange-500 bg-orange-500 px-4 py-3">
+      <p className="text-sm font-medium text-white">
+        {message}
+      </p>
+    </div>
+  )}
 
-          {/* Success Message */}
-          {message && (
-            <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3">
-              <p className="text-sm font-medium text-green-900">
-                {message}
-              </p>
-            </div>
-          )}
+  {/* Error Message */}
+  {error && (
+    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+      <p className="text-sm font-medium text-red-600">
+        {error}
+      </p>
+    </div>
+  )}
 
-          {/* Error Message */}
-          {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-              <p className="text-sm font-medium text-red-600">
-                {error}
-              </p>
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={loading}
-            className="
-              h-12
-              w-full
-              rounded-xl
-              bg-orange-500
-              text-white
-              font-semibold
-              shadow-lg
-              shadow-orange-500/25
-              transition-all
-              cursor-pointer
-              duration-200
-              hover:bg-orange-600
-              hover:shadow-orange-500/40
-              hover:-translate-y-0.5
-              disabled:cursor-not-allowed
-              disabled:opacity-60
-            "
-          >
-            {loading ? "Sending..." : "Send Reset Link"}
-          </Button>
-        </form>
+  {/* Submit Button */}
+  {!message && (
+    <Button
+      type="submit"
+      disabled={loading}
+      className="
+        h-12
+        w-full
+        rounded-sm
+        bg-orange-500
+        text-white
+        font-semibold
+        shadow-lg
+        shadow-orange-500/25
+        transition-all
+        cursor-pointer
+        duration-200
+        hover:bg-orange-600
+        hover:shadow-orange-500/40
+        hover:-translate-y-0.5
+        disabled:cursor-not-allowed
+        disabled:opacity-60
+      "
+    >
+      {loading ? "Sending..." : "Send Reset Link"}
+    </Button>
+  )}
+</form>
 
         {/* Back to Login */}
         <div className="mt-7 text-center">
