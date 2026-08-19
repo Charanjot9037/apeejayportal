@@ -206,9 +206,8 @@
 
 // export default Login;
 
-
 "use client";
-
+import Image from "next/image";
 import React, { useState } from "react";
 import { Input, Label, Button } from "@/components/ui";
 import { useFormik } from "formik";
@@ -217,6 +216,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/redux/authSlice";
+import { DashboardHeader } from "./elements";
 import { setStudentProfile } from "@/redux/studentSlice";
 
 const Login = () => {
@@ -312,24 +312,25 @@ const Login = () => {
 
   return (
     <div className="w-full max-w-md">
-      {/* Login Card */}
+      {/* Login Card */}{" "}
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
-
-        {/* Header */}
-        <div className="mb-6 sm:mb-7">
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-            Welcome Back
-          </h1>
-
-          <p className="mt-2 text-sm leading-6 text-gray-600">
-            Login to access your dashboard.
-          </p>
+        {/* Header */}{" "}
+        <div className="flex justify-center items-center md:hidden">
+          <Image
+            src="/logo.png"
+            alt="Apeejay Logo"
+            width={90}
+            height={90}
+            className="  rounded-full my-2"
+          />
         </div>
-
-        <form
-          onSubmit={formik.handleSubmit}
-          className="space-y-4 sm:space-y-5"
-        >
+        <div className="py-2">
+          <DashboardHeader
+            title="Welcome Back"
+            description=" Login to access your dashboard."
+          />
+        </div>
+        <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-5">
           {/* Email */}
           <div className="space-y-2">
             <Label
@@ -352,12 +353,9 @@ const Login = () => {
               required
             />
 
-            {formik.touched.email &&
-              formik.errors.email && (
-                <p className="text-sm text-red-500">
-                  {formik.errors.email}
-                </p>
-              )}
+            {formik.touched.email && formik.errors.email && (
+              <p className="text-sm text-red-500">{formik.errors.email}</p>
+            )}
           </div>
 
           {/* Password */}
@@ -374,11 +372,7 @@ const Login = () => {
               <Input
                 id="password"
                 name="password"
-                type={
-                  showPassword
-                    ? "text"
-                    : "password"
-                }
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={formik.values.password}
                 onChange={formik.handleChange}
@@ -388,30 +382,17 @@ const Login = () => {
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowPassword(!showPassword)
-                }
+                onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors hover:text-gray-800"
-                aria-label={
-                  showPassword
-                    ? "Hide password"
-                    : "Show password"
-                }
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? (
-                  <EyeOff size={19} />
-                ) : (
-                  <Eye size={19} />
-                )}
+                {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
               </button>
             </div>
 
-            {formik.touched.password &&
-              formik.errors.password && (
-                <p className="text-sm text-red-500">
-                  {formik.errors.password}
-                </p>
-              )}
+            {formik.touched.password && formik.errors.password && (
+              <p className="text-sm text-red-500">{formik.errors.password}</p>
+            )}
           </div>
 
           {/* Forgot Password */}
@@ -433,29 +414,7 @@ const Login = () => {
           </Button>
 
           {/* Divider */}
-          <div className="relative my-4 sm:my-5">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-200" />
-            </div>
-
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-3 text-gray-500">
-                OR
-              </span>
-            </div>
-          </div>
         </form>
-
-        {/* Signup */}
-        <p className="mt-5 text-center text-sm text-gray-600 sm:mt-6">
-          Don't have an account?{" "}
-          <a
-            href="/signup"
-            className="font-semibold text-orange-500 transition-colors hover:text-orange-600 hover:underline"
-          >
-            Sign Up
-          </a>
-        </p>
       </div>
     </div>
   );

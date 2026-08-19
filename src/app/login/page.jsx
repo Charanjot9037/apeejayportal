@@ -36,9 +36,9 @@ export default function Page() {
                 <Image
                   src="/logo.png"
                   alt="Apeejay Logo"
-                  width={80}
-                  height={80}
-                  className="h-32 w-32  rounded-full my-2"
+                  width={100}
+                  height={100}
+                  className=" rounded-full my-2"
                 />
         
 
