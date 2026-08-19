@@ -7,9 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { useSelector } from "react-redux";
 import TeamMemberCard from "./TeamMemberCard";
-
+import { use, useEffect, useState } from "react";
 /* =========================================================
    COLLABORATION SECTION
 ========================================================= */
@@ -20,6 +20,44 @@ export default function CollaborationSection({
   removeTeamMember,
   getTeamError,
 }) {
+  const [mentors, setMentors] = useState();
+  const [loading, setMentorLoading] = useState(false);
+  const department = useSelector((state) => state.student.department);
+  useEffect(() => {
+    if (!department) return;
+
+    const fetchMentors = async () => {
+      try {
+        setMentorLoading(true);
+
+        const response = await fetch("/api/mentors", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            department,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message);
+        }
+
+        setMentors(data.mentors);
+      } catch (error) {
+        console.error("Failed to fetch mentors:", error);
+        setMentors([]);
+      } finally {
+        setMentorLoading(false);
+      }
+    };
+
+    fetchMentors();
+  }, [department]);
+  console.log("mentors", mentors);
   const handleFieldChange = (index, field, value) => {
     formik.setFieldValue(`teamMembers[${index}].${field}`, value);
   };
@@ -31,9 +69,7 @@ export default function CollaborationSection({
   return (
     <section className="mt-6">
       <h2 className="border-b border-slate-300 pb-2 text-base font-medium text-blue-900">
-        <span className="border-b-2 border-orange-500 pb-2">
-          Collaboration
-        </span>
+        <span className="border-b-2 border-orange-500 pb-2">Collaboration</span>
       </h2>
 
       {/* PROJECT TYPE */}
@@ -81,39 +117,20 @@ export default function CollaborationSection({
               </h3>
 
               <p className="mt-1 text-xs text-slate-500">
-                Add the students who are working on this project.
+                Add the student who are working on this project.
               </p>
             </div>
-
-            <span className="text-xs text-slate-400">
-              {formik.values.teamMembers.length}{" "}
-              {formik.values.teamMembers.length === 1 ? "Member" : "Members"}
-            </span>
           </div>
 
           <div className="space-y-4">
-            {formik.values.teamMembers.map((member, index) => (
-              <TeamMemberCard
-                key={index}
-                member={member}
-                index={index}
-                canRemove={formik.values.teamMembers.length > 1}
-                onRemove={() => removeTeamMember(index)}
-                getTeamError={getTeamError}
-                onFieldChange={handleFieldChange}
-                onFieldBlur={handleFieldBlur}
-              />
-            ))}
-          </div>
+            <TeamMemberCard
+              formik={formik}
 
-          <button
-            type="button"
-            onClick={addTeamMember}
-            className="mt-4 flex items-center gap-1 text-sm font-medium text-orange-500 hover:text-orange-600"
-          >
-            <span className="text-lg leading-none">+</span>
-            Add Team Member
-          </button>
+              getTeamError={getTeamError}
+              onFieldChange={handleFieldChange}
+              onFieldBlur={handleFieldBlur}
+            />
+          </div>
         </div>
       )}
 
@@ -162,7 +179,7 @@ export default function CollaborationSection({
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-slate-700">
-            Assigned Mentor <span className="text-slate-400">(Optional)</span>
+            Assigne Mentor <span className="text-slate-400"></span>
           </label>
 
           <Select
@@ -172,13 +189,31 @@ export default function CollaborationSection({
             }}
           >
             <SelectTrigger className="h-10 bg-slate-50 text-sm">
-              <SelectValue placeholder="Select a faculty mentor..." />
+              <SelectValue placeholder="Select a faculty mentor">
+                {formik?.values?.mentor
+                  ? mentors?.find(
+                      (mentor) => mentor._id === formik.values.mentor,
+                    )?.userId?.name
+                  : "Select a faculty mentor"}
+              </SelectValue>
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value="mentor1">Dr. Faculty Mentor 1</SelectItem>
-              <SelectItem value="mentor2">Dr. Faculty Mentor 2</SelectItem>
-              <SelectItem value="mentor3">Prof. Faculty Mentor 3</SelectItem>
+              {loading ? (
+                <SelectItem value="loading" disabled>
+                  Loading mentors...
+                </SelectItem>
+              ) : mentors?.length === 0 ? (
+                <SelectItem value="no-mentor" disabled>
+                  No mentors available
+                </SelectItem>
+              ) : (
+                mentors?.map((mentor) => (
+                  <SelectItem key={mentor._id} value={mentor._id}>
+                    {mentor.userId?.name}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         </div>

@@ -25,7 +25,7 @@ const StudentCard = ({ student, onSave }) => {
     <div
       className="
         group
-        w-full
+        w-75
         overflow-hidden
         rounded-xl
         border
@@ -45,10 +45,11 @@ const StudentCard = ({ student, onSave }) => {
     <div
   className="
     relative
-    aspect-[6/4]
-    w-full
     overflow-hidden
     bg-slate-100
+     h-75
+     w-75
+     flex
   "
 >
   {profileImage ? (
@@ -57,8 +58,9 @@ const StudentCard = ({ student, onSave }) => {
       alt={fullName || "Student"}
       sizes="(max-width: 768px) 100vw, 33vw"
       className="
-        object-contain
-        object-top
+      object-fill
+      h-full
+      w-full
         transition-transform
         duration-500
         ease-out

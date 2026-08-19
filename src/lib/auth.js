@@ -4,10 +4,10 @@ import User from "@/models/user";
 
 export const authOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
+    // GoogleProvider({
+    //   clientId: process.env.GOOGLE_CLIENT_ID,
+    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    // }),
   ],
 
   session: {
@@ -30,19 +30,19 @@ export const authOptions = {
             name: user.name,
             email: user.email,
 
-            provider: "google",
+            // provider: "google",
 
-            googleId: account.providerAccountId,
+            // googleId: account.providerAccountId,
 
             image: user.image,
 
             role: "student",
           });
         } else {
-          existingUser.googleId =
-            account.providerAccountId;
+        //   existingUser.googleId =
+        //     account.providerAccountId;
 
-          existingUser.provider = "google";
+        //   existingUser.provider = "google";
 
           existingUser.image = user.image;
 

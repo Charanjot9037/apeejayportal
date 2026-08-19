@@ -9,9 +9,18 @@ import { validationSchema } from "@/validations/AddProjectSchema";
 /* =========================================================
    useAddProjectForm
 
-   Owns all formik state, the submit handler, and every
-   field-level handler used by AddProjectForm and its
-   section components.
+   All files are uploaded to Cloudinary BEFORE project
+   submission.
+
+   Formik stores Cloudinary objects:
+   {
+     url,
+     publicId,
+     originalName,
+     resourceType
+   }
+
+   /api/projects only receives JSON and saves it to MongoDB.
 ========================================================= */
 
 export function useAddProjectForm({ mode = "create", project = null }) {
@@ -22,8 +31,6 @@ export function useAddProjectForm({ mode = "create", project = null }) {
   const isEdit = mode === "edit";
 
   const formik = useFormik({
-    enableReinitialize: true,
-
     initialValues: {
       projectName: isEdit ? project?.title || "" : "",
 
@@ -40,48 +47,45 @@ export function useAddProjectForm({ mode = "create", project = null }) {
       projectType: isEdit ? project?.projectType || "individual" : "individual",
 
       techStack:
-        isEdit && Array.isArray(project?.techStack)
-          ? project.techStack
-          : ["React", "Node.js", "MongoDB"],
+        isEdit && Array.isArray(project?.techStack) ? project.techStack : [""],
 
-      teamMembers:
-        isEdit &&
-        Array.isArray(project?.teamMembers) &&
-        project.teamMembers.length > 0
-          ? project.teamMembers
-          : [{ ...emptyTeamMember }],
+      teamMembers: isEdit ? project?.teamMembers || "" : "",
 
-      /*
-       * NEW FILES
-       *
-       * Existing Cloudinary files are NOT placed
-       * inside these arrays.
-       *
-       * They remain inside project.projectImages,
-       * project.presentationFile, etc.
-       */
+      /* =====================================================
+         CLOUDINARY FILE OBJECTS
 
-      projectImages: [],
+         These are NOT File objects anymore.
 
-      presentationFile: null,
+         Example:
 
-      synopsisFile: null,
-
-      reportFile: null,
-
-      existingProjectImages:
+         projectImages: [
+           {
+             url: "...",
+             publicId: "...",
+             originalName: "image.png",
+             resourceType: "image"
+           }
+         ]
+      ===================================================== */
+      projectImages:
         isEdit && Array.isArray(project?.projectImages)
           ? project.projectImages
           : [],
 
-      existingSynopsisFile: isEdit ? project?.synopsisFile || null : null,
+      presentationFile:
+        isEdit && project?.presentationFile ? project.presentationFile : null,
 
-      existingReportFile: isEdit ? project?.reportFile || null : null,
+      synopsisFile:
+        isEdit && project?.synopsisFile ? project.synopsisFile : null,
 
-      existingPresentationFile: isEdit ? project?.presentationFile || null : null,
+      reportFile: isEdit && project?.reportFile ? project.reportFile : null,
     },
 
     validationSchema,
+
+    /* =======================================================
+       SUBMIT
+    ======================================================= */
 
     onSubmit: async (values, { setSubmitting }) => {
       try {
@@ -92,46 +96,47 @@ export function useAddProjectForm({ mode = "create", project = null }) {
           return;
         }
 
-        const formData = new FormData();
+        /* =================================================
+           PROJECT DATA
 
-        formData.append(
-          "projectData",
-          JSON.stringify({
-            projectName: values.projectName,
-            description: values.description,
-            techStack: values.techStack,
-            githubLink: values.githubLink,
-            liveDemoLink: values.liveDemoLink,
-            projectType: values.projectType,
-            teamMembers:
-              values.projectType === "team" ? values.teamMembers : [],
-            semester: values.semester,
-            mentor: values.mentor,
-            studentId,
-            existingProjectImages: values.existingProjectImages || [],
-            existingSynopsisFile: values.existingSynopsisFile || null,
-            existingReportFile: values.existingReportFile || null,
-            existingPresentationFile: values.existingPresentationFile || null,
-          })
-        );
+           Everything is already uploaded to Cloudinary.
+           Therefore we send JSON directly.
+        ================================================= */
+        const projectData = {
+          projectName: values.projectName,
 
-        if (values.projectImages && values.projectImages.length > 0) {
-          values.projectImages.forEach((file) => {
-            formData.append("projectImages", file);
-          });
-        }
+          description: values.description,
 
-        if (values.presentationFile) {
-          formData.append("presentationFile", values.presentationFile);
-        }
+          techStack: values.techStack,
 
-        if (values.synopsisFile) {
-          formData.append("synopsisFile", values.synopsisFile);
-        }
+          githubLink: values.githubLink,
 
-        if (values.reportFile) {
-          formData.append("reportFile", values.reportFile);
-        }
+          liveDemoLink: values.liveDemoLink,
+
+          projectType: values.projectType,
+
+          teamMembers: values.projectType === "team" ? values.teamMembers : "",
+
+          semester: values.semester,
+
+          mentor: values.mentor || null,
+
+          studentId,
+
+          projectImages: values.projectImages || [],
+
+          presentationFile: values.presentationFile || null,
+
+          synopsisFile: values.synopsisFile || null,
+
+          reportFile: values.reportFile || null,
+        };
+
+        console.log("PROJECT DATA:", projectData);
+
+        /* =================================================
+           API
+        ================================================= */
 
         const url = isEdit ? `/api/projects/${project._id}` : "/api/projects";
 
@@ -143,27 +148,50 @@ export function useAddProjectForm({ mode = "create", project = null }) {
           url,
         });
 
+        /* =================================================
+           SEND JSON
+        ================================================= */
+
         const response = await fetch(url, {
           method,
-          body: formData,
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify(projectData),
         });
 
         const result = await response.json();
 
+        /* =================================================
+           AUTH ERROR
+        ================================================= */
+
         if (response.status === 401) {
           toast.error("You are not authenticated. Please log in again.");
+
           router.push("/login");
+
           return;
         }
+
+        /* =================================================
+           API ERROR
+        ================================================= */
 
         if (!response.ok) {
           throw new Error(result.message || "Failed to save project");
         }
 
+        /* =================================================
+           SUCCESS
+        ================================================= */
+
         toast.success(
           isEdit
             ? "Project updated successfully."
-            : "Project submitted for approval successfully."
+            : "Project submitted for approval successfully.",
         );
 
         if (isEdit) {
@@ -203,7 +231,7 @@ export function useAddProjectForm({ mode = "create", project = null }) {
   const removeTechnology = (technology) => {
     formik.setFieldValue(
       "techStack",
-      formik.values.techStack.filter((item) => item !== technology)
+      formik.values.techStack.filter((item) => item !== technology),
     );
   };
 
@@ -220,7 +248,7 @@ export function useAddProjectForm({ mode = "create", project = null }) {
 
   const removeTeamMember = (index) => {
     const updatedMembers = formik.values.teamMembers.filter(
-      (_, memberIndex) => memberIndex !== index
+      (_, memberIndex) => memberIndex !== index,
     );
 
     formik.setFieldValue("teamMembers", updatedMembers);
@@ -239,21 +267,32 @@ export function useAddProjectForm({ mode = "create", project = null }) {
   };
 
   /* =======================================================
-     FILES
+     FILE ERRORS
   ======================================================= */
 
   const getFileError = (field) => {
     return formik.touched[field] ? formik.errors[field] : null;
   };
 
+  /* =======================================================
+     RETURN
+  ======================================================= */
+
   return {
     formik,
+
     isEdit,
+
     addTechnology,
+
     removeTechnology,
+
     addTeamMember,
+
     removeTeamMember,
+
     getTeamError,
+
     getFileError,
   };
 }

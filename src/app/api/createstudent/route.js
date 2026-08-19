@@ -73,6 +73,7 @@ export async function POST(request) {
       {
         success: true,
         message: "Student profile created successfully",
+        studentId:student._id,
       },
       { status: 201 },
     );

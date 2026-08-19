@@ -19,8 +19,11 @@ export async function POST(req) {
 
     const isImage = file.type.startsWith("image/");
     const isPDF = file.type === "application/pdf";
-
-    if (!isImage && !isPDF) {
+    const isPPT =
+      file.type === "application/vnd.ms-powerpoint" ||
+      file.type ===
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    if (!isImage && !isPDF && !isPPT) {
       return Response.json(
         { message: "Only images and PDFs are allowed" },
         { status: 400 },
