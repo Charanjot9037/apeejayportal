@@ -336,7 +336,6 @@ export async function GET(request, context) {
         path: "teamMembers",
         select: "name email",
       });
-    console.log(project);
 
     if (!project) {
       return NextResponse.json(
