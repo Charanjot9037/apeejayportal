@@ -1,8 +1,8 @@
 // app/api/mentors/route.js
 
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import Mentor from "@/models/mentor";
+import { NextResponse } from 'next/server';
+import { connectDB } from '@/lib/db';
+import Mentor from '@/models/mentor';
 
 export async function POST(req) {
   try {
@@ -15,7 +15,7 @@ export async function POST(req) {
       return NextResponse.json(
         {
           success: false,
-          message: "Department is required",
+          message: 'Department is required',
         },
         { status: 400 },
       );
@@ -24,26 +24,26 @@ export async function POST(req) {
     const mentors = await Mentor.find({
       department: {
         $regex: `^${department}$`,
-        $options: "i",
+        $options: 'i',
       },
     })
       .populate({
-        path: "userId",
-        select: "name email",
+        path: 'userId',
+        select: 'name email',
       })
-      .select("userId mobileNumber department designation");
-console.log("mentors");
+      .select('userId mobileNumber department designation');
+    console.log('mentors');
     return NextResponse.json({
       success: true,
       mentors,
     });
   } catch (error) {
-    console.error("Fetch mentors error:", error);
+    console.error('Fetch mentors error:', error);
 
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to fetch mentors",
+        message: 'Failed to fetch mentors',
       },
       { status: 500 },
     );

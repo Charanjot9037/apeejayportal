@@ -8,30 +8,45 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    const { department, program, academicBatch, excludeUserId } = body;
+    const { department, program, academicBatch, specialization } = body;
 
     if (!department || !program || !academicBatch) {
       return NextResponse.json(
         {
           success: false,
-          message: "Department, program, and year are required.",
+          message: "Department, program and academic batch are required.",
         },
         { status: 400 },
       );
     }
 
     const query = {
-      department: { $regex: `^${department.trim()}$`, $options: "i" },
-      program: { $regex: `^${program.trim()}$`, $options: "i" },
-      academicBatch: { $regex: `^${academicBatch.trim()}$`, $options: "i" },
+      department: {
+        $regex: `^${department}$`,
+        $options: "i",
+      },
+
+      program: {
+        $regex: `^${program}$`,
+        $options: "i",
+      },
+
+      academicBatch: {
+        $regex: `^${academicBatch}$`,
+        $options: "i",
+      },
     };
 
-    if (excludeUserId) {
-      query.userId = { $ne: excludeUserId };
+    // Add specialization only when it is provided
+    if (specialization) {
+      query.specialization = {
+        $regex: `^${specialization}$`,
+        $options: "i",
+      };
     }
 
     const students = await Student.find(query).select(
-      "_id userId fullName department program academicBatch",
+      "_id userId fullName rollNumber department program academicBatch specialization",
     );
 
     return NextResponse.json(

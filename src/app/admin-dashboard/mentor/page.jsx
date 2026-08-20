@@ -5,83 +5,71 @@ import { Users, GraduationCap } from 'lucide-react';
 import Roster from '@/app/components/elements/roaster';
 
 import {
-  studentColumns,
-  DEFAULT_FILTERS,
-  STUDENT_FILTERS,
-  mapStudentToRoster,
+  MENTOR_ROSTER_COLUMNS,
+  MENTOR_DEFAULT_FILTERS,
+  MENTOR_FILTER_CONFIG,
+  mapMentorToRoster,
 } from '@/constants/adminData';
 
 export default function Page() {
-  const [students, setStudents] = useState([]);
+  const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState(MENTOR_DEFAULT_FILTERS);
 
-  const fetchStudents = async (selectedFilters) => {
+  const fetchMentors = async (selectedFilters) => {
     try {
       setLoading(true);
       setError('');
 
-      const apiFilters = {
-        department: selectedFilters.department,
-        program: selectedFilters.program,
-        academicBatch: selectedFilters.academicBatch,
-      };
-
-      if (selectedFilters.specialization) {
-        apiFilters.specialization = selectedFilters.specialization;
-      }
-
-      const response = await fetch('/api/student/team-member', {
+      const response = await fetch('/api/mentors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(apiFilters),
+        body: JSON.stringify(selectedFilters),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Failed to fetch students');
+        throw new Error(data.message || 'Failed to fetch mentors');
       }
 
-      const mappedStudents = (data.students || []).map(mapStudentToRoster);
+      const mappedMentors = (data.mentors || []).map(mapMentorToRoster);
 
-      setStudents(mappedStudents);
+      setMentors(mappedMentors);
     } catch (error) {
-      console.error('FETCH_STUDENTS_ERROR:', error);
+      console.error('FETCH_MENTORS_ERROR:', error);
 
       setError(error.message || 'Something went wrong');
 
-      setStudents([]);
+      setMentors([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchStudents(DEFAULT_FILTERS);
+    fetchMentors(MENTOR_DEFAULT_FILTERS);
   }, []);
 
   const handleApplyFilters = (selectedFilters) => {
     setFilters(selectedFilters);
-    fetchStudents(selectedFilters);
+    fetchMentors(selectedFilters);
   };
 
   const handleRetry = () => {
-    fetchStudents(filters);
+    fetchMentors(filters);
   };
 
   return (
     <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
+        {/* Header */}
+
         <div className="mb-6">
-          <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400">
-            <span>Dashboard</span>
-            <span>/</span>
-            <span className="text-slate-500">Students</span>
-          </div>
+         
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -91,13 +79,12 @@ export default function Page() {
                 </div>
 
                 <h1 className="text-2xl font-bold text-[#1c3a5e]">
-                  Student Management
+                  Mentor Management
                 </h1>
               </div>
 
               <p className="mt-2 text-sm text-slate-500">
-                View and manage students according to their department, course
-                and academic batch.
+                View and manage mentors according to their department.
               </p>
             </div>
 
@@ -108,16 +95,18 @@ export default function Page() {
 
               <div>
                 <p className="text-xs font-medium text-slate-400">
-                  Total Students
+                  Total Mentors
                 </p>
 
                 <p className="text-lg font-bold text-[#1c3a5e]">
-                  {students.length}
+                  {mentors.length}
                 </p>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Error */}
 
         {error && (
           <div className="mb-5 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
@@ -127,7 +116,7 @@ export default function Page() {
               </div>
 
               <h2 className="mt-4 text-base font-semibold text-slate-700">
-                Unable to load students
+                Unable to load mentors
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">{error}</p>
@@ -143,6 +132,8 @@ export default function Page() {
           </div>
         )}
 
+        {/* Roster */}
+
         <div className="relative rounded-2xl">
           {loading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
@@ -150,24 +141,24 @@ export default function Page() {
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-primary-orange" />
 
                 <span className="text-sm font-medium text-slate-600">
-                  Loading students...
+                  Loading mentors...
                 </span>
               </div>
             </div>
           )}
 
           <Roster
-            title="Student Roster"
-            data={students}
-            columns={studentColumns}
-            searchPlaceholder="Search students..."
+            title="Mentor Roster"
+            data={mentors}
+            columns={MENTOR_ROSTER_COLUMNS}
+            searchPlaceholder="Search mentors..."
             defaultFilters={filters}
-            filterConfig={STUDENT_FILTERS}
+            filterConfig={MENTOR_FILTER_CONFIG}
             showApplyButton={true}
             onApplyFilters={handleApplyFilters}
             className="mt-0 shadow-sm"
-            onRowClick={(student) => {
-              console.log('Selected student:', student);
+            onRowClick={(mentor) => {
+              console.log('Selected mentor:', mentor);
             }}
           />
         </div>
