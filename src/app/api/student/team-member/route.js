@@ -14,7 +14,11 @@ export async function POST(request) {
       return NextResponse.json(
         {
           success: false,
+<<<<<<< HEAD
           message: "Department, program and academic batch are required.",
+=======
+          message: 'Department, program and academic batch are required.',
+>>>>>>> c7867bdb6ad252bf3201acbf09d90366dba9f2fe
         },
         { status: 400 },
       );
