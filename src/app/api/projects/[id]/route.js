@@ -259,7 +259,8 @@ export async function PUT(request, context) {
 
     project.projectType = projectType;
 
-    project.teamMembers = projectType === "team" ? teamMembers || [] : [];
+    project.teamMembers =
+      projectType === "team" && teamMembers ? teamMembers : null;
 
     project.semester = semester || "";
 
@@ -323,7 +324,7 @@ export async function GET(request, context) {
     }
 
     const project = await Project.findById(id)
-       .populate({
+      .populate({
         path: "mentor",
         select: "userId designation",
         populate: {
