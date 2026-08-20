@@ -6,7 +6,7 @@ const MAX_REPORT_SIZE = 20 * 1024 * 1024; // 20MB
 
 const MAX_PROJECT_IMAGES = 6;
 
-export  const projectValidationSchema = Yup.object({
+export const projectValidationSchema = Yup.object({
   projectName: Yup.string()
     .trim()
     .min(3, "Project name must be at least 3 characters")
@@ -42,30 +42,7 @@ export  const projectValidationSchema = Yup.object({
     .min(1, "Add at least one technology")
     .required("Tech stack is required"),
 
-  teamMembers: Yup.array().when("projectType", {
-    is: "team",
-
-    then: (schema) =>
-      schema.min(1, "Add at least one team member").of(
-        Yup.object({
-          name: Yup.string().trim().required("Member name is required"),
-
-          enrollment: Yup.string()
-            .trim()
-            .required("Enrollment / Student ID is required"),
-
-          email: Yup.string()
-            .transform((value) => (value === "" ? null : value))
-            .nullable()
-            .email("Enter a valid email"),
-
-          role: Yup.string().trim().nullable(),
-        }),
-      ),
-
-    otherwise: (schema) => schema,
-  }),
-
+  teamMembers: Yup.string().nullable(),
   projectImages: Yup.array()
     .test(
       "max-images",
