@@ -11,6 +11,8 @@ import SideCard from "../SideCard";
 ========================================================= */
 
 export default function MentorSection({ project }) {
+  const mentorName = project.mentor?.userId?.name;
+
   return (
     <SideCard title="Assigned Mentor">
       <div className="flex items-center gap-3">
@@ -19,17 +21,19 @@ export default function MentorSection({ project }) {
         </div>
 
         <div className="min-w-0">
-          <p className="text-[11px] font-medium text-slate-800">
-            {project.mentor || "Not assigned"}
+          <p className="truncate text-sm font-medium text-slate-800">
+            {mentorName || "Not assigned"}
           </p>
 
-          <p className="mt-0.5 text-[8px] text-slate-400">Project Mentor</p>
+          <p className="mt-0.5 truncate text-xs text-slate-400">
+            {project.mentor?.designation || "Project Mentor"}
+          </p>
         </div>
       </div>
 
-      {project.mentor && (
+      {mentorName && (
         <Button
-          className="mt-4 h-8 w-full bg-orange-500 text-[10px] text-white hover:bg-orange-600"
+          className="mt-4 h-9 w-full bg-orange-500 text-xs text-white hover:bg-orange-600"
           onClick={() =>
             toast.info("Mentor contact functionality can be added here.")
           }

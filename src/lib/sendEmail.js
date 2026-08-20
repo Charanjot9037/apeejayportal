@@ -53,7 +53,7 @@ export async function sendPasswordResetEmail(email, resetUrl) {
         </div>
 
         <p>
-          This link will expire in <strong>15 minutes</strong>.
+          This link will expire in <strong>5 minutes</strong>.
         </p>
 
         <p>

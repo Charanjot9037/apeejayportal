@@ -42,9 +42,9 @@ export default function DocumentItem({ label, file }) {
         </div>
 
         <div className="min-w-0">
-          <p className="text-[10px] font-medium text-slate-700">{label}</p>
+          <p className="text-sm font-medium text-slate-700">{label}</p>
 
-          <p className="max-w-[220px] truncate text-[8px] text-slate-400">
+          <p className="max-w-[220px] truncate text-sm text-slate-400">
             {fileName}
           </p>
         </div>
@@ -71,7 +71,7 @@ export default function DocumentItem({ label, file }) {
           href={fileUrl}
           download
           title={`Download ${fileName}`}
-          className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-orange-600"
+          className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-orange-600 "
         >
           <Download className="h-3.5 w-3.5" />
         </a>

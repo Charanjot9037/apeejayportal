@@ -259,7 +259,8 @@ export async function PUT(request, context) {
 
     project.projectType = projectType;
 
-    project.teamMembers = projectType === "team" ? teamMembers || [] : [];
+    project.teamMembers =
+      projectType === "team" && teamMembers ? teamMembers : null;
 
     project.semester = semester || "";
 
@@ -322,7 +323,19 @@ export async function GET(request, context) {
       );
     }
 
-    const project = await Project.findById(id);
+    const project = await Project.findById(id)
+      .populate({
+        path: "mentor",
+        select: "userId designation",
+        populate: {
+          path: "userId",
+          select: "name email",
+        },
+      })
+      .populate({
+        path: "teamMembers",
+        select: "name email",
+      });
 
     if (!project) {
       return NextResponse.json(

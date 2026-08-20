@@ -1,19 +1,230 @@
-"use client";
+// "use client";
 
-import React from "react";
+// import React from "react";
+// import { Input, Label, Button } from "@/components/ui";
+// import { useFormik } from "formik";
+// import { loginSchema } from "@/validations/loginSchema";
+// import { useRouter } from "next/navigation";
+// import { Eye, EyeOff } from "lucide-react";
+// import { useState } from "react";
+// import { useDispatch } from "react-redux";
+// import { loginSuccess } from "@/redux/authSlice";
+// import { setStudentProfile } from "@/redux/studentSlice";
+// const Login = () => {
+//   const router = useRouter();
+//   const dispatch = useDispatch();
+//   const [showPassword, setShowPassword] = useState(false);
+//   const formik = useFormik({
+//     initialValues: {
+//       email: "",
+//       password: "",
+//     },
+
+//     validationSchema: loginSchema,
+
+//     onSubmit: async (values) => {
+//       try {
+//         const response = await fetch("/api/auth/login", {
+//           method: "POST",
+//           headers: {
+//             "Content-Type": "application/json",
+//           },
+//           body: JSON.stringify(values),
+//         });
+
+//         const data = await response.json();
+//         console.log("data", data);
+//         if (!response.ok) {
+//           throw new Error(data.message);
+//         }
+//         dispatch(
+//           loginSuccess({
+//             user: data.user,
+//             name: data.name,
+//             email: data.email,
+//             role: data.role,
+//           }),
+//         );
+//         dispatch(
+//           setStudentProfile({
+//             department: data.user?.department,
+//             program: data.user?.program,
+//             academicBatch: data?.user?.academicBatch,
+//           }),
+//         );
+//         const role = data?.user?.role;
+//         const designation = data?.user?.designation;
+
+//         switch (role) {
+//           case "student":
+//             if (data?.user?.studentId) {
+//               router.push("/student");
+//             } else {
+//               router.push("/create-profile");
+//             }
+//             break;
+
+//           case "mentor":
+//             switch (designation?.toLowerCase()) {
+//               case "engineer":
+//                 router.push("/admin-dashboard");
+//                 break;
+
+//               case "dean":
+//               case "assistant professor":
+//               case "associate professor":
+//               case "professor":
+//                 router.push("/mentor-dashboard");
+//                 break;
+
+//               default:
+//                 router.push("/mentor-dashboard");
+//                 break;
+//             }
+//             break;
+
+//           default:
+//             router.push("/login");
+//             break;
+//         }
+//       } catch (error) {
+//         console.log(error.message);
+//         alert(error.message);
+//       }
+//     },
+//   });
+
+//   return (
+//     <div className="min-h-screen flex items-center justify-center bg-white px-4">
+//       <div className="w-full max-w-md rounded-2xl border border-gray-200 shadow-xl shadow-blue-300/40 p-8">
+//         <div className="flex flex-col items-start gap-2 mb-6">
+//           <h1 className="text-3xl font-bold text-black">Welcome Back</h1>
+
+//           <p className="text-gray-600">Login to access your dashboard.</p>
+//         </div>
+
+//         <form onSubmit={formik.handleSubmit} className="space-y-5">
+//           {/* Email */}
+
+//           <div className="space-y-2">
+//             <Label htmlFor="email" required>
+//               Email{" "}
+//             </Label>
+
+//             <Input
+//               id="email"
+//               name="email"
+//               type="email"
+//               placeholder="Enter your email"
+//               value={formik.values.email}
+//               onChange={formik.handleChange}
+//               onBlur={formik.handleBlur}
+//               required
+//             />
+
+//             {formik.touched.email && formik.errors.email && (
+//               <p className="text-red-500 text-sm">{formik.errors.email}</p>
+//             )}
+//           </div>
+
+//           {/* Password */}
+//           <div className="space-y-2">
+//             <Label htmlFor="password" required>
+//               {" "}
+//               Password
+//             </Label>
+
+//             <div className="relative">
+//               <Input
+//                 id="password"
+//                 name="password"
+//                 type={showPassword ? "text" : "password"}
+//                 placeholder="Enter your password"
+//                 value={formik.values.password}
+//                 onChange={formik.handleChange}
+//                 onBlur={formik.handleBlur}
+//                 className="pr-10"
+//               />
+
+//               <button
+//                 type="button"
+//                 onClick={() => setShowPassword(!showPassword)}
+//                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+//               >
+//                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+//               </button>
+//             </div>
+
+//             {formik.touched.password && formik.errors.password && (
+//               <p className="text-red-500 text-sm">{formik.errors.password}</p>
+//             )}
+//           </div>
+//           {/* Forgot Password */}
+
+//           <div className="text-right">
+//             <a
+//               href="/forgot-password"
+//               className="text-sm text-blue-600 hover:underline"
+//             >
+//               Forgot Password?
+//             </a>
+//           </div>
+
+//           {/* Login Button */}
+
+//           <Button
+//             type="submit"
+//             className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+//           >
+//             {" "}
+//             Login
+//           </Button>
+//           <div className="relative my-5">
+//             <div className="absolute inset-0 flex items-center">
+//               <span className="w-full border-t" />
+//             </div>
+
+//             <div className="relative flex justify-center text-xs uppercase">
+//               <span className="bg-white px-2 text-gray-500"> OR </span>
+//             </div>
+//           </div>
+//         </form>
+
+//         <p className="mt-6 text-center text-gray-700">
+//           Don't have an account?{" "}
+//           <a
+//             href="/signup"
+//             className="font-semibold text-orange-500 hover:underline"
+//           >
+//             Sign Up
+//           </a>
+//         </p>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Login;
+
+"use client";
+import Image from "next/image";
+import React, { useState } from "react";
 import { Input, Label, Button } from "@/components/ui";
 import { useFormik } from "formik";
 import { loginSchema } from "@/validations/loginSchema";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/redux/authSlice";
+import { DashboardHeader } from "./elements";
 import { setStudentProfile } from "@/redux/studentSlice";
+
 const Login = () => {
   const router = useRouter();
   const dispatch = useDispatch();
+
   const [showPassword, setShowPassword] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -33,10 +244,13 @@ const Login = () => {
         });
 
         const data = await response.json();
+
         console.log("data", data);
+
         if (!response.ok) {
           throw new Error(data.message);
         }
+
         dispatch(
           loginSuccess({
             user: data.user,
@@ -45,6 +259,7 @@ const Login = () => {
             role: data.role,
           }),
         );
+
         dispatch(
           setStudentProfile({
             department: data.user?.department,
@@ -52,6 +267,7 @@ const Login = () => {
             academicBatch: data?.user?.academicBatch,
           }),
         );
+
         const role = data?.user?.role;
         const designation = data?.user?.designation;
 
@@ -95,20 +311,34 @@ const Login = () => {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4">
-      <div className="w-full max-w-md rounded-2xl border border-gray-200 shadow-xl shadow-blue-300/40 p-8">
-        <div className="flex flex-col items-start gap-2 mb-6">
-          <h1 className="text-3xl font-bold text-black">Welcome Back</h1>
-
-          <p className="text-gray-600">Login to access your dashboard.</p>
+    <div className="w-full max-w-md">
+      {/* Login Card */}{" "}
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
+        {/* Header */}{" "}
+        <div className="flex justify-center items-center md:hidden">
+          <Image
+            src="/logo.png"
+            alt="Apeejay Logo"
+            width={90}
+            height={90}
+            className="  rounded-full my-2"
+          />
         </div>
-
-        <form onSubmit={formik.handleSubmit} className="space-y-5">
+        <div className="py-2">
+          <DashboardHeader
+            title="Welcome Back"
+            description=" Login to access your dashboard."
+          />
+        </div>
+        <form onSubmit={formik.handleSubmit} className="space-y-4 sm:space-y-5">
           {/* Email */}
-
           <div className="space-y-2">
-            <Label htmlFor="email" required>
-              Email{" "}
+            <Label
+              htmlFor="email"
+              required
+              className="text-sm font-medium text-gray-800"
+            >
+              Email
             </Label>
 
             <Input
@@ -119,18 +349,22 @@ const Login = () => {
               value={formik.values.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
+              className="h-10 w-full text-sm md:text-md bg-white text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500 sm:h-11"
               required
             />
 
             {formik.touched.email && formik.errors.email && (
-              <p className="text-red-500 text-sm">{formik.errors.email}</p>
+              <p className="text-sm text-red-500">{formik.errors.email}</p>
             )}
           </div>
 
           {/* Password */}
           <div className="space-y-2">
-            <Label htmlFor="password" required>
-              {" "}
+            <Label
+              htmlFor="password"
+              required
+              className="text-sm font-medium text-gray-800"
+            >
               Password
             </Label>
 
@@ -143,62 +377,44 @@ const Login = () => {
                 value={formik.values.password}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="pr-10"
+                className="h-10 w-full text-sm md:text-md bg-white pr-10 text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500 sm:h-11"
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors hover:text-gray-800"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
               </button>
             </div>
 
             {formik.touched.password && formik.errors.password && (
-              <p className="text-red-500 text-sm">{formik.errors.password}</p>
+              <p className="text-sm text-red-500">{formik.errors.password}</p>
             )}
           </div>
-          {/* Forgot Password */}
 
-          <div className="text-right">
+          {/* Forgot Password */}
+          <div className="flex justify-end">
             <a
               href="/forgot-password"
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 hover:underline"
             >
               Forgot Password?
             </a>
           </div>
 
           {/* Login Button */}
-
           <Button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+            className="h-10 w-full cursor-pointer bg-orange-500 text-white transition-colors hover:bg-orange-600 sm:h-11"
           >
-            {" "}
             Login
           </Button>
-          <div className="relative my-5">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
 
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-gray-500"> OR </span>
-            </div>
-          </div>
+          {/* Divider */}
         </form>
-
-        <p className="mt-6 text-center text-gray-700">
-          Don't have an account?{" "}
-          <a
-            href="/signup"
-            className="font-semibold text-orange-500 hover:underline"
-          >
-            Sign Up
-          </a>
-        </p>
       </div>
     </div>
   );

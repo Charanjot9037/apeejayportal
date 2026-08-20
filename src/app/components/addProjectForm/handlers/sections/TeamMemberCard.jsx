@@ -17,11 +17,9 @@ export default function TeamMemberCard({
   onRemove,
   getTeamError,
 }) {
-  const student = useSelector((state) => state.student);
-
-  const department = "MANAGEMENT";
-  const program = "MBA";
-  const academicBatch = "2023";
+  const { department, program, academicBatch, userId } = useSelector(
+    (state) => state.student,
+  );
 
   const [students, setStudents] = useState([]);
   const [studentLoading, setStudentLoading] = useState(false);
@@ -39,6 +37,7 @@ export default function TeamMemberCard({
           department,
           program,
           academicBatch,
+          excludeUserId: userId,
         }),
       });
 
@@ -61,7 +60,7 @@ export default function TeamMemberCard({
     if (!department || !program || !academicBatch) return;
 
     fetchStudents();
-  }, [department, program, academicBatch]);
+  }, [department, program, academicBatch, userId]);
 
   const selectedStudent = students.find(
     (student) => student.userId === formik.values.teamMembers,

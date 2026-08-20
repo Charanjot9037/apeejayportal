@@ -3,47 +3,14 @@
 
 import React, { useState } from "react";
 import { Input, Label, Button } from "@/components/ui";
-import { Eye, EyeOff, Check, X } from "lucide-react";
-import {
-  useSearchParams,
-  useRouter,
-} from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
-import * as Yup from "yup";
+import { passwordSchema } from "@/validations/passwordSchema";
 
-/*
- * Password validation schema
- */
-const passwordSchema = Yup.object({
-  password: Yup.string()
-    .required("Password is required")
-    .min(
-      8,
-      "Password must be at least 8 characters",
-    )
-    .max(
-      64,
-      "Password must not exceed 64 characters",
-    )
-    
-    .matches(
-      /[^A-Za-z0-9]/,
-      "Password must contain at least one special character",
-    ),
-
-  confirmPassword: Yup.string()
-    .required("Please confirm your password")
-    .oneOf(
-      [Yup.ref("password")],
-      "Passwords do not match",
-    ),
-});
 
 const ResetPassword = () => {
-  const searchParams = useSearchParams();
   const router = useRouter();
-
-  const token = searchParams.get("token");
 
   const [showPassword, setShowPassword] =
     useState(false);
@@ -55,178 +22,101 @@ const ResetPassword = () => {
   const [serverError, setServerError] =
     useState("");
 
-  /*
-   * Formik
-   */
   const formik = useFormik({
     initialValues: {
       password: "",
       confirmPassword: "",
     },
 
-    passwordSchema,
+    validationSchema: passwordSchema,
 
-    onSubmit: async (values, { setSubmitting, resetForm }) => {
-      setMessage("");
-      setServerError("");
+ onSubmit: async (
+  values,
+  { setSubmitting, resetForm },
+) => {
+  setMessage("");
+  setServerError("");
 
-      /*
-       * Check reset token
-       */
-      if (!token) {
-        setServerError(
-          "Invalid password reset link.",
-        );
-        setSubmitting(false);
-        return;
-      }
+  try {
+    const response = await fetch(
+      "/api/auth/reset-password",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          password: values.password,
+          confirmPassword:
+            values.confirmPassword,
+        }),
+      },
+    );
 
-      try {
-        const response = await fetch(
-          "/api/auth/reset-password",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              token,
-              password: values.password,
-              confirmPassword:
-                values.confirmPassword,
-            }),
-          },
-        );
+    const data = await response.json();
 
-        const data = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+          "Unable to reset password.",
+      );
+    }
 
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              "Unable to reset password.",
-          );
-        }
+    setMessage(data.message);
 
-        setMessage(data.message);
+    resetForm();
 
-        resetForm();
-
-        /*
-         * Redirect to login after 2 seconds
-         */
-        setTimeout(() => {
-          router.push("/login");
-        }, 2000);
-      } catch (error) {
-        setServerError(
-          error.message ||
-            "Something went wrong. Please try again.",
-        );
-      } finally {
-        setSubmitting(false);
-      }
-    },
+    setTimeout(() => {
+      router.push("/login");
+    }, 2000);
+  } catch (error) {
+    setServerError(
+      error.message ||
+        "Something went wrong. Please try again.",
+    );
+  } finally {
+    setSubmitting(false);
+  }
+},
   });
 
-  /*
-   * Password rules
-   */
-  const password =
-    formik.values.password;
-
-  const passwordRules = {
-    minLength: password.length >= 8,
-
-    maxLength:
-      password.length > 0 &&
-      password.length <= 64,
-
-    uppercase: /[A-Z]/.test(password),
-
-    lowercase: /[a-z]/.test(password),
-
-    number: /[0-9]/.test(password),
-
-    special: /[^A-Za-z0-9]/.test(password),
-  };
-
-  /*
-   * Password requirement component
-   */
-  const PasswordRequirement = ({
-    valid,
-    children,
-  }) => {
-    return (
-      <div className="flex items-center gap-2 text-sm">
-        {valid ? (
-          <Check
-            size={16}
-            className="text-green-600"
-          />
-        ) : (
-          <X
-            size={16}
-            className="text-gray-400"
-          />
-        )}
-
-        <span
-          className={
-            valid
-              ? "text-green-600"
-              : "text-gray-500"
-          }
-        >
-          {children}
-        </span>
-      </div>
-    );
-  };
-
-  /*
-   * Password match status
-   */
-  const passwordsMatch =
-    password.length > 0 &&
-    formik.values.confirmPassword.length > 0 &&
-    password ===
-      formik.values.confirmPassword;
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4">
-      <div className="w-full max-w-md rounded-2xl border border-gray-200 shadow-xl shadow-blue-300/40 p-8">
+    <div
+      className="relative min-h-screen flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage:
+          "url('/landing-page/image.png')",
+      }}
+    >
+      {/* Background overlay + blur */}
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-md" />
 
-        {/* Header */}
+      {/* Reset password card */}
+      <div className="relative z-10 w-full max-w-md">
+        <div className="rounded-2xl border border-white/40 bg-white p-8">
+          {/* Header */}
 
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-black">
-            Reset Password
-          </h1>
+          <div className="mb-7">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Reset Password
+            </h1>
 
-          <p className="mt-2 text-gray-600">
-            Enter your new password below.
-          </p>
-        </div>
+            <p className="mt-2 text-sm text-gray-600">
+              Enter your new password below.
+            </p>
+          </div>
 
-        {/* Invalid Token */}
-
-        {!token ? (
-          <p className="text-red-500">
-            Invalid password reset link.
-          </p>
-        ) : (
           <form
             onSubmit={formik.handleSubmit}
             className="space-y-5"
           >
-
             {/* Password */}
 
             <div className="space-y-2">
               <Label
                 htmlFor="password"
                 required
+                className="text-gray-800"
               >
                 New Password
               </Label>
@@ -251,7 +141,7 @@ const ResetPassword = () => {
                   onBlur={
                     formik.handleBlur
                   }
-                  className="pr-10"
+                  className="pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
                   required
                 />
 
@@ -262,7 +152,7 @@ const ResetPassword = () => {
                       !showPassword,
                     )
                   }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 transition-colors"
                   aria-label={
                     showPassword
                       ? "Hide password"
@@ -276,66 +166,6 @@ const ResetPassword = () => {
                   )}
                 </button>
               </div>
-
-              {/* Password requirements */}
-
-              <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 space-y-1.5">
-
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Password must contain:
-                </p>
-
-                <PasswordRequirement
-                  valid={
-                    passwordRules.minLength
-                  }
-                >
-                  At least 8 characters
-                </PasswordRequirement>
-
-                <PasswordRequirement
-                  valid={
-                    passwordRules.maxLength
-                  }
-                >
-                  Maximum 64 characters
-                </PasswordRequirement>
-
-                <PasswordRequirement
-                  valid={
-                    passwordRules.uppercase
-                  }
-                >
-                  At least one uppercase letter
-                </PasswordRequirement>
-
-                <PasswordRequirement
-                  valid={
-                    passwordRules.lowercase
-                  }
-                >
-                  At least one lowercase letter
-                </PasswordRequirement>
-
-                <PasswordRequirement
-                  valid={
-                    passwordRules.number
-                  }
-                >
-                  At least one number
-                </PasswordRequirement>
-
-                <PasswordRequirement
-                  valid={
-                    passwordRules.special
-                  }
-                >
-                  At least one special character
-                </PasswordRequirement>
-
-              </div>
-
-              {/* Formik password error */}
 
               {formik.touched.password &&
                 formik.errors.password && (
@@ -351,6 +181,7 @@ const ResetPassword = () => {
               <Label
                 htmlFor="confirmPassword"
                 required
+                className="text-gray-800"
               >
                 Confirm Password
               </Label>
@@ -376,7 +207,7 @@ const ResetPassword = () => {
                   onBlur={
                     formik.handleBlur
                   }
-                  className="pr-10"
+                  className="pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
                   required
                 />
 
@@ -387,7 +218,7 @@ const ResetPassword = () => {
                       !showConfirmPassword,
                     )
                   }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 transition-colors"
                   aria-label={
                     showConfirmPassword
                       ? "Hide confirm password"
@@ -401,40 +232,6 @@ const ResetPassword = () => {
                   )}
                 </button>
               </div>
-
-              {/* Password match indicator */}
-
-              {formik.values
-                .confirmPassword.length >
-                0 && (
-                <div className="flex items-center gap-2 text-sm">
-                  {passwordsMatch ? (
-                    <>
-                      <Check
-                        size={16}
-                        className="text-green-600"
-                      />
-
-                      <span className="text-green-600">
-                        Passwords match
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <X
-                        size={16}
-                        className="text-red-500"
-                      />
-
-                      <span className="text-red-500">
-                        Passwords do not match
-                      </span>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* Formik confirm password error */}
 
               {formik.touched
                 .confirmPassword &&
@@ -452,17 +249,21 @@ const ResetPassword = () => {
             {/* Server Error */}
 
             {serverError && (
-              <p className="text-red-500 text-sm">
-                {serverError}
-              </p>
+              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                <p className="text-red-600 text-sm">
+                  {serverError}
+                </p>
+              </div>
             )}
 
             {/* Success Message */}
 
             {message && (
-              <p className="text-green-600 text-sm">
-                {message}
-              </p>
+              <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
+                <p className="text-green-600 text-sm">
+                  {message}
+                </p>
+              </div>
             )}
 
             {/* Submit Button */}
@@ -473,14 +274,14 @@ const ResetPassword = () => {
                 formik.isSubmitting ||
                 !formik.isValid
               }
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-orange-500 cursor-pointer hover:bg-orange-600 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {formik.isSubmitting
                 ? "Updating..."
                 : "Reset Password"}
             </Button>
           </form>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -40,7 +40,7 @@ export async function POST(req) {
       return NextResponse.json(
         {
           message:
-            "If an account exists with this email, a password reset link has been sent.",
+            "Password reset link has been sent.",
         },
         {
           status: 200,
@@ -73,8 +73,12 @@ export async function POST(req) {
       process.env.NEXT_PUBLIC_BASE_URL ||
       "http://localhost:3000";
 
+    // const resetUrl =
+    //   `${baseUrl}/reset-password?token=${resetToken}`;
     const resetUrl =
-      `${baseUrl}/reset-password?token=${resetToken}`;
+  `${baseUrl}/api/auth/reset-password?token=${encodeURIComponent(
+    resetToken,
+  )}`;
 
     /*
      * Do NOT log resetToken/resetUrl in production.
@@ -92,7 +96,7 @@ export async function POST(req) {
       {
         success: true,
         message:
-          "If an account exists with this email, a password reset link has been sent.",
+          "Password reset link has been sent.",
       },
       {
         status: 200,

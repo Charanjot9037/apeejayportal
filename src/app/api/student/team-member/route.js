@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { connectDB } from '@/lib/db';
-import Student from '@/models/student';
+import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/db";
+import Student from "@/models/student";
 
 export async function POST(request) {
   try {
@@ -14,7 +14,7 @@ export async function POST(request) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Department, program and academic batch are required.',
+          message: "Department, program and academic batch are required.",
         },
         { status: 400 },
       );
@@ -23,17 +23,17 @@ export async function POST(request) {
     const query = {
       department: {
         $regex: `^${department}$`,
-        $options: 'i',
+        $options: "i",
       },
 
       program: {
         $regex: `^${program}$`,
-        $options: 'i',
+        $options: "i",
       },
 
       academicBatch: {
         $regex: `^${academicBatch}$`,
-        $options: 'i',
+        $options: "i",
       },
     };
 
@@ -41,12 +41,12 @@ export async function POST(request) {
     if (specialization) {
       query.specialization = {
         $regex: `^${specialization}$`,
-        $options: 'i',
+        $options: "i",
       };
     }
 
     const students = await Student.find(query).select(
-      '_id userId fullName rollNumber department program academicBatch specialization',
+      "_id userId fullName rollNumber department program academicBatch specialization",
     );
 
     return NextResponse.json(
@@ -57,12 +57,12 @@ export async function POST(request) {
       { status: 200 },
     );
   } catch (error) {
-    console.error('TEAM_STUDENTS_GET_ERROR:', error);
+    console.error("TEAM_STUDENTS_GET_ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to fetch students.',
+        message: error.message || "Failed to fetch students.",
       },
       { status: 500 },
     );
