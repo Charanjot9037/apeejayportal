@@ -12,8 +12,8 @@ import { Card, CardContent } from "@/components/ui/card";
 export default function SideCard({ title, children }) {
   return (
     <Card className="border-slate-200 bg-white shadow-sm">
-      <CardContent className="p-3">
-        <h3 className="mb-3 border-b border-slate-200 pb-2 text-[10px] font-semibold uppercase tracking-wide text-blue-800">
+      <CardContent className="">
+        <h3 className="mb-3 border-b border-slate-200 pb-2 text-sm font-semibold uppercase tracking-wide text-blue-800">
           {title}
         </h3>
 
