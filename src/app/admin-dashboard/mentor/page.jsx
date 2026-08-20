@@ -69,11 +69,7 @@ export default function Page() {
         {/* Header */}
 
         <div className="mb-6">
-          <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400">
-            <span>Dashboard</span>
-            <span>/</span>
-            <span className="text-slate-500">Mentors</span>
-          </div>
+         
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
