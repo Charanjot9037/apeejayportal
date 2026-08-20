@@ -34,7 +34,7 @@ export default function ProjectDetail() {
   }
 
   return (
-    <div className="min-h-full bg-[#f8f7f4] px-4 py-5 md:px-6 lg:px-8">
+    <div className="min-h-full ">
       <DetailHeader
         project={project}
         deleting={deleting}
@@ -42,7 +42,6 @@ export default function ProjectDetail() {
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_250px]">
-        {/* LEFT COLUMN */}
         <div className="space-y-4">
           <OverviewSection project={project} />
           <TechnologiesSection project={project} />

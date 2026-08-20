@@ -37,7 +37,7 @@ export default function GallerySection({ project }) {
               </div>
 
               <div className="px-2.5 py-2">
-                <p className="truncate text-[10px] font-medium text-slate-700">
+                <p className="truncate text-sm font-medium text-slate-700">
                   {image.originalName || `Project Image ${index + 1}`}
                 </p>
               </div>

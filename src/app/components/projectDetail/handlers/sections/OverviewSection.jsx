@@ -13,7 +13,7 @@ export default function OverviewSection({ project }) {
   return (
     <DetailCard title="Overview" icon={<FileText />}>
       <div className="space-y-4">
-        <p className="text-xs leading-6 text-slate-600 md:text-[13px]">
+        <p className="text-sm leading-6 text-slate-600 md:text-sm">
           {project.description || "No description provided."}
         </p>
 
