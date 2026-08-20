@@ -23,7 +23,7 @@ export const adminDashboardData = {
     {
       label: 'Mentor',
       icon: FileText,
-      href: '/mentor-dashboard/applications',
+      href: '/admin-dashboard/mentor',
     },
     {
       label: 'Tools',
@@ -161,4 +161,114 @@ export const ADMIN_DASHBOARD_HEADER = {
   title: 'Admin Dashboard',
   description: 'Overview of institutional metrics and student management.',
   actionLabel: '12 Pending Approvals',
+};
+
+export const studentColumns = [
+  {
+    key: 'name',
+    label: 'Student Name',
+  },
+  {
+    key: 'rollNumber',
+    label: 'Roll Number',
+  },
+  {
+    key: 'department',
+    label: 'Department',
+  },
+  {
+    key: 'program',
+    label: 'Course',
+  },
+  {
+    key: 'academicBatch',
+    label: 'Batch',
+  },
+  {
+    key: 'specialization',
+    label: 'Specialization',
+  },
+];
+
+export const DEFAULT_FILTERS = {
+  department: 'Engineering',
+  program: 'BTECH',
+  academicBatch: '2023',
+  specialization: '',
+};
+
+export const STUDENT_FILTERS = [
+  {
+    key: 'department',
+    label: 'Department',
+    options: ['Engineering', 'Management', 'Information Technology'],
+  },
+  {
+    key: 'specialization',
+    label: 'Specialization',
+    options: ['CSE', 'ECE', 'ME', 'CE'],
+  },
+  {
+    key: 'program',
+    label: 'Program',
+    options: ['BTECH', 'BCA', 'BCOM', 'BBA', 'MBA'],
+  },
+  {
+    key: 'academicBatch',
+    label: 'Academic Batch',
+    options: ['2022', '2023', '2024', '2025', '2026'],
+  },
+];
+
+export const mapStudentToRoster = (student) => {
+  return {
+    id: student._id,
+    name: student.fullName || '-',
+    rollNumber: student.rollNumber || '-',
+    department: student.department || '-',
+    program: student.program || '-',
+    academicBatch: student.academicBatch || '-',
+    specialization: student.specialization || '-',
+  };
+};
+
+export const MENTOR_ROSTER_COLUMNS = [
+  {
+    key: 'name',
+    label: 'Mentor Name',
+  },
+  {
+    key: 'mobile',
+    label: 'Mobile',
+  },
+  {
+    key: 'department',
+    label: 'Department',
+  },
+  {
+    key: 'designation',
+    label: 'Designation',
+  },
+];
+
+export const MENTOR_DEFAULT_FILTERS = {
+  department: 'Engineering',
+};
+
+export const MENTOR_FILTER_CONFIG = [
+  {
+    key: 'department',
+    label: 'Department',
+    options: ['Engineering', 'Management', 'Information Technology'],
+  },
+];
+
+export const mapMentorToRoster = (mentor) => {
+  return {
+    id: mentor._id,
+    name: mentor.userId?.name || '-',
+    mobile: mentor.mobileNumber || '-',
+    department: mentor.department || '-',
+    designation: mentor.designation || '-',
+  };
 };
