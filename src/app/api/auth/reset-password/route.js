@@ -1,139 +1,4 @@
-// import { NextResponse } from "next/server";
-// import crypto from "crypto";
-// import bcrypt from "bcrypt";
 
-// import { connectDB } from "@/lib/db";
-// import User from "@/models/user";
-
-// export async function POST(req) {
-//   try {
-//     await connectDB();
-
-//     const {
-//       token,
-//       password,
-//       confirmPassword,
-//     } = await req.json();
-
-//     if (!token || !password || !confirmPassword) {
-//       return NextResponse.json(
-//         {
-//           message:
-//             "Token, password and confirm password are required",
-//         },
-//         {
-//           status: 400,
-//         },
-//       );
-//     }
-
-//     if (password !== confirmPassword) {
-//       return NextResponse.json(
-//         {
-//           message: "Passwords do not match",
-//         },
-//         {
-//           status: 400,
-//         },
-//       );
-//     }
-
-//     if (password.length < 6) {
-//       return NextResponse.json(
-//         {
-//           message:
-//             "Password must be at least 6 characters",
-//         },
-//         {
-//           status: 400,
-//         },
-//       );
-//     }
-
-//     /*
-//      * Hash token received from URL
-//      */
-//     const hashedToken = crypto
-//       .createHash("sha256")
-//       .update(token)
-//       .digest("hex");
-
-//        console.log(hashedToken);
-
-//     /*
-    
-//      * Find user with valid token
-//      */
-   
-//     const user = await User.findOne({
-//       resetPasswordToken: hashedToken,
-//       resetPasswordExpires: {
-//         $gt: new Date(),
-//       },
-//     });
-
-//     if (!user) {
-//       return NextResponse.json(
-//         {
-//           message:
-//             "Invalid or expired password reset link",
-//         },
-//         {
-//           status: 400,
-//         },
-//       );
-//     }
-
-//     /*
-//      * Hash new password
-//      */
-//     const hashedPassword = await bcrypt.hash(
-//       password,
-//       10,
-//     );
-
-//     user.password = hashedPassword;
-
-//     /*
-//      * Remove reset token after successful reset
-//      */
-//     user.resetPasswordToken = null;
-//     user.resetPasswordExpires = null;
-
-//     /*
-//      * Invalidate existing refresh token
-//      *
-//      * This logs the user out from existing sessions.
-//      */
-//     user.refreshToken = null;
-
-//     await user.save();
-
-//     return NextResponse.json(
-//       {
-//         success: true,
-//         message:
-//           "Password reset successfully. You can now login.",
-//       },
-//       {
-//         status: 200,
-//       },
-//     );
-//   } catch (error) {
-//     console.error("Reset password error:", error);
-
-//     return NextResponse.json(
-//       {
-//         message:
-//           error.message ||
-//           "Something went wrong",
-//       },
-//       {
-//         status: 500,
-//       },
-//     );
-//   }
-// }
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 
@@ -144,28 +9,143 @@ import {
   verifyPasswordResetToken,
 } from "@/lib/jwt";
 
+/*
+ * GET
+ *
+ * Receives the token from the email link.
+ * Stores it in an HttpOnly cookie.
+ * Redirects the user to the clean reset-password page.
+ */
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+
+    const token = searchParams.get("token");
+
+    /*
+     * No token
+     */
+    if (!token) {
+      return NextResponse.redirect(
+        new URL(
+          "/reset-password?error=invalid-link",
+          req.url,
+        ),
+      );
+    }
+
+    /*
+     * Verify JWT before putting it into cookie.
+     */
+    let decoded;
+
+    try {
+      decoded = verifyPasswordResetToken(token);
+    } catch (error) {
+      return NextResponse.redirect(
+        new URL(
+          "/reset-password?error=invalid-link",
+          req.url,
+        ),
+      );
+    }
+
+    /*
+     * Make sure this is a password reset token.
+     */
+    if (
+      !decoded ||
+      decoded.type !== "password-reset"
+    ) {
+      return NextResponse.redirect(
+        new URL(
+          "/reset-password?error=invalid-link",
+          req.url,
+        ),
+      );
+    }
+
+    /*
+     * Create redirect response.
+     */
+    const response = NextResponse.redirect(
+      new URL("/reset-password", req.url),
+    );
+
+    /*
+     * Store token in HttpOnly cookie.
+     *
+     * Frontend JavaScript CANNOT read this cookie.
+     */
+    response.cookies.set(
+      "password_reset_token",
+      token,
+      {
+        httpOnly: true,
+
+        /*
+         * HTTPS only in production.
+         */
+        secure:
+          process.env.NODE_ENV === "production",
+
+        /*
+         * Prevent cross-site requests from
+         * automatically sending this cookie.
+         */
+        sameSite: "lax",
+
+        /*
+         * Cookie only needs to be sent to
+         * the reset-password API.
+         */
+        path: "/api/auth/reset-password",
+
+        /*
+         * 5 minutes.
+         */
+        maxAge: 5 * 60,
+      },
+    );
+
+    return response;
+  } catch (error) {
+    console.error(
+      "Password reset initialization error:",
+      error,
+    );
+
+    return NextResponse.redirect(
+      new URL(
+        "/reset-password?error=invalid-link",
+        req.url,
+      ),
+    );
+  }
+}
+
+/*
+ * POST
+ *
+ * Reads token from HttpOnly cookie.
+ */
 export async function POST(req) {
   try {
     await connectDB();
 
     const {
-      token,
       password,
       confirmPassword,
     } = await req.json();
 
     /*
-     * Validate input
+     * Validate password input.
      */
-    if (
-      !token ||
-      !password ||
-      !confirmPassword
-    ) {
+    if (!password || !confirmPassword) {
       return NextResponse.json(
         {
           message:
-            "Token, password and confirm password are required",
+            "Password and confirm password are required",
         },
         {
           status: 400,
@@ -174,7 +154,7 @@ export async function POST(req) {
     }
 
     /*
-     * Check passwords match
+     * Check passwords match.
      */
     if (password !== confirmPassword) {
       return NextResponse.json(
@@ -188,13 +168,16 @@ export async function POST(req) {
     }
 
     /*
-     * Password length validation
+     * Server-side password validation.
      */
-    if (password.length < 6) {
+    if (
+      password.length < 8 ||
+      password.length > 64
+    ) {
       return NextResponse.json(
         {
           message:
-            "Password must be at least 6 characters",
+            "Password must be between 8 and 64 characters",
         },
         {
           status: 400,
@@ -203,25 +186,15 @@ export async function POST(req) {
     }
 
     /*
-     * Verify JWT
+     * Read token from HttpOnly cookie.
      *
-     * jwt.verify() checks:
-     *
-     * 1. JWT signature
-     * 2. JWT expiration
+     * JavaScript cannot access this.
      */
-    let decoded;
+    const token = req.cookies.get(
+      "password_reset_token",
+    )?.value;
 
-    try {
-      decoded =
-        verifyPasswordResetToken(token);
-    } catch (error) {
-      /*
-       * This catches:
-       * - expired token
-       * - invalid token
-       * - wrong signature
-       */
+    if (!token) {
       return NextResponse.json(
         {
           message:
@@ -234,7 +207,27 @@ export async function POST(req) {
     }
 
     /*
-     * Make sure this is a password reset token
+     * Verify JWT.
+     */
+    let decoded;
+
+    try {
+      decoded =
+        verifyPasswordResetToken(token);
+    } catch (error) {
+      return NextResponse.json(
+        {
+          message:
+            "Invalid or expired password reset link",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    /*
+     * Verify token type.
      */
     if (
       !decoded ||
@@ -252,20 +245,13 @@ export async function POST(req) {
     }
 
     /*
-     * Find user
-     *
-     * We check both:
-     * - user ID from JWT
-     * - exact reset token stored in DB
+     * Find user.
      */
     const user = await User.findOne({
       _id: decoded.id,
       resetPasswordToken: token,
     });
 
-    /*
-     * Token does not match DB
-     */
     if (!user) {
       return NextResponse.json(
         {
@@ -279,50 +265,59 @@ export async function POST(req) {
     }
 
     /*
-     * Hash new password
+     * Hash new password.
      */
     const hashedPassword =
-      await bcrypt.hash(
-        password,
-        10,
-      );
+      await bcrypt.hash(password, 10);
 
     /*
-     * Update password
+     * Update password.
      */
     user.password = hashedPassword;
 
     /*
-     * Remove reset token
-     *
-     * This makes the reset link
-     * single-use.
+     * Make reset token single-use.
      */
     user.resetPasswordToken = null;
 
     /*
-     * Invalidate existing refresh token
-     *
-     * This logs the user out from
-     * existing sessions.
+     * Invalidate existing sessions.
      */
     user.refreshToken = null;
 
     await user.save();
 
     /*
-     * Successful response
+     * Successful response.
+     *
+     * Delete reset cookie.
      */
-    return NextResponse.json(
+    const response =
+      NextResponse.json(
+        {
+          success: true,
+          message:
+            "Password reset successfully. You can now login.",
+        },
+        {
+          status: 200,
+        },
+      );
+
+    response.cookies.set(
+      "password_reset_token",
+      "",
       {
-        success: true,
-        message:
-          "Password reset successfully. You can now login.",
-      },
-      {
-        status: 200,
+        httpOnly: true,
+        secure:
+          process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/api/auth/reset-password",
+        maxAge: 0,
       },
     );
+
+    return response;
   } catch (error) {
     console.error(
       "Reset password error:",
