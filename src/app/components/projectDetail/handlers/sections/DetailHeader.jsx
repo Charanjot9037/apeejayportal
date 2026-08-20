@@ -16,11 +16,6 @@ export default function DetailHeader({ project, deleting, onDelete }) {
   return (
     <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
       <div>
-        {/* Semester */}
-        <p className="mb-1 text-sm font-medium uppercase tracking-wide text-slate-500">
-         Semester - {project.semester || "Academic Project"}
-        </p>
-
         {/* Project Title */}
         <h1 className="text-xl font-semibold tracking-tight text-blue-900 md:text-2xl">
           {project.title}
