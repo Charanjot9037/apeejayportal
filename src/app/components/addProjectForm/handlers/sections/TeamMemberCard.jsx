@@ -10,12 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function TeamMemberCard({
-  index,
-  canRemove,
-  formik,
-  onRemove,
-}) {
+export default function TeamMemberCard({ index, canRemove, formik, onRemove }) {
   const { department, program, academicBatch, userId } = useSelector(
     (state) => state.student,
   );
@@ -65,9 +60,6 @@ export default function TeamMemberCard({
     (student) => student._id === formik.values.teamMembers,
   );
 
- const selectedStudent = students.find(
-  (student) => student.userId === formik.values.teamMembers,
-);
   return (
     <div className="rounded-md border border-slate-200 bg-white p-2 text-sm">
       <div className="mb-4 flex items-center justify-between">
@@ -91,36 +83,36 @@ export default function TeamMemberCard({
           Assign Team Member
         </label>
 
-  <Select
-  value={formik.values.teamMembers || ""}
-  onValueChange={(value) => {
-    formik.setFieldValue("teamMembers", value);
-  }}
->
-  <SelectTrigger className="h-10 bg-slate-50 text-sm">
-    <SelectValue placeholder="Select a student">
-      {selectedStudent?.fullName || "Select a student"}
-    </SelectValue>
-  </SelectTrigger>
+        <Select
+          value={formik.values.teamMembers || ""}
+          onValueChange={(value) => {
+            formik.setFieldValue("teamMembers", value);
+          }}
+        >
+          <SelectTrigger className="h-10 bg-slate-50 text-sm">
+            <SelectValue placeholder="Select a student">
+              {selectedStudent?.fullName || "Select a student"}
+            </SelectValue>
+          </SelectTrigger>
 
-  <SelectContent>
-    {studentLoading ? (
-      <SelectItem value="loading" disabled>
-        Loading students...
-      </SelectItem>
-    ) : students.length === 0 ? (
-      <SelectItem value="no-student" disabled>
-        No students available
-      </SelectItem>
-    ) : (
-      students.map((student) => (
-        <SelectItem key={student.userId} value={student.userId}>
-          {student.fullName}
-        </SelectItem>
-      ))
-    )}
-  </SelectContent>
-</Select>
+          <SelectContent>
+            {studentLoading ? (
+              <SelectItem value="loading" disabled>
+                Loading students...
+              </SelectItem>
+            ) : students.length === 0 ? (
+              <SelectItem value="no-student" disabled>
+                No students available
+              </SelectItem>
+            ) : (
+              students.map((student) => (
+                <SelectItem key={student.userId} value={student.userId}>
+                  {student.fullName}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
