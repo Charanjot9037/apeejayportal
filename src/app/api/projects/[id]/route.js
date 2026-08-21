@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
+import Student from "@/models/student";
 import Project from "@/models/projects";
 import cloudinary from "@/lib/cloudinary";
 import Mentor from "@/models/mentor";
@@ -313,7 +314,7 @@ export async function GET(request, context) {
     await connectDB();
 
     const { id } = await context.params;
-
+console.log(id);
     if (!id) {
       return NextResponse.json(
         {
@@ -339,10 +340,10 @@ export async function GET(request, context) {
           path: "userId",
           select: "name email",
         },
-      });
+      })
+      ;
 
-
-
+console.log(project);
     if (!project) {
       return NextResponse.json(
         {
