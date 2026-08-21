@@ -91,7 +91,7 @@ export default function TeamMemberCard({
           Assign Team Member
         </label>
 
-  <Select
+<Select
   value={formik.values.teamMembers || ""}
   onValueChange={(value) => {
     formik.setFieldValue("teamMembers", value);
