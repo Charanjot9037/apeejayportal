@@ -340,7 +340,7 @@ export async function GET(request, context) {
         },
       });
 
-    console.log(project);
+
 
     if (!project) {
       return NextResponse.json(
