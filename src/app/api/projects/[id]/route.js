@@ -5,6 +5,7 @@ import Project from "@/models/projects";
 import cloudinary from "@/lib/cloudinary";
 import Mentor from "@/models/mentor";
 import User from "@/models/user";
+import Student from "@/models/student";
 /* =========================================================
    DELETE CLOUDINARY FILE
 ========================================================= */
@@ -314,7 +315,7 @@ export async function GET(request, context) {
     await connectDB();
 
     const { id } = await context.params;
-console.log(id);
+    console.log(id);
     if (!id) {
       return NextResponse.json(
         {
@@ -324,10 +325,11 @@ console.log(id);
         { status: 400 },
       );
     }
+
     const project = await Project.findById(id)
       .populate({
         path: "mentor",
-        select: "userId designation department",
+        select: "userId designation",
         populate: {
           path: "userId",
           select: "name email",
@@ -340,10 +342,9 @@ console.log(id);
           path: "userId",
           select: "name email",
         },
-      })
-      ;
+      });
 
-console.log(project);
+
     if (!project) {
       return NextResponse.json(
         {

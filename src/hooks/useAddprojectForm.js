@@ -50,9 +50,9 @@ mentor: isEdit
       techStack:
         isEdit && Array.isArray(project?.techStack) ? project.techStack : [""],
 
-teamMembers: isEdit
+   teamMembers: isEdit
   ? project?.teamMembers?._id || project?.teamMembers || ""
-  : "",
+        : "",
       /* =====================================================
          CLOUDINARY FILE OBJECTS
 
@@ -117,7 +117,7 @@ teamMembers: isEdit
 
           projectType: values.projectType,
 
-          teamMembers: values.projectType === "team" ? values.teamMembers : [],
+          teamMembers: values.projectType === "team" ? values.teamMembers : "",
 
           semester: values.semester,
 
@@ -247,32 +247,11 @@ const url = isEdit
      TEAM MEMBERS
   ======================================================= */
 
-  const addTeamMember = () => {
-    formik.setFieldValue("teamMembers", [
-      ...formik.values.teamMembers,
-      { ...emptyTeamMember },
-    ]);
-  };
 
-  const removeTeamMember = (index) => {
-    const updatedMembers = formik.values.teamMembers.filter(
-      (_, memberIndex) => memberIndex !== index,
-    );
 
-    formik.setFieldValue("teamMembers", updatedMembers);
-  };
 
-  const getTeamError = (index, field) => {
-    const touched = formik.touched.teamMembers?.[index]?.[field];
 
-    const error = formik.errors.teamMembers?.[index]?.[field];
 
-    if (touched && error) {
-      return error;
-    }
-
-    return null;
-  };
 
   /* =======================================================
      FILE ERRORS
@@ -295,11 +274,7 @@ const url = isEdit
 
     removeTechnology,
 
-    addTeamMember,
-
-    removeTeamMember,
-
-    getTeamError,
+   
 
     getFileError,
   };
