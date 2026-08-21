@@ -30,17 +30,6 @@ export default function MentorSection({ project }) {
           </p>
         </div>
       </div>
-
-      {mentorName && (
-        <Button
-          className="mt-4 h-9 w-full bg-orange-500 text-xs text-white hover:bg-orange-600"
-          onClick={() =>
-            toast.info("Mentor contact functionality can be added here.")
-          }
-        >
-          Contact Mentor
-        </Button>
-      )}
     </SideCard>
   );
 }
