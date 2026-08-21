@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import Student from "@/models/student";
+
 import Project from "@/models/projects";
 import cloudinary from "@/lib/cloudinary";
 import Mentor from "@/models/mentor";
@@ -343,7 +343,6 @@ export async function GET(request, context) {
           select: "name email",
         },
       });
-
 
     if (!project) {
       return NextResponse.json(
