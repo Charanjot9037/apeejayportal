@@ -117,7 +117,7 @@ mentor: isEdit
 
           projectType: values.projectType,
 
-          teamMembers: values.projectType === "team" ? values.teamMembers : [],
+          teamMembers: values.projectType === "team" ? values.teamMembers : "",
 
           semester: values.semester,
 

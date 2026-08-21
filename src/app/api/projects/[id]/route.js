@@ -4,6 +4,7 @@ import Project from "@/models/projects";
 import cloudinary from "@/lib/cloudinary";
 import Mentor from "@/models/mentor";
 import User from "@/models/user";
+import Student from "@/models/student";
 /* =========================================================
    DELETE CLOUDINARY FILE
 ========================================================= */
@@ -333,10 +334,14 @@ export async function GET(request, context) {
           select: "name email",
         },
       })
-      .populate({
-        path: "teamMembers",
-        select: "name email",
-      });
+    .populate({
+    path: "teamMembers",
+    select: "fullName profileImage userId enrollment",
+    populate: {
+      path: "userId",
+      select: "name email",
+    },
+  });
 
     if (!project) {
       return NextResponse.json(

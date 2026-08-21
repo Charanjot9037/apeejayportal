@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   Select,
@@ -10,43 +10,72 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function TeamMemberCard({ index, canRemove, formik, onRemove }) {
-  const { department, program, academicBatch, userId } = useSelector(
-    (state) => state.student,
-  );
+export default function TeamMemberCard({
+  canRemove,
+  formik,
+  onRemove,
+}) {
+  const {
+    department,
+    program,
+    academicBatch,
+    userId,
+  } = useSelector((state) => state.student);
 
   const [students, setStudents] = useState([]);
-  const [studentLoading, setStudentLoading] = useState(false);
+  const [studentLoading, setStudentLoading] =
+    useState(false);
 
   useEffect(() => {
-    if (!department || !program || !academicBatch) return;
+    if (
+      !department ||
+      !program ||
+      !academicBatch
+    ) {
+      return;
+    }
 
     const fetchStudents = async () => {
       try {
         setStudentLoading(true);
 
-        const response = await fetch("/api/student/team-member", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetch(
+          "/api/student/team-member",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              department,
+              program,
+              academicBatch,
+              excludeUserId: userId,
+            }),
           },
-          body: JSON.stringify({
-            department,
-            program,
-            academicBatch,
-            excludeUserId: userId,
-          }),
-        });
+        );
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch students");
+          throw new Error(
+            data.message ||
+              "Failed to fetch students",
+          );
         }
+
+        console.log(
+          "STUDENTS FROM API:",
+          data.students,
+        );
 
         setStudents(data.students || []);
       } catch (error) {
-        console.error("STUDENTS_FETCH_ERROR:", error);
+        console.error(
+          "STUDENTS_FETCH_ERROR:",
+          error,
+        );
+
         setStudents([]);
       } finally {
         setStudentLoading(false);
@@ -54,22 +83,28 @@ export default function TeamMemberCard({ index, canRemove, formik, onRemove }) {
     };
 
     fetchStudents();
-  }, [department, program, academicBatch, userId]);
+  }, [
+    department,
+    program,
+    academicBatch,
+    userId,
+  ]);
 
-  // const selectedStudent = students.find(
-  //   (student) => student._id === formik.values.teamMembers,
-  // );
-  const selectedStudent = students.find(
-    (student) => student._id === formik.values.teamMembers,
+  /* =====================================================
+     CURRENT SELECTED VALUE
+  ===================================================== */
+
+  const selectedTeamMember =
+    formik.values.teamMembers || "";
+
+  console.log(
+    "FORMIK TEAM MEMBER:",
+    selectedTeamMember,
   );
 
   return (
     <div className="rounded-md border border-slate-200 bg-white p-2 text-sm">
       <div className="mb-4 flex items-center justify-between">
-        {/* <h4 className="text-xs font-semibold text-slate-700">
-          Team Member 
-        </h4> */}
-
         {canRemove && (
           <button
             type="button"
@@ -86,15 +121,18 @@ export default function TeamMemberCard({ index, canRemove, formik, onRemove }) {
           Assign Team Member
         </label>
 
-<Select
-  value={formik.values.teamMembers || ""}
+      <Select
+  value={selectedTeamMember}
   onValueChange={(value) => {
     formik.setFieldValue("teamMembers", value);
   }}
 >
   <SelectTrigger className="h-10 bg-slate-50 text-sm">
     <SelectValue placeholder="Select a student">
-      {selectedStudent?.fullName || "Select a student"}
+      {students.find(
+        (student) =>
+          String(student._id) === String(selectedTeamMember)
+      )?.fullName || "Select a student"}
     </SelectValue>
   </SelectTrigger>
 
@@ -109,13 +147,23 @@ export default function TeamMemberCard({ index, canRemove, formik, onRemove }) {
       </SelectItem>
     ) : (
       students.map((student) => (
-        <SelectItem key={student.userId} value={student.userId}>
+        <SelectItem
+          key={student._id}
+          value={String(student._id)}
+        >
           {student.fullName}
         </SelectItem>
       ))
     )}
   </SelectContent>
 </Select>
+
+        {formik.touched.teamMembers &&
+          formik.errors.teamMembers && (
+            <p className="mt-1 text-xs text-red-500">
+              {formik.errors.teamMembers}
+            </p>
+          )}
       </div>
     </div>
   );
