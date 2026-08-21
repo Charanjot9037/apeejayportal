@@ -10,12 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function TeamMemberCard({
-  index,
-  canRemove,
-  formik,
-  onRemove,
-}) {
+export default function TeamMemberCard({ index, canRemove, formik, onRemove }) {
   const { department, program, academicBatch, userId } = useSelector(
     (state) => state.student,
   );
@@ -64,10 +59,10 @@ export default function TeamMemberCard({
   // const selectedStudent = students.find(
   //   (student) => student._id === formik.values.teamMembers,
   // );
+  const selectedStudent = students.find(
+    (student) => student._id === formik.values.teamMembers,
+  );
 
- const selectedStudent = students.find(
-  (student) => student.userId === formik.values.teamMembers,
-);
   return (
     <div className="rounded-md border border-slate-200 bg-white p-2 text-sm">
       <div className="mb-4 flex items-center justify-between">
