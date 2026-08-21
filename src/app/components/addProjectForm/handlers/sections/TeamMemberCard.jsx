@@ -63,7 +63,7 @@ export default function TeamMemberCard({
   }, [department, program, academicBatch, userId]);
 
   const selectedStudent = students.find(
-    (student) => student.userId === formik.values.teamMembers,
+    (student) => student._id === formik.values.teamMembers,
   );
 
   return (
@@ -110,7 +110,7 @@ export default function TeamMemberCard({
               </SelectItem>
             ) : (
               students.map((student) => (
-                <SelectItem key={student.userId} value={student.userId}>
+                <SelectItem key={student._id} value={student._id}>
                   {student.fullName}
                 </SelectItem>
               ))

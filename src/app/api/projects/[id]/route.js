@@ -322,11 +322,10 @@ export async function GET(request, context) {
         { status: 400 },
       );
     }
-
     const project = await Project.findById(id)
       .populate({
         path: "mentor",
-        select: "userId designation",
+        select: "userId designation department",
         populate: {
           path: "userId",
           select: "name email",
@@ -334,8 +333,14 @@ export async function GET(request, context) {
       })
       .populate({
         path: "teamMembers",
-        select: "name email",
+        select: "fullName profileImage",
+        populate: {
+          path: "userId",
+          select: "name email",
+        },
       });
+
+
 
     if (!project) {
       return NextResponse.json(

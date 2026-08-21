@@ -48,7 +48,7 @@ export async function POST(request) {
         { status: 400 },
       );
     }
-console.log("teamMembers",teamMembers)
+
     const project = await Project.create({
       title: projectName,
       subtitle:
