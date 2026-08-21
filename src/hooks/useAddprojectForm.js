@@ -42,15 +42,17 @@ export function useAddProjectForm({ mode = "create", project = null }) {
 
       semester: isEdit ? project?.semester || "" : "",
 
-      mentor: isEdit ? project?.mentor || "" : "",
-
+mentor: isEdit
+  ? project?.mentor?._id || project?.mentor || ""
+  : "",
       projectType: isEdit ? project?.projectType || "individual" : "individual",
 
       techStack:
         isEdit && Array.isArray(project?.techStack) ? project.techStack : [""],
 
-      teamMembers: isEdit ? project?.teamMembers || "" : "",
-
+   teamMembers: isEdit
+  ? project?.teamMembers?._id || project?.teamMembers || ""
+        : "",
       /* =====================================================
          CLOUDINARY FILE OBJECTS
 
@@ -138,8 +140,14 @@ export function useAddProjectForm({ mode = "create", project = null }) {
            API
         ================================================= */
 
-        const url = isEdit ? `/api/projects/${project._id}` : "/api/projects";
-
+const projectId = project?._id || project?.id;
+if (isEdit && !projectId) {
+  toast.error("Project ID is missing.");
+  return;
+}
+const url = isEdit
+  ? `/api/projects/${projectId}`
+  : "/api/projects";
         const method = isEdit ? "PUT" : "POST";
 
         console.log("PROJECT SAVE:", {
@@ -239,32 +247,11 @@ export function useAddProjectForm({ mode = "create", project = null }) {
      TEAM MEMBERS
   ======================================================= */
 
-  const addTeamMember = () => {
-    formik.setFieldValue("teamMembers", [
-      ...formik.values.teamMembers,
-      { ...emptyTeamMember },
-    ]);
-  };
 
-  const removeTeamMember = (index) => {
-    const updatedMembers = formik.values.teamMembers.filter(
-      (_, memberIndex) => memberIndex !== index,
-    );
 
-    formik.setFieldValue("teamMembers", updatedMembers);
-  };
 
-  const getTeamError = (index, field) => {
-    const touched = formik.touched.teamMembers?.[index]?.[field];
 
-    const error = formik.errors.teamMembers?.[index]?.[field];
 
-    if (touched && error) {
-      return error;
-    }
-
-    return null;
-  };
 
   /* =======================================================
      FILE ERRORS
@@ -287,11 +274,7 @@ export function useAddProjectForm({ mode = "create", project = null }) {
 
     removeTechnology,
 
-    addTeamMember,
-
-    removeTeamMember,
-
-    getTeamError,
+   
 
     getFileError,
   };

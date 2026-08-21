@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import SideCard from "../SideCard";
 
 /* =========================================================
@@ -8,11 +7,11 @@ import SideCard from "../SideCard";
 ========================================================= */
 
 export default function TeamMembersSection({ project }) {
-  if (project.projectType !== "team") {
+  if (project?.projectType !== "team") {
     return null;
   }
 
-  const member = project.teamMembers;
+  const member = project?.teamMembers;
 
   return (
     <SideCard title="Team Members">
@@ -24,28 +23,38 @@ export default function TeamMembersSection({ project }) {
               {member?.profileImage ? (
                 <img
                   src={member.profileImage}
-                  alt={member?.fullName || "Team member"}
+                  alt={
+                    member?.fullName ||
+                    "Team member"
+                  }
                   className="h-full w-full object-cover"
                 />
               ) : (
                 <span className="text-sm font-medium text-slate-600">
-                  {member?.fullName?.charAt(0)?.toUpperCase() || "U"}
+                  {member?.fullName
+                    ?.charAt(0)
+                    ?.toUpperCase() || "U"}
                 </span>
               )}
             </div>
 
+            {/* Details */}
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-slate-800">
-                {member.fullName}
+                {member?.fullName ||
+                  "Team Member"}
               </p>
 
               <p className="truncate text-xs text-slate-400">
-                {member.userId.email || "Team Member"}
+                {member?.userId?.email ||
+                  "Team Member"}
               </p>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-slate-400">No team members.</p>
+          <p className="text-sm text-slate-400">
+            No team members.
+          </p>
         )}
       </div>
     </SideCard>
