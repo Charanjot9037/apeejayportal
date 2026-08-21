@@ -109,7 +109,7 @@ const ProjectSchema = new mongoose.Schema(
     },
     teamMembers: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Student",
       default: null,
     },
     semester: {
