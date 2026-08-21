@@ -61,7 +61,9 @@ export default function TeamMemberCard({
     fetchStudents();
   }, [department, program, academicBatch, userId]);
 
-  const selectedValue = formik.values.teamMembers?.[index] || "";
+  // const selectedStudent = students.find(
+  //   (student) => student._id === formik.values.teamMembers,
+  // );
 
  const selectedStudent = students.find(
   (student) => student.userId === formik.values.teamMembers,
