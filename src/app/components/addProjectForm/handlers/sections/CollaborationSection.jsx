@@ -16,9 +16,7 @@ import { use, useEffect, useState } from "react";
 
 export default function CollaborationSection({
   formik,
-  addTeamMember,
-  removeTeamMember,
-  getTeamError,
+
 }) {
   const [mentors, setMentors] = useState();
   const [loading, setMentorLoading] = useState(false);
@@ -58,13 +56,9 @@ export default function CollaborationSection({
     fetchMentors();
   }, [department]);
   console.log("mentors", mentors);
-  const handleFieldChange = (index, field, value) => {
-    formik.setFieldValue(`teamMembers[${index}].${field}`, value);
-  };
 
-  const handleFieldBlur = (index, field) => {
-    formik.setFieldTouched(`teamMembers[${index}].${field}`, true);
-  };
+
+
 
   return (
     <section className="mt-6">
@@ -123,13 +117,12 @@ export default function CollaborationSection({
           </div>
 
           <div className="space-y-4">
-            <TeamMemberCard
-              formik={formik}
-
-              getTeamError={getTeamError}
-              onFieldChange={handleFieldChange}
-              onFieldBlur={handleFieldBlur}
-            />
+              <TeamMemberCard
+                
+                formik={formik}
+        
+              />
+           
           </div>
         </div>
       )}
@@ -190,11 +183,8 @@ export default function CollaborationSection({
           >
             <SelectTrigger className="h-10 bg-slate-50 text-sm">
               <SelectValue placeholder="Select a faculty mentor">
-                {formik?.values?.mentor
-                  ? mentors?.find(
-                      (mentor) => mentor._id === formik.values.mentor,
-                    )?.userId?.name
-                  : "Select a faculty mentor"}
+                {mentors?.find((mentor) => mentor._id === formik.values.mentor)
+                  ?.userId?.name || "Select a faculty mentor"}
               </SelectValue>
             </SelectTrigger>
 

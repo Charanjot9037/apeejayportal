@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/projects";
 import cloudinary from "@/lib/cloudinary";
-
+import Mentor from "@/models/mentor";
+import User from "@/models/user";
 /* =========================================================
    DELETE CLOUDINARY FILE
 ========================================================= */
@@ -264,7 +265,7 @@ export async function PUT(request, context) {
 
     project.semester = semester || "";
 
-    project.mentor = mentor || "";
+    project.mentor = mentor || null;
 
     project.projectImages = finalProjectImages;
 
@@ -361,6 +362,116 @@ export async function GET(request, context) {
       {
         success: false,
         message: error.message || "Failed to fetch project.",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+/* =========================================================
+   DELETE PROJECT
+========================================================= */
+
+export async function DELETE(request, context) {
+  try {
+    await connectDB();
+
+    const { id } = await context.params;
+
+    if (!id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Project ID is required.",
+        },
+        { status: 400 },
+      );
+    }
+
+    /* =====================================================
+       FIND PROJECT
+    ===================================================== */
+
+    const project = await Project.findById(id);
+
+    if (!project) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Project not found.",
+        },
+        { status: 404 },
+      );
+    }
+
+    /* =====================================================
+       DELETE PROJECT IMAGES
+    ===================================================== */
+
+    if (project.projectImages?.length) {
+      for (const image of project.projectImages) {
+        if (image?.publicId) {
+          await deleteFromCloudinary(
+            image.publicId,
+            image.resourceType || "image",
+          );
+        }
+      }
+    }
+
+    /* =====================================================
+       DELETE PRESENTATION
+    ===================================================== */
+
+    if (project.presentationFile?.publicId) {
+      await deleteFromCloudinary(
+        project.presentationFile.publicId,
+        project.presentationFile.resourceType || "raw",
+      );
+    }
+
+    /* =====================================================
+       DELETE SYNOPSIS
+    ===================================================== */
+
+    if (project.synopsisFile?.publicId) {
+      await deleteFromCloudinary(
+        project.synopsisFile.publicId,
+        project.synopsisFile.resourceType || "raw",
+      );
+    }
+
+    /* =====================================================
+       DELETE REPORT
+    ===================================================== */
+
+    if (project.reportFile?.publicId) {
+      await deleteFromCloudinary(
+        project.reportFile.publicId,
+        project.reportFile.resourceType || "raw",
+      );
+    }
+
+    /* =====================================================
+       DELETE PROJECT FROM DATABASE
+    ===================================================== */
+
+    await Project.findByIdAndDelete(id);
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Project deleted successfully.",
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("PROJECT_DELETE_ERROR:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message || "Failed to delete project.",
       },
       { status: 500 },
     );
