@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 
 import Avatar from './avatar';
+import SelectField from './SelectFiled';
 
 export default function Roster({
   title = 'Roster',
@@ -40,11 +41,21 @@ export default function Roster({
    * Handle filter change.
    */
   const handleFilterChange = (key, value) => {
-    setFilters((prevFilters) => {
+    setFilters((previousFilters) => {
       const updatedFilters = {
-        ...prevFilters,
+        ...previousFilters,
         [key]: value,
       };
+
+      if (key === 'department') {
+        updatedFilters.program = '';
+        updatedFilters.specialization = '';
+        updatedFilters.currentSemester = '';
+      }
+
+      if (key === 'program') {
+        updatedFilters.currentSemester = '';
+      }
 
       console.log('Roster - filter changed:', updatedFilters);
 
@@ -58,12 +69,11 @@ export default function Roster({
   const handleApplyFilters = () => {
     console.log('Roster - applying filters:', filters);
 
-    onApplyFilters?.(filters);
+    onApplyFilters?.({
+      ...filters,
+    });
   };
 
-  /*
-   * Render table cells.
-   */
   const renderCell = (column, item) => {
     /*
      * =========================
@@ -285,8 +295,6 @@ if (column.key === 'contact') {
         ${className}
       `}
     >
-      {/* ================= HEADER ================= */}
-
       <div className="px-5 pt-5">
         <div className="flex items-center gap-2">
 
@@ -491,8 +499,6 @@ if (column.key === 'contact') {
           )}
         </div>
       </div>
-
-      {/* ================= TABLE ================= */}
 
       <div className="overflow-x-auto">
         <table className="mt-4 w-full min-w-[700px] text-left text-sm">
