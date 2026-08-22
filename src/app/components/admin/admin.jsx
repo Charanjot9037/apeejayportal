@@ -1,5 +1,6 @@
 'use client';
 import { StatCards, Roster, DashboardHeader } from '@/app/components/elements';
+import AdminStats from './adminStats';
 
 import {
   STAT_CARDS,
@@ -19,33 +20,7 @@ export default function Admin() {
           onAction={() => console.log('Pending Approvals')}
         />
         <StatCards cards={STAT_CARDS} />
-        <div className="grid grid-cols-1  gap-6 xl:grid-cols-2">
-          <Roster
-            title="Student Roaster"
-            data={STUDENTS}
-            columns={STUDENT_COLUMNS}
-            searchPlaceholder="Search Student..."
-            onViewAll={() => {
-              console.log('View all students');
-            }}
-            onRowClick={(student) => {
-              console.log('Student:', student);
-            }}
-          />
-          <Roster
-            title="Mentor Roster"
-            data={MENTORS}
-            columns={MENTOR_COLUMNS}
-            searchPlaceholder="Search mentors..."
-            onRowClick={(mentor) => {
-              console.log('Mentor:', mentor);
-            }}
-            onViewAll={() => {
-              console.log('View all mentors');
-            }}
-            viewAllLabel="View All Mentors"
-          />
-        </div>
+        <AdminStats />
       </main>
     </div>
   );
