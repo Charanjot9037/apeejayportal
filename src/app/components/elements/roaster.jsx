@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { Search, ChevronRight, SlidersHorizontal } from 'lucide-react';
+
 import Avatar from './avatar';
+import SelectField from './SelectFiled';
 
 export default function Roster({
   title = 'Roster',
@@ -18,26 +20,44 @@ export default function Roster({
 }) {
   const [search, setSearch] = useState('');
 
-  // Controls whether all table records are displayed.
   const [showAll, setShowAll] = useState(false);
 
-  /*
-   * Stores the filters currently selected by the user.
-   *
-   * Changing a dropdown only changes this state.
-   * It does NOT call the API.
-   */
-  const [filters, setFilters] = useState(defaultFilters);
+  const [filters, setFilters] = useState(() => ({
+    ...defaultFilters,
+  }));
 
-  /*
-   * Called whenever the user changes a filter.
-   */
+  const getFilterOptions = (filter) => {
+    const { options = [], dependsOn } = filter;
+
+    if (!dependsOn) {
+      return Array.isArray(options) ? options : [];
+    }
+
+    const parentValue = filters[dependsOn];
+
+    if (!parentValue) {
+      return [];
+    }
+
+    return options?.[parentValue] || [];
+  };
+
   const handleFilterChange = (key, value) => {
-    setFilters((prevFilters) => {
+    setFilters((previousFilters) => {
       const updatedFilters = {
-        ...prevFilters,
+        ...previousFilters,
         [key]: value,
       };
+
+      if (key === 'department') {
+        updatedFilters.program = '';
+        updatedFilters.specialization = '';
+        updatedFilters.currentSemester = '';
+      }
+
+      if (key === 'program') {
+        updatedFilters.currentSemester = '';
+      }
 
       console.log('Roster - filter changed:', updatedFilters);
 
@@ -45,24 +65,15 @@ export default function Roster({
     });
   };
 
-  /*
-   * Called when the user clicks Apply Filters.
-   *
-   * The parent page receives the selected filters.
-   */
   const handleApplyFilters = () => {
     console.log('Roster - applying filters:', filters);
 
-    onApplyFilters?.(filters);
+    onApplyFilters?.({
+      ...filters,
+    });
   };
 
-  /*
-   * Render table cells.
-   */
   const renderCell = (column, item) => {
-    /*
-     * Name column
-     */
     if (column.key === 'name') {
       return (
         <div className="flex items-center gap-3">
@@ -77,9 +88,6 @@ export default function Roster({
       );
     }
 
-    /*
-     * Status column
-     */
     if (column.key === 'status') {
       return (
         <span
@@ -96,19 +104,9 @@ export default function Roster({
       );
     }
 
-    /*
-     * All other columns are rendered generically.
-     */
     return item[column.key] ?? '-';
   };
 
-  /*
-   * Search is performed only on the data
-   * already received from the parent.
-   *
-   * This component does NOT call the backend
-   * for search.
-   */
   const filteredData = data.filter((item) => {
     const searchValue = search.trim().toLowerCase();
 
@@ -123,36 +121,27 @@ export default function Roster({
     );
   });
 
-  /*
-   * Initially show only the first 5 records.
-   *
-   * When showAll is true, display all filtered records.
-   */
   const displayedData = showAll ? filteredData : filteredData.slice(0, 5);
 
   return (
     <div
       className={`mt-4 flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}
     >
-      {/* ================= HEADER ================= */}
-
       <div className="px-5 pt-5">
         <h2 className="text-lg font-bold text-[#1c3a5e]">{title}</h2>
 
         <div className="mt-1 h-0.5 w-8 bg-primary-orange" />
       </div>
 
-      {/* ================= SEARCH ================= */}
-
       <div className="px-5 pt-4">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
           <input
             type="text"
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+            onChange={(event) => {
+              setSearch(event.target.value);
               setShowAll(false);
             }}
             placeholder={searchPlaceholder}
@@ -161,12 +150,8 @@ export default function Roster({
         </div>
       </div>
 
-      {/* ================= FILTERS ================= */}
-
       {filterConfig.length > 0 && (
         <div className="px-5 pt-4">
-          {/* Filter heading */}
-
           <div className="mb-3 flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-slate-500" />
 
@@ -174,8 +159,6 @@ export default function Roster({
               Filters
             </span>
           </div>
-
-          {/* Filter fields */}
 
           <div
             className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${
@@ -189,40 +172,43 @@ export default function Roster({
             }`}
           >
             {filterConfig.map((filter) => {
-              const { key, label, options = [], placeholder } = filter;
+              const { key, label, placeholder, dependsOn } = filter;
+
+              const options = getFilterOptions(filter);
+
+              const isDependent = Boolean(dependsOn);
+
+              const parentValue = dependsOn ? filters[dependsOn] : null;
+
+              const parentSelected = !isDependent || Boolean(parentValue);
 
               return (
                 <div key={key}>
-                  <label className="mb-1 block text-xs font-medium text-slate-500">
-                    {label}
-                  </label>
-
-                  <select
-                    value={filters[key] ?? ''}
-                    onChange={(e) => handleFilterChange(key, e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 focus:border-[#f2792a] focus:outline-none focus:ring-1 focus:ring-[#f2792a]"
-                  >
-                    {placeholder && <option value="">{placeholder}</option>}
-
-                    {options.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
+                  <SelectField
+                    label={label}
+                    name={key}
+                    value={filters[key] || ''}
+                    onChange={(value) => handleFilterChange(key, value)}
+                    onBlur={() => {}}
+                    placeholder={
+                      !parentSelected
+                        ? `Select ${dependsOn}`
+                        : placeholder || `Select ${label}`
+                    }
+                    options={options}
+                    disabled={!parentSelected}
+                  />
                 </div>
               );
             })}
           </div>
-
-          {/* Apply Filters button */}
 
           {showApplyButton && (
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
                 onClick={handleApplyFilters}
-                className="rounded-lg bg-[#f2792a] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#df681c] focus:outline-none focus:ring-2 focus:ring-[#f2792a] focus:ring-offset-2"
+                className="rounded-lg bg-primary-orange px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#df681c] focus:outline-none focus:ring-2 focus:ring-[#f2792a] focus:ring-offset-2"
               >
                 Apply Filters
               </button>
@@ -231,12 +217,8 @@ export default function Roster({
         </div>
       )}
 
-      {/* ================= TABLE ================= */}
-
       <div className="overflow-x-auto">
         <table className="mt-4 w-full min-w-[600px] text-left text-sm">
-          {/* Table Header */}
-
           <thead>
             <tr className="border-y border-slate-100 text-xs uppercase tracking-wide text-slate-400">
               {columns.map((column) => (
@@ -248,8 +230,6 @@ export default function Roster({
               <th className="px-5 py-2 text-right font-medium">Action</th>
             </tr>
           </thead>
-
-          {/* Table Body */}
 
           <tbody>
             {displayedData.length > 0 ? (
@@ -263,8 +243,6 @@ export default function Roster({
                       {renderCell(column, item)}
                     </td>
                   ))}
-
-                  {/* Action */}
 
                   <td className="px-5 py-3 text-right">
                     <button
@@ -291,12 +269,10 @@ export default function Roster({
         </table>
       </div>
 
-      {/* ================= VIEW ALL ================= */}
-
       {filteredData.length > 5 && (
         <button
           type="button"
-          onClick={() => setShowAll((prev) => !prev)}
+          onClick={() => setShowAll((previous) => !previous)}
           className="mt-auto rounded-b-xl border-t border-slate-100 py-3 text-center text-sm font-semibold text-[#1c3a5e] hover:bg-slate-50"
         >
           {showAll ? 'Show Less' : 'View All'}

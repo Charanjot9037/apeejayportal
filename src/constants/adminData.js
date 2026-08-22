@@ -191,7 +191,7 @@ export const studentColumns = [
 ];
 
 export const DEFAULT_FILTERS = {
-  department: 'Engineering',
+  department: 'ENGINEERING',
   program: 'BTECH',
   academicBatch: '2023',
   specialization: '',
@@ -201,22 +201,87 @@ export const STUDENT_FILTERS = [
   {
     key: 'department',
     label: 'Department',
-    options: ['Engineering', 'Management', 'Information Technology'],
+    options: [
+      { value: 'ENGINEERING', label: 'Engineering' },
+      { value: 'MANAGEMENT', label: 'Management' },
+      { value: 'IT', label: 'IT' },
+    ],
   },
+
+  {
+    key: 'program',
+    label: 'Program / Degree',
+    dependsOn: 'department',
+    options: {
+      ENGINEERING: [{ value: 'BTECH', label: 'B.Tech' }],
+
+      MANAGEMENT: [
+        { value: 'MBA', label: 'MBA' },
+        { value: 'BBA', label: 'BBA' },
+        { value: 'BCOM', label: 'B.Com' },
+      ],
+
+      IT: [
+        { value: 'MCA', label: 'MCA' },
+        { value: 'BCA', label: 'BCA' },
+      ],
+    },
+  },
+
   {
     key: 'specialization',
     label: 'Specialization',
-    options: ['CSE', 'ECE', 'ME', 'CE'],
+    dependsOn: 'department',
+    options: {
+      ENGINEERING: [
+        { value: 'CSE', label: 'Computer Science & Engineering' },
+        { value: 'ECE', label: 'Electronics & Communication Engineering' },
+        { value: 'ME', label: 'Mechanical Engineering' },
+        { value: 'CIVIL', label: 'Civil Engineering' },
+        { value: 'EEE', label: 'Electrical & Electronics Engineering' },
+      ],
+
+      MANAGEMENT: [
+        { value: 'FINANCE', label: 'Finance' },
+        { value: 'MARKETING', label: 'Marketing' },
+        { value: 'HR', label: 'Human Resource Management' },
+        {
+          value: 'BUSINESS_ANALYTICS',
+          label: 'Business Analytics',
+        },
+      ],
+
+      IT: [
+        {
+          value: 'SOFTWARE_DEVELOPMENT',
+          label: 'Software Development',
+        },
+        { value: 'DATA_SCIENCE', label: 'Data Science' },
+        {
+          value: 'AI_ML',
+          label: 'Artificial Intelligence & Machine Learning',
+        },
+        {
+          value: 'CYBER_SECURITY',
+          label: 'Cyber Security',
+        },
+        {
+          value: 'CLOUD_COMPUTING',
+          label: 'Cloud Computing',
+        },
+      ],
+    },
   },
-  {
-    key: 'program',
-    label: 'Program',
-    options: ['BTECH', 'BCA', 'BCOM', 'BBA', 'MBA'],
-  },
+
   {
     key: 'academicBatch',
     label: 'Academic Batch',
-    options: ['2022', '2023', '2024', '2025', '2026'],
+    options: [
+      { value: '2023', label: '2023' },
+      { value: '2024', label: '2024' },
+      { value: '2025', label: '2025' },
+      { value: '2026', label: '2026' },
+    ],
   },
 ];
 
@@ -259,7 +324,20 @@ export const MENTOR_FILTER_CONFIG = [
   {
     key: 'department',
     label: 'Department',
-    options: ['Engineering', 'Management', 'Information Technology'],
+    options: [
+      {
+        value: 'Engineering',
+        label: 'Engineering',
+      },
+      {
+        value: 'Management',
+        label: 'Management',
+      },
+      {
+        value: 'IT',
+        label: 'Information Technology',
+      },
+    ],
   },
 ];
 

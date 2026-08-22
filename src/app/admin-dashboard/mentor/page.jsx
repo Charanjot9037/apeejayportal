@@ -15,7 +15,10 @@ export default function Page() {
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState(MENTOR_DEFAULT_FILTERS);
+
+  const [filters, setFilters] = useState({
+    ...MENTOR_DEFAULT_FILTERS,
+  });
 
   const fetchMentors = async (selectedFilters) => {
     try {
@@ -55,7 +58,10 @@ export default function Page() {
   }, []);
 
   const handleApplyFilters = (selectedFilters) => {
-    setFilters(selectedFilters);
+    setFilters({
+      ...selectedFilters,
+    });
+
     fetchMentors(selectedFilters);
   };
 
@@ -66,11 +72,7 @@ export default function Page() {
   return (
     <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
-
         <div className="mb-6">
-         
-
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -106,8 +108,6 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Error */}
-
         {error && (
           <div className="mb-5 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
             <div className="flex flex-col items-center justify-center text-center">
@@ -132,8 +132,6 @@ export default function Page() {
           </div>
         )}
 
-        {/* Roster */}
-
         <div className="relative rounded-2xl">
           {loading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
@@ -152,11 +150,15 @@ export default function Page() {
             data={mentors}
             columns={MENTOR_ROSTER_COLUMNS}
             searchPlaceholder="Search mentors..."
-            defaultFilters={filters}
+
             filterConfig={MENTOR_FILTER_CONFIG}
+
             showApplyButton={true}
+
             onApplyFilters={handleApplyFilters}
+
             className="mt-0 shadow-sm"
+
             onRowClick={(mentor) => {
               console.log('Selected mentor:', mentor);
             }}

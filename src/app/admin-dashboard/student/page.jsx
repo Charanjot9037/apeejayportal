@@ -15,7 +15,10 @@ export default function Page() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+
+  const [filters, setFilters] = useState({
+    ...DEFAULT_FILTERS,
+  });
 
   const fetchStudents = async (selectedFilters) => {
     try {
@@ -65,7 +68,10 @@ export default function Page() {
   }, []);
 
   const handleApplyFilters = (selectedFilters) => {
-    setFilters(selectedFilters);
+    setFilters({
+      ...selectedFilters,
+    });
+
     fetchStudents(selectedFilters);
   };
 
@@ -77,12 +83,6 @@ export default function Page() {
     <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6">
-          <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400">
-            <span>Dashboard</span>
-            <span>/</span>
-            <span className="text-slate-500">Students</span>
-          </div>
-
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -161,11 +161,17 @@ export default function Page() {
             data={students}
             columns={studentColumns}
             searchPlaceholder="Search students..."
-            defaultFilters={filters}
+
+            defaultFilters={DEFAULT_FILTERS}
+
             filterConfig={STUDENT_FILTERS}
+
             showApplyButton={true}
+
             onApplyFilters={handleApplyFilters}
+
             className="mt-0 shadow-sm"
+
             onRowClick={(student) => {
               console.log('Selected student:', student);
             }}
