@@ -2,15 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function AdminStats() {
   const [stats, setStats] = useState({
@@ -52,33 +44,14 @@ export default function AdminStats() {
     fetchStats();
   }, []);
 
-  const data = [
-    {
-      name: 'Students',
-      count: stats.students,
-    },
-    {
-      name: 'Mentors',
-      count: stats.mentors,
-    },
-    {
-      name: 'Projects',
-      count: stats.projects,
-    },
-  ];
-
   if (loading) {
     return (
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Database Overview
-          </h2>
+      <div className="mt-6 rounded-xl border bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900">
+          Database Overview
+        </h2>
 
-          <p className="text-sm text-gray-500">
-            Students, mentors and projects
-          </p>
-        </div>
+        <p className="text-sm text-gray-500">Students, mentors and projects</p>
 
         <div className="flex h-[320px] items-center justify-center">
           <p className="text-sm text-gray-500">Loading statistics...</p>
@@ -90,15 +63,9 @@ export default function AdminStats() {
   if (error) {
     return (
       <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Database Overview
-          </h2>
-
-          <p className="text-sm text-gray-500">
-            Students, mentors and projects
-          </p>
-        </div>
+        <h2 className="text-lg font-semibold text-gray-900">
+          Database Overview
+        </h2>
 
         <div className="flex h-[320px] items-center justify-center">
           <p className="text-sm text-red-500">{error}</p>
@@ -106,6 +73,21 @@ export default function AdminStats() {
       </div>
     );
   }
+
+  const charts = [
+    {
+      title: 'Students',
+      value: stats.students,
+    },
+    {
+      title: 'Mentors',
+      value: stats.mentors,
+    },
+    {
+      title: 'Projects',
+      value: stats.projects,
+    },
+  ];
 
   return (
     <div className="rounded-xl border bg-white p-6 shadow-sm">
@@ -117,28 +99,57 @@ export default function AdminStats() {
         <p className="text-sm text-gray-500">Students, mentors and projects</p>
       </div>
 
-      <div className="h-[320px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{
-              top: 10,
-              right: 20,
-              left: 0,
-              bottom: 10,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {charts.map((chart) => {
+          const chartData = [
+            {
+              name: chart.title,
+              value: chart.value,
+            },
+          ];
 
-            <XAxis dataKey="name" />
+          return (
+            <div
+              key={chart.title}
+              className="rounded-xl border border-gray-100 p-4"
+            >
+              <h3 className="text-center text-sm font-medium text-gray-700">
+                {chart.title}
+              </h3>
 
-            <YAxis allowDecimals={false} />
+              <div className="relative h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={3}
+                    >
+                      <Cell fill="var(--color-primary-orange)" />
+                    </Pie>
 
-            <Tooltip />
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
 
-            <Bar dataKey="count" radius={[6, 6, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-gray-900">
+                    {chart.value}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-center text-xs text-gray-500">
+                Total {chart.title}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

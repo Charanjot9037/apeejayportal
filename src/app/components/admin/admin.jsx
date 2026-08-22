@@ -1,15 +1,8 @@
 'use client';
-import { StatCards, Roster, DashboardHeader } from '@/app/components/elements';
+import { StatCards, DashboardHeader } from '@/app/components/elements';
 import AdminStats from './adminStats';
 
-import {
-  STAT_CARDS,
-  STUDENTS,
-  MENTORS,
-  MENTOR_COLUMNS,
-  ADMIN_DASHBOARD_HEADER,
-  STUDENT_COLUMNS,
-} from '@/constants/adminData';
+import { STAT_CARDS, ADMIN_DASHBOARD_HEADER } from '@/constants/adminData';
 
 export default function Admin() {
   return (
@@ -20,7 +13,9 @@ export default function Admin() {
           onAction={() => console.log('Pending Approvals')}
         />
         <StatCards cards={STAT_CARDS} />
-        <AdminStats />
+        <div className="mt-4">
+          <AdminStats />
+        </div>
       </main>
     </div>
   );
