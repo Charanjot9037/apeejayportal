@@ -191,7 +191,7 @@ export const studentColumns = [
 ];
 
 export const DEFAULT_FILTERS = {
-  department: 'Engineering',
+  department: 'ENGINEERING',
   program: 'BTECH',
   academicBatch: '2023',
   specialization: '',

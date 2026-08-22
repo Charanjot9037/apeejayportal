@@ -18,100 +18,30 @@ export default function Roster({
   filterConfig = [],
   showApplyButton = false,
 }) {
-  /*
-   * =========================================================
-   * STATE
-   * =========================================================
-   */
-
   const [search, setSearch] = useState('');
 
   const [showAll, setShowAll] = useState(false);
 
-  /*
-   * Stores the currently selected filters.
-   *
-   * Example:
-   *
-   * {
-   *   department: 'ENGINEERING',
-   *   program: '',
-   *   specialization: '',
-   *   academicBatch: ''
-   * }
-   *
-   * If department is present in defaultFilters,
-   * it will automatically appear selected.
-   */
   const [filters, setFilters] = useState(() => ({
     ...defaultFilters,
   }));
 
-  /*
-   * =========================================================
-   * GET FILTER OPTIONS
-   * =========================================================
-   *
-   * This supports both:
-   *
-   * Normal dropdown:
-   *
-   * options: [
-   *   {
-   *     value: 'ENGINEERING',
-   *     label: 'Engineering'
-   *   }
-   * ]
-   *
-   * Dependent dropdown:
-   *
-   * dependsOn: 'department'
-   *
-   * options: {
-   *   ENGINEERING: [...],
-   *   MANAGEMENT: [...]
-   * }
-   */
   const getFilterOptions = (filter) => {
     const { options = [], dependsOn } = filter;
 
-    /*
-     * Normal dropdown.
-     */
     if (!dependsOn) {
       return Array.isArray(options) ? options : [];
     }
 
-    /*
-     * Find the selected parent value.
-     *
-     * Example:
-     *
-     * dependsOn = 'department'
-     *
-     * filters.department = 'ENGINEERING'
-     */
     const parentValue = filters[dependsOn];
 
-    /*
-     * Parent hasn't been selected.
-     */
     if (!parentValue) {
       return [];
     }
 
-    /*
-     * Return options belonging to
-     * selected parent.
-     */
     return options?.[parentValue] || [];
   };
 
-  /*
-   * =========================================================
-   * HANDLE FILTER CHANGE
-   * =========================================================
-   */
   const handleFilterChange = (key, value) => {
     setFilters((previousFilters) => {
       const updatedFilters = {
@@ -119,22 +49,12 @@ export default function Roster({
         [key]: value,
       };
 
-      /*
-       * Department changed.
-       *
-       * Clear fields that depend on department.
-       */
       if (key === 'department') {
         updatedFilters.program = '';
         updatedFilters.specialization = '';
         updatedFilters.currentSemester = '';
       }
 
-      /*
-       * Program changed.
-       *
-       * Semester depends on program.
-       */
       if (key === 'program') {
         updatedFilters.currentSemester = '';
       }
@@ -145,33 +65,15 @@ export default function Roster({
     });
   };
 
-  /*
-   * =========================================================
-   * APPLY FILTERS
-   * =========================================================
-   */
   const handleApplyFilters = () => {
     console.log('Roster - applying filters:', filters);
 
-    /*
-     * Send selected filters to parent.
-     *
-     * Roster itself does not call the API.
-     */
     onApplyFilters?.({
       ...filters,
     });
   };
 
-  /*
-   * =========================================================
-   * RENDER TABLE CELL
-   * =========================================================
-   */
   const renderCell = (column, item) => {
-    /*
-     * NAME COLUMN
-     */
     if (column.key === 'name') {
       return (
         <div className="flex items-center gap-3">
@@ -186,9 +88,6 @@ export default function Roster({
       );
     }
 
-    /*
-     * STATUS COLUMN
-     */
     if (column.key === 'status') {
       return (
         <span
@@ -205,21 +104,9 @@ export default function Roster({
       );
     }
 
-    /*
-     * ALL OTHER COLUMNS
-     */
     return item[column.key] ?? '-';
   };
 
-  /*
-   * =========================================================
-   * SEARCH
-   * =========================================================
-   *
-   * Search only searches the data already loaded.
-   *
-   * It does NOT call the API.
-   */
   const filteredData = data.filter((item) => {
     const searchValue = search.trim().toLowerCase();
 
@@ -234,30 +121,17 @@ export default function Roster({
     );
   });
 
-  /*
-   * =========================================================
-   * DISPLAY DATA
-   * =========================================================
-   */
   const displayedData = showAll ? filteredData : filteredData.slice(0, 5);
 
   return (
     <div
       className={`mt-4 flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}
     >
-      {/* =====================================================
-          HEADER
-      ====================================================== */}
-
       <div className="px-5 pt-5">
         <h2 className="text-lg font-bold text-[#1c3a5e]">{title}</h2>
 
         <div className="mt-1 h-0.5 w-8 bg-primary-orange" />
       </div>
-
-      {/* =====================================================
-          SEARCH
-      ====================================================== */}
 
       <div className="px-5 pt-4">
         <div className="relative">
@@ -276,14 +150,8 @@ export default function Roster({
         </div>
       </div>
 
-      {/* =====================================================
-          FILTERS
-      ====================================================== */}
-
       {filterConfig.length > 0 && (
         <div className="px-5 pt-4">
-          {/* Filter heading */}
-
           <div className="mb-3 flex items-center gap-2">
             <SlidersHorizontal className="h-4 w-4 text-slate-500" />
 
@@ -291,8 +159,6 @@ export default function Roster({
               Filters
             </span>
           </div>
-
-          {/* Filter grid */}
 
           <div
             className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${
@@ -308,25 +174,12 @@ export default function Roster({
             {filterConfig.map((filter) => {
               const { key, label, placeholder, dependsOn } = filter;
 
-              /*
-               * Get options for this filter.
-               */
               const options = getFilterOptions(filter);
 
-              /*
-               * Is this a dependent dropdown?
-               */
               const isDependent = Boolean(dependsOn);
 
-              /*
-               * Find parent value.
-               */
               const parentValue = dependsOn ? filters[dependsOn] : null;
 
-              /*
-               * Parent must exist before
-               * dependent dropdown is enabled.
-               */
               const parentSelected = !isDependent || Boolean(parentValue);
 
               return (
@@ -350,16 +203,12 @@ export default function Roster({
             })}
           </div>
 
-          {/* =================================================
-              APPLY BUTTON
-          ================================================== */}
-
           {showApplyButton && (
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
                 onClick={handleApplyFilters}
-                className="rounded-lg bg-[#f2792a] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#df681c] focus:outline-none focus:ring-2 focus:ring-[#f2792a] focus:ring-offset-2"
+                className="rounded-lg bg-primary-orange px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#df681c] focus:outline-none focus:ring-2 focus:ring-[#f2792a] focus:ring-offset-2"
               >
                 Apply Filters
               </button>
@@ -368,14 +217,8 @@ export default function Roster({
         </div>
       )}
 
-      {/* =====================================================
-          TABLE
-      ====================================================== */}
-
       <div className="overflow-x-auto">
         <table className="mt-4 w-full min-w-[600px] text-left text-sm">
-          {/* Header */}
-
           <thead>
             <tr className="border-y border-slate-100 text-xs uppercase tracking-wide text-slate-400">
               {columns.map((column) => (
@@ -387,8 +230,6 @@ export default function Roster({
               <th className="px-5 py-2 text-right font-medium">Action</th>
             </tr>
           </thead>
-
-          {/* Body */}
 
           <tbody>
             {displayedData.length > 0 ? (
@@ -402,8 +243,6 @@ export default function Roster({
                       {renderCell(column, item)}
                     </td>
                   ))}
-
-                  {/* Action */}
 
                   <td className="px-5 py-3 text-right">
                     <button
@@ -429,10 +268,6 @@ export default function Roster({
           </tbody>
         </table>
       </div>
-
-      {/* =====================================================
-          VIEW ALL
-      ====================================================== */}
 
       {filteredData.length > 5 && (
         <button
