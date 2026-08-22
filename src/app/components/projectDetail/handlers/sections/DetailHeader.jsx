@@ -5,7 +5,7 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
+import { ArrowLeft } from "lucide-react";
 import { statusStyles } from "../../helpers";
 
 /* =========================================================
@@ -15,7 +15,15 @@ import { statusStyles } from "../../helpers";
 export default function DetailHeader({ project, deleting, onDelete }) {
   return (
     <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+     
       <div>
+          <Link
+              href="/student"
+              className="mb-5 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-blue-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Link>
         {/* Project Title */}
         <h1 className="text-xl font-semibold tracking-tight text-blue-900 md:text-2xl">
           {project.title}

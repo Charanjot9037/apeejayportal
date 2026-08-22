@@ -30,8 +30,8 @@ export default function AddProjectForm({ mode = "create", project = null }) {
   } = useAddProjectForm({ mode, project });
   console.log("errors", formik.errors);
   return (
-    <div className="min-h-screen bg-[#faf9f8] px-4 py-8">
-      <div className="mx-auto max-w-5xl">
+    <div className="min-h-full">
+     
         <FormHeader isEdit={isEdit} />
 
         <form
@@ -64,7 +64,7 @@ export default function AddProjectForm({ mode = "create", project = null }) {
 
           <FormActions formik={formik} isEdit={isEdit} />
         </form>
-      </div>
+      
     </div>
   );
 }
