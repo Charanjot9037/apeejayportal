@@ -379,14 +379,18 @@ if (column.key === 'contact') {
               </div>
 
               {/* Filter fields */}
-
+              
               {filterConfig.map((filter) => {
                 const {
                   key,
                   label,
-                  options = [],
                   placeholder,
                 } = filter;
+                
+const options = Array.isArray(filter.options)
+  ? filter.options
+  : [];
+                
 
                 return (
                   <div
@@ -434,14 +438,26 @@ if (column.key === 'contact') {
                           </option>
                         )}
 
-                        {options.map((option) => (
-                          <option
-                            key={option}
-                            value={option}
-                          >
-                            {option}
-                          </option>
-                        ))}
+                       {options.map((option, index) => {
+  const value =
+    typeof option === 'object'
+      ? option.value
+      : option;
+
+  const label =
+    typeof option === 'object'
+      ? option.label
+      : option;
+
+  return (
+    <option
+      key={`${key}-${value}-${index}`}
+      value={value}
+    >
+      {label}
+    </option>
+  );
+})}
                       </select>
 
                       <ChevronDown
