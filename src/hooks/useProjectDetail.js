@@ -89,5 +89,6 @@ export function useProjectDetail() {
     loading,
     deleting,
     handleDelete,
+     setProject,
   };
 }

@@ -3,9 +3,12 @@ import { connectDB } from "@/lib/db";
 
 import Project from "@/models/projects";
 import cloudinary from "@/lib/cloudinary";
+import { authenticateUser } from "@/lib/authentication";
+
 import Mentor from "@/models/mentor";
 import User from "@/models/user";
 import Student from "@/models/student";
+
 /* =========================================================
    DELETE CLOUDINARY FILE
 ========================================================= */
@@ -29,6 +32,7 @@ async function deleteFromCloudinary(publicId, resourceType = "image") {
 /* =========================================================
    PUT - UPDATE PROJECT
 ========================================================= */
+
 export async function PUT(request, context) {
   try {
     await connectDB();
@@ -50,6 +54,22 @@ export async function PUT(request, context) {
     }
 
     /* =====================================================
+       AUTHENTICATION
+    ===================================================== */
+
+    const auth = await authenticateUser();
+
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        { status: auth.status },
+      );
+    }
+
+    /* =====================================================
        FIND PROJECT
     ===================================================== */
 
@@ -62,6 +82,36 @@ export async function PUT(request, context) {
           message: "Project not found.",
         },
         { status: 404 },
+      );
+    }
+
+    /* =====================================================
+       ACCESS CONTROL
+       OWNER STUDENT OR ASSIGNED MENTOR
+    ===================================================== */
+
+    const isOwnerStudent =
+      project.student.toString() === auth.user._id.toString();
+
+    let isAssignedMentor = false;
+
+    if (project.mentor) {
+      const mentorProfile = await Mentor.findOne({
+        userId: auth.user._id,
+      });
+
+      isAssignedMentor =
+        mentorProfile &&
+        mentorProfile._id.toString() === project.mentor.toString();
+    }
+
+    if (!isOwnerStudent && !isAssignedMentor) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "You are not allowed to update this project.",
+        },
+        { status: 403 },
       );
     }
 
@@ -113,7 +163,8 @@ export async function PUT(request, context) {
       return NextResponse.json(
         {
           success: false,
-          message: "Project name, description and student ID are required.",
+          message:
+            "Project name, description and student ID are required.",
         },
         { status: 400 },
       );
@@ -137,7 +188,10 @@ export async function PUT(request, context) {
        TEAM VALIDATION
     ===================================================== */
 
-    if (projectType === "team" && (!teamMembers || teamMembers.length === 0)) {
+    if (
+      projectType === "team" &&
+      (!teamMembers || teamMembers.length === 0)
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -169,11 +223,15 @@ export async function PUT(request, context) {
 
     const oldImages = project.projectImages || [];
 
-    const newImages = Array.isArray(projectImages) ? projectImages : [];
+    const newImages = Array.isArray(projectImages)
+      ? projectImages
+      : [];
 
     const newImageIds = new Set(
       newImages
-        .map((image) => (typeof image === "string" ? image : image?.publicId))
+        .map((image) =>
+          typeof image === "string" ? image : image?.publicId
+        )
         .filter(Boolean),
     );
 
@@ -182,7 +240,10 @@ export async function PUT(request, context) {
     ===================================================== */
 
     for (const oldImage of oldImages) {
-      if (oldImage?.publicId && !newImageIds.has(oldImage.publicId)) {
+      if (
+        oldImage?.publicId &&
+        !newImageIds.has(oldImage.publicId)
+      ) {
         await deleteFromCloudinary(
           oldImage.publicId,
           oldImage.resourceType || "image",
@@ -263,7 +324,9 @@ export async function PUT(request, context) {
     project.projectType = projectType;
 
     project.teamMembers =
-      projectType === "team" && teamMembers ? teamMembers : null;
+      projectType === "team" && teamMembers
+        ? teamMembers
+        : null;
 
     project.semester = semester || "";
 
@@ -310,12 +373,18 @@ export async function PUT(request, context) {
   }
 }
 
+/* =========================================================
+   GET SINGLE PROJECT
+========================================================= */
+
 export async function GET(request, context) {
   try {
     await connectDB();
 
     const { id } = await context.params;
+
     console.log(id);
+
     if (!id) {
       return NextResponse.json(
         {

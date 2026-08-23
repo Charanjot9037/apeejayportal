@@ -14,7 +14,7 @@ import TeamMembersSection from "../projectDetail/handlers/sections/TeamMemberSec
 import MentorSection from "../projectDetail/handlers/sections/MentorSection";
 import ProjectInfoSection from "../projectDetail/handlers/sections/ProjectInfo";
 import ApprovalHistorySection from "../projectDetail/handlers/sections/ApprovalHistorySection";
-
+import MentorFeedbackSection from "../projectDetail/handlers/sections/MentorFeedbackSection";
 /* =========================================================
    PROJECT DETAIL
 
@@ -44,6 +44,8 @@ export default function ProjectDetail() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_250px]">
         <div className="space-y-4">
           <OverviewSection project={project} />
+          <MentorFeedbackSection project={project} />
+
           <TechnologiesSection project={project} />
           <GallerySection project={project} />
           <DocumentsSection project={project} />
