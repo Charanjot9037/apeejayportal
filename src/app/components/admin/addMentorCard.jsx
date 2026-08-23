@@ -1,33 +1,34 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useFormik } from "formik";
+import { useState } from 'react';
+import { useFormik } from 'formik';
 import {
   UserRound,
   Mail,
   Phone,
   Building2,
   BriefcaseBusiness,
-} from "lucide-react";
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-import { mentorValidationSchema } from "@/validations/admin/mentorValidationSchema";
+import { mentorValidationSchema } from '@/validations/admin/mentorValidationSchema';
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from '@/components/ui/card';
 
-import InputField from "../elements/InputField";
-import SelectField from "../elements/SelectFiled";
-import { DashboardHeader } from "../elements";
+import InputField from '../elements/InputField';
+import SelectField from '../elements/SelectFiled';
+import { DashboardHeader } from '../elements';
 
 const AddMentor = () => {
   const [loading, setLoading] = useState(false);
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      email: "",
-      mobileNumber: "",
-      department: "",
-      designation: "",
+      name: '',
+      email: '',
+      mobileNumber: '',
+      department: '',
+      designation: '',
     },
 
     validationSchema: mentorValidationSchema,
@@ -36,10 +37,10 @@ const AddMentor = () => {
       try {
         setLoading(true);
 
-        const response = await fetch("/api/admin/creatementor", {
-          method: "POST",
+        const response = await fetch('/api/admin/creatementor', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify(values),
         });
@@ -47,18 +48,16 @@ const AddMentor = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to create mentor");
+          throw new Error(data.message || 'Failed to create mentor');
         }
 
-        console.log("Mentor created:", data);
-
-        alert("Mentor added successfully");
+        toast.success('Mentor added successfully!');
 
         resetForm();
       } catch (error) {
-        console.error("Add mentor error:", error);
+        console.error('Add mentor error:', error);
 
-        alert(error.message || "Something went wrong");
+        toast.error(error.message || 'Something went wrong');
       } finally {
         setLoading(false);
       }
@@ -68,7 +67,7 @@ const AddMentor = () => {
   const getError = (field) => {
     return formik.touched[field] && formik.errors[field]
       ? formik.errors[field]
-      : "";
+      : '';
   };
 
   return (
@@ -98,7 +97,7 @@ const AddMentor = () => {
                     placeholder="e.g. Dr. Sarah Jenkins"
                     formik={formik}
                     icon={<UserRound size={13} />}
-                    error={getError("name")}
+                    error={getError('name')}
                   />
                 </div>
                 <div className="w-full md:w-1/2">
@@ -110,7 +109,7 @@ const AddMentor = () => {
                     placeholder="sarah.jenkins@university.edu"
                     formik={formik}
                     icon={<Mail size={13} />}
-                    error={getError("email")}
+                    error={getError('email')}
                   />
                 </div>
               </div>
@@ -126,7 +125,7 @@ const AddMentor = () => {
                     placeholder="+1 (555) 000-0000"
                     formik={formik}
                     icon={<Phone size={13} />}
-                    error={getError("mobileNumber")}
+                    error={getError('mobileNumber')}
                   />
                 </div>
                 <div className="w-full md:w-1/2">
@@ -136,23 +135,23 @@ const AddMentor = () => {
                     required
                     value={formik.values.department}
                     onChange={(value) =>
-                      formik.setFieldValue("department", value)
+                      formik.setFieldValue('department', value)
                     }
-                    onBlur={() => formik.setFieldTouched("department", true)}
-                    error={getError("department")}
+                    onBlur={() => formik.setFieldTouched('department', true)}
+                    error={getError('department')}
                     icon={<Building2 size={13} />}
                     options={[
                       {
-                        value: "Information Technology",
-                        label: "Information Technology",
+                        value: 'Information Technology',
+                        label: 'Information Technology',
                       },
                       {
-                        value: "Management",
-                        label: "Management",
+                        value: 'Management',
+                        label: 'Management',
                       },
                       {
-                        value: "Engineering",
-                        label: "Engineering",
+                        value: 'Engineering',
+                        label: 'Engineering',
                       },
                     ]}
                   />
@@ -164,42 +163,48 @@ const AddMentor = () => {
                 name="designation"
                 required
                 value={formik.values.designation}
-                onChange={(value) => formik.setFieldValue("designation", value)}
-                onBlur={() => formik.setFieldTouched("designation", true)}
-                error={getError("designation")}
+                onChange={(value) => formik.setFieldValue('designation', value)}
+                onBlur={() => formik.setFieldTouched('designation', true)}
+                error={getError('designation')}
                 icon={<BriefcaseBusiness size={13} />}
                 options={[
                   {
-                    value: "ASSISTANT-PROFESSOR",
-                    label: "Assistant professor",
+                    value: 'ASSISTANT-PROFESSOR',
+                    label: 'Assistant professor',
                   },
                   {
-                    value: "HOD",
-                    label: "HOD",
+                    value: 'HOD',
+                    label: 'HOD',
                   },
                   {
-                    value: "DEAN",
-                    label: "Dean",
+                    value: 'DEAN',
+                    label: 'Dean',
                   },
                   {
-                    value: "DIRECTOR",
-                    label: "Director",
+                    value: 'DIRECTOR',
+                    label: 'Director',
                   },
                   {
-                    value: "Engineer",
-                    label: "Engineer",
+                    value: 'Engineer',
+                    label: 'Engineer',
                   },
                 ]}
               />
 
-              {/* Submit */}
               <div className="flex p-4 justify-end">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="rounded-lg bg-primary-orange px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex items-center justify-center gap-2 rounded-lg bg-primary-orange px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {loading ? "Adding..." : "Add Mentor"}
+                  {loading ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Adding...
+                    </>
+                  ) : (
+                    'Add Mentor'
+                  )}
                 </button>
               </div>
             </form>
