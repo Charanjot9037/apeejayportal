@@ -158,6 +158,16 @@ const ProjectSchema = new mongoose.Schema(
       enum: ["Pending Approval", "Approved", "Rejected", "Draft"],
       default: "Pending Approval",
     },
+      mentorComment: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    mentorReviewedAt: {
+      type: Date,
+      default: null,
+    },
 
     /* =====================================================
        STUDENT

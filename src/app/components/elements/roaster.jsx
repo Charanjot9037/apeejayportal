@@ -145,12 +145,12 @@ export default function Roster({
             >
               {name || '-'}
             </p>
-
+{/* 
             {(item.rollNo || item.id) && (
               <p className="text-xs text-slate-400">
                 {item.rollNo || item.id}
               </p>
-            )}
+            )} */}
           </div>
         </div>
       );

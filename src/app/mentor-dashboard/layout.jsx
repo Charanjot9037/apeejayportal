@@ -14,7 +14,8 @@ export default function MentorLayout({ children }) {
         sidebarData={mentorDashboardData}
       />
 
-      <main className="min-w-0 overflow-y-auto ml-62 flex-1">{children}</main>
-    </div>
+  <main className="flex-1 overflow-y-auto p-5">
+        {children}
+      </main>    </div>
   );
 }
