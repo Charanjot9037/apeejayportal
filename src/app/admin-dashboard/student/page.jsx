@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Users, GraduationCap } from 'lucide-react';
 import Roster from '@/app/components/elements/roaster';
+import StudentRosterSkeleton from '@/app/components/admin/skeleton/studentRosterSkeleton';
 
 import {
   studentColumns,
@@ -143,39 +144,25 @@ export default function Page() {
           </div>
         )}
 
-        <div className="relative rounded-2xl">
-          {loading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-md">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-primary-orange" />
-
-                <span className="text-sm font-medium text-slate-600">
-                  Loading students...
-                </span>
-              </div>
-            </div>
+        <div className="rounded-2xl">
+          {loading ? (
+            <StudentRosterSkeleton />
+          ) : (
+            <Roster
+              title="Student Roster"
+              data={students}
+              columns={studentColumns}
+              searchPlaceholder="Search students..."
+              defaultFilters={DEFAULT_FILTERS}
+              filterConfig={STUDENT_FILTERS}
+              showApplyButton={true}
+              onApplyFilters={handleApplyFilters}
+              className="mt-0 shadow-sm"
+              onRowClick={(student) => {
+                console.log('Selected student:', student);
+              }}
+            />
           )}
-
-          <Roster
-            title="Student Roster"
-            data={students}
-            columns={studentColumns}
-            searchPlaceholder="Search students..."
-
-            defaultFilters={DEFAULT_FILTERS}
-
-            filterConfig={STUDENT_FILTERS}
-
-            showApplyButton={true}
-
-            onApplyFilters={handleApplyFilters}
-
-            className="mt-0 shadow-sm"
-
-            onRowClick={(student) => {
-              console.log('Selected student:', student);
-            }}
-          />
         </div>
       </div>
     </div>

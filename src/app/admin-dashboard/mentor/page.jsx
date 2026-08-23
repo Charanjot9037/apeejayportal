@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Users, GraduationCap } from 'lucide-react';
 import Roster from '@/app/components/elements/roaster';
+import MentorRosterSkeleton from '@/app/components/admin/skeleton/studentRosterSkeleton';
 
 import {
   MENTOR_ROSTER_COLUMNS,
@@ -131,38 +132,24 @@ export default function Page() {
             </div>
           </div>
         )}
-
-        <div className="relative rounded-2xl">
-          {loading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-md">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-primary-orange" />
-
-                <span className="text-sm font-medium text-slate-600">
-                  Loading mentors...
-                </span>
-              </div>
-            </div>
+        <div className="rounded-2xl">
+          {loading ? (
+            <MentorRosterSkeleton />
+          ) : (
+            <Roster
+              title="Mentor Roster"
+              data={mentors}
+              columns={MENTOR_ROSTER_COLUMNS}
+              searchPlaceholder="Search mentors..."
+              filterConfig={MENTOR_FILTER_CONFIG}
+              showApplyButton={true}
+              onApplyFilters={handleApplyFilters}
+              className="mt-0 shadow-sm"
+              onRowClick={(mentor) => {
+                console.log('Selected mentor:', mentor);
+              }}
+            />
           )}
-
-          <Roster
-            title="Mentor Roster"
-            data={mentors}
-            columns={MENTOR_ROSTER_COLUMNS}
-            searchPlaceholder="Search mentors..."
-
-            filterConfig={MENTOR_FILTER_CONFIG}
-
-            showApplyButton={true}
-
-            onApplyFilters={handleApplyFilters}
-
-            className="mt-0 shadow-sm"
-
-            onRowClick={(mentor) => {
-              console.log('Selected mentor:', mentor);
-            }}
-          />
         </div>
       </div>
     </div>
