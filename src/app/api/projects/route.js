@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/projects";
 import { authenticateUser } from "@/lib/authentication";
-
+import User from "@/models/user";
+import Student from "@/models/student";
 export async function POST(request) {
   try {
     await connectDB();
@@ -18,6 +19,8 @@ export async function POST(request) {
         { status: auth.status },
       );
     }
+    const user = auth.user;
+    const userId = user._id;
 
     const body = await request.json();
 
@@ -30,14 +33,18 @@ export async function POST(request) {
       projectType,
       teamMembers,
       semester,
-      mentor,
-      studentId,
 
       projectImages,
       presentationFile,
       synopsisFile,
       reportFile,
     } = body;
+
+    const mentor1 = await User.findById(userId).select("mentorId");
+    const teamMember = await Student.findById(teamMembers).populate({
+      path: "userId",
+      select: "_id mentorId",
+    });
 
     if (!projectName || !description) {
       return NextResponse.json(
@@ -70,7 +77,8 @@ export async function POST(request) {
 
       semester,
 
-      mentor: mentor || null,
+      mentor: mentor1.mentorId || null,
+      mentor2: teamMember.userId.mentorId || null,
 
       projectImages: projectImages || [],
 
@@ -82,14 +90,14 @@ export async function POST(request) {
 
       status: "Pending Approval",
 
-      student: studentId || auth.user._id,
+      student: userId,
     });
 
     return NextResponse.json(
       {
         success: true,
         message: "Project submitted successfully.",
-        project,
+        // project,
       },
       { status: 201 },
     );

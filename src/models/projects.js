@@ -120,6 +120,11 @@ const ProjectSchema = new mongoose.Schema(
       ref: "Mentor",
       default: null,
     },
+    mentor2: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Mentor",
+      default: null,
+    },
 
     /* =====================================================
        PROJECT IMAGES
@@ -158,7 +163,7 @@ const ProjectSchema = new mongoose.Schema(
       enum: ["Pending Approval", "Approved", "Rejected", "Draft"],
       default: "Pending Approval",
     },
-      mentorComment: {
+    mentorComment: {
       type: String,
       trim: true,
       default: "",

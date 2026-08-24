@@ -42,16 +42,14 @@ export function useAddProjectForm({ mode = "create", project = null }) {
 
       semester: isEdit ? project?.semester || "" : "",
 
-mentor: isEdit
-  ? project?.mentor?._id || project?.mentor || ""
-  : "",
+      mentor: isEdit ? project?.mentor?._id || project?.mentor || "" : "",
       projectType: isEdit ? project?.projectType || "individual" : "individual",
 
       techStack:
         isEdit && Array.isArray(project?.techStack) ? project.techStack : [""],
 
-   teamMembers: isEdit
-  ? project?.teamMembers?._id || project?.teamMembers || ""
+      teamMembers: isEdit
+        ? project?.teamMembers?._id || project?.teamMembers || ""
         : "",
       /* =====================================================
          CLOUDINARY FILE OBJECTS
@@ -91,13 +89,6 @@ mentor: isEdit
 
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        const studentId = auth?.user?._id || auth?.user?.id;
-
-        if (!studentId) {
-          toast.error("Student information not found.");
-          return;
-        }
-
         /* =================================================
            PROJECT DATA
 
@@ -121,10 +112,6 @@ mentor: isEdit
 
           semester: values.semester,
 
-          mentor: values.mentor || null,
-
-          studentId,
-
           projectImages: values.projectImages || [],
 
           presentationFile: values.presentationFile || null,
@@ -140,14 +127,12 @@ mentor: isEdit
            API
         ================================================= */
 
-const projectId = project?._id || project?.id;
-if (isEdit && !projectId) {
-  toast.error("Project ID is missing.");
-  return;
-}
-const url = isEdit
-  ? `/api/projects/${projectId}`
-  : "/api/projects";
+        const projectId = project?._id || project?.id;
+        if (isEdit && !projectId) {
+          toast.error("Project ID is missing.");
+          return;
+        }
+        const url = isEdit ? `/api/projects/${projectId}` : "/api/projects";
         const method = isEdit ? "PUT" : "POST";
 
         console.log("PROJECT SAVE:", {
@@ -202,11 +187,11 @@ const url = isEdit
             : "Project submitted for approval successfully.",
         );
 
-        if (isEdit) {
-          router.push(`/student/projects/${project._id}`);
-        } else {
-          router.push("/student");
-        }
+        // if (isEdit) {
+        //   router.push(`/student/projects/${project._id}`);
+        // } else {
+        //   router.push("/student");
+        // }
       } catch (error) {
         console.error("PROJECT_SAVE_ERROR:", error);
 
@@ -247,12 +232,6 @@ const url = isEdit
      TEAM MEMBERS
   ======================================================= */
 
-
-
-
-
-
-
   /* =======================================================
      FILE ERRORS
   ======================================================= */
@@ -273,8 +252,6 @@ const url = isEdit
     addTechnology,
 
     removeTechnology,
-
-   
 
     getFileError,
   };
