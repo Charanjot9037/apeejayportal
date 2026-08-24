@@ -50,9 +50,9 @@ mentor: isEdit
       techStack:
         isEdit && Array.isArray(project?.techStack) ? project.techStack : [""],
 
-   teamMembers: isEdit
-  ? project?.teamMembers?._id || project?.teamMembers || ""
-        : "",
+  teamMembers: isEdit
+    ? project?.teamMembers?._id || project?.teamMembers || null
+    : null,
       /* =====================================================
          CLOUDINARY FILE OBJECTS
 
@@ -117,8 +117,10 @@ mentor: isEdit
 
           projectType: values.projectType,
 
-          teamMembers: values.projectType === "team" ? values.teamMembers : "",
-
+teamMembers:
+  values.projectType === "team"
+    ? values.teamMembers || null
+    : null,
           semester: values.semester,
 
           mentor: values.mentor || null,

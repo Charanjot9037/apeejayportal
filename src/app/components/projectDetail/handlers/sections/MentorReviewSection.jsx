@@ -32,6 +32,35 @@ export default function MentorReviewSection({ project, onUpdated }) {
     return result.project;
   };
 
+  const handleDeleteReview = async (reviewId) => {
+  try {
+    const response = await fetch(
+      `/api/projects/${project._id}/mentor-review`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reviewId,
+        }),
+      },
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to delete review.");
+    }
+
+    toast.success("Review deleted.");
+    onUpdated?.(result.project);
+  } catch (error) {
+    console.error("MENTOR_REVIEW_DELETE_ERROR:", error);
+    toast.error(error.message || "Failed to delete review.");
+  }
+};
+
   const handleStatusSave = async () => {
     try {
       setSavingStatus(true);
@@ -127,24 +156,38 @@ export default function MentorReviewSection({ project, onUpdated }) {
           <div className="space-y-2 border-t border-slate-100 pt-3">
             <p className="text-xs font-semibold text-slate-500">Review History</p>
             <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
-              {history.map((entry) => (
-                <div
-                  key={entry._id}
-                  className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs"
-                >
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>{formatDate(entry.reviewedAt)}</span>
-                    {entry.status && (
-                      <span className="rounded-full bg-slate-200 px-2 py-0.5 font-medium text-slate-600">
-                        {entry.status}
-                      </span>
-                    )}
-                  </div>
-                  {entry.comment && (
-                    <p className="mt-1 text-sm text-slate-600">{entry.comment}</p>
-                  )}
-                </div>
-              ))}
+       {history.map((entry) => (
+  <div
+    key={entry._id}
+    className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs"
+  >
+    <div className="flex items-center justify-between text-slate-400">
+      <span>{formatDate(entry.reviewedAt)}</span>
+
+      <div className="flex items-center gap-2">
+        {entry.status && (
+          <span className="rounded-full bg-slate-200 px-2 py-0.5 font-medium text-slate-600">
+            {entry.status}
+          </span>
+        )}
+
+        <button
+          type="button"
+          onClick={() => handleDeleteReview(entry._id)}
+          className="text-red-500 hover:text-red-700"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+
+    {entry.comment && (
+      <p className="mt-1 text-sm text-slate-600">
+        {entry.comment}
+      </p>
+    )}
+  </div>
+))}
             </div>
           </div>
         )}
