@@ -387,9 +387,11 @@ if (column.key === 'contact') {
                   placeholder,
                 } = filter;
                 
-const options = Array.isArray(filter.options)
-  ? filter.options
-  : [];
+const options = filter.dependsOn
+  ? filter.options?.[filters[filter.dependsOn]] || []
+  : Array.isArray(filter.options)
+    ? filter.options
+    : [];
                 
 
                 return (
