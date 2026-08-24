@@ -1,10 +1,24 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Student from "@/models/student";
+import { authenticateUser } from "@/lib/authentication";
 
 export async function POST(request) {
   try {
     await connectDB();
+
+    // Get logged-in user
+    const auth = await authenticateUser();
+
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        { status: 401 }
+      );
+    }
 
     const body = await request.json();
 
@@ -16,7 +30,7 @@ export async function POST(request) {
           success: false,
           message: "Department, program and academic batch are required.",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -35,9 +49,14 @@ export async function POST(request) {
         $regex: `^${academicBatch}$`,
         $options: "i",
       },
+
+      // Exclude logged-in student
+      userId: {
+        $ne: auth.user._id,
+      },
     };
 
-    // Add specialization only when it is provided
+    // Add specialization only when provided
     if (specialization) {
       query.specialization = {
         $regex: `^${specialization}$`,
@@ -46,7 +65,7 @@ export async function POST(request) {
     }
 
     const students = await Student.find(query).select(
-      "_id userId fullName rollNumber department program academicBatch specialization",
+      "_id userId fullName rollNumber department program academicBatch specialization"
     );
 
     return NextResponse.json(
@@ -54,7 +73,7 @@ export async function POST(request) {
         success: true,
         students,
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
     console.error("TEAM_STUDENTS_GET_ERROR:", error);
@@ -64,7 +83,7 @@ export async function POST(request) {
         success: false,
         message: error.message || "Failed to fetch students.",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -13,7 +13,6 @@ export async function PATCH(request, context) {
     await connectDB();
 
     const { id } = await context.params;
-
     const auth = await authenticateUser();
 
     if (!auth.success) {
@@ -32,7 +31,6 @@ export async function PATCH(request, context) {
       );
     }
 
-    // Confirm this mentor is actually assigned to this project
     const mentorProfile = await Mentor.findOne({ userId: auth.user._id });
 
     if (
@@ -63,15 +61,34 @@ export async function PATCH(request, context) {
       );
     }
 
-    if (status) {
-      project.status = status;
+    // comment, if provided, must be non-empty after trimming —
+    // otherwise we'd log empty history entries
+    if (comment !== undefined && comment.trim() === "") {
+      return NextResponse.json(
+        { success: false, message: "Comment cannot be empty." },
+        { status: 400 },
+      );
     }
 
-    if (comment !== undefined) {
-      project.mentorComment = comment;
-    }
+    const now = new Date();
 
-    project.mentorReviewedAt = new Date();
+    // build the history entry from whatever was actually sent
+    const reviewEntry = {
+      reviewedBy: mentorProfile._id,
+      reviewedAt: now,
+    };
+    if (status) reviewEntry.status = status;
+    if (comment !== undefined) reviewEntry.comment = comment.trim();
+
+if (!Array.isArray(project.mentorReviews)) {
+  project.mentorReviews = [];
+}
+
+project.mentorReviews.push(reviewEntry);
+    // keep the "current state" fields in sync
+    if (status) project.status = status;
+    if (comment !== undefined) project.mentorComment = comment.trim();
+    project.mentorReviewedAt = now;
 
     await project.save();
 
