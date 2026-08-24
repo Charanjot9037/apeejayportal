@@ -1,5 +1,11 @@
 import MentorManagement from "./MentorManagement";
 
-export default function Page() {
-  return <MentorManagement />;
-}
+const page = () => {
+  return (
+    <div>
+      <MentorManagement />
+    </div>
+  );
+};
+
+export default page;
