@@ -108,7 +108,7 @@ export default function MentorReviewSection({ project, onUpdated }) {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 focus:border-[#f2792a] focus:outline-none"
+              className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 focus:border-[rgb(242,121,42)] focus:outline-none"
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
@@ -120,7 +120,7 @@ export default function MentorReviewSection({ project, onUpdated }) {
               type="button"
               onClick={handleStatusSave}
               disabled={savingStatus || status === project.status}
-              className="bg-[#f2792a] text-white hover:bg-[#df681c] mt-3"
+              className="bg-[rgb(242,121,42)] text-white hover:bg-[#df681c] mt-3"
             >
               {savingStatus ? "Saving..." : "Update Status"}
             </Button>
@@ -137,14 +137,14 @@ export default function MentorReviewSection({ project, onUpdated }) {
             onChange={(e) => setComment(e.target.value)}
             rows={4}
             placeholder="Write feedback the student will see..."
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 focus:border-[#f2792a] focus:outline-none"
+            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 focus:border-[rgb(242,121,42)] focus:outline-none"
           />
           <Button
             type="button"
             onClick={handleCommentSave}
             disabled={savingComment}
             variant="outline"
-            className="w-full gap-2 border-[#f2792a] text-[#f2792a] hover:bg-[#f2792a]/10"
+            className="w-full gap-2 border-[rgb(242,121,42)] text-[rgb(242,121,42)] hover:bg-primary-orange/10"
           >
             <MessageSquarePlus className="h-4 w-4" />
             {savingComment ? "Submitting..." : "Submit Review"}
