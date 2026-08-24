@@ -64,20 +64,31 @@ export const MENTOR_STAT_CARDS = [
     description: 'Target: 95%',
   },
 ];
-
 export const MENTOR_STUDENT_COLUMNS = [
+  {
+    key: 'projectTitle',
+    label: 'Project Name',
+  },
   {
     key: 'name',
     label: 'Student Name',
   },
-  {
-    key: 'major',
-    label: 'Major',
+   {
+    key: 'program',
+    label: 'Program',
   },
   {
-    key: 'projectName',
-    label: 'Project Name',
+    key: 'department',
+    label: 'Department',
   },
+  {
+    key: 'semester',
+    label: 'Semester',
+  },
+{
+  key:'specialization',
+  label:'Specialization'
+},
   {
     key: 'status',
     label: 'Status',

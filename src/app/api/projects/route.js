@@ -80,7 +80,7 @@ export async function POST(request) {
 
       reportFile: reportFile || null,
 
-      status: "Pending Approval",
+      status: "Pending",
 
       student: studentId || auth.user._id,
     });
