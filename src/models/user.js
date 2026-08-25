@@ -23,8 +23,9 @@ const userSchema = new mongoose.Schema(
     mentorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
-      unique: true,
+      required: function () {
+        return this.role === "student";
+      },
     },
     role: {
       type: String,
