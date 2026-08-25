@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/db";
 import Project from "@/models/projects";
 import Mentor from "@/models/mentor";
 import { authenticateUser } from "@/lib/authentication";
+import { sendMentorFeedbackEmail,sendMentorStatusUpdateEmail } from "@/lib/sendEmail";
 
 const ALLOWED_STATUSES = ["Approved", "Rejected", "Pending Approval"];
 
@@ -22,7 +23,10 @@ export async function PATCH(request, context) {
       );
     }
 
-    const project = await Project.findById(id);
+    const project = await Project.findById(id).populate({
+  path: "student",
+  select: "name email",
+});
 
     if (!project) {
       return NextResponse.json(
@@ -92,6 +96,92 @@ project.mentorReviews.push(reviewEntry);
 
 await project.save();
 
+
+console.log("========================================");
+console.log("MENTOR REVIEW SAVED");
+console.log("Project ID:", project._id);
+console.log("Project Title:", project.title);
+console.log("Student Name:", project.student?.name);
+console.log("Student Email:", project.student?.email);
+console.log("Status:", status);
+console.log("Comment:", comment);
+console.log("========================================");
+
+// ========================================
+// STATUS EMAIL
+// ========================================
+
+if (status) {
+  console.log("STATUS EMAIL: Preparing to send...");
+  console.log("STATUS EMAIL: Recipient:", project.student?.email);
+  console.log("STATUS EMAIL: Status:", project.status);
+
+  if (!project.student?.email) {
+    console.error(
+      "STATUS EMAIL ERROR: Student email not found."
+    );
+  } else {
+    try {
+      await sendMentorStatusUpdateEmail({
+        email: project.student.email,
+        studentName: project.student.name,
+        projectTitle: project.title,
+        mentorName: project.mentor?.userId?.name || "Your Mentor",
+        status: project.status,
+      });
+
+      console.log(
+        "STATUS EMAIL SENT SUCCESSFULLY to:",
+        project.student.email
+
+      );
+      console.log(" mentor name : ",project.mentor?.userId?.name);
+    } catch (emailError) {
+      console.error(
+        "STATUS EMAIL FAILED:",
+        emailError
+      );
+    }
+  }
+}
+
+// ========================================
+// FEEDBACK EMAIL
+// ========================================
+
+if (comment?.trim()) {
+  console.log("FEEDBACK EMAIL: Preparing to send...");
+  console.log("FEEDBACK EMAIL: Recipient:", project.student?.email);
+  console.log("FEEDBACK EMAIL: Comment:", comment.trim());
+
+  if (!project.student?.email) {
+    console.error(
+      "FEEDBACK EMAIL ERROR: Student email not found."
+    );
+  } else {
+    try {
+      await sendMentorFeedbackEmail({
+        email: project.student.email,
+        studentName: project.student.name,
+        projectTitle: project.title,
+         mentorName: project.mentor?.userId?.name || "Your Mentor",
+        comment: comment.trim(),
+      });
+
+      console.log(
+        "FEEDBACK EMAIL SENT SUCCESSFULLY to:",
+        project.student.email
+      );
+    } catch (emailError) {
+      console.error(
+        "FEEDBACK EMAIL FAILED:",
+        emailError
+      );
+    }
+  }
+}
+
+
 const updatedProject = await Project.findById(id)
   .populate({
     path: "mentor",
@@ -145,7 +235,20 @@ export async function DELETE(request, context) {
       );
     }
 
-    const project = await Project.findById(id);
+    // const project = await Project.findById(id);
+    const project = await Project.findById(id)
+  .populate({
+    path: "student",
+    select: "name email",
+  })
+  .populate({
+    path: "mentor",
+    select: "userId",
+    populate: {
+      path: "userId",
+      select: "name email",
+    },
+  });
 
     if (!project) {
       return NextResponse.json(

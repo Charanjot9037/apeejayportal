@@ -7,7 +7,7 @@ import {
   MENTOR_STUDENT_COLUMNS,
   MENTOR_DASHBOARD_HEADER,
 } from "@/constants/mentorData";
-import { mapMentorProjectToRoster } from "@/mappers/mentors/mentorData";
+import { mapMentorProjectToRoster } from "@/mappers/mentor";
 
 export default function Mentor() {
   const router = useRouter();

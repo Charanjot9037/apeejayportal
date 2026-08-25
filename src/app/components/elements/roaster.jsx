@@ -168,7 +168,8 @@ export default function Roster({
     if (column.key === 'status') {
       const statusStyles = {
         Verified: 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100',
-        Pending: 'bg-amber-50 text-amber-600 ring-1 ring-amber-100',
+        'Pending Approval':
+    'bg-amber-50 text-amber-600 ring-1 ring-amber-100',
         'Changes Required':
           'bg-orange-50 text-orange-600 ring-1 ring-orange-100',
         Placed: 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100',
