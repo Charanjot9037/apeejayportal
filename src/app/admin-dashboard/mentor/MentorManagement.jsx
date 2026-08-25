@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Users, GraduationCap } from "lucide-react";
 import Roster from "@/app/components/elements/roaster";
+import MentorRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 
 import {
   MENTOR_ROSTER_COLUMNS,
@@ -46,6 +47,7 @@ export default function MentorManagement() {
       console.error("FETCH_MENTORS_ERROR:", error);
 
       setError(error.message || "Something went wrong");
+
       setMentors([]);
     } finally {
       setLoading(false);
@@ -71,7 +73,6 @@ export default function MentorManagement() {
   return (
     <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
         <div className="mb-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -90,7 +91,6 @@ export default function MentorManagement() {
               </p>
             </div>
 
-            {/* Total Mentors */}
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
                 <Users className="h-4 w-4 text-blue-600" />
@@ -109,7 +109,6 @@ export default function MentorManagement() {
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="mb-5 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
             <div className="flex flex-col items-center justify-center text-center">
@@ -133,34 +132,24 @@ export default function MentorManagement() {
             </div>
           </div>
         )}
-
-        {/* Roster */}
-        <div className="relative rounded-2xl">
-          {loading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-md">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-primary-orange" />
-
-                <span className="text-sm font-medium text-slate-600">
-                  Loading mentors...
-                </span>
-              </div>
-            </div>
+        <div className="rounded-2xl">
+          {loading ? (
+            <MentorRosterSkeleton />
+          ) : (
+            <Roster
+              title="Mentor Roster"
+              data={mentors}
+              columns={MENTOR_ROSTER_COLUMNS}
+              searchPlaceholder="Search mentors..."
+              filterConfig={MENTOR_FILTER_CONFIG}
+              showApplyButton={true}
+              onApplyFilters={handleApplyFilters}
+              className="mt-0 shadow-sm"
+              onRowClick={(mentor) => {
+                console.log("Selected mentor:", mentor);
+              }}
+            />
           )}
-
-          <Roster
-            title="Mentor Roster"
-            data={mentors}
-            columns={MENTOR_ROSTER_COLUMNS}
-            searchPlaceholder="Search mentors..."
-            filterConfig={MENTOR_FILTER_CONFIG}
-            showApplyButton={true}
-            onApplyFilters={handleApplyFilters}
-            className="mt-0 shadow-sm"
-            onRowClick={(mentor) => {
-              console.log("Selected mentor:", mentor);
-            }}
-          />
         </div>
       </div>
     </div>
