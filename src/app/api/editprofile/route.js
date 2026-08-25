@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import Student from "@/models/student";
-import { authenticateUser } from "@/lib/authentication";
+import { NextResponse } from 'next/server';
+import { connectDB } from '@/lib/db';
+import Student from '@/models/student';
+import { authenticateUser } from '@/lib/authentication';
 
 export async function PATCH(req) {
   try {
@@ -31,11 +31,11 @@ export async function PATCH(req) {
     // STUDENT ONLY
     // =========================
 
-    if (user.role !== "student") {
+    if (user.role !== 'student') {
       return NextResponse.json(
         {
           success: false,
-          message: "Access denied. Students only are allowed.",
+          message: 'Access denied. Students only are allowed.',
         },
         {
           status: 403,
@@ -43,13 +43,12 @@ export async function PATCH(req) {
       );
     }
 
-
     const userId = user._id;
     if (!userId) {
       return NextResponse.json(
         {
           success: false,
-          message: "User ID is required",
+          message: 'User ID is required',
         },
         {
           status: 400,
@@ -57,14 +56,13 @@ export async function PATCH(req) {
       );
     }
 
-
     const { section, data } = await req.json();
 
     if (!section || !data) {
       return NextResponse.json(
         {
           success: false,
-          message: "Section and data are required",
+          message: 'Section and data are required',
         },
         {
           status: 400,
@@ -79,12 +77,12 @@ export async function PATCH(req) {
     // =========================
 
     switch (section) {
-      case "profile":
+      case 'profile':
         updateData = {
           profileImage: data.profileImage,
         };
         break;
-      case "personal":
+      case 'personal':
         updateData = {
           fullName: data.fullName,
           phone: data.phone,
@@ -97,7 +95,7 @@ export async function PATCH(req) {
       // SKILLS & INTERESTS
       // =========================
 
-      case "skills":
+      case 'skills':
         updateData = {
           skills: data.technicalSkills || [],
           interests: data.interests || [],
@@ -108,7 +106,7 @@ export async function PATCH(req) {
       // ACADEMIC
       // =========================
 
-      case "academic": {
+      case 'academic': {
         const programDuration = {
           MBA: 2,
           MCA: 2,
@@ -124,7 +122,7 @@ export async function PATCH(req) {
           return NextResponse.json(
             {
               success: false,
-              message: "Invalid program",
+              message: 'Invalid program',
             },
             {
               status: 400,
@@ -136,7 +134,7 @@ export async function PATCH(req) {
           return NextResponse.json(
             {
               success: false,
-              message: "Academic batch is required",
+              message: 'Academic batch is required',
             },
             {
               status: 400,
@@ -149,8 +147,7 @@ export async function PATCH(req) {
         updateData = {
           department: data.department,
           program: data.program,
-          specialization: data.specialization || "",
-          currentSemester: data.currentSemester,
+          specialization: data.specialization || '',
           rollNumber: data.rollNumber,
           academicBatch: data.academicBatch,
           lastYear: String(lastYear),
@@ -163,11 +160,11 @@ export async function PATCH(req) {
       // ONLINE PROFILES
       // =========================
 
-      case "onlineProfiles":
+      case 'onlineProfiles':
         updateData = {
-          linkedin: data.linkedin || "",
-          github: data.github || "",
-          portfolio: data.portfolio || "",
+          linkedin: data.linkedin || '',
+          github: data.github || '',
+          portfolio: data.portfolio || '',
         };
         break;
 
@@ -175,10 +172,10 @@ export async function PATCH(req) {
       // RESUME
       // =========================
 
-      case "resume":
+      case 'resume':
         updateData = {
-          resume: data.resume || "",
-          resumeName: data.resumeName || "",
+          resume: data.resume || '',
+          resumeName: data.resumeName || '',
         };
         break;
 
@@ -186,7 +183,7 @@ export async function PATCH(req) {
         return NextResponse.json(
           {
             success: false,
-            message: "Invalid profile section",
+            message: 'Invalid profile section',
           },
           {
             status: 400,
@@ -211,7 +208,7 @@ export async function PATCH(req) {
       return NextResponse.json(
         {
           success: false,
-          message: "Student profile not found",
+          message: 'Student profile not found',
         },
         {
           status: 404,
@@ -230,12 +227,12 @@ export async function PATCH(req) {
       },
     );
   } catch (error) {
-    console.error("Edit student error:", error);
+    console.error('Edit student error:', error);
 
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to update student profile",
+        message: error.message || 'Failed to update student profile',
       },
       {
         status: 500,

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import { authenticateUser } from "@/lib/authentication";
-import Student from "@/models/student";
+import { NextResponse } from 'next/server';
+import { connectDB } from '@/lib/db';
+import { authenticateUser } from '@/lib/authentication';
+import Student from '@/models/student';
 export async function POST(request) {
   try {
     await connectDB();
@@ -25,11 +25,11 @@ export async function POST(request) {
     }
     const user = auth.user;
     const userId = user._id;
-    if (user.role !== "student") {
+    if (user.role !== 'student') {
       return NextResponse.json(
         {
           success: false,
-          message: "Access denied. Students only are allowed.",
+          message: 'Access denied. Students only are allowed.',
         },
         {
           status: 403,
@@ -41,7 +41,7 @@ export async function POST(request) {
       return NextResponse.json(
         {
           success: false,
-          message: "User ID is required",
+          message: 'User ID is required',
         },
         { status: 400 },
       );
@@ -54,7 +54,7 @@ export async function POST(request) {
       return NextResponse.json(
         {
           success: false,
-          message: "Student profile already exists",
+          message: 'Student profile already exists',
         },
         { status: 409 },
       );
@@ -66,24 +66,24 @@ export async function POST(request) {
       phone,
       gender,
       address,
-      profileImage: profileImage || "",
+      profileImage: profileImage || '',
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Student profile created successfully",
-        studentId:student._id,
+        message: 'Student profile created successfully',
+        studentId: student._id,
       },
       { status: 201 },
     );
   } catch (error) {
-    console.error("Create student error:", error);
+    console.error('Create student error:', error);
 
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to create student profile",
+        message: 'Failed to create student profile',
       },
       { status: 500 },
     );
@@ -112,7 +112,7 @@ export async function PATCH(req) {
       return NextResponse.json(
         {
           success: false,
-          message: "User ID is required",
+          message: 'User ID is required',
         },
         { status: 400 },
       );
@@ -124,7 +124,7 @@ export async function PATCH(req) {
       return NextResponse.json(
         {
           success: false,
-          message: "Section and data are required",
+          message: 'Section and data are required',
         },
         { status: 400 },
       );
@@ -133,23 +133,23 @@ export async function PATCH(req) {
     let updateData = {};
 
     switch (section) {
-      case "personal":
+      case 'personal':
         updateData = {
           fullName: data.fullName,
           phone: data.phone,
           gender: data.gender,
           address: data.address,
-          profileImage: data.profileImage || "",
+          profileImage: data.profileImage || '',
         };
         break;
-      case "skills":
+      case 'skills':
         updateData = {
           skills: data.skills,
           interests: data.interests,
         };
         break;
 
-      case "academic": {
+      case 'academic': {
         const programDuration = {
           MBA: 2,
           MCA: 2,
@@ -165,7 +165,7 @@ export async function PATCH(req) {
           return NextResponse.json(
             {
               success: false,
-              message: "Invalid program",
+              message: 'Invalid program',
             },
             { status: 400 },
           );
@@ -175,7 +175,7 @@ export async function PATCH(req) {
           return NextResponse.json(
             {
               success: false,
-              message: "Academic batch is required",
+              message: 'Academic batch is required',
             },
             { status: 400 },
           );
@@ -187,7 +187,6 @@ export async function PATCH(req) {
           department: data.department,
           program: data.program,
           specialization: data.specialization,
-          currentSemester: data.currentSemester,
           rollNumber: data.rollNumber,
           academicBatch: data.academicBatch,
           lastYear: String(lastYear),
@@ -200,7 +199,7 @@ export async function PATCH(req) {
       // ONLINE PROFILES
       // =========================
 
-      case "onlineProfiles":
+      case 'onlineProfiles':
         updateData = {
           linkedin: data.linkedin,
           github: data.github,
@@ -214,7 +213,7 @@ export async function PATCH(req) {
         return NextResponse.json(
           {
             success: false,
-            message: "Invalid profile section",
+            message: 'Invalid profile section',
           },
           { status: 400 },
         );
@@ -241,7 +240,7 @@ export async function PATCH(req) {
       return NextResponse.json(
         {
           success: false,
-          message: "Student profile not found",
+          message: 'Student profile not found',
         },
         { status: 404 },
       );
@@ -260,12 +259,12 @@ export async function PATCH(req) {
       { status: 200 },
     );
   } catch (error) {
-    console.error("Edit student error:", error);
+    console.error('Edit student error:', error);
 
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to update student profile",
+        message: error.message || 'Failed to update student profile',
       },
       { status: 500 },
     );
