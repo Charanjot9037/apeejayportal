@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Student from "@/models/student";
 import { authenticateUser } from "@/lib/authentication";
-
 export async function POST(request) {
   try {
     await connectDB();
@@ -16,7 +15,7 @@ export async function POST(request) {
           success: false,
           message: auth.message,
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -30,10 +29,24 @@ export async function POST(request) {
           success: false,
           message: "Department, program and academic batch are required.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        {
+          status: auth.status,
+        },
+      );
+    }
+
+    const user = auth.user;
+    const userId = user._id;
     const query = {
       department: {
         $regex: `^${department}$`,
@@ -49,10 +62,8 @@ export async function POST(request) {
         $regex: `^${academicBatch}$`,
         $options: "i",
       },
-
-      // Exclude logged-in student
       userId: {
-        $ne: auth.user._id,
+        $ne: userId,
       },
     };
 
@@ -63,17 +74,44 @@ export async function POST(request) {
         $options: "i",
       };
     }
+    const students = await Student.find(query)
+      .select(
+        "_id userId fullName rollNumber department program academicBatch specialization",
+      )
+      .populate({
+        path: "userId",
+        select: "mentorId",
+        populate: {
+          path: "mentorId",
+          select: "_id name email",
+        },
+      });
+    const formattedStudents = students.map((student) => ({
+      _id: student._id,
+      userId: student.userId?._id,
+      fullName: student.fullName,
+      rollNumber: student.rollNumber,
+      department: student.department,
+      program: student.program,
+      academicBatch: student.academicBatch,
+      specialization: student.specialization,
 
-    const students = await Student.find(query).select(
-      "_id userId fullName rollNumber department program academicBatch specialization"
-    );
+      mentor: student.userId?.mentorId
+        ? {
+            _id: student.userId.mentorId._id,
+            name: student.userId.mentorId.name,
+            email: student.userId.mentorId.email,
+          }
+        : null,
+    }));
+
 
     return NextResponse.json(
       {
         success: true,
-        students,
+        formattedStudents,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("TEAM_STUDENTS_GET_ERROR:", error);
@@ -83,7 +121,7 @@ export async function POST(request) {
         success: false,
         message: error.message || "Failed to fetch students.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

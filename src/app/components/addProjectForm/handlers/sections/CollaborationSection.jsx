@@ -14,28 +14,17 @@ import { use, useEffect, useState } from "react";
    COLLABORATION SECTION
 ========================================================= */
 
-export default function CollaborationSection({
-  formik,
-
-}) {
+export default function CollaborationSection({ formik }) {
   const [mentors, setMentors] = useState();
   const [loading, setMentorLoading] = useState(false);
   const department = useSelector((state) => state.student.department);
   useEffect(() => {
-    if (!department) return;
-
-    const fetchMentors = async () => {
+    const fetchMentor = async () => {
       try {
         setMentorLoading(true);
 
-        const response = await fetch("/api/mentors", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            department,
-          }),
+        const response = await fetch("/api/student/my-mentor", {
+          method: "GET",
         });
 
         const data = await response.json();
@@ -44,21 +33,19 @@ export default function CollaborationSection({
           throw new Error(data.message);
         }
 
-        setMentors(data.mentors);
+        // API returns a single mentor
+        setMentors(data.mentor ? data.mentor?.name : " ");
       } catch (error) {
-        console.error("Failed to fetch mentors:", error);
+        console.error("Failed to fetch mentor:", error);
         setMentors([]);
       } finally {
         setMentorLoading(false);
       }
     };
 
-    fetchMentors();
-  }, [department]);
+    fetchMentor();
+  }, []);
   console.log("mentors", mentors);
-
-
-
 
   return (
     <section className="mt-6">
@@ -117,12 +104,7 @@ export default function CollaborationSection({
           </div>
 
           <div className="space-y-4">
-              <TeamMemberCard
-                
-                formik={formik}
-        
-              />
-           
+            <TeamMemberCard formik={formik} />
           </div>
         </div>
       )}
@@ -172,40 +154,17 @@ export default function CollaborationSection({
 
         <div>
           <label className="mb-1.5 block text-xs font-medium text-slate-700">
-            Assigne Mentor <span className="text-slate-400"></span>
+            Assigned Mentor
           </label>
 
-          <Select
-            value={formik.values.mentor}
-            onValueChange={(value) => {
-              formik.setFieldValue("mentor", value);
-            }}
-          >
-            <SelectTrigger className="h-10 bg-slate-50 text-sm">
-              <SelectValue placeholder="Select a faculty mentor">
-                {mentors?.find((mentor) => mentor._id === formik.values.mentor)
-                  ?.userId?.name || "Select a faculty mentor"}
-              </SelectValue>
-            </SelectTrigger>
-
-            <SelectContent>
-              {loading ? (
-                <SelectItem value="loading" disabled>
-                  Loading mentors...
-                </SelectItem>
-              ) : mentors?.length === 0 ? (
-                <SelectItem value="no-mentor" disabled>
-                  No mentors available
-                </SelectItem>
-              ) : (
-                mentors?.map((mentor) => (
-                  <SelectItem key={mentor._id} value={mentor._id}>
-                    {mentor.userId?.name}
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
+          <input
+            type="text"
+            value={
+              loading ? "Loading mentor..." : mentors || "No mentor assigned"
+            }
+            readOnly
+            className="h-10 w-full rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 outline-none"
+          />
         </div>
       </div>
     </section>

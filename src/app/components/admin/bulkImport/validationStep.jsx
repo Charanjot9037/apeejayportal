@@ -55,6 +55,8 @@ export default function ValidationStep({
               <th className="px-4 py-3">#</th>
               <th className="px-4 py-3">Student Name</th>
               <th className="px-4 py-3">Email</th>
+              <th className="px-4 py-3">Guide Name</th>
+              <th className="px-4 py-3">Guide Email</th>
               <th className="px-4 py-3">Validation</th>
             </tr>
           </thead>
@@ -69,12 +71,12 @@ export default function ValidationStep({
                     type="text"
                     value={student.name}
                     onChange={(event) =>
-                      handleStudentChange(index, 'name', event.target.value)
+                      handleStudentChange(index, "name", event.target.value)
                     }
                     className={`w-full rounded-md border px-3 py-2 outline-none ${
-                      student.errors.some((error) => error.includes('Name'))
-                        ? 'border-red-400'
-                        : 'border-slate-300'
+                      student.errors.some((error) => error.includes("Name"))
+                        ? "border-red-400"
+                        : "border-slate-300"
                     }`}
                   />
                 </td>
@@ -84,19 +86,56 @@ export default function ValidationStep({
                     type="email"
                     value={student.email}
                     onChange={(event) =>
-                      handleStudentChange(index, 'email', event.target.value)
+                      handleStudentChange(index, "email", event.target.value)
                     }
                     className={`w-full rounded-md border px-3 py-2 outline-none ${
                       student.errors.some(
                         (error) =>
-                          error.includes('email') || error.includes('Email'),
+                          error.includes("email") || error.includes("Email"),
                       )
-                        ? 'border-red-400'
-                        : 'border-slate-300'
+                        ? "border-red-400"
+                        : "border-slate-300"
                     }`}
                   />
                 </td>
 
+                <td className="px-4 py-3">
+                  <input
+                    type="text"
+                    value={student.guidename}
+                    onChange={(event) =>
+                      handleStudentChange(
+                        index,
+                        "guidename",
+                        event.target.value,
+                      )
+                    }
+                    className={`w-full rounded-md border px-3 py-2 outline-none ${
+                      student.errors.some((error) =>
+                        error.includes("GuideName"),
+                      )
+                        ? "border-red-400"
+                        : "border-slate-300"
+                    }`}
+                  />
+                </td>
+                <td className="px-4 py-3">
+                  <input
+                    type="email"
+                    value={student.guideemail}
+                    onChange={(event) =>
+                      handleStudentChange(index, "guideemail", event.target.value)
+                    }
+                    className={`w-full rounded-md border px-3 py-2 outline-none ${
+                      student.errors.some(
+                        (error) =>
+                          error.includes("guideemail") || error.includes("GuideEmail"),
+                      )
+                        ? "border-red-400"
+                        : "border-slate-300"
+                    }`}
+                  />
+                </td>
                 <td className="px-4 py-3">
                   {student.isValid ? (
                     <span className="font-medium text-green-600">✓ Valid</span>
@@ -105,7 +144,7 @@ export default function ValidationStep({
                       <span className="font-medium text-red-600">✗ Error</span>
 
                       <div className="mt-1 text-xs text-red-500">
-                        {student.errors.join(', ')}
+                        {student.errors.join(", ")}
                       </div>
                     </div>
                   )}

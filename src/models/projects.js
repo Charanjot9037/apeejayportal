@@ -138,7 +138,12 @@ const ProjectSchema = new mongoose.Schema(
     },
     mentor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Mentor",
+      ref: "User",
+      default: null,
+    },
+    mentor2: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       default: null,
     },
 
@@ -179,7 +184,7 @@ const ProjectSchema = new mongoose.Schema(
       enum: ["Pending Approval", "Approved", "Rejected", "Draft"],
       default: "Pending Approval",
     },
-      mentorComment: {
+    mentorComment: {
       type: String,
       trim: true,
       default: "",

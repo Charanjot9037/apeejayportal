@@ -1,44 +1,46 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
-import * as XLSX from 'xlsx';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
+import * as XLSX from "xlsx";
+import { toast } from "sonner";
 import {
   ImportSteps,
   UploadStep,
   ValidationStep,
   PreviewStep,
-} from './bulkImport/index';
+} from "./bulkImport/index";
 
-import { studentValidationSchema } from '@/validations/admin/studentValidationSchema';
+import { studentValidationSchema } from "@/validations/admin/studentValidationSchema";
 
 const validationSchema = Yup.object({
   file: Yup.mixed()
-    .required('Please select a file')
-    .test('fileType', 'Only CSV or XLSX files are allowed', (value) => {
+    .required("Please select a file")
+    .test("fileType", "Only CSV or XLSX files are allowed", (value) => {
       if (!value) return false;
 
       const fileName = value.name?.toLowerCase();
 
-      return fileName.endsWith('.csv') || fileName.endsWith('.xlsx');
+      return fileName.endsWith(".csv") || fileName.endsWith(".xlsx");
     }),
 });
 
 const downloadTemplate = () => {
-  const csvContent = 'name,email\n' + 'xyz,xyz@example.com\n';
+  const csvContent =
+    "name,email,guidename,guideemail\n" +
+    "xyz,xyz@example.com,xyz,xyz@example.com";
 
   const blob = new Blob([csvContent], {
-    type: 'text/csv;charset=utf-8;',
+    type: "text/csv;charset=utf-8;",
   });
 
   const url = URL.createObjectURL(blob);
 
-  const link = document.createElement('a');
+  const link = document.createElement("a");
 
   link.href = url;
-  link.download = 'student-import-template.csv';
+  link.download = "student-import-template.csv";
 
   document.body.appendChild(link);
 
@@ -54,7 +56,7 @@ export default function BulkImport() {
   const [isUploading, setIsUploading] = useState(false);
   const [validatedStudents, setValidatedStudents] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [fileName, setFileName] = useState('');
+  const [fileName, setFileName] = useState("");
 
   const handleFileParse = (file) => {
     if (!file) return;
@@ -68,7 +70,7 @@ export default function BulkImport() {
         const data = event.target.result;
 
         const workbook = XLSX.read(data, {
-          type: 'array',
+          type: "array",
         });
 
         if (!workbook.SheetNames.length) {
@@ -81,18 +83,18 @@ export default function BulkImport() {
         const worksheet = workbook.Sheets[firstSheetName];
 
         const rows = XLSX.utils.sheet_to_json(worksheet);
-
+        console.log("Excel rows:", rows);
         const validatedRows = studentValidationSchema(rows);
 
         setValidatedStudents(validatedRows);
-
+        console.log(validatedRows);
         setStep(2);
       } catch (error) {
-        console.error('Error reading file:', error);
+        console.error("Error reading file:", error);
 
         setValidatedStudents([]);
 
-        toast.error('Unable to read the selected file.');
+        toast.error("Unable to read the selected file.");
       }
     };
 
@@ -111,6 +113,8 @@ export default function BulkImport() {
       updatedStudents.map((student) => ({
         name: student.name,
         email: student.email,
+        guidename: student.guidename,
+        guideemail: student.guideemail,
       })),
     );
 
@@ -124,10 +128,12 @@ export default function BulkImport() {
         .map((student) => ({
           name: student.name,
           email: student.email,
+          guidename: student.guidename,
+          guideemail: student.guideemail,
         }));
 
       if (validStudents.length === 0) {
-        toast.error('No valid students to import.');
+        toast.error("No valid students to import.");
         return;
       }
 
@@ -137,14 +143,14 @@ export default function BulkImport() {
 
       let totalImported = 0;
       let totalAlreadyExists = 0;
-
+      console.log("students", validStudents);
       for (let i = 0; i < validStudents.length; i += BATCH_SIZE) {
         const batch = validStudents.slice(i, i + BATCH_SIZE);
 
-        const response = await fetch('/api/admin/bulkImport', {
-          method: 'POST',
+        const response = await fetch("/api/admin/bulkImport", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             students: batch,
@@ -154,7 +160,7 @@ export default function BulkImport() {
         const data = await response.json();
 
         if (!response.ok) {
-          toast.error(data.message || 'Failed to import students.');
+          toast.error(data.message || "Failed to import students.");
           return;
         }
 
@@ -167,9 +173,9 @@ export default function BulkImport() {
         `Import successful! Imported: ${totalImported}, Already Exists: ${totalAlreadyExists}`,
       );
     } catch (error) {
-      console.error('Bulk import error:', error);
+      console.error("Bulk import error:", error);
 
-      toast.error('Something went wrong while importing students.');
+      toast.error("Something went wrong while importing students.");
     } finally {
       setIsUploading(false);
     }
