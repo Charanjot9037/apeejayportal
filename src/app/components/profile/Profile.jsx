@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import ProfileHeader from "../profile/ProfileHeader";
-import PersonalInformation from "./ProfileInformation";
-import OnlineProfiles from "./OnlineProfile";
-import ResumeDocuments from "./ResumeDocuments";
-import SkillsAndInterests from "./SkillInterest";
-import AcademicInformation from "./AcadamicInformation";
+import ProfileHeader from '../profile/ProfileHeader';
+import PersonalInformation from './ProfileInformation';
+import OnlineProfiles from './OnlineProfile';
+import ResumeDocuments from './ResumeDocuments';
+import SkillsAndInterests from './SkillInterest';
+import AcademicInformation from './AcadamicInformation';
 
-import { mapStudentToProfile } from "@/lib/mapper";
+import { mapStudentToProfile } from '@/lib/mapper';
 
 export default function Profile() {
   const [imageLoading, setImageLoading] = useState(false);
@@ -19,24 +19,24 @@ export default function Profile() {
   useEffect(() => {
     const getStudentProfile = async () => {
       try {
-        const response = await fetch("/api/student/profile", {
-          method: "GET",
-          credentials: "include",
+        const response = await fetch('/api/student/profile', {
+          method: 'GET',
+          credentials: 'include',
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch student profile");
+          throw new Error(data.message || 'Failed to fetch student profile');
         }
 
         const mappedData = mapStudentToProfile(data.data);
 
-        console.log("Student profile:", mappedData);
+        console.log('Student profile:', mappedData);
 
         setStudentData(mappedData);
       } catch (error) {
-        console.error("Failed to load student profile:", error);
+        console.error('Failed to load student profile:', error);
       } finally {
         setLoading(false);
       }
@@ -47,15 +47,15 @@ export default function Profile() {
 
   const handlePersonalSave = async (data) => {
     try {
-      alert("going to update");
-      const response = await fetch("/api/editprofile", {
-        method: "PATCH",
+      alert('going to update');
+      const response = await fetch('/api/editprofile', {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify({
-          section: "personal",
+          section: 'personal',
           data,
         }),
       });
@@ -64,11 +64,11 @@ export default function Profile() {
 
       if (!response.ok) {
         throw new Error(
-          result.message || "Failed to update personal information",
+          result.message || 'Failed to update personal information',
         );
       }
-      alert("updated");
-      console.log("Personal updated:", result.profile);
+      alert('updated');
+      console.log('Personal updated:', result.profile);
 
       setStudentData((prev) => ({
         ...prev,
@@ -85,20 +85,20 @@ export default function Profile() {
 
       return result;
     } catch (error) {
-      console.error("Personal update error:", error);
+      console.error('Personal update error:', error);
       throw error;
     }
   };
 
   const handleSkillsSave = async (data) => {
     try {
-      const response = await fetch("/api/editprofile", {
-        method: "PATCH",
+      const response = await fetch('/api/editprofile', {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          section: "skills",
+          section: 'skills',
           data,
         }),
       });
@@ -106,10 +106,10 @@ export default function Profile() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to update skills");
+        throw new Error(result.message || 'Failed to update skills');
       }
 
-      console.log("Skills updated:", result.profile);
+      console.log('Skills updated:', result.profile);
 
       setStudentData((prev) => ({
         ...prev,
@@ -121,7 +121,7 @@ export default function Profile() {
 
       return result;
     } catch (error) {
-      console.error("Skills update error:", error);
+      console.error('Skills update error:', error);
       throw error;
     }
   };
@@ -132,13 +132,13 @@ export default function Profile() {
 
   const handleAcademicSave = async (data) => {
     try {
-      const response = await fetch("/api/editprofile", {
-        method: "PATCH",
+      const response = await fetch('/api/editprofile', {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          section: "academic",
+          section: 'academic',
           data,
         }),
       });
@@ -147,7 +147,7 @@ export default function Profile() {
 
       if (!response.ok) {
         throw new Error(
-          result.message || "Failed to update academic information",
+          result.message || 'Failed to update academic information',
         );
       }
 
@@ -157,7 +157,7 @@ export default function Profile() {
 
       return result;
     } catch (error) {
-      console.error("Academic update error:", error);
+      console.error('Academic update error:', error);
       throw error;
     }
   };
@@ -168,14 +168,14 @@ export default function Profile() {
 
   const handleOnlineProfilesSave = async (data) => {
     try {
-      const response = await fetch("/api/editprofile", {
-        method: "PATCH",
+      const response = await fetch('/api/editprofile', {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify({
-          section: "onlineProfiles",
+          section: 'onlineProfiles',
           data,
         }),
       });
@@ -183,10 +183,10 @@ export default function Profile() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to update online profiles");
+        throw new Error(result.message || 'Failed to update online profiles');
       }
 
-      console.log("Online profiles updated:", result.profile);
+      console.log('Online profiles updated:', result.profile);
 
       setStudentData((prev) => ({
         ...prev,
@@ -198,7 +198,7 @@ export default function Profile() {
 
       return result;
     } catch (error) {
-      console.error("Online profiles update error:", error);
+      console.error('Online profiles update error:', error);
 
       throw error;
     }
@@ -210,14 +210,14 @@ export default function Profile() {
 
   const handleResumeSave = async (data) => {
     try {
-      const response = await fetch("/api/editprofile", {
-        method: "PATCH",
+      const response = await fetch('/api/editprofile', {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify({
-          section: "resume",
+          section: 'resume',
           data,
         }),
       });
@@ -225,10 +225,10 @@ export default function Profile() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to update resume");
+        throw new Error(result.message || 'Failed to update resume');
       }
 
-      console.log("Resume updated:", result.profile);
+      console.log('Resume updated:', result.profile);
 
       setStudentData((prev) => ({
         ...prev,
@@ -240,7 +240,7 @@ export default function Profile() {
 
       return result;
     } catch (error) {
-      console.error("Resume update error:", error);
+      console.error('Resume update error:', error);
       throw error;
     }
   };
@@ -250,27 +250,27 @@ export default function Profile() {
       setImageLoading(true);
       const formData = new FormData();
 
-      formData.append("file", file);
+      formData.append('file', file);
 
-      const uploadResponse = await fetch("/api/upload", {
-        method: "POST",
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
         body: formData,
       });
 
       const uploadData = await uploadResponse.json();
 
       if (!uploadResponse.ok) {
-        throw new Error(uploadData.message || "Image upload failed");
+        throw new Error(uploadData.message || 'Image upload failed');
       }
 
-      console.log("Uploaded image:", uploadData.url);
-      const response = await fetch("/api/editprofile", {
-        method: "PATCH",
+      console.log('Uploaded image:', uploadData.url);
+      const response = await fetch('/api/editprofile', {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          section: "profile",
+          section: 'profile',
           data: {
             profileImage: uploadData.url,
           },
@@ -280,7 +280,7 @@ export default function Profile() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to update profile image");
+        throw new Error(result.message || 'Failed to update profile image');
       }
 
       setStudentData((prev) => ({
@@ -292,9 +292,9 @@ export default function Profile() {
         },
       }));
 
-      console.log("Profile image saved:", result.profile);
+      console.log('Profile image saved:', result.profile);
     } catch (error) {
-      console.error("Profile image update failed:", error);
+      console.error('Profile image update failed:', error);
     } finally {
       setImageLoading(false);
     }

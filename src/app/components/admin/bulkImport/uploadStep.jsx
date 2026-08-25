@@ -17,7 +17,6 @@ export default function UploadStep({
         Upload a CSV or Excel file containing student name and email.
       </p>
 
-      {/* Required format */}
       <div>
         <div className="mt-2 rounded-lg bg-slate-50 p-4">
           <p className="text-sm font-semibold text-slate-700">
