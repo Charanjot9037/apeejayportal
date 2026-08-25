@@ -17,7 +17,7 @@ export default function MentorSection({ project }) {
         self.findIndex((m) => m._id?.toString() === mentor._id?.toString()),
     );
 
-  console.log(mentors);
+ 
   return (
     <SideCard title="Assigned Mentor">
       <div className="space-y-3">
