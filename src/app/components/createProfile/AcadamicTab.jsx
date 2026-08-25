@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { GraduationCap } from "lucide-react";
+import { GraduationCap } from 'lucide-react';
 
-import InputField from "../elements/InputField";
-import YearField from "../elements/Calendar";
-import SelectField from "../elements/SelectFiled";
+import InputField from '../elements/InputField';
+import YearField from '../elements/Calendar';
+import SelectField from '../elements/SelectFiled';
 export default function AcademicInformationTab({
   formik,
   getError,
@@ -14,100 +14,100 @@ export default function AcademicInformationTab({
   const specializationOptions = {
     ENGINEERING: [
       {
-        value: "CSE",
-        label: "Computer Science & Engineering",
+        value: 'CSE',
+        label: 'Computer Science & Engineering',
       },
       {
-        value: "ECE",
-        label: "Electronics & Communication Engineering",
+        value: 'ECE',
+        label: 'Electronics & Communication Engineering',
       },
       {
-        value: "ME",
-        label: "Mechanical Engineering",
+        value: 'ME',
+        label: 'Mechanical Engineering',
       },
       {
-        value: "CIVIL",
-        label: "Civil Engineering",
+        value: 'CIVIL',
+        label: 'Civil Engineering',
       },
       {
-        value: "EEE",
-        label: "Electrical & Electronics Engineering",
+        value: 'EEE',
+        label: 'Electrical & Electronics Engineering',
       },
     ],
 
     MANAGEMENT: [
       {
-        value: "FINANCE",
-        label: "Finance",
+        value: 'FINANCE',
+        label: 'Finance',
       },
       {
-        value: "MARKETING",
-        label: "Marketing",
+        value: 'MARKETING',
+        label: 'Marketing',
       },
       {
-        value: "HR",
-        label: "Human Resource Management",
+        value: 'HR',
+        label: 'Human Resource Management',
       },
       {
-        value: "BUSINESS_ANALYTICS",
-        label: "Business Analytics",
+        value: 'BUSINESS_ANALYTICS',
+        label: 'Business Analytics',
       },
     ],
 
     IT: [
       {
-        value: "SOFTWARE_DEVELOPMENT",
-        label: "Software Development",
+        value: 'SOFTWARE_DEVELOPMENT',
+        label: 'Software Development',
       },
       {
-        value: "DATA_SCIENCE",
-        label: "Data Science",
+        value: 'DATA_SCIENCE',
+        label: 'Data Science',
       },
       {
-        value: "AI_ML",
-        label: "Artificial Intelligence & Machine Learning",
+        value: 'AI_ML',
+        label: 'Artificial Intelligence & Machine Learning',
       },
       {
-        value: "CYBER_SECURITY",
-        label: "Cyber Security",
+        value: 'CYBER_SECURITY',
+        label: 'Cyber Security',
       },
       {
-        value: "CLOUD_COMPUTING",
-        label: "Cloud Computing",
+        value: 'CLOUD_COMPUTING',
+        label: 'Cloud Computing',
       },
     ],
   };
   const programOptions = {
     ENGINEERING: [
       {
-        value: "BTECH",
-        label: "B.Tech",
+        value: 'BTECH',
+        label: 'B.Tech',
       },
     ],
 
     IT: [
       {
-        value: "MCA",
-        label: "MCA",
+        value: 'MCA',
+        label: 'MCA',
       },
       {
-        value: "BCA",
-        label: "BCA",
+        value: 'BCA',
+        label: 'BCA',
       },
     ],
 
     MANAGEMENT: [
       {
-        value: "MBA",
-        label: "MBA",
+        value: 'MBA',
+        label: 'MBA',
       },
       {
-        value: "BBA",
-        label: "BBA",
+        value: 'BBA',
+        label: 'BBA',
       },
       {
-        value: "BCOM",
-        label: "B.Com",
+        value: 'BCOM',
+        label: 'B.Com',
       },
     ],
   };
@@ -162,22 +162,22 @@ export default function AcademicInformationTab({
           label="DEPARTMENT"
           name="department"
           value={formik.values.department}
-          onChange={(value) => formik.setFieldValue("department", value)}
-          onBlur={() => formik.setFieldTouched("department", true)}
-          error={getError("department")}
+          onChange={(value) => formik.setFieldValue('department', value)}
+          onBlur={() => formik.setFieldTouched('department', true)}
+          error={getError('department')}
           options={[
             {
-              value: "ENGINEERING",
-              label: "Engineering",
+              value: 'ENGINEERING',
+              label: 'Engineering',
             },
             {
-              value: "MANAGEMENT",
-              label: "Managemnet",
+              value: 'MANAGEMENT',
+              label: 'Managemnet',
             },
 
             {
-              value: "IT",
-              label: "IT",
+              value: 'IT',
+              label: 'IT',
             },
           ]}
         />
@@ -185,9 +185,9 @@ export default function AcademicInformationTab({
           label="PROGRAM / DEGREE"
           name="program"
           value={formik.values.program}
-          onChange={(value) => formik.setFieldValue("program", value)}
-          onBlur={() => formik.setFieldTouched("program", true)}
-          error={getError("program")}
+          onChange={(value) => formik.setFieldValue('program', value)}
+          onBlur={() => formik.setFieldTouched('program', true)}
+          error={getError('program')}
           options={programOptions[formik.values.department] || []}
         />
 
@@ -195,20 +195,10 @@ export default function AcademicInformationTab({
           label="SPECIALIZATION"
           name="specialization"
           value={formik.values.specialization}
-          onChange={(value) => formik.setFieldValue("specialization", value)}
-          onBlur={() => formik.setFieldTouched("specialization", true)}
-          error={getError("specialization")}
+          onChange={(value) => formik.setFieldValue('specialization', value)}
+          onBlur={() => formik.setFieldTouched('specialization', true)}
+          error={getError('specialization')}
           options={specializationOptions[formik.values.department] || []}
-        />
-        <SelectField
-          label="CURRENT SEMESTER"
-          name="currentSemester"
-          required
-          value={formik.values.currentSemester}
-          onChange={(value) => formik.setFieldValue("currentSemester", value)}
-          onBlur={() => formik.setFieldTouched("currentSemester", true)}
-          error={getError("currentSemester")}
-          options={semesterOptions[formik.values.program] || []}
         />
 
         <InputField
@@ -217,7 +207,7 @@ export default function AcademicInformationTab({
           required
           placeholder="Enter roll number"
           formik={formik}
-          error={getError("rollNumber")}
+          error={getError('rollNumber')}
         />
 
         <YearField
@@ -226,7 +216,7 @@ export default function AcademicInformationTab({
           required
           placeholder="Select batch"
           formik={formik}
-          error={getError("academicBatch")}
+          error={getError('academicBatch')}
         />
       </div>
 
