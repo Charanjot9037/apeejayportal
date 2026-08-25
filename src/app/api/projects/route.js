@@ -73,7 +73,7 @@ export async function POST(request) {
 
       projectType,
 
-      teamMembers: projectType === "team" ? teamMembers || "" : "",
+      teamMembers: projectType === "team" ? teamMembers || "" : null,
 
       semester,
 

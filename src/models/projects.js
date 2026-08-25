@@ -65,6 +65,27 @@ const CloudinaryFileSchema = new mongoose.Schema(
   },
 );
 
+const MentorReviewSchema = new mongoose.Schema(
+  {
+    status: {
+      type: String,
+      enum: ["Pending Approval", "Approved", "Rejected"],
+    },
+    comment: {
+      type: String,
+      trim: true,
+    },
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Mentor",
+    },
+    reviewedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: true, timestamps: false },
+);
 /* =========================================================
    PROJECT
 ========================================================= */
@@ -172,6 +193,11 @@ const ProjectSchema = new mongoose.Schema(
     mentorReviewedAt: {
       type: Date,
       default: null,
+    },
+
+      mentorReviews: {
+      type: [MentorReviewSchema],
+      default: [],
     },
 
     /* =====================================================

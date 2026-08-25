@@ -6,6 +6,19 @@ export async function POST(request) {
   try {
     await connectDB();
 
+    // Get logged-in user
+    const auth = await authenticateUser();
+
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        { status: 401 },
+      );
+    }
+
     const body = await request.json();
 
     const { department, program, academicBatch, specialization } = body;
@@ -19,7 +32,6 @@ export async function POST(request) {
         { status: 400 },
       );
     }
-    const auth = await authenticateUser();
 
     if (!auth.success) {
       return NextResponse.json(
@@ -55,7 +67,7 @@ export async function POST(request) {
       },
     };
 
-    // Add specialization only when it is provided
+    // Add specialization only when provided
     if (specialization) {
       query.specialization = {
         $regex: `^${specialization}$`,
@@ -92,6 +104,7 @@ export async function POST(request) {
           }
         : null,
     }));
+
 
     return NextResponse.json(
       {

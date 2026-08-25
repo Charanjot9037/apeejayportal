@@ -108,8 +108,10 @@ export function useAddProjectForm({ mode = "create", project = null }) {
 
           projectType: values.projectType,
 
-          teamMembers: values.projectType === "team" ? values.teamMembers : "",
-
+teamMembers:
+  values.projectType === "team"
+    ? values.teamMembers || null
+    : null,
           semester: values.semester,
 
           projectImages: values.projectImages || [],
