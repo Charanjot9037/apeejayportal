@@ -17,20 +17,13 @@ export async function GET(request) {
         { status: auth.status },
       );
     }
+  
 
-    const mentor = await Mentor.findOne({ userId: auth.user._id });
-
-    if (!mentor) {
-      return NextResponse.json(
-        { success: false, message: "Mentor profile not found." },
-        { status: 404 },
-      );
-    }
-
-    const projects = await Project.find({ mentor: mentor._id })
+    const projects = await Project.find({ mentor:  auth.user._id })
       .populate({ path: "student", select: "name email" })
       .sort({ createdAt: -1 })
       .lean();
+        console.log("projects:",projects);
 
     // Get Student academic details for each project's student (User._id)
     const studentUserIds = projects
@@ -59,6 +52,7 @@ export async function GET(request) {
           }
         : null,
     }));
+     console.log("enrichedprojects:",enrichedProjects);
 
     return NextResponse.json({
       success: true,

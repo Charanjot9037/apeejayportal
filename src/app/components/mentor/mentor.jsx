@@ -21,6 +21,9 @@ export default function Mentor() {
         const res = await fetch("/api/projects/mentor");
         const data = await res.json();
 
+
+      
+
         if (!data.success) {
           setError(data.message || "Failed to load projects.");
           return;
