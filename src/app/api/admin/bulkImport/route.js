@@ -41,6 +41,9 @@ export async function POST(request) {
       const name = student.name?.toString().trim();
 
       const email = student.email?.toString().trim().toLowerCase();
+      const guidename = student.guidename?.toString().trim();
+
+      const guideemail = student.guideemail?.toString().trim().toLowerCase();
 
       const errors = [];
 
@@ -52,6 +55,15 @@ export async function POST(request) {
         errors.push("Email is required");
       } else if (!emailRegex.test(email)) {
         errors.push("Invalid email");
+      } else if (!guidename) {
+        errors.push("Guide name is required");
+      }
+
+      // Guide email
+      else if (!guideemail) {
+        errors.push("Guide email is required");
+      } else if (!emailRegex.test(guideemail)) {
+        errors.push("Invalid guide email");
       }
 
       if (errors.length > 0) {
@@ -59,6 +71,8 @@ export async function POST(request) {
           row: index + 1,
           name: name || "",
           email: email || "",
+          guidename: guidename || "",
+          guideemail: guideemail || "",
           errors,
         });
       }
@@ -66,6 +80,8 @@ export async function POST(request) {
       return {
         name,
         email,
+        guideemail,
+        guidename,
       };
     });
 
@@ -93,7 +109,7 @@ export async function POST(request) {
     const existingUsers = await User.find({
       email: { $in: emails },
     }).select("email");
-
+    console.log(existingUsers);
     const existingEmailSet = new Set(
       existingUsers.map((user) => user.email.toLowerCase()),
     );
@@ -116,8 +132,68 @@ export async function POST(request) {
     const studentsToInsert = [];
 
     const credentials = [];
+    const invalidGuides = [];
+    const guideEmails = [
+      ...new Set(newStudents.map((student) => student.guideemail)),
+    ];
+    const mentorUsers = await User.find({
+      email: { $in: guideEmails },
+      role: "mentor",
+    }).select("_id name email role");
+    // Create lookup by email
+    const mentorUserMap = new Map();
 
-    for (const student of newStudents) {
+    mentorUsers.forEach((mentor) => {
+      mentorUserMap.set(mentor.email.toLowerCase(), mentor);
+    });
+
+    const validStudents = [];
+
+    newStudents.forEach((student) => {
+      const mentorUser = mentorUserMap.get(student.guideemail);
+
+      // Mentor email not found
+      if (!mentorUser) {
+        invalidGuides.push({
+          name: student.name,
+          email: student.email,
+          guidename: student.guidename,
+          guideemail: student.guideemail,
+          errors: ["Guide email does not belong to a mentor."],
+        });
+
+        return;
+      }
+
+      // Compare guide name
+      const excelGuideName = student.guidename.trim().toLowerCase();
+
+      const databaseGuideName = mentorUser.name?.trim().toLowerCase();
+
+      if (excelGuideName !== databaseGuideName) {
+        invalidGuides.push({
+          name: student.name,
+          email: student.email,
+          guidename: student.guidename,
+          guideemail: student.guideemail,
+          errors: [
+            `Guide name does not match. Excel: "${student.guidename}", Database: "${mentorUser.name}"`,
+          ],
+        });
+
+        return;
+      }
+
+      // Everything is valid
+      validStudents.push({
+        ...student,
+
+        // User collection mentor _id
+        mentorId: mentorUser._id,
+      });
+    });
+
+    for (const student of validStudents) {
       const temporaryPassword = generateTemporaryPassword();
 
       const hashedPassword = await bcrypt.hash(temporaryPassword, 12);
@@ -127,11 +203,12 @@ export async function POST(request) {
         email: student.email,
         password: hashedPassword,
         role: "student",
+        mentorId: student.mentorId,
       });
     }
 
     let insertedStudents = [];
-    console.log(studentsToInsert);
+
     if (studentsToInsert.length > 0) {
       insertedStudents = await User.insertMany(studentsToInsert, {
         ordered: false,
@@ -159,8 +236,6 @@ export async function POST(request) {
       { status: 201 },
     );
   } catch (error) {
-    console.error("Bulk import error:", error);
-
     return NextResponse.json(
       {
         success: false,

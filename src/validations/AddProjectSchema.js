@@ -115,7 +115,7 @@ export const validationSchema = Yup.object({
   //     );
   //   },
   // )
-  synopsisFile: Yup.mixed(),
+  synopsisFile: Yup.mixed().nullable(),
   // .nullable()
   // .test("synopsis-type", "Only PDF files are allowed", (file) => {
   //   if (isEmptyFile(file)) {
