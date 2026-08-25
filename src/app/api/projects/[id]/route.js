@@ -115,10 +115,6 @@ export async function PUT(request, context) {
       );
     }
 
-    /* =====================================================
-       READ JSON
-    ===================================================== */
-
     let projectData;
 
     try {
@@ -133,10 +129,6 @@ export async function PUT(request, context) {
       );
     }
 
-    /* =====================================================
-       PROJECT DATA
-    ===================================================== */
-
     const {
       projectName,
       description,
@@ -146,9 +138,6 @@ export async function PUT(request, context) {
       projectType,
       teamMembers,
       semester,
-      mentor,
-      studentId,
-
       projectImages,
       presentationFile,
       synopsisFile,
@@ -159,16 +148,22 @@ export async function PUT(request, context) {
        BASIC VALIDATION
     ===================================================== */
 
+    const user = auth.user;
+    const studentId = user._id;
     if (!projectName || !description || !studentId) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Project name, description and student ID are required.",
+          message: "Project name, description and student ID are required.",
         },
         { status: 400 },
       );
     }
+    const mentor1 = await User.findById(studentId).select("mentorId");
+    const teamMember = await Student.findById(teamMembers).populate({
+      path: "userId",
+      select: "_id mentorId",
+    });
 
     /* =====================================================
        STUDENT OWNERSHIP CHECK
@@ -188,10 +183,7 @@ export async function PUT(request, context) {
        TEAM VALIDATION
     ===================================================== */
 
-    if (
-      projectType === "team" &&
-      (!teamMembers || teamMembers.length === 0)
-    ) {
+    if (projectType === "team" && (!teamMembers || teamMembers.length === 0)) {
       return NextResponse.json(
         {
           success: false,
@@ -223,15 +215,11 @@ export async function PUT(request, context) {
 
     const oldImages = project.projectImages || [];
 
-    const newImages = Array.isArray(projectImages)
-      ? projectImages
-      : [];
+    const newImages = Array.isArray(projectImages) ? projectImages : [];
 
     const newImageIds = new Set(
       newImages
-        .map((image) =>
-          typeof image === "string" ? image : image?.publicId
-        )
+        .map((image) => (typeof image === "string" ? image : image?.publicId))
         .filter(Boolean),
     );
 
@@ -240,10 +228,7 @@ export async function PUT(request, context) {
     ===================================================== */
 
     for (const oldImage of oldImages) {
-      if (
-        oldImage?.publicId &&
-        !newImageIds.has(oldImage.publicId)
-      ) {
+      if (oldImage?.publicId && !newImageIds.has(oldImage.publicId)) {
         await deleteFromCloudinary(
           oldImage.publicId,
           oldImage.resourceType || "image",
@@ -324,13 +309,13 @@ export async function PUT(request, context) {
     project.projectType = projectType;
 
     project.teamMembers =
-      projectType === "team" && teamMembers
-        ? teamMembers
-        : null;
+      projectType === "team" && teamMembers ? teamMembers : null;
 
     project.semester = semester || "";
 
-    project.mentor = mentor || null;
+    project.mentor = mentor1.mentorId || null;
+
+    project.mentor2 = teamMember.userId.mentorId || null;
 
     project.projectImages = finalProjectImages;
 
@@ -398,11 +383,11 @@ export async function GET(request, context) {
     const project = await Project.findById(id)
       .populate({
         path: "mentor",
-        select: "userId designation",
-        populate: {
-          path: "userId",
-          select: "name email",
-        },
+        select: "name",
+      })
+      .populate({
+        path: "mentor2",
+        select: "name",
       })
       .populate({
         path: "teamMembers",

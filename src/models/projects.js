@@ -117,12 +117,12 @@ const ProjectSchema = new mongoose.Schema(
     },
     mentor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Mentor",
+      ref: "User",
       default: null,
     },
     mentor2: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Mentor",
+      ref: "User",
       default: null,
     },
 
