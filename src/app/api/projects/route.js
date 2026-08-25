@@ -88,7 +88,7 @@ export async function POST(request) {
 
       reportFile: reportFile || null,
 
-      status: "Pending",
+      status: "Pending Approval",
 
       student: userId,
     });
