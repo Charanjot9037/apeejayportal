@@ -7,6 +7,7 @@ import {
   MENTOR_STUDENT_COLUMNS,
   MENTOR_DASHBOARD_HEADER,
 } from "@/constants/mentorData";
+import { mapMentorProjectToRoster } from "@/mappers/mentor";
 
 export default function Mentor() {
   const router = useRouter();
@@ -19,6 +20,9 @@ export default function Mentor() {
       try {
         const res = await fetch("/api/projects/mentor");
         const data = await res.json();
+
+
+      
 
         if (!data.success) {
           setError(data.message || "Failed to load projects.");
@@ -37,14 +41,8 @@ export default function Mentor() {
     fetchMentorProjects();
   }, []);
 
-  const rosterData = projects.map((p) => ({
-    id: p._id,
-    name: p.student?.name || "Unknown",
-    major: p.student?.department || "—",
-    projectName: p.title,
-    projectTitle: p.title,
-    status: p.status,
-  }));
+  const rosterData = projects.map(mapMentorProjectToRoster);
+  
 
   const handleViewProject = (item) => {
     router.push(`/mentor-dashboard/projects/${item.id}`);
@@ -64,7 +62,7 @@ export default function Mentor() {
 
         {!loading && !error && (
           <Roster
-            title="Student Roster"
+            title="Project Roster"
             data={rosterData}
             columns={MENTOR_STUDENT_COLUMNS}
             searchPlaceholder="Search students..."
