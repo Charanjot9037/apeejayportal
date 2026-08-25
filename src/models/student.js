@@ -60,11 +60,6 @@ const studentSchema = new mongoose.Schema(
       default: '',
     },
 
-    currentSemester: {
-      type: String,
-      default: '',
-    },
-
     rollNumber: {
       type: String,
       default: '',

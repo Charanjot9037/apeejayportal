@@ -13,6 +13,7 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
+
   const handleLogout = async () => {
     try {
       alert('going to log out');
@@ -28,10 +29,14 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
       console.error('Logout failed:', error);
     }
   };
+
   function handleHelp() {
     console.log('Help clicked');
   }
-  const { title, subtitle, profileUrl, navItems = [] } = sidebarData;
+
+  const { title, subtitle, profileUrl, role, navItems = [] } = sidebarData;
+
+  const showProfilePicture = role === 'student' && profileUrl;
 
   return (
     <>
@@ -39,15 +44,16 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
+
       <aside
-  className={`fixed inset-y-0 left-0 z-40 flex h-screen overflow-hidden w-64 shrink-0 flex-col bg-primary-orange p-5 text-white transition-transform duration-200
-    lg:static lg:h-screen lg:translate-x-0
-    ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-  `}
->
-        <div className=" py-5 flex flex-col gap-2 items-center border-b">
-          <div className=" flex  items-center  justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
-            {profileUrl ? (
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col overflow-hidden bg-primary-orange p-5 text-white transition-transform duration-200
+          lg:static lg:h-screen lg:translate-x-0
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        <div className="flex flex-col items-center gap-2 border-b py-5">
+          <div className="flex h-[68px] w-[67px] items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
+            {showProfilePicture ? (
               <Image
                 src={profileUrl}
                 alt={`${title} profile`}
@@ -56,28 +62,33 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="h-full w-full bg-slate-100" />
+              <div className="flex h-full w-full items-center justify-center bg-slate-100">
+                <span className="text-2xl font-bold text-primary-orange">
+                  {title?.charAt(0)?.toUpperCase() || 'U'}
+                </span>
+              </div>
             )}
           </div>
 
-          <div className="text-center flex flex-col gap-2">
+          <div className="flex flex-col gap-2 text-center">
             <p className="text-sm font-bold text-white">{title}</p>
 
             <p className="text-sm font-bold text-white">{subtitle}</p>
           </div>
         </div>
 
-        <nav className="flex py-4 flex-1 flex-col gap-1">
+        <nav className="flex flex-1 flex-col gap-1 py-4">
           {navItems.map(({ label, icon: Icon, href }) => {
             const isActive = pathname === href;
+
             return (
               <Link
                 key={label}
                 href={href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-white   text-primary-orange shadow-sm'
-                    : 'text-white hover:text-primary hover:bg-white hover:shadow-sm'
+                    ? 'bg-white text-primary-orange shadow-sm'
+                    : 'text-white hover:bg-white hover:text-primary hover:shadow-sm'
                 }`}
               >
                 <Icon className="h-4 w-4" strokeWidth={2} />
@@ -92,18 +103,20 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
           <button
             type="button"
             onClick={handleHelp}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium  transition-colors hover:text-primary hover:bg-white"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-white hover:text-primary"
           >
             <HelpCircle className="h-4 w-4" />
+
             <span>Help Center</span>
           </button>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white hover:text-primary hover:bg-white transition-colors hover:bg-white-50 "
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white hover:text-primary"
           >
             <LogOut className="h-4 w-4" />
+
             <span>Logout</span>
           </button>
         </div>

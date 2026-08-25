@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
@@ -20,7 +20,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-
+    mentorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: function () {
+        return this.role === "student";
+      },
+    },
     role: {
       type: String,
       default: "student",
@@ -31,16 +37,14 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
     resetPasswordToken: {
-  type: String,
-  default: null,
-},
-
+      type: String,
+      default: null,
+    },
   },
-  
 
   {
     timestamps: true,
   },
 );
 
-export default mongoose.models.User || mongoose.model('User', userSchema);
+export default mongoose.models.User || mongoose.model("User", userSchema);

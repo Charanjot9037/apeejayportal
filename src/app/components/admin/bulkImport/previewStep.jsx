@@ -50,6 +50,13 @@ export default function PreviewStep({
               </th>
 
               <th className="px-4 py-3 font-semibold text-slate-700">Email</th>
+              <th className="px-4 py-3 font-semibold text-slate-700">
+                Guide Name
+              </th>
+
+              <th className="px-4 py-3 font-semibold text-slate-700">
+                Guide Email
+              </th>
 
               <th className="px-4 py-3 font-semibold text-slate-700">Status</th>
             </tr>
@@ -63,6 +70,13 @@ export default function PreviewStep({
                 <td className="px-4 py-3 text-slate-800">{student.name}</td>
 
                 <td className="px-4 py-3 text-slate-600">{student.email}</td>
+                <td className="px-4 py-3 text-slate-800">
+                  {student.guidename}
+                </td>
+
+                <td className="px-4 py-3 text-slate-600">
+                  {student.guideemail}
+                </td>
 
                 <td className="px-4 py-3">
                   <span className="font-medium text-green-600">✓ Ready</span>
@@ -97,7 +111,7 @@ export default function PreviewStep({
                 Uploading...
               </>
             ) : (
-              'Upload Students'
+              "Upload Students"
             )}
           </button>
         </div>

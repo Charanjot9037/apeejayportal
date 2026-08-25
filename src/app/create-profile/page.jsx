@@ -1,11 +1,11 @@
-import CreateStudentProfile from "@/app/components/createProfile/CreateProfile"
+import CreateStudentProfile from '@/app/components/createProfile/CreateProfile';
 
 const page = () => {
   return (
     <div>
-      <CreateStudentProfile/>
+      <CreateStudentProfile />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

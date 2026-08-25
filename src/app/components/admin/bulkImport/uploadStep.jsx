@@ -17,7 +17,6 @@ export default function UploadStep({
         Upload a CSV or Excel file containing student name and email.
       </p>
 
-      {/* Required format */}
       <div>
         <div className="mt-2 rounded-lg bg-slate-50 p-4">
           <p className="text-sm font-semibold text-slate-700">
@@ -34,12 +33,17 @@ export default function UploadStep({
                 <tr>
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Email</th>
+                  <th className="px-4 py-3">Guide Name</th>
+                  <th className="px-4 py-3">Guide Email</th>
                 </tr>
               </thead>
 
               <tbody>
                 <tr className="border-t">
                   <td className="px-4 py-3 font-medium">studnet name</td>
+
+                  <td className="px-4 py-3">xyz@gmail.com</td>
+                  <td className="px-4 py-3 font-medium">Guide name</td>
 
                   <td className="px-4 py-3">xyz@gmail.com</td>
                 </tr>
@@ -74,14 +78,14 @@ export default function UploadStep({
           const file = event.dataTransfer.files?.[0];
 
           if (file) {
-            setFieldValue('file', file);
+            setFieldValue("file", file);
             handleFileParse(file);
           }
         }}
         className={`mt-5 flex h-[150px] flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition ${
           isDragging
-            ? 'border-primary-orange bg-orange-50'
-            : 'border-slate-300 bg-slate-50'
+            ? "border-primary-orange bg-orange-50"
+            : "border-slate-300 bg-slate-50"
         }`}
       >
         <label
@@ -109,7 +113,7 @@ export default function UploadStep({
 
             if (!file) return;
 
-            setFieldValue('file', file);
+            setFieldValue("file", file);
             handleFileParse(file);
           }}
         />
