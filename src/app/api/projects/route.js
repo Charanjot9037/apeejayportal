@@ -38,6 +38,9 @@ export async function POST(request) {
       presentationFile,
       synopsisFile,
       reportFile,
+        presentationFile2,
+  synopsisFile2,
+  reportFile2,
     } = body;
 
     const mentor1 = await User.findById(userId).select("mentorId");
@@ -73,7 +76,7 @@ export async function POST(request) {
 
       projectType,
 
-      teamMembers: projectType === "team" ? teamMembers || "" : null,
+      teamMembers: projectType === "team" ? teamMembers || null : null,
 
       semester,
 
@@ -87,6 +90,9 @@ export async function POST(request) {
       synopsisFile: synopsisFile || null,
 
       reportFile: reportFile || null,
+      presentationFile2: presentationFile2 || null,
+synopsisFile2: synopsisFile2 || null,
+reportFile2: reportFile2 || null,
 
       status: "Pending Approval",
 
@@ -122,39 +128,34 @@ export async function GET(request) {
   try {
     await connectDB();
 
-    const { searchParams } = new URL(request.url);
-
-    const studentId = searchParams.get("studentId");
-
-    if (!studentId) {
+    const auth = await authenticateUser();
+    if (!auth.success) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Student ID is required.",
-        },
-        { status: 400 },
+        { success: false, message: auth.message },
+        { status: auth.status }
       );
     }
 
-    const projects = await Project.find({
-      student: studentId,
-    }).sort({
+    const userId = auth.user._id;
+
+    // Resolve this user's Student profile — teamMembers stores a Student _id
+    const studentProfile = await Student.findOne({ userId });
+
+    const orConditions = [{ student: userId }];
+    if (studentProfile) {
+      orConditions.push({ teamMembers: studentProfile._id });
+    }
+
+    const projects = await Project.find({ $or: orConditions }).sort({
       createdAt: -1,
     });
 
-    return NextResponse.json({
-      success: true,
-      projects,
-    });
+    return NextResponse.json({ success: true, projects });
   } catch (error) {
     console.error("PROJECT_GET_ERROR:", error);
-
     return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to fetch projects.",
-      },
-      { status: 500 },
+      { success: false, message: "Failed to fetch projects." },
+      { status: 500 }
     );
   }
 }

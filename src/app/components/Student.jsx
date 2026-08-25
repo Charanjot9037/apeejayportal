@@ -27,50 +27,37 @@ export default function DashboardContent() {
   const auth = useSelector((state) => state.auth);
   const [projects, setProjects] = useState(initialProjects);
   const [loadingProjects, setLoadingProjects] = useState(true);
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const studentId = auth?.user?._id || auth?.user?.id;
+useEffect(() => {
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch('/api/projects', {
+        credentials: 'include', // ensures session cookie is sent
+      });
 
-        if (!studentId) {
-          setLoadingProjects(false);
-          return;
-        }
+      const result = await response.json();
 
-        const response = await fetch(`/api/projects?studentId=${studentId}`);
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.message || 'Failed to fetch projects');
-        }
-
-        setProjects([
-          ...result.projects.map((project) => ({
-            ...project,
-
-            // MongoDB uses _id
-            id: project._id,
-
-            // Keep compatibility with your existing UI
-            title: project.title,
-
-            subtitle: project.subtitle,
-
-            status: project.status,
-          })),
-
-          ...initialProjects,
-        ]);
-      } catch (error) {
-        console.error('FETCH_PROJECTS_ERROR:', error);
-      } finally {
-        setLoadingProjects(false);
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to fetch projects');
       }
-    };
 
-    fetchProjects();
-  }, [auth?.user?._id, auth?.user?.id]);
+      setProjects(
+        result.projects.map((project) => ({
+          ...project,
+          id: project._id,
+          title: project.title,
+          subtitle: project.subtitle,
+          status: project.status,
+        }))
+      );
+    } catch (error) {
+      console.error('FETCH_PROJECTS_ERROR:', error);
+    } finally {
+      setLoadingProjects(false);
+    }
+  };
+
+  fetchProjects();
+}, []);
   console.log('AUTH:', auth);
   console.log('USER:', auth?.user);
 

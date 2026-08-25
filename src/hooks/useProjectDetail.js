@@ -15,6 +15,8 @@ export function useProjectDetail() {
 
   const [project, setProject] = useState(null);
 
+  const [viewerRole, setViewerRole] = useState(null);
+
   const [loading, setLoading] = useState(true);
 
   const [deleting, setDeleting] = useState(false);
@@ -26,7 +28,9 @@ export function useProjectDetail() {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(`/api/projects/${params.id}`);
+        const response = await fetch(`/api/projects/${params.id}`, {
+          credentials: "include",
+        });
 
         const result = await response.json();
 
@@ -35,6 +39,7 @@ export function useProjectDetail() {
         }
 
         setProject(result.project);
+        setViewerRole(result.viewerRole);
       } catch (error) {
         console.error("PROJECT_FETCH_ERROR:", error);
       } finally {
@@ -65,6 +70,7 @@ export function useProjectDetail() {
 
       const response = await fetch(`/api/projects/${project._id}`, {
         method: "DELETE",
+        credentials: "include",
       });
 
       const result = await response.json();
@@ -86,9 +92,10 @@ export function useProjectDetail() {
 
   return {
     project,
+    viewerRole,
     loading,
     deleting,
     handleDelete,
-     setProject,
+    setProject,
   };
 }

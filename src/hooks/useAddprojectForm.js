@@ -79,6 +79,19 @@ export function useAddProjectForm({ mode = "create", project = null }) {
         isEdit && project?.synopsisFile ? project.synopsisFile : null,
 
       reportFile: isEdit && project?.reportFile ? project.reportFile : null,
+
+      /* =====================================================
+         TEAM MEMBER'S FILES (owner cannot edit these)
+      ===================================================== */
+
+      presentationFile2:
+        isEdit && project?.presentationFile2 ? project.presentationFile2 : null,
+
+      synopsisFile2:
+        isEdit && project?.synopsisFile2 ? project.synopsisFile2 : null,
+
+      reportFile2:
+        isEdit && project?.reportFile2 ? project.reportFile2 : null,
     },
 
     validationSchema,
@@ -108,10 +121,9 @@ export function useAddProjectForm({ mode = "create", project = null }) {
 
           projectType: values.projectType,
 
-teamMembers:
-  values.projectType === "team"
-    ? values.teamMembers || null
-    : null,
+          teamMembers:
+            values.projectType === "team" ? values.teamMembers || null : null,
+
           semester: values.semester,
 
           projectImages: values.projectImages || [],
@@ -121,6 +133,12 @@ teamMembers:
           synopsisFile: values.synopsisFile || null,
 
           reportFile: values.reportFile || null,
+
+          presentationFile2: values.presentationFile2 || null,
+
+          synopsisFile2: values.synopsisFile2 || null,
+
+          reportFile2: values.reportFile2 || null,
         };
 
         console.log("PROJECT DATA:", projectData);

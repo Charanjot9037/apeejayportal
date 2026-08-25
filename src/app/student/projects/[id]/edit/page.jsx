@@ -9,12 +9,15 @@ export default function EditProjectPage() {
   const params = useParams();
 
   const [project, setProject] = useState(null);
+  const [viewerRole, setViewerRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(`/api/projects/${params.id}`);
+        const response = await fetch(`/api/projects/${params.id}`, {
+          credentials: "include",
+        });
 
         const result = await response.json();
 
@@ -23,18 +26,10 @@ export default function EditProjectPage() {
         }
 
         console.log("PROJECT LOADED FOR EDIT:", result.project);
-
-        console.log("PROJECT FROM API:", result.project);
-
-        console.log("PROJECT IMAGES:", result.project?.projectImages);
-
-        console.log("SYNOPSIS:", result.project?.synopsisFile);
-
-        console.log("REPORT:", result.project?.reportFile);
-
-        console.log("PRESENTATION:", result.project?.presentationFile);
+        console.log("VIEWER ROLE:", result.viewerRole);
 
         setProject(result.project);
+        setViewerRole(result.viewerRole);
       } catch (error) {
         console.error("EDIT_PROJECT_ERROR:", error);
       } finally {
@@ -75,5 +70,7 @@ export default function EditProjectPage() {
      EDIT FORM
   ============================================ */
 
-  return <AddProjectForm mode="edit" project={project} />;
+  return (
+    <AddProjectForm mode="edit" project={project} viewerRole={viewerRole} />
+  );
 }

@@ -23,7 +23,8 @@ import MentorFeedbackSection from "../projectDetail/handlers/sections/MentorFeed
 ========================================================= */
 
 export default function ProjectDetail() {
-  const { project, loading, deleting, handleDelete } = useProjectDetail();
+  const { project, viewerRole, loading, deleting, handleDelete } =
+    useProjectDetail();
 
   if (loading) {
     return <LoadingState />;
@@ -33,12 +34,18 @@ export default function ProjectDetail() {
     return <NotFoundState />;
   }
 
+  const teamMemberName =
+    project?.teamMembers?.fullName ||
+    project?.teamMembers?.userId?.name ||
+    (project?.teamMembers ? "Team Member" : null);
+
   return (
     <div className="min-h-full ">
       <DetailHeader
         project={project}
         deleting={deleting}
         onDelete={handleDelete}
+        viewerRole={viewerRole}
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_250px]">
@@ -48,7 +55,7 @@ export default function ProjectDetail() {
 
           <TechnologiesSection project={project} />
           <GallerySection project={project} />
-          <DocumentsSection project={project} />
+          <DocumentsSection project={project} teamMemberName={teamMemberName} />
         </div>
 
         {/* RIGHT COLUMN */}

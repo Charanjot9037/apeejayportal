@@ -1,6 +1,6 @@
 "use client";
 
-import { Upload, Eye, FileText, Loader2 } from "lucide-react";
+import { Upload, Eye, FileText, Loader2, Lock } from "lucide-react";
 
 export default function DocumentUpload({
   title,
@@ -10,6 +10,8 @@ export default function DocumentUpload({
   existingFile,
   error,
   loading,
+  disabled,
+  idSuffix = "",
   onChange,
   onRemove,
   onRemoveExisting,
@@ -25,7 +27,9 @@ export default function DocumentUpload({
   const currentFileName =
     typeof file === "string" ? title : file?.originalName || file?.name || null;
 
-  const inputId = `file-upload-${title.toLowerCase().replace(/\s+/g, "-")}`;
+  const inputId = `file-upload-${title.toLowerCase().replace(/\s+/g, "-")}${
+    idSuffix ? `-${idSuffix}` : ""
+  }`;
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files?.[0];
@@ -42,7 +46,7 @@ export default function DocumentUpload({
   };
 
   return (
-    <div>
+    <div className={disabled ? "opacity-70" : ""}>
       {/* EXISTING FILE */}
       {existingFile && existingFileUrl && !file && !loading && (
         <div className="mb-2 rounded-md border border-slate-200 bg-slate-50 p-3">
@@ -69,13 +73,15 @@ export default function DocumentUpload({
                   View
                 </a>
 
-                <button
-                  type="button"
-                  onClick={onRemoveExisting}
-                  className="text-xs font-medium text-red-500 hover:text-red-600"
-                >
-                  Remove
-                </button>
+                {!disabled && (
+                  <button
+                    type="button"
+                    onClick={onRemoveExisting}
+                    className="text-xs font-medium text-red-500 hover:text-red-600"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -84,16 +90,30 @@ export default function DocumentUpload({
 
       {/* UPLOAD AREA */}
       <label
-        htmlFor={inputId}
+        htmlFor={disabled ? undefined : inputId}
         className={`flex min-h-[130px] flex-col items-center justify-center rounded-md border border-dashed px-4 py-5 text-center transition ${
-          loading
-            ? "cursor-not-allowed border-blue-300 bg-blue-50"
-            : error
-              ? "cursor-pointer border-red-400 bg-red-50"
-              : "cursor-pointer border-slate-300 bg-slate-50 hover:border-orange-400 hover:bg-orange-50"
+          disabled
+            ? "cursor-not-allowed border-slate-200 bg-slate-100"
+            : loading
+              ? "cursor-not-allowed border-blue-300 bg-blue-50"
+              : error
+                ? "cursor-pointer border-red-400 bg-red-50"
+                : "cursor-pointer border-slate-300 bg-slate-50 hover:border-orange-400 hover:bg-orange-50"
         }`}
       >
-        {loading ? (
+        {disabled ? (
+          <>
+            <Lock className="mb-2 h-5 w-5 text-slate-400" />
+
+            <span className="max-w-full truncate px-2 text-xs font-medium text-slate-500">
+              {currentFileName || existingFileName || title}
+            </span>
+
+            <span className="mt-1 text-[10px] text-slate-400">
+              Only the owner of this document can edit it
+            </span>
+          </>
+        ) : loading ? (
           <>
             <Loader2 className="mb-2 h-6 w-6 animate-spin text-orange-500" />
 
@@ -131,14 +151,14 @@ export default function DocumentUpload({
           id={inputId}
           type="file"
           accept={accept}
-          disabled={loading}
+          disabled={loading || disabled}
           className="hidden"
           onChange={handleFileChange}
         />
       </label>
 
       {/* REMOVE NEW FILE */}
-      {file && !error && !loading && (
+      {file && !error && !loading && !disabled && (
         <button
           type="button"
           onClick={onRemove}
