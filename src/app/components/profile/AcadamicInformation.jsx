@@ -1,78 +1,78 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useFormik } from 'formik';
-import { Pencil, Check, X } from 'lucide-react';
+import { useState } from "react";
+import { useFormik } from "formik";
+import { Pencil, Check, X } from "lucide-react";
 
-import InformationField from '../elements/InformationField';
-import SelectField from '../elements/SelectFiled';
-import YearField from '../elements/Calendar';
+import InformationField from "../elements/InformationField";
+import SelectField from "../elements/SelectFiled";
+import YearField from "../elements/Calendar";
 
-import { academicInformationSchema } from '@/validations/profileSchema';
+import { academicInformationSchema } from "@/validations/profileSchema";
 
 const specializationOptions = {
   ENGINEERING: [
     {
-      value: 'CSE',
-      label: 'Computer Science & Engineering',
+      value: "CSE",
+      label: "Computer Science & Engineering",
     },
     {
-      value: 'ECE',
-      label: 'Electronics & Communication Engineering',
+      value: "ECE",
+      label: "Electronics & Communication Engineering",
     },
     {
-      value: 'ME',
-      label: 'Mechanical Engineering',
+      value: "ME",
+      label: "Mechanical Engineering",
     },
     {
-      value: 'CIVIL',
-      label: 'Civil Engineering',
+      value: "CIVIL",
+      label: "Civil Engineering",
     },
     {
-      value: 'EEE',
-      label: 'Electrical & Electronics Engineering',
+      value: "EEE",
+      label: "Electrical & Electronics Engineering",
     },
   ],
 
   MANAGEMENT: [
     {
-      value: 'FINANCE',
-      label: 'Finance',
+      value: "FINANCE",
+      label: "Finance",
     },
     {
-      value: 'MARKETING',
-      label: 'Marketing',
+      value: "MARKETING",
+      label: "Marketing",
     },
     {
-      value: 'HR',
-      label: 'Human Resource Management',
+      value: "HR",
+      label: "Human Resource Management",
     },
     {
-      value: 'BUSINESS_ANALYTICS',
-      label: 'Business Analytics',
+      value: "BUSINESS_ANALYTICS",
+      label: "Business Analytics",
     },
   ],
 
   IT: [
     {
-      value: 'SOFTWARE_DEVELOPMENT',
-      label: 'Software Development',
+      value: "SOFTWARE_DEVELOPMENT",
+      label: "Software Development",
     },
     {
-      value: 'DATA_SCIENCE',
-      label: 'Data Science',
+      value: "DATA_SCIENCE",
+      label: "Data Science",
     },
     {
-      value: 'AI_ML',
-      label: 'Artificial Intelligence & Machine Learning',
+      value: "AI_ML",
+      label: "Artificial Intelligence & Machine Learning",
     },
     {
-      value: 'CYBER_SECURITY',
-      label: 'Cyber Security',
+      value: "CYBER_SECURITY",
+      label: "Cyber Security",
     },
     {
-      value: 'CLOUD_COMPUTING',
-      label: 'Cloud Computing',
+      value: "CLOUD_COMPUTING",
+      label: "Cloud Computing",
     },
   ],
 };
@@ -80,34 +80,34 @@ const specializationOptions = {
 const programOptions = {
   ENGINEERING: [
     {
-      value: 'BTECH',
-      label: 'B.Tech',
+      value: "BTECH",
+      label: "B.Tech",
     },
   ],
 
   IT: [
     {
-      value: 'MCA',
-      label: 'MCA',
+      value: "MCA",
+      label: "MCA",
     },
     {
-      value: 'BCA',
-      label: 'BCA',
+      value: "BCA",
+      label: "BCA",
     },
   ],
 
   MANAGEMENT: [
     {
-      value: 'MBA',
-      label: 'MBA',
+      value: "MBA",
+      label: "MBA",
     },
     {
-      value: 'BBA',
-      label: 'BBA',
+      value: "BBA",
+      label: "BBA",
     },
     {
-      value: 'BCOM',
-      label: 'B.Com',
+      value: "BCOM",
+      label: "B.Com",
     },
   ],
 };
@@ -117,11 +117,11 @@ export default function AcademicInformation({ data, onSave }) {
 
   const formik = useFormik({
     initialValues: {
-      department: data?.department || '',
-      program: data?.program || '',
-      specialization: data?.specialization || '',
-      rollNumber: data?.rollNumber || '',
-      academicBatch: data?.academicBatch || '',
+      department: data?.department || "",
+      program: data?.program || "",
+      specialization: data?.specialization || "",
+      rollNumber: data?.rollNumber || "",
+      academicBatch: data?.academicBatch || "",
     },
 
     enableReinitialize: true,
@@ -131,12 +131,13 @@ export default function AcademicInformation({ data, onSave }) {
     onSubmit: async (values) => {
       try {
         if (onSave) {
+          alert("going to update");
           await onSave(values);
         }
 
         setIsEditing(false);
       } catch (error) {
-        console.error('Failed to save academic information:', error);
+        console.error("Failed to save academic information:", error);
       }
     },
   });
@@ -163,18 +164,18 @@ export default function AcademicInformation({ data, onSave }) {
    * Department changed
    */
   const handleDepartmentChange = (value) => {
-    formik.setFieldValue('department', value);
+    formik.setFieldValue("department", value);
 
     // Reset dependent fields
-    formik.setFieldValue('program', '');
-    formik.setFieldValue('specialization', '');
+    formik.setFieldValue("program", "");
+    formik.setFieldValue("specialization", "");
   };
 
   /*
    * Program changed
    */
   const handleProgramChange = (value) => {
-    formik.setFieldValue('program', value);
+    formik.setFieldValue("program", value);
   };
 
   return (
@@ -223,7 +224,7 @@ export default function AcademicInformation({ data, onSave }) {
             >
               <Check size={14} />
 
-              {formik.isSubmitting ? 'Saving...' : 'Save'}
+              {formik.isSubmitting ? "Saving..." : "Save"}
             </button>
           </div>
         )}
@@ -254,20 +255,20 @@ export default function AcademicInformation({ data, onSave }) {
               required
               value={formik.values.department}
               onChange={handleDepartmentChange}
-              onBlur={() => formik.setFieldTouched('department', true)}
+              onBlur={() => formik.setFieldTouched("department", true)}
               error={formik.touched.department && formik.errors.department}
               options={[
                 {
-                  value: 'ENGINEERING',
-                  label: 'Engineering',
+                  value: "ENGINEERING",
+                  label: "Engineering",
                 },
                 {
-                  value: 'MANAGEMENT',
-                  label: 'Management',
+                  value: "MANAGEMENT",
+                  label: "Management",
                 },
                 {
-                  value: 'IT',
-                  label: 'IT',
+                  value: "IT",
+                  label: "IT",
                 },
               ]}
             />
@@ -294,7 +295,7 @@ export default function AcademicInformation({ data, onSave }) {
               required
               value={formik.values.program}
               onChange={handleProgramChange}
-              onBlur={() => formik.setFieldTouched('program', true)}
+              onBlur={() => formik.setFieldTouched("program", true)}
               error={formik.touched.program && formik.errors.program}
               options={availablePrograms}
             />
@@ -323,9 +324,9 @@ export default function AcademicInformation({ data, onSave }) {
               required
               value={formik.values.specialization}
               onChange={(value) =>
-                formik.setFieldValue('specialization', value)
+                formik.setFieldValue("specialization", value)
               }
-              onBlur={() => formik.setFieldTouched('specialization', true)}
+              onBlur={() => formik.setFieldTouched("specialization", true)}
               error={
                 formik.touched.specialization && formik.errors.specialization
               }
