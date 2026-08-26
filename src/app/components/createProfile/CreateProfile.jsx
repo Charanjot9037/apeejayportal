@@ -1,25 +1,26 @@
-'use client';
+"use client";
 
-import { useRef, useState } from 'react';
-import { useFormik } from 'formik';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useSelector } from 'react-redux';
-import { useRouter } from 'next/navigation';
-import { studentProfileSchema } from '@/validations/profileSchema';
+import { useRef, useState } from "react";
+import { useFormik } from "formik";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import { studentProfileSchema } from "@/validations/profileSchema";
 
-import PersonalInformationTab from './PersonalInformationTab';
-import SkillsInterestsTab from './SkillInterestTab';
-import AcademicInformationTab from './AcadamicTab';
-import OnlineProfilesTab from './OnlineProfileTab';
-import { DashboardHeader } from '../elements';
-
+import PersonalInformationTab from "./PersonalInformationTab";
+import SkillsInterestsTab from "./SkillInterestTab";
+import AcademicInformationTab from "./AcadamicTab";
+import OnlineProfilesTab from "./OnlineProfileTab";
+import { DashboardHeader } from "../elements";
+import { setStudentProfile } from "@/redux/studentSlice";
+import { useDispatch } from "react-redux";
 export default function CreateStudentProfile() {
   const imageInputRef = useRef(null);
   const resumeInputRef = useRef(null);
   const router = useRouter();
   const user = useSelector((state) => state.auth.user);
-
-  const [activeTab, setActiveTab] = useState('personal');
+  const dispatch = useDispatch();
+  const [activeTab, setActiveTab] = useState("personal");
   // This will come from your create student API later
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   // This will come from your create student API later
@@ -28,27 +29,27 @@ export default function CreateStudentProfile() {
   const formik = useFormik({
     initialValues: {
       profileImage: null,
-      profileImageUrl: '',
-      fullName: user?.name || '',
-      email: '',
-      phone: '',
-      dateOfBirth: '',
-      gender: '',
-      address: '',
-      skills: '',
-      interests: '',
-      department: '',
-      program: '',
+      profileImageUrl: "",
+      fullName: user?.name || "",
+      email: "",
+      phone: "",
+      dateOfBirth: "",
+      gender: "",
+      address: "",
+      skills: "",
+      interests: "",
+      department: "",
+      program: "",
 
-      rollNumber: '',
-      academicBatch: '',
-      lastYear: '',
-      linkedin: '',
-      github: '',
-      portfolio: '',
-      specialization: '',
-      resume: '',
-      resumeName: '',
+      rollNumber: "",
+      academicBatch: "",
+      lastYear: "",
+      linkedin: "",
+      github: "",
+      portfolio: "",
+      specialization: "",
+      resume: "",
+      resumeName: "",
       resumeFile: null,
     },
 
@@ -60,27 +61,27 @@ export default function CreateStudentProfile() {
 
     if (!file) return;
     setIsUploadingImage(true);
-    formik.setFieldValue('profileImageFile', file);
+    formik.setFieldValue("profileImageFile", file);
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
+      const response = await fetch("/api/upload", {
+        method: "POST",
         body: formData,
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Upload failed');
+        throw new Error(data.message || "Upload failed");
       }
 
-      formik.setFieldValue('profileImage', file);
-      formik.setFieldValue('profileImageUrl', data.url);
+      formik.setFieldValue("profileImage", file);
+      formik.setFieldValue("profileImageUrl", data.url);
     } catch (error) {
-      console.error('Image upload failed:', error);
+      console.error("Image upload failed:", error);
     } finally {
       setIsUploadingImage(false);
     }
@@ -92,52 +93,52 @@ export default function CreateStudentProfile() {
     if (!file) return;
 
     // Store actual file for displaying filename
-    formik.setFieldValue('resumeFile', file);
+    formik.setFieldValue("resumeFile", file);
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
+      const response = await fetch("/api/upload", {
+        method: "POST",
         body: formData,
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Resume upload failed');
+        throw new Error(data.message || "Resume upload failed");
       }
 
-      console.log('Resume Cloudinary URL:', data.url);
+      console.log("Resume Cloudinary URL:", data.url);
 
-      formik.setFieldValue('resume', data.url);
+      formik.setFieldValue("resume", data.url);
     } catch (error) {
-      console.error('Resume upload failed:', error);
+      console.error("Resume upload failed:", error);
 
-      formik.setFieldValue('resumeFile', null);
-      formik.setFieldValue('resume', '');
+      formik.setFieldValue("resumeFile", null);
+      formik.setFieldValue("resume", "");
     }
   };
   function removeProfileImage() {
-    formik.setFieldValue('profileImage', null);
+    formik.setFieldValue("profileImage", null);
 
     if (imageInputRef.current) {
-      imageInputRef.current.value = '';
+      imageInputRef.current.value = "";
     }
   }
   function removeResume() {
-    formik.setFieldValue('resume', null);
+    formik.setFieldValue("resume", null);
 
     if (resumeInputRef.current) {
-      resumeInputRef.current.value = '';
+      resumeInputRef.current.value = "";
     }
   }
 
   const getError = (field) => {
     return formik.touched[field] && formik.errors[field]
       ? formik.errors[field]
-      : '';
+      : "";
   };
 
   const validateStep = async (fields) => {
@@ -156,7 +157,7 @@ export default function CreateStudentProfile() {
   };
 
   const handlePersonalNext = async () => {
-    const fields = ['fullName', 'phone', 'gender', 'address', 'profileImage'];
+    const fields = ["fullName", "phone", "gender", "address", "profileImage"];
 
     const isValid = await validateStep(fields);
 
@@ -165,10 +166,10 @@ export default function CreateStudentProfile() {
     }
 
     try {
-      const response = await fetch('/api/createstudent', {
-        method: 'POST',
+      const response = await fetch("/api/createstudent", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: user.id,
@@ -191,14 +192,14 @@ export default function CreateStudentProfile() {
       // Store Student's own _id
       setStudentId(data.studentId);
 
-      setActiveTab('academic');
+      setActiveTab("academic");
     } catch (error) {
-      console.error('Create student error:', error);
+      console.error("Create student error:", error);
     }
   };
 
   const handleSkillsNext = async () => {
-    const fields = ['skills', 'interests'];
+    const fields = ["skills", "interests"];
 
     const isValid = await validateStep(fields);
 
@@ -207,14 +208,14 @@ export default function CreateStudentProfile() {
     }
 
     try {
-      const response = await fetch('/api/createstudent', {
-        method: 'PATCH',
+      const response = await fetch("/api/createstudent", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: user?.id,
-          section: 'skills',
+          section: "skills",
           data: {
             skills: formik.values.skills,
             interests: formik.values.interests,
@@ -225,30 +226,30 @@ export default function CreateStudentProfile() {
       const result = await response.json();
 
       if (!response.ok) {
-        console.error('Skills update failed:', result.message);
+        console.error("Skills update failed:", result.message);
         return;
       }
 
-      console.log('Skills updated successfully:', result);
+      console.log("Skills updated successfully:", result);
 
-      alert('Successful');
+      alert("Successful");
 
-      setActiveTab('profiles');
+      setActiveTab("profiles");
     } catch (error) {
-      console.error('Skills API error:', error);
+      console.error("Skills API error:", error);
     }
   };
 
   const handleAcademicNext = async () => {
     const fields = [
-      'university',
-      'department',
-      'program',
-      'rollNumber',
-      'lastYear',
-      'cumulativeGPA',
-      'academicBatch',
-      'specialization',
+      "university",
+      "department",
+      "program",
+      "rollNumber",
+      "lastYear",
+      "cumulativeGPA",
+      "academicBatch",
+      "specialization",
     ];
 
     const isValid = await validateStep(fields);
@@ -258,14 +259,14 @@ export default function CreateStudentProfile() {
     }
 
     try {
-      const response = await fetch('/api/createstudent', {
-        method: 'PATCH',
+      const response = await fetch("/api/createstudent", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: user.id,
-          section: 'academic',
+          section: "academic",
           data: {
             university: formik.values.university,
             department: formik.values.department,
@@ -281,20 +282,28 @@ export default function CreateStudentProfile() {
       const result = await response.json();
 
       if (!response.ok) {
-        console.error('Academic update failed:', result.message);
+        console.error("Academic update failed:", result.message);
         return;
       }
+      console.log(result);
+      dispatch(
+        setStudentProfile({
+          department: result?.profile?.department,
+          program: result?.profile?.program,
+          academicBatch: result?.profile?.academicBatch,
+        }),
+      );
 
-      alert('Academic information updated:', result);
+      alert("Academic information updated:", result);
 
-      setActiveTab('skills');
+      setActiveTab("skills");
     } catch (error) {
-      console.error('Academic API error:', error);
+      console.error("Academic API error:", error);
     }
   };
 
   const handleFinalSubmit = async () => {
-    const fields = ['linkedin', 'github', 'portfolio', 'resume'];
+    const fields = ["linkedin", "github", "portfolio", "resume"];
 
     const isValid = await validateStep(fields);
 
@@ -303,14 +312,14 @@ export default function CreateStudentProfile() {
     }
 
     try {
-      const response = await fetch('/api/createstudent', {
-        method: 'PATCH',
+      const response = await fetch("/api/createstudent", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: user.id,
-          section: 'onlineProfiles',
+          section: "onlineProfiles",
           data: {
             linkedin: formik.values.linkedin,
             github: formik.values.github,
@@ -324,14 +333,14 @@ export default function CreateStudentProfile() {
       const result = await response.json();
 
       if (!response.ok) {
-        console.error('Profile update failed:', result.message);
+        console.error("Profile update failed:", result.message);
         return;
       }
 
-      alert('Student profile completed successfully!');
-      router.push('/student');
+      alert("Student profile completed successfully!");
+      router.push("/student");
     } catch (error) {
-      console.error('Final profile update error:', error);
+      console.error("Final profile update error:", error);
     }
   };
 
@@ -350,7 +359,7 @@ export default function CreateStudentProfile() {
           value={activeTab}
           onValueChange={(value) => {
             // Prevent manually going to future tabs
-            if (!studentId && value !== 'personal') {
+            if (!studentId && value !== "personal") {
               return;
             }
 
@@ -410,7 +419,7 @@ export default function CreateStudentProfile() {
             <SkillsInterestsTab
               formik={formik}
               getError={getError}
-              onBack={() => setActiveTab('academic')}
+              onBack={() => setActiveTab("academic")}
               onNext={handleSkillsNext}
             />
           </TabsContent>
@@ -423,7 +432,7 @@ export default function CreateStudentProfile() {
             <AcademicInformationTab
               formik={formik}
               getError={getError}
-              onBack={() => setActiveTab('skills')}
+              onBack={() => setActiveTab("skills")}
               onNext={handleAcademicNext}
             />
           </TabsContent>
@@ -439,7 +448,7 @@ export default function CreateStudentProfile() {
               resumeInputRef={resumeInputRef}
               handleResume={handleResume}
               removeResume={removeResume}
-              onBack={() => setActiveTab('skills')}
+              onBack={() => setActiveTab("skills")}
               onSubmit={handleFinalSubmit}
             />
           </TabsContent>

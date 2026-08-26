@@ -100,8 +100,6 @@ export const academicInformationSchema = Yup.object({
     .min(2, "Program must be at least 2 characters")
     .max(50, "Program name is too long"),
 
-  currentSemester: Yup.string().trim().required("Current semester is required"),
-
   rollNumber: Yup.string()
     .trim()
     .required("Roll number is required")

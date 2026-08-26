@@ -211,7 +211,7 @@ export default function AcademicInformationTab({
         />
 
         <YearField
-          label="academicBatch"
+          label="Academic Batch"
           name="academicBatch"
           required
           placeholder="Select batch"
