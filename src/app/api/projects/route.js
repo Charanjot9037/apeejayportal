@@ -38,9 +38,9 @@ export async function POST(request) {
       presentationFile,
       synopsisFile,
       reportFile,
-        presentationFile2,
-  synopsisFile2,
-  reportFile2,
+      presentationFile2,
+      synopsisFile2,
+      reportFile2,
     } = body;
 
     const mentor1 = await User.findById(userId).select("mentorId");
@@ -81,7 +81,9 @@ export async function POST(request) {
       semester,
 
       mentor: mentor1.mentorId || null,
-      mentor2: teamMember.userId.mentorId || null,
+      ...(projectType === "team" && teamMember
+        ? { mentor2: teamMember.userId?.mentorId || null }
+        : {}),
 
       projectImages: projectImages || [],
 
@@ -91,8 +93,8 @@ export async function POST(request) {
 
       reportFile: reportFile || null,
       presentationFile2: presentationFile2 || null,
-synopsisFile2: synopsisFile2 || null,
-reportFile2: reportFile2 || null,
+      synopsisFile2: synopsisFile2 || null,
+      reportFile2: reportFile2 || null,
 
       status: "Pending Approval",
 
@@ -132,7 +134,7 @@ export async function GET(request) {
     if (!auth.success) {
       return NextResponse.json(
         { success: false, message: auth.message },
-        { status: auth.status }
+        { status: auth.status },
       );
     }
 
@@ -155,7 +157,7 @@ export async function GET(request) {
     console.error("PROJECT_GET_ERROR:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch projects." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
