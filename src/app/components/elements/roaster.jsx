@@ -106,15 +106,19 @@ export default function Roster({
               {item.projectTitle || '-'}
             </p>
 
-            {item.id && (
-              <p className="text-xs text-slate-400">
-                Project #{item.id}
-              </p>
-            )}
           </div>
         </div>
       );
     }
+    if (column.key === 'techStack') {
+  return (
+    <span className="text-sm text-slate-600">
+      {Array.isArray(item.techStack)
+        ? item.techStack.join('')
+        : '-'}
+    </span>
+  );
+}
 
     /*
      * =========================
@@ -164,11 +168,14 @@ export default function Roster({
     if (column.key === 'status') {
       const statusStyles = {
         Verified: 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100',
-        Pending: 'bg-amber-50 text-amber-600 ring-1 ring-amber-100',
+        'Pending Approval':
+    'bg-amber-50 text-amber-600 ring-1 ring-amber-100',
         'Changes Required':
           'bg-orange-50 text-orange-600 ring-1 ring-orange-100',
         Placed: 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100',
         Looking: 'bg-orange-50 text-orange-primary',
+            Approved:
+  'bg-green text-emerald-600 ring-1 ring-emerald-100',
       };
 
       return (
@@ -387,9 +394,11 @@ if (column.key === 'contact') {
                   placeholder,
                 } = filter;
                 
-const options = Array.isArray(filter.options)
-  ? filter.options
-  : [];
+const options = filter.dependsOn
+  ? filter.options?.[filters[filter.dependsOn]] || []
+  : Array.isArray(filter.options)
+    ? filter.options
+    : [];
                 
 
                 return (

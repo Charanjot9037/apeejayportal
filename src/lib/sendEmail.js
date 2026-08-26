@@ -71,3 +71,202 @@ export async function sendPasswordResetEmail(email, resetUrl) {
     `,
   });
 }
+export async function sendMentorStatusUpdateEmail({
+  email,
+  studentName,
+  projectTitle,
+  mentorName,
+  status,
+}) {
+  await transporter.sendMail({
+    from: `"Apeejay Student Portal" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `Project Status Updated - ${projectTitle}`,
+
+    html: `
+      <div style="
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: auto;
+        padding: 30px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background-color: #ffffff;
+      ">
+
+        <h2 style="
+          color: #1d4ed8;
+          margin-bottom: 20px;
+        ">
+          Project Status Updated
+        </h2>
+
+        <p>
+          Hello <strong>${studentName || "Student"}</strong>,
+        </p>
+
+        <p>
+  Your mentor 
+  <strong>${mentorName}</strong>
+  has updated the status of your project.
+</p>
+
+        <div style="
+          margin: 24px 0;
+          padding: 18px;
+          background-color: #f8fafc;
+          border-radius: 8px;
+        ">
+
+          <p style="margin: 0 0 10px;">
+            <strong>Project:</strong>
+            ${projectTitle}
+          </p>
+
+          <p style="margin: 0;">
+            <strong>Status:</strong>
+            <span style="
+              color: #f2792a;
+              font-weight: 600;
+            ">
+              ${status}
+            </span>
+          </p>
+           <p style="margin: 0 0 10px;">
+    <strong>Mentor:</strong>
+    ${mentorName}
+  </p>
+
+        </div>
+
+
+        <hr style="
+          border: none;
+          border-top: 1px solid #e2e8f0;
+          margin: 25px 0;
+        " />
+
+        <p style="
+          font-size: 12px;
+          color: #777;
+        ">
+          Apeejay Student Portal
+        </p>
+
+      </div>
+    `,
+  });
+}
+export async function sendMentorFeedbackEmail({
+  email,
+  studentName,
+  projectTitle,
+  mentorName,
+  comment,
+}) {
+  await transporter.sendMail({
+    from: `"Apeejay Student Portal" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `New Mentor Feedback - ${projectTitle}`,
+
+    html: `
+      <div style="
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: auto;
+        padding: 30px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background-color: #ffffff;
+      ">
+
+        <h2 style="
+          color: #1d4ed8;
+          margin-bottom: 20px;
+        ">
+          New Mentor Feedback
+        </h2>
+
+        <p>
+          Hello <strong>${studentName || "Student"}</strong>,
+        </p>
+
+       <p>
+  Your mentor 
+  <strong>${mentorName}</strong>
+  has submitted new feedback for your project.
+</p>
+
+        <div style="
+          margin: 24px 0;
+          padding: 20px;
+          background-color: #fff7ed;
+          border-left: 4px solid #f2792a;
+          border-radius: 6px;
+        ">
+
+          <p style="
+            margin: 0 0 10px;
+            font-weight: 600;
+            color: #334155;
+          ">
+            Project
+          </p>
+
+          <p style="
+            margin: 0 0 18px;
+            color: #475569;
+          ">
+            ${projectTitle}
+          </p>
+          <p style="
+    margin: 0 0 10px;
+    font-weight: 600;
+    color: #334155;
+  ">
+    Mentor
+  </p>
+
+  <p style="
+    margin: 0 0 18px;
+    color: #475569;
+  ">
+    ${mentorName}
+  </p>
+
+          <p style="
+            margin: 0 0 10px;
+            font-weight: 600;
+            color: #334155;
+          ">
+            Mentor Feedback
+          </p>
+
+          <p style="
+            margin: 0;
+            color: #475569;
+            line-height: 1.6;
+          ">
+            ${comment}
+          </p>
+
+        </div>
+
+
+        <hr style="
+          border: none;
+          border-top: 1px solid #e2e8f0;
+          margin: 25px 0;
+        " />
+
+        <p style="
+          font-size: 12px;
+          color: #777;
+        ">
+          Apeejay Student Portal
+        </p>
+
+      </div>
+    `,
+  });
+}
