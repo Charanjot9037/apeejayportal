@@ -175,6 +175,20 @@ const ProjectSchema = new mongoose.Schema(
       default: null,
     },
 
+    presentationFile2: {
+  type: CloudinaryFileSchema,
+  default: null,
+},
+
+synopsisFile2: {
+  type: CloudinaryFileSchema,
+  default: null,
+},
+
+reportFile2: {
+  type: CloudinaryFileSchema,
+  default: null,
+},
     /* =====================================================
        STATUS
     ===================================================== */

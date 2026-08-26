@@ -8,24 +8,25 @@ export default function MediaDocumentsSection({
   formik,
   getFileError,
   isEdit,
+  viewerRole, // "owner" | "teamMember" | "viewer"
+  teamMemberName, // pass project's team member's display name
 }) {
   const [uploading, setUploading] = useState({
     presentationFile: false,
     synopsisFile: false,
     reportFile: false,
+    presentationFile2: false,
+    synopsisFile2: false,
+    reportFile2: false,
   });
 
   const uploadDocument = async (file, fieldName) => {
     if (!file) return;
 
     try {
-      setUploading((prev) => ({
-        ...prev,
-        [fieldName]: true,
-      }));
+      setUploading((prev) => ({ ...prev, [fieldName]: true }));
 
       const formData = new FormData();
-
       formData.append("file", file);
       formData.append("type", "project-document");
 
@@ -48,25 +49,21 @@ export default function MediaDocumentsSection({
       });
 
       formik.setFieldTouched(fieldName, true, false);
-
       toast.success(`${file.name} uploaded successfully`);
     } catch (error) {
       console.error(`${fieldName} upload error:`, error);
-
       toast.error(error.message || "File upload failed");
-
-      // Don't destroy the old file if upload fails
     } finally {
-      setUploading((prev) => ({
-        ...prev,
-        [fieldName]: false,
-      }));
+      setUploading((prev) => ({ ...prev, [fieldName]: false }));
     }
   };
 
   const removeFile = (fieldName) => {
     formik.setFieldValue(fieldName, null);
   };
+
+  const isOwnerFieldsDisabled = viewerRole === "teamMember";
+  const isTeamMemberFieldsDisabled = viewerRole === "owner";
 
   return (
     <section className="mt-6">
@@ -76,49 +73,99 @@ export default function MediaDocumentsSection({
         </span>
       </h2>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-        {/* PRESENTATION */}
-
+      {/* OWNER'S DOCUMENTS */}
+      <h3 className="mt-4 text-sm font-semibold text-slate-700">
+        Your Documents
+      </h3>
+      <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-3">
         <DocumentUpload
           title="PPT Presentation"
           description="PPT / PPTX • Max 10MB"
           accept=".ppt,.pptx"
           file={formik.values.presentationFile}
+          idSuffix="owner"
           error={getFileError("presentationFile")}
           loading={uploading.presentationFile}
-
+          disabled={isOwnerFieldsDisabled}
           onChange={(file) => uploadDocument(file, "presentationFile")}
           onRemove={() => removeFile("presentationFile")}
         />
-
-        {/* SYNOPSIS */}
 
         <DocumentUpload
           title="Project Synopsis"
           description="PDF • Max 5MB"
           accept=".pdf"
           file={formik.values.synopsisFile}
+          idSuffix="owner"
           error={getFileError("synopsisFile")}
           loading={uploading.synopsisFile}
-
+          disabled={isOwnerFieldsDisabled}
           onChange={(file) => uploadDocument(file, "synopsisFile")}
           onRemove={() => removeFile("synopsisFile")}
         />
-
-        {/* REPORT */}
 
         <DocumentUpload
           title="Final Project Report"
           description="PDF • Max 20MB"
           accept=".pdf"
           file={formik.values.reportFile}
+          idSuffix="owner"
           error={getFileError("reportFile")}
           loading={uploading.reportFile}
-
+          disabled={isOwnerFieldsDisabled}
           onChange={(file) => uploadDocument(file, "reportFile")}
           onRemove={() => removeFile("reportFile")}
         />
       </div>
+
+      {/* TEAM MEMBER'S DOCUMENTS */}
+      {teamMemberName && (
+        <>
+          <h3 className="mt-6 text-sm font-semibold text-slate-700">
+            {teamMemberName}&apos;s Documents
+          </h3>
+          <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <DocumentUpload
+              title="PPT Presentation"
+              description="PPT / PPTX • Max 10MB"
+              accept=".ppt,.pptx"
+              file={formik.values.presentationFile2}
+               idSuffix="member"
+              error={getFileError("presentationFile2")}
+              loading={uploading.presentationFile2}
+              disabled={isTeamMemberFieldsDisabled}
+              onChange={(file) => uploadDocument(file, "presentationFile2")}
+              onRemove={() => removeFile("presentationFile2")}
+            />
+
+            <DocumentUpload
+              title="Project Synopsis"
+              description="PDF • Max 5MB"
+              accept=".pdf"
+              file={formik.values.synopsisFile2}
+               idSuffix="member"
+              error={getFileError("synopsisFile2")}
+              loading={uploading.synopsisFile2}
+              disabled={isTeamMemberFieldsDisabled}
+              onChange={(file) => uploadDocument(file, "synopsisFile2")}
+              onRemove={() => removeFile("synopsisFile2")}
+            />
+
+            <DocumentUpload
+              title="Final Project Report"
+              description="PDF • Max 20MB"
+              accept=".pdf"
+              file={formik.values.reportFile2}
+               idSuffix="member"
+              error={getFileError("reportFile2")}
+              loading={uploading.reportFile2}
+              disabled={isTeamMemberFieldsDisabled}
+              onChange={(file) => uploadDocument(file, "reportFile2")}
+              onRemove={() => removeFile("reportFile2")}
+            />
+          </div>
+        </>
+      )}
     </section>
   );
 }

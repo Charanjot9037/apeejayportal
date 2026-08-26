@@ -15,9 +15,17 @@ import FormActions from "./handlers/sections/FormAction";
 
    All form state and handlers live in useAddProjectForm.
    This component is just layout + composition of sections.
+
+   viewerRole / teamMemberName come from the parent page,
+   which fetches the project via GET /api/projects/[id]
+   (that route now returns { project, viewerRole }).
 ========================================================= */
 
-export default function AddProjectForm({ mode = "create", project = null }) {
+export default function AddProjectForm({
+  mode = "create",
+  project = null,
+  viewerRole = "owner",
+}) {
   const {
     formik,
     isEdit,
@@ -28,43 +36,50 @@ export default function AddProjectForm({ mode = "create", project = null }) {
     getTeamError,
     getFileError,
   } = useAddProjectForm({ mode, project });
+
   console.log("errors", formik.errors);
+
+  const teamMemberName =
+    project?.teamMembers?.fullName ||
+    project?.teamMembers?.userId?.name ||
+    (project?.teamMembers ? "Team Member" : null);
+
   return (
     <div className="min-h-full">
-     
-        <FormHeader isEdit={isEdit} />
+      <FormHeader isEdit={isEdit} />
 
-        <form
-          onSubmit={formik.handleSubmit}
-          noValidate
-          className="rounded-md border border-slate-300 bg-white p-5 shadow-sm"
-        >
-          <BasicInfoSection formik={formik} />
+      <form
+        onSubmit={formik.handleSubmit}
+        noValidate
+        className="rounded-md border border-slate-300 bg-white p-5 shadow-sm"
+      >
+        <BasicInfoSection formik={formik} />
 
-          <TechnicalDetailsSection
-            formik={formik}
-            addTechnology={addTechnology}
-            removeTechnology={removeTechnology}
-          />
+        <TechnicalDetailsSection
+          formik={formik}
+          addTechnology={addTechnology}
+          removeTechnology={removeTechnology}
+        />
 
-          <CollaborationSection
-            formik={formik}
-            addTeamMember={addTeamMember}
-            removeTeamMember={removeTeamMember}
-            getTeamError={getTeamError}
-          />
+        <CollaborationSection
+          formik={formik}
+          addTeamMember={addTeamMember}
+          removeTeamMember={removeTeamMember}
+          getTeamError={getTeamError}
+        />
 
-          <ProjectImagesSection formik={formik} isEdit={isEdit} />
+        <ProjectImagesSection formik={formik} isEdit={isEdit} />
 
-          <MediaDocumentsSection
-            formik={formik}
-            isEdit={isEdit}
-            getFileError={getFileError}
-          />
+        <MediaDocumentsSection
+          formik={formik}
+          isEdit={isEdit}
+          getFileError={getFileError}
+          viewerRole={viewerRole}
+          teamMemberName={teamMemberName}
+        />
 
-          <FormActions formik={formik} isEdit={isEdit} />
-        </form>
-      
+        <FormActions formik={formik} isEdit={isEdit} />
+      </form>
     </div>
   );
 }

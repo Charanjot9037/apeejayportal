@@ -12,7 +12,14 @@ import { statusStyles } from "../../helpers";
    DETAIL HEADER
 ========================================================= */
 
-export default function DetailHeader({ project, deleting, onDelete }) {
+export default function DetailHeader({
+  project,
+  deleting,
+  onDelete,
+  viewerRole,
+}) {
+  const isOwner = viewerRole === "owner";
+
   return (
     <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
      
@@ -51,6 +58,8 @@ export default function DetailHeader({ project, deleting, onDelete }) {
       {/* ACTION BUTTONS */}
 
       <div className="flex items-center gap-2">
+        {/* Both owner and team member can edit — their own docs are
+            gated separately inside the edit form via viewerRole */}
         <Link href={`/student/projects/${project._id}/edit`}>
           <Button className="h-9 bg-orange-500 px-4 text-xs text-white hover:bg-orange-600">
             <Pencil className="mr-2 h-3.5 w-3.5" />
@@ -58,15 +67,18 @@ export default function DetailHeader({ project, deleting, onDelete }) {
           </Button>
         </Link>
 
-        <Button
-          variant="outline"
-          onClick={onDelete}
-          disabled={deleting}
-          className="h-9 border-red-200 px-4 text-xs text-red-500 hover:bg-red-50 hover:text-red-600"
-        >
-          <Trash2 className="mr-2 h-3.5 w-3.5" />
-          {deleting ? "Deleting..." : "Delete"}
-        </Button>
+        {/* Delete is destructive and irreversible — owner only */}
+        {isOwner && (
+          <Button
+            variant="outline"
+            onClick={onDelete}
+            disabled={deleting}
+            className="h-9 border-red-200 px-4 text-xs text-red-500 hover:bg-red-50 hover:text-red-600"
+          >
+            <Trash2 className="mr-2 h-3.5 w-3.5" />
+            {deleting ? "Deleting..." : "Delete"}
+          </Button>
+        )}
       </div>
     </div>
   );

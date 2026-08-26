@@ -30,6 +30,22 @@ async function deleteFromCloudinary(publicId, resourceType = "image") {
 }
 
 /* =========================================================
+   HELPER - IS FILE DIFFERENT
+========================================================= */
+
+function isDifferentFile(oldFile, newFile) {
+  if (!oldFile?.publicId) {
+    return false;
+  }
+
+  if (!newFile?.publicId) {
+    return true;
+  }
+
+  return oldFile.publicId !== newFile.publicId;
+}
+
+/* =========================================================
    PUT - UPDATE PROJECT
 ========================================================= */
 
@@ -87,7 +103,7 @@ export async function PUT(request, context) {
 
     /* =====================================================
        ACCESS CONTROL
-       OWNER STUDENT OR ASSIGNED MENTOR
+       OWNER STUDENT, ASSIGNED MENTOR, OR TEAM MEMBER
     ===================================================== */
 
     const isOwnerStudent =
@@ -105,7 +121,16 @@ export async function PUT(request, context) {
         mentorProfile._id.toString() === project.mentor.toString();
     }
 
-    if (!isOwnerStudent && !isAssignedMentor) {
+    const currentStudentProfile = await Student.findOne({
+      userId: auth.user._id,
+    });
+
+    const isTeamMember =
+      currentStudentProfile &&
+      project.teamMembers &&
+      project.teamMembers.toString() === currentStudentProfile._id.toString();
+
+    if (!isOwnerStudent && !isAssignedMentor && !isTeamMember) {
       return NextResponse.json(
         {
           success: false,
@@ -114,6 +139,10 @@ export async function PUT(request, context) {
         { status: 403 },
       );
     }
+
+    /* =====================================================
+       PARSE BODY
+    ===================================================== */
 
     let projectData;
 
@@ -142,194 +171,189 @@ export async function PUT(request, context) {
       presentationFile,
       synopsisFile,
       reportFile,
+      presentationFile2,
+      synopsisFile2,
+      reportFile2,
     } = projectData;
 
     /* =====================================================
-       BASIC VALIDATION
+       FIELD-LEVEL PERMISSIONS
+       - Only owner/mentor can edit project details & their files
+       - Only team member/mentor can edit team member's files
+       - Team members editing files ONLY should still be allowed
+         through even though they don't own project metadata
     ===================================================== */
 
-    const user = auth.user;
-    const studentId = user._id;
-    if (!projectName || !description || !studentId) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Project name, description and student ID are required.",
-        },
-        { status: 400 },
-      );
-    }
-    const mentor1 = await User.findById(studentId).select("mentorId");
-    const teamMember = await Student.findById(teamMembers).populate({
-      path: "userId",
-      select: "_id mentorId",
-    });
+    const canEditProjectDetails = isOwnerStudent || isAssignedMentor;
+    const canEditOwnerFiles = isOwnerStudent || isAssignedMentor;
+    const canEditTeamMemberFiles = isTeamMember || isAssignedMentor;
 
     /* =====================================================
-       STUDENT OWNERSHIP CHECK
+       BASIC VALIDATION (only required when editing details)
     ===================================================== */
 
-    if (project.student.toString() !== studentId.toString()) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "You are not allowed to update this project.",
-        },
-        { status: 403 },
-      );
-    }
+    const studentId = auth.user._id;
 
-    /* =====================================================
-       TEAM VALIDATION
-    ===================================================== */
-
-    if (projectType === "team" && (!teamMembers || teamMembers.length === 0)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Team project must have at least one team member.",
-        },
-        { status: 400 },
-      );
-    }
-
-    /* =====================================================
-       CLOUDINARY FILE HELPER
-    ===================================================== */
-
-    const isDifferentFile = (oldFile, newFile) => {
-      if (!oldFile?.publicId) {
-        return false;
+    if (canEditProjectDetails) {
+      if (!projectName || !description) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Project name and description are required.",
+          },
+          { status: 400 },
+        );
       }
 
-      if (!newFile?.publicId) {
-        return true;
-      }
-
-      return oldFile.publicId !== newFile.publicId;
-    };
-
-    /* =====================================================
-       PROJECT IMAGES
-    ===================================================== */
-
-    const oldImages = project.projectImages || [];
-
-    const newImages = Array.isArray(projectImages) ? projectImages : [];
-
-    const newImageIds = new Set(
-      newImages
-        .map((image) => (typeof image === "string" ? image : image?.publicId))
-        .filter(Boolean),
-    );
-
-    /* =====================================================
-       DELETE REMOVED PROJECT IMAGES
-    ===================================================== */
-
-    for (const oldImage of oldImages) {
-      if (oldImage?.publicId && !newImageIds.has(oldImage.publicId)) {
-        await deleteFromCloudinary(
-          oldImage.publicId,
-          oldImage.resourceType || "image",
+      if (
+        projectType === "team" &&
+        (!teamMembers || teamMembers.length === 0)
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Team project must have at least one team member.",
+          },
+          { status: 400 },
         );
       }
     }
 
     /* =====================================================
-       FINAL PROJECT IMAGES
+       OWNER FILES (presentation / synopsis / report)
     ===================================================== */
 
-    const finalProjectImages = newImages;
+    if (canEditOwnerFiles) {
+      const newPresentation = presentationFile || null;
+      if (isDifferentFile(project.presentationFile, newPresentation)) {
+        await deleteFromCloudinary(
+          project.presentationFile.publicId,
+          project.presentationFile.resourceType || "raw",
+        );
+      }
+      project.presentationFile = newPresentation;
 
-    /* =====================================================
-       PRESENTATION
-    ===================================================== */
+      const newSynopsis = synopsisFile || null;
+      if (isDifferentFile(project.synopsisFile, newSynopsis)) {
+        await deleteFromCloudinary(
+          project.synopsisFile.publicId,
+          project.synopsisFile.resourceType || "raw",
+        );
+      }
+      project.synopsisFile = newSynopsis;
 
-    const oldPresentation = project.presentationFile;
+      const newReport = reportFile || null;
+      if (isDifferentFile(project.reportFile, newReport)) {
+        await deleteFromCloudinary(
+          project.reportFile.publicId,
+          project.reportFile.resourceType || "raw",
+        );
+      }
+      project.reportFile = newReport;
 
-    const newPresentation = presentationFile || null;
+      /* PROJECT IMAGES */
+      const oldImages = project.projectImages || [];
+      const newImages = Array.isArray(projectImages) ? projectImages : [];
 
-    if (isDifferentFile(oldPresentation, newPresentation)) {
-      await deleteFromCloudinary(
-        oldPresentation.publicId,
-        oldPresentation.resourceType || "raw",
+      const newImageIds = new Set(
+        newImages
+          .map((image) =>
+            typeof image === "string" ? image : image?.publicId,
+          )
+          .filter(Boolean),
       );
+
+      for (const oldImage of oldImages) {
+        if (oldImage?.publicId && !newImageIds.has(oldImage.publicId)) {
+          await deleteFromCloudinary(
+            oldImage.publicId,
+            oldImage.resourceType || "image",
+          );
+        }
+      }
+
+      project.projectImages = newImages;
     }
 
     /* =====================================================
-       SYNOPSIS
+       TEAM MEMBER FILES (presentation2 / synopsis2 / report2)
     ===================================================== */
 
-    const oldSynopsis = project.synopsisFile;
+    if (canEditTeamMemberFiles) {
+      const newPresentation2 = presentationFile2 || null;
+      if (isDifferentFile(project.presentationFile2, newPresentation2)) {
+        await deleteFromCloudinary(
+          project.presentationFile2.publicId,
+          project.presentationFile2.resourceType || "raw",
+        );
+      }
+      project.presentationFile2 = newPresentation2;
 
-    const newSynopsis = synopsisFile || null;
+      const newSynopsis2 = synopsisFile2 || null;
+      if (isDifferentFile(project.synopsisFile2, newSynopsis2)) {
+        await deleteFromCloudinary(
+          project.synopsisFile2.publicId,
+          project.synopsisFile2.resourceType || "raw",
+        );
+      }
+      project.synopsisFile2 = newSynopsis2;
 
-    if (isDifferentFile(oldSynopsis, newSynopsis)) {
-      await deleteFromCloudinary(
-        oldSynopsis.publicId,
-        oldSynopsis.resourceType || "raw",
-      );
+      const newReport2 = reportFile2 || null;
+      if (isDifferentFile(project.reportFile2, newReport2)) {
+        await deleteFromCloudinary(
+          project.reportFile2.publicId,
+          project.reportFile2.resourceType || "raw",
+        );
+      }
+      project.reportFile2 = newReport2;
     }
 
     /* =====================================================
-       REPORT
+       PROJECT DETAILS (owner/mentor only)
     ===================================================== */
 
-    const oldReport = project.reportFile;
+    if (canEditProjectDetails) {
+      const mentor1 = await User.findById(studentId).select("mentorId");
 
-    const newReport = reportFile || null;
+      let mentor2Id = project.mentor2; // keep existing by default
 
-    if (isDifferentFile(oldReport, newReport)) {
-      await deleteFromCloudinary(
-        oldReport.publicId,
-        oldReport.resourceType || "raw",
-      );
+      if (projectType === "team" && teamMembers) {
+        const teamMemberDoc = await Student.findById(teamMembers).populate({
+          path: "userId",
+          select: "_id mentorId",
+        });
+        mentor2Id = teamMemberDoc?.userId?.mentorId || null;
+      } else if (projectType !== "team") {
+        mentor2Id = null;
+      }
+
+      project.title = projectName;
+
+      project.subtitle =
+        projectType === "team" ? "Team Project • 1 Member" : "Individual Project";
+
+      project.description = description;
+
+      project.techStack = techStack || [];
+
+      project.githubLink = githubLink || "";
+
+      project.liveLink = liveDemoLink || "";
+
+      project.projectType = projectType;
+
+      project.teamMembers =
+        projectType === "team" && teamMembers ? teamMembers : null;
+
+      project.semester = semester || "";
+
+      project.mentor = mentor1.mentorId || null;
+
+      project.mentor2 = mentor2Id;
+
+      /* RESET STATUS only when project details change */
+      project.status = "Pending Approval";
     }
-
-    /* =====================================================
-       UPDATE PROJECT
-    ===================================================== */
-
-    project.title = projectName;
-
-    project.subtitle =
-      projectType === "team"
-        ? `Team Project • ${teamMembers?.length || 0} Members`
-        : "Individual Project";
-
-    project.description = description;
-
-    project.techStack = techStack || [];
-
-    project.githubLink = githubLink || "";
-
-    project.liveLink = liveDemoLink || "";
-
-    project.projectType = projectType;
-
-    project.teamMembers =
-      projectType === "team" && teamMembers ? teamMembers : null;
-
-    project.semester = semester || "";
-
-    project.mentor = mentor1.mentorId || null;
-
-    project.mentor2 = teamMember.userId.mentorId || null;
-
-    project.projectImages = finalProjectImages;
-
-    project.presentationFile = newPresentation;
-
-    project.synopsisFile = newSynopsis;
-
-    project.reportFile = newReport;
-
-    /* =====================================================
-       RESET STATUS
-    ===================================================== */
-
-    project.status = "Pending Approval";
 
     await project.save();
 
@@ -368,8 +392,6 @@ export async function GET(request, context) {
 
     const { id } = await context.params;
 
-    console.log(id);
-
     if (!id) {
       return NextResponse.json(
         {
@@ -377,6 +399,18 @@ export async function GET(request, context) {
           message: "Project ID is required.",
         },
         { status: 400 },
+      );
+    }
+
+    const auth = await authenticateUser();
+
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        { status: auth.status },
       );
     }
 
@@ -408,10 +442,40 @@ export async function GET(request, context) {
       );
     }
 
+    /* =====================================================
+       DETERMINE VIEWER ROLE
+    ===================================================== */
+
+    const currentStudentProfile = await Student.findOne({
+      userId: auth.user._id,
+    });
+
+    let viewerRole = "viewer";
+
+    if (project.student.toString() === auth.user._id.toString()) {
+      viewerRole = "owner";
+    } else if (
+      currentStudentProfile &&
+      project.teamMembers &&
+      project.teamMembers._id?.toString() ===
+        currentStudentProfile._id.toString()
+    ) {
+      viewerRole = "teamMember";
+    } else if (project.mentor) {
+      const mentorProfile = await Mentor.findOne({ userId: auth.user._id });
+      if (
+        mentorProfile &&
+        mentorProfile._id.toString() === project.mentor._id?.toString()
+      ) {
+        viewerRole = "mentor";
+      }
+    }
+
     return NextResponse.json(
       {
         success: true,
         project,
+        viewerRole,
       },
       { status: 200 },
     );
@@ -449,8 +513,20 @@ export async function DELETE(request, context) {
     }
 
     /* =====================================================
-       FIND PROJECT
+       AUTHENTICATION + OWNER-ONLY CHECK
     ===================================================== */
+
+    const auth = await authenticateUser();
+
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        { status: auth.status },
+      );
+    }
 
     const project = await Project.findById(id);
 
@@ -461,6 +537,16 @@ export async function DELETE(request, context) {
           message: "Project not found.",
         },
         { status: 404 },
+      );
+    }
+
+    if (project.student.toString() !== auth.user._id.toString()) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Only the project owner can delete this project.",
+        },
+        { status: 403 },
       );
     }
 
@@ -480,7 +566,7 @@ export async function DELETE(request, context) {
     }
 
     /* =====================================================
-       DELETE PRESENTATION
+       DELETE OWNER DOCUMENTS
     ===================================================== */
 
     if (project.presentationFile?.publicId) {
@@ -490,10 +576,6 @@ export async function DELETE(request, context) {
       );
     }
 
-    /* =====================================================
-       DELETE SYNOPSIS
-    ===================================================== */
-
     if (project.synopsisFile?.publicId) {
       await deleteFromCloudinary(
         project.synopsisFile.publicId,
@@ -501,14 +583,35 @@ export async function DELETE(request, context) {
       );
     }
 
-    /* =====================================================
-       DELETE REPORT
-    ===================================================== */
-
     if (project.reportFile?.publicId) {
       await deleteFromCloudinary(
         project.reportFile.publicId,
         project.reportFile.resourceType || "raw",
+      );
+    }
+
+    /* =====================================================
+       DELETE TEAM MEMBER DOCUMENTS
+    ===================================================== */
+
+    if (project.presentationFile2?.publicId) {
+      await deleteFromCloudinary(
+        project.presentationFile2.publicId,
+        project.presentationFile2.resourceType || "raw",
+      );
+    }
+
+    if (project.synopsisFile2?.publicId) {
+      await deleteFromCloudinary(
+        project.synopsisFile2.publicId,
+        project.synopsisFile2.resourceType || "raw",
+      );
+    }
+
+    if (project.reportFile2?.publicId) {
+      await deleteFromCloudinary(
+        project.reportFile2.publicId,
+        project.reportFile2.resourceType || "raw",
       );
     }
 
