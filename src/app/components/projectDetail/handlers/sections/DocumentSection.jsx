@@ -9,7 +9,7 @@ import DocumentItem from "../DocumentItem";
    DOCUMENTS SECTION
 ========================================================= */
 
-export default function DocumentsSection({ project, teamMemberName }) {
+export default function DocumentsSection({ project, ownerName, teamMemberName }) {
   const hasNoOwnerDocuments =
     !project.synopsisFile && !project.reportFile && !project.presentationFile;
 
@@ -27,7 +27,7 @@ export default function DocumentsSection({ project, teamMemberName }) {
         <div className="space-y-2">
           {isTeamProject && (
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Owner&apos;s Documents
+              {ownerName}&apos;s Documents
             </p>
           )}
 
