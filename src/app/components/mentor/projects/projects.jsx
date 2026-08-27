@@ -2,14 +2,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { StatCards, Roster, DashboardHeader } from "@/app/components/elements";
-import {
-  MENTOR_STAT_CARDS,
-  MENTOR_STUDENT_COLUMNS,
-  MENTOR_DASHBOARD_HEADER,
-} from "@/constants/mentorData";
+import { MENTOR_STUDENT_COLUMNS } from "@/constants/mentorData";
 import { mapMentorProjectToRoster } from "@/mappers/mentor";
 
-export default function Mentor() {
+export default function AllProject() {
   const router = useRouter();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,42 +35,14 @@ export default function Mentor() {
   }, []);
 
   const rosterData = projects.map(mapMentorProjectToRoster);
-  const totalProjects = projects.length;
-  const pendingProjects = projects.filter(
-    (project) => project.status == "Pending Approval",
-  ).length;
-  const approvedProjects = projects.filter(
-    (project) => project.status == "Approved",
-  ).length;
-  const inReviewProjects = projects.filter(
-    (project) => project.status == "In Review",
-  ).length;
+
   const handleViewProject = (item) => {
     router.push(`/mentor-dashboard/projects/${item.id}`);
   };
-  const mentorStatCards = MENTOR_STAT_CARDS.map((card) => {
-    const values = {
-      approved: approvedProjects, // put your student count here
-      projects: projects.length,
-      pending: pendingProjects,
-      inReview: inReviewProjects,
-    };
 
-    return {
-      ...card,
-      value: values[card.id],
-    };
-  });
-  const mentorDashboardHeader = {
-    ...MENTOR_DASHBOARD_HEADER,
-    actionLabel: `${pendingProjects} Pending Reviews`,
-  };
   return (
     <div className="flex h-full">
       <main className="flex-1 ">
-        <DashboardHeader {...mentorDashboardHeader} />
-        <StatCards cards={mentorStatCards} />
-
         {loading && <p>Loading students...</p>}
         {error && <p className="text-red-500">{error}</p>}
 

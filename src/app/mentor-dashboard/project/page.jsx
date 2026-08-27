@@ -1,7 +1,10 @@
-import React from 'react';
-
+import AllProject from "@/app/components/mentor/projects/projects";
 const page = () => {
-  return <div>hello</div>;
+  return (
+    <>
+      <AllProject />
+    </>
+  );
 };
 
 export default page;

@@ -265,6 +265,7 @@ const Login = () => {
             department: data.user?.department,
             program: data.user?.program,
             academicBatch: data?.user?.academicBatch,
+            profileImage: data?.user?.profileImage,
           }),
         );
 

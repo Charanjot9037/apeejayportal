@@ -1,127 +1,144 @@
-import { Users, Calendar, LayoutDashboard } from 'lucide-react';
+import { Users, Calendar, LayoutDashboard } from "lucide-react";
 
 export const mentorDashboardData = {
-  title: 'Mentor Portal',
+  title: "Mentor Portal",
 
-  subtitle: 'Academic Year 2024-25',
-
-  profileUrl: '/profile.png',
+  profileUrl: "/profile.png",
 
   navItems: [
     {
-      label: 'Dashboard',
+      label: "Dashboard",
       icon: LayoutDashboard,
-      href: '/mentor-dashboard',
+      href: "/mentor-dashboard",
     },
     {
-      label: 'Students',
+      label: "Students",
       icon: Users,
-      href: '/mentor-dashboard/addStudent',
+      href: "/mentor-dashboard/my-students",
     },
     {
-      label: 'Projects',
+      label: "Projects",
       icon: Users,
-      href: '/mentor-dashboard/project',
-    },
-    {
-      label: 'Tools',
-      icon: Calendar,
-      href: '/mentor/sessions',
+      href: "/mentor-dashboard/project",
     },
   ],
 };
 
 export const MENTOR_STAT_CARDS = [
   {
-    id: 'students',
-    title: 'Total Students',
-    value: '4,250',
-    icon: 'GraduationCap',
-    description: '+12% this year',
+    id: "projects",
+    title: "Total Projects",
+    icon: "FolderKanban",
+    description: "Uploaded Projects",
   },
-
   {
-    id: 'mentors',
-    title: 'Total Mentors',
-    value: '185',
-    icon: 'UserRound',
-    description: 'Across 15 departments',
+    id: "approved",
+    title: "Approved",
+    icon: "CheckCircle",
+    description: "Approved Projects",
   },
-
   {
-    id: 'recruiters',
-    title: 'Active Recruiters',
-    value: '342',
-    icon: 'CalendarClock',
-    description: '45 new this month',
+    id: "pending",
+    title: "Pending",
+    icon: "CalendarClock",
+    description: "Pending Projects",
   },
-
   {
-    id: 'placement-rate',
-    title: 'Placement Rate',
-    value: '88%',
-    icon: null,
-    description: 'Target: 95%',
+    id: "inReview",
+    title: "In Review",
+    icon: "Eye",
+    description: "Under review",
   },
 ];
 export const MENTOR_STUDENT_COLUMNS = [
   {
-    key: 'projectTitle',
-    label: 'Project Name',
+    key: "projectTitle",
+    label: "Project Name",
   },
   {
-    key: 'name',
-    label: 'Student Name',
-  },
-   {
-    key: 'program',
-    label: 'Program',
+    key: "name",
+    label: "Student Name",
   },
   {
-    key: 'department',
-    label: 'Department',
+    key: "program",
+    label: "Program",
   },
   {
-    key: 'semester',
-    label: 'Semester',
+    key: "department",
+    label: "Department",
   },
-{
-  key:'specialization',
-  label:'Specialization'
-},
   {
-    key: 'status',
-    label: 'Status',
+    key: "semester",
+    label: "Semester",
+  },
+  {
+    key: "specialization",
+    label: "Specialization",
+  },
+  {
+    key: "status",
+    label: "Status",
   },
 ];
 
 export const MENTOR_STUDENTS = [
   {
-    id: 'STU001',
-    name: 'Rahul Sharma',
-    major: 'Computer Science',
-    projectName: 'AI Resume Analyzer',
-    status: 'On Track',
+    id: "STU001",
+    name: "Rahul Sharma",
+    major: "Computer Science",
+    projectName: "AI Resume Analyzer",
+    status: "On Track",
   },
   {
-    id: 'STU002',
-    name: 'Priya Singh',
-    major: 'Information Technology',
-    projectName: 'Smart Campus Portal',
-    status: 'Needs Attention',
+    id: "STU002",
+    name: "Priya Singh",
+    major: "Information Technology",
+    projectName: "Smart Campus Portal",
+    status: "Needs Attention",
   },
   {
-    id: 'STU003',
-    name: 'Aman Kumar',
-    major: 'Computer Science',
-    projectName: 'Healthcare Management System',
-    status: 'Completed',
+    id: "STU003",
+    name: "Aman Kumar",
+    major: "Computer Science",
+    projectName: "Healthcare Management System",
+    status: "Completed",
   },
 ];
 
 export const MENTOR_DASHBOARD_HEADER = {
-  title: 'Mentor Dashboard',
+  title: "Mentor Dashboard",
   description:
-    'Overview of your mentees, academic progress, and mentoring activities.',
-  actionLabel: '5 Pending Reviews',
+    "Overview of your mentees, academic progress, and mentoring activities.",
+  actionLabel: "5 Pending Reviews",
 };
+
+export const MENTOR_STUDENTS_COLUMNS = [
+  {
+    key: "name",
+    label: "Student Name",
+  },
+  {
+    key: "program",
+    label: "Program",
+  },
+  {
+    key: "department",
+    label: "Department",
+  },
+  {
+    key: "specialization",
+    label: "Specialization",
+  },
+  {
+    key: "academicYear",
+    label: "Academic Year",
+  },
+  {
+    key: "lastYear",
+    label: "Last Year",
+  },
+  {
+    key: "rollNumber",
+    label: "Roll No.",
+  },
+];
