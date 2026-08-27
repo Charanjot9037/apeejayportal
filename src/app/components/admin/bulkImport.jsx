@@ -71,7 +71,7 @@ export default function BulkImport() {
 
     const reader = new FileReader();
 
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const data = event.target.result;
 
@@ -92,8 +92,26 @@ export default function BulkImport() {
         console.log("Excel rows:", rows);
         const validatedRows = studentValidationSchema(rows);
 
-        setValidatedStudents(validatedRows);
-        console.log(validatedRows);
+        const mentorResults = await validateMentors(validatedRows);
+
+        if (!mentorResults) {
+          return;
+        }
+
+        const finalRows = validatedRows.map((student, index) => {
+          const mentor = mentorResults[index];
+
+          return {
+            ...student,
+            errors: [...(student.errors || []), ...(mentor?.errors || [])],
+            isValid:
+              student.isValid &&
+              mentor?.exists === true &&
+              mentor?.nameMatches === true,
+          };
+        });
+
+        setValidatedStudents(finalRows);
         setStep(2);
       } catch (error) {
         console.error("Error reading file:", error);
@@ -220,7 +238,62 @@ export default function BulkImport() {
   const validCount = validatedStudents.filter(
     (student) => student.isValid,
   ).length;
+  const validateMentors = async (students) => {
+    try {
+      const mentors = students.map((student) => ({
+        name: student.guidename,
+        email: student.guideemail,
+      }));
 
+      const response = await fetch("/api/admin/bulkImport/validate-mentor", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          mentors,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 401) {
+        setAuthModal({
+          open: true,
+          type: "authentication",
+          message:
+            data.message || "Your session has expired. Please login again.",
+        });
+
+        return null;
+      }
+
+      if (response.status === 403) {
+        setAuthModal({
+          open: true,
+          type: "unauthorized",
+          message:
+            data.message || "You are not authorized to validate mentors.",
+        });
+
+        return null;
+      }
+
+      if (!response.ok) {
+        toast.error(data.message || "Failed to validate mentors.");
+        return null;
+      }
+
+      return data.mentors;
+    } catch (error) {
+      console.error("MENTOR_VALIDATION_ERROR:", error);
+
+      toast.error("Unable to validate mentors.");
+
+      return null;
+    }
+  };
   return (
     <div>
       <AuthGuardModal
