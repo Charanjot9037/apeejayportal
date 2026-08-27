@@ -17,7 +17,8 @@ const authSlice = createSlice({
       state.name=action.payload.name;
       state.email=action.payload.email;
       state.profileImage=action.payload.profileImage;
-      state.role=action.payload.role
+      state.role=action.payload.role;
+      state.designation=action.payload.designation;
     },
 
     logout: (state) => {
@@ -26,6 +27,7 @@ const authSlice = createSlice({
       state.email = null;   
       state.profileImage = null;
       state.role=null;
+      state.designation=null;
     },
   },
 });

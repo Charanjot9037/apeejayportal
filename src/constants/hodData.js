@@ -42,38 +42,7 @@ export const HOD_DASHBOARD_HEADER = {
   description: 'Overview of department performance and project status.',
   actionLabel: 'Export Report',
 };
-export const STAT_CARDS = [
-  {
-    id: 'students',
-    title: 'Total Students',
-    value: '4,250',
-    icon: 'GraduationCap',
-    description: '+12% this year',
-  },
 
-  {
-    id: 'mentors',
-    title: 'Total Mentors',
-    value: '185',
-    icon: 'UserRound',
-    description: 'Across 15 departments',
-  },
-
-  {
-    id: 'pending-reviews',
-    title: 'Pending Reviews',
-    value: '42',
-    icon: FileText,
-    description: '42 this week',
-  },
-
-  {
-    id: 'mentor-verified',
-    title: 'Mentor Verified',
-    value: '245',
-    icon: null,
-  },
-];
 // export const PROJECTS = [
 //   {
 //     id: 1,
@@ -288,5 +257,33 @@ export const PROJECT_COLUMNS = [
   {
     key: 'approvalDate',
     label: 'Approval Date',
+  },
+];
+// constants/hodFilters.js
+export const HOD_PROJECT_FILTERS = [
+  {
+    key: "specialization",
+    label: "Specialization",
+    placeholder: "All Specializations",
+    options: [
+      "CSE",
+      "ECE",
+      "ME",
+      "CE",
+    ],
+  },
+
+  {
+    key: "academicBatch",
+    label: "Academic Batch",
+    placeholder: "All Batches",
+    options: [
+      "2023",
+      "2024",
+      "2025",
+      "2026",
+      "2027",
+      "2028",
+    ],
   },
 ];

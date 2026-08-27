@@ -170,22 +170,22 @@ const AddMentor = () => {
                 options={[
                   {
                     value: 'ASSISTANT-PROFESSOR',
-                    label: 'Assistant professor',
+                    label: 'assistant_professor',
                   },
                   {
-                    value: 'HOD',
+                    value: 'hod',
                     label: 'HOD',
                   },
                   {
-                    value: 'DEAN',
+                    value: 'dean',
                     label: 'Dean',
                   },
                   {
-                    value: 'DIRECTOR',
+                    value: 'director',
                     label: 'Director',
                   },
                   {
-                    value: 'Engineer',
+                    value: 'engineer',
                     label: 'Engineer',
                   },
                 ]}
