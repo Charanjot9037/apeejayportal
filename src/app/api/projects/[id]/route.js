@@ -414,23 +414,27 @@ export async function GET(request, context) {
       );
     }
 
-    const project = await Project.findById(id)
-      .populate({
-        path: "mentor",
-        select: "name",
-      })
-      .populate({
-        path: "mentor2",
-        select: "name",
-      })
-      .populate({
-        path: "teamMembers",
-        select: "fullName profileImage",
-        populate: {
-          path: "userId",
-          select: "name email",
-        },
-      });
+   const project = await Project.findById(id)
+  .populate({
+    path: "student",
+    select: "name email",
+  })
+  .populate({
+    path: "mentor",
+    select: "name",
+  })
+  .populate({
+    path: "mentor2",
+    select: "name",
+  })
+  .populate({
+    path: "teamMembers",
+    select: "fullName profileImage",
+    populate: {
+      path: "userId",
+      select: "name email",
+    },
+  });
 
     if (!project) {
       return NextResponse.json(

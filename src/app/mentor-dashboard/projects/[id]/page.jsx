@@ -20,7 +20,11 @@ export default function MentorProjectDetail() {
 
   if (loading) return <LoadingState />;
   if (!project) return <NotFoundState />;
-
+ const teamMemberName =
+    project?.teamMembers?.fullName ||
+    project?.teamMembers?.userId?.name ||
+    (project?.teamMembers ? "Team Member" : null);
+     const ownerName = project?.student?.name || "Owner";
   return (
     <div className="min-h-full">
       {/* Simple read-only header — no delete/edit buttons */}
@@ -41,8 +45,11 @@ export default function MentorProjectDetail() {
           <OverviewSection project={project} />
           <TechnologiesSection project={project} />
           <GallerySection project={project} />
-          <DocumentsSection project={project} />
-        </div>
+  <DocumentsSection
+            project={project}
+            ownerName={ownerName}
+            teamMemberName={teamMemberName}
+          />        </div>
 
         <div className="space-y-4">
           <MentorReviewSection project={project} onUpdated={setProject} />

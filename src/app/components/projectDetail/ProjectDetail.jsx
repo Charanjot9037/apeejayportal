@@ -38,7 +38,7 @@ export default function ProjectDetail() {
     project?.teamMembers?.fullName ||
     project?.teamMembers?.userId?.name ||
     (project?.teamMembers ? "Team Member" : null);
-
+  const ownerName = project?.student?.name || "Owner";
   return (
     <div className="min-h-full ">
       <DetailHeader
@@ -55,8 +55,11 @@ export default function ProjectDetail() {
 
           <TechnologiesSection project={project} />
           <GallerySection project={project} />
-          <DocumentsSection project={project} teamMemberName={teamMemberName} />
-        </div>
+  <DocumentsSection
+            project={project}
+            ownerName={ownerName}
+            teamMemberName={teamMemberName}
+          />        </div>
 
         {/* RIGHT COLUMN */}
         <div className="space-y-4">
