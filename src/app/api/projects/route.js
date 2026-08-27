@@ -137,6 +137,18 @@ export async function GET(request) {
         { status: auth.status },
       );
     }
+    const user = auth.user;
+    if (user.role !== "student") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Access denied. Students only are allowed.",
+        },
+        {
+          status: 403,
+        },
+      );
+    }
 
     const userId = auth.user._id;
 

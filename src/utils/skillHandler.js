@@ -1,11 +1,7 @@
 export const getSkillList = (skills) => {
   if (Array.isArray(skills)) {
     return skills
-      .flatMap((skill) =>
-        typeof skill === "string"
-          ? skill.split(",")
-          : []
-      )
+      .flatMap((skill) => (typeof skill === "string" ? skill.split(",") : []))
       .map((skill) => skill.trim())
       .filter(Boolean);
   }
@@ -19,3 +15,5 @@ export const getSkillList = (skills) => {
 
   return [];
 };
+
+

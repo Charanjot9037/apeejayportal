@@ -26,8 +26,8 @@ export default function ResumeDocuments({ data, onSave }) {
 
   const formik = useFormik({
     initialValues: {
-      resumeUrl: data.resume || "",
-      resumeName: data.resumeName || "",
+      resumeUrl: data?.resume || null,
+      resumeName: data?.resumeName || "",
       resumeFile: null,
     },
 
@@ -54,7 +54,11 @@ export default function ResumeDocuments({ data, onSave }) {
       }
     },
   });
-
+  const hasResume =
+    typeof formik.values.resumeUrl === "string" &&
+    formik.values.resumeUrl.trim() !== "" &&
+    typeof formik.values.resumeName === "string" &&
+    formik.values.resumeName.trim() !== "";
   // ================================================
   // EDIT
   // ================================================
@@ -163,8 +167,6 @@ export default function ResumeDocuments({ data, onSave }) {
           </button>
         ) : (
           <div className="flex items-center gap-2">
-            {/* CANCEL */}
-
             <button
               type="button"
               onClick={handleCancel}
@@ -216,9 +218,7 @@ export default function ResumeDocuments({ data, onSave }) {
               </p>
 
               <p className="mt-0.5 text-[9px] text-gray-400">
-                {formik.values.resumeUrl
-                  ? "Resume uploaded"
-                  : "No resume uploaded"}
+                {hasResume ? "Resume uploaded" : "No resume uploaded"}
               </p>
             </div>
           </div>
@@ -264,33 +264,31 @@ export default function ResumeDocuments({ data, onSave }) {
               VIEW / DOWNLOAD
           ======================================== */}
 
-          {!isEditing &&
-            formik.values.resumeUrl &&
-            formik.values.resumeName && (
-              <div className="mt-2.5 grid grid-cols-2 gap-1.5">
-                <div>
-                  <a
-                    href={formik.values.resumeUrl}
-                    download
-                    className="flex h-7 items-center justify-center gap-1 rounded-md border border-gray-400 text-[10px] font-medium text-gray-700 transition hover:bg-gray-100"
-                  >
-                    <Download size={12} />
-                    Download
-                  </a>
-                </div>
-
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => setShowResumeModal(true)}
-                    className="flex h-7 w-full items-center justify-center gap-1 rounded-md bg-orange-500 text-[10px] font-medium text-white transition hover:bg-orange-600"
-                  >
-                    <Eye size={12} />
-                    View Resume
-                  </button>
-                </div>
+          {!isEditing && hasResume && (
+            <div className="mt-2.5 grid grid-cols-2 gap-1.5">
+              <div>
+                <a
+                  href={formik.values.resumeUrl}
+                  download
+                  className="flex h-7 items-center justify-center gap-1 rounded-md border border-gray-400 text-[10px] font-medium text-gray-700 transition hover:bg-gray-100"
+                >
+                  <Download size={12} />
+                  Download
+                </a>
               </div>
-            )}
+
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowResumeModal(true)}
+                  className="flex h-7 w-full items-center justify-center gap-1 rounded-md bg-orange-500 text-[10px] font-medium text-white transition hover:bg-orange-600"
+                >
+                  <Eye size={12} />
+                  View Resume
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </form>
       {showResumeModal && (

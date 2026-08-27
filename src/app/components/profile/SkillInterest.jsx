@@ -24,16 +24,13 @@ const defaultData = {
   ],
 };
 
-export default function SkillsAndInterests({
-  data ,
-  onSave,
-}) {
+export default function SkillsAndInterests({ data = {}, onSave }) {
   const [isEditing, setIsEditing] = useState(false);
 
   const formik = useFormik({
     initialValues: {
-      technicalSkills: data.skills || [],
-      interests: data.interests || [],
+      technicalSkills: data?.skills || [],
+      interests: data?.interests || [],
     },
 
     enableReinitialize: true,
@@ -51,26 +48,19 @@ export default function SkillsAndInterests({
     },
   });
 
-
-
   function handleEdit() {
     setIsEditing(true);
   }
-
 
   function handleCancel() {
     formik.resetForm();
     setIsEditing(false);
   }
 
-
   function addSkill(skill) {
     const trimmedSkill = skill.trim();
 
-    if (
-      trimmedSkill &&
-      !formik.values.technicalSkills.includes(trimmedSkill)
-    ) {
+    if (trimmedSkill && !formik.values.technicalSkills.includes(trimmedSkill)) {
       formik.setFieldValue("technicalSkills", [
         ...formik.values.technicalSkills,
         trimmedSkill,
@@ -78,24 +68,18 @@ export default function SkillsAndInterests({
     }
   }
 
-
-
   function removeSkill(index) {
     const updatedSkills = formik.values.technicalSkills.filter(
-      (_, i) => i !== index
+      (_, i) => i !== index,
     );
 
     formik.setFieldValue("technicalSkills", updatedSkills);
   }
 
-
   function addInterest(interest) {
     const trimmedInterest = interest.trim();
 
-    if (
-      trimmedInterest &&
-      !formik.values.interests.includes(trimmedInterest)
-    ) {
+    if (trimmedInterest && !formik.values.interests.includes(trimmedInterest)) {
       formik.setFieldValue("interests", [
         ...formik.values.interests,
         trimmedInterest,
@@ -103,10 +87,9 @@ export default function SkillsAndInterests({
     }
   }
 
-
   function removeInterest(index) {
     const updatedInterests = formik.values.interests.filter(
-      (_, i) => i !== index
+      (_, i) => i !== index,
     );
 
     formik.setFieldValue("interests", updatedInterests);
@@ -174,10 +157,7 @@ export default function SkillsAndInterests({
           FORM
       ============================================ */}
 
-      <form
-        id="skills-interests-form"
-        onSubmit={formik.handleSubmit}
-      >
+      <form id="skills-interests-form" onSubmit={formik.handleSubmit}>
         {/* ==========================================
             TECHNICAL SKILLS
         ========================================== */}
@@ -214,14 +194,7 @@ export default function SkillsAndInterests({
    REUSABLE SKILL SECTION
 ================================================= */
 
-function SkillSection({
-  title,
-  items,
-  editing,
-  type,
-  onAdd,
-  onRemove,
-}) {
+function SkillSection({ title, items, editing, type, onAdd, onRemove }) {
   const [inputValue, setInputValue] = useState("");
 
   function handleAdd() {
@@ -242,9 +215,7 @@ function SkillSection({
     <div>
       {/* LABEL */}
 
-      <p className="mb-2 text-sm font-medium text-gray-600">
-        {title}
-      </p>
+      <p className="mb-2 text-sm font-medium text-gray-600">{title}</p>
 
       {/* ==========================================
           TAGS
@@ -301,20 +272,13 @@ function SkillSection({
    REUSABLE TAG
 ================================================= */
 
-function SkillTag({
-  text,
-  type,
-  editing,
-  onRemove,
-}) {
+function SkillTag({ text, type, editing, onRemove }) {
   const isSkill = type === "skill";
 
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
-        isSkill
-          ? "bg-orange-50 text-orange-500"
-          : "bg-blue-50 text-blue-600"
+        isSkill ? "bg-orange-50 text-orange-500" : "bg-blue-50 text-blue-600"
       }`}
     >
       {text}

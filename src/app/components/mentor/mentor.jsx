@@ -8,28 +8,72 @@ import {
   MENTOR_DASHBOARD_HEADER,
 } from "@/constants/mentorData";
 import { mapMentorProjectToRoster } from "@/mappers/mentor";
-
+import { apiRequest } from "@/lib/apiRequest";
+import AuthGuardModal from "../AuthGuardModal";
 export default function Mentor() {
   const router = useRouter();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [authModal, setAuthModal] = useState({
+    open: false,
+    type: null,
+    message: "",
+  });
 
   useEffect(() => {
     const fetchMentorProjects = async () => {
       try {
-        const res = await fetch("/api/projects/mentor");
-        const data = await res.json();
+        const result = await apiRequest("/api/projects/mentor", {
+          method: "GET",
+        });
 
-        if (!data.success) {
-          setError(data.message || "Failed to load projects.");
+        console.log("MENTOR PROJECT RESULT:", result);
+
+        // =========================
+        // NOT AUTHENTICATED
+        // =========================
+
+        if (result.status === 401) {
+          setAuthModal({
+            open: true,
+            type: "authentication",
+            message:
+              result.message || "Your session has expired. Please login again.",
+          });
+
           return;
         }
 
-        setProjects(data.projects);
+        // =========================
+        // NOT AUTHORIZED
+        // =========================
+
+        if (result.status === 403) {
+          setAuthModal({
+            open: true,
+            type: "unauthorized",
+            message:
+              result.message ||
+              "You are not authorized to access the mentor dashboard.",
+          });
+
+          return;
+        }
+
+        // =========================
+        // SUCCESS
+        // =========================
+
+        const mentorProjects = result?.data?.projects || [];
+
+        setProjects(mentorProjects);
       } catch (err) {
-        console.error(err);
-        setError("Something went wrong while fetching projects.");
+        console.error("MENTOR_PROJECT_ERROR:", err);
+
+        setError(
+          err.message || "Something went wrong while fetching projects.",
+        );
       } finally {
         setLoading(false);
       }
@@ -37,7 +81,6 @@ export default function Mentor() {
 
     fetchMentorProjects();
   }, []);
-
   const rosterData = projects.map(mapMentorProjectToRoster);
   const totalProjects = projects.length;
   const pendingProjects = projects.filter(
@@ -90,6 +133,20 @@ export default function Mentor() {
           />
         )}
       </main>
+      <AuthGuardModal
+        open={authModal.open}
+        type={authModal.type}
+        message={authModal.message}
+        onClose={() =>
+          setAuthModal({
+            open: false,
+            type: null,
+            message: "",
+          })
+        }
+        onLogin={() => router.push("/login")}
+         onBack={() => router.back()}
+      />
     </div>
   );
 }
