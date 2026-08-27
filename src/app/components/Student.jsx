@@ -19,6 +19,9 @@ import {
   STUDENT_DASHBOARD_HEADER,
   dashboardStats,
 } from "@/constants/studentdashboard";
+import { apiRequest } from "@/lib/apiRequest";
+import AuthGuardModal from "./AuthGuardModal";
+
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
@@ -27,21 +30,41 @@ export default function DashboardContent() {
   const router = useRouter();
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
+  const [authModal, setAuthModal] = useState({
+    open: false,
+    type: null,
+    message: "",
+  });
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch("/api/projects", {
-          credentials: "include", // ensures session cookie is sent
+        const result = await apiRequest("/api/projects", {
+          method: "GET",
         });
 
-        const result = await response.json();
+        if (result.status === 401) {
+          setAuthModal({
+            open: true,
+            type: "authentication",
+            message:
+              result.message || "Your session has expired. Please login again.",
+          });
 
-        if (!response.ok) {
-          throw new Error(result.message || "Failed to fetch projects");
+          return;
         }
+        if (result.status === 403) {
+          setAuthModal({
+            open: true,
+            type: "unauthorized",
+            message:
+              result.message || "You are not authorized to access this page.",
+          });
 
+          return;
+        }
+        const projects = result.data.projects;
         setProjects(
-          result.projects.map((project) => ({
+          projects.map((project) => ({
             ...project,
             id: project._id,
             title: project.title,
@@ -82,94 +105,110 @@ export default function DashboardContent() {
     };
   });
   return (
-    <div className="min-h-screen w-full  ">
-      <div className=" ">
-        <DashboardHeader
-          {...STUDENT_DASHBOARD_HEADER}
-          onAction={() => {
-            router.push("/profile");
-          }}
-        />
-        {/* <DashboardCards /> */}
-        <StatCards cards={studentStatCards} />
+    <>
+      <AuthGuardModal
+        open={authModal.open}
+        type={authModal.type}
+        message={authModal.message}
+        onClose={() =>
+          setAuthModal({
+            open: false,
+            type: null,
+            message: "",
+          })
+        }
+        onBack={() => router.back()}
+        onLogin={() => router.push("/login")}
+      />
 
-        <div className="grid grid-cols-1 mt-4 gap-5 lg:grid-cols-3">
-          {/* Left column */}
+      <div className="min-h-screen w-full  ">
+        <div className=" ">
+          <DashboardHeader
+            {...STUDENT_DASHBOARD_HEADER}
+            onAction={() => {
+              router.push("/profile");
+            }}
+          />
+          {/* <DashboardCards /> */}
+          <StatCards cards={studentStatCards} />
 
-          {/* Right column */}
-          <div className="flex flex-col  gap-5 lg:col-span-4">
-            <Card className="flex-1">
-              <CardContent>
-                <div className=" flex border-b-2 p-1 items-center justify-between">
-                  <h2 className="text-base font-semibold text-primary">
-                    Featured Projects Portfolio
-                  </h2>
-                  <Link href="/student/projects/add">
-                    <Button
-                      variant="ghost"
-                      className="flex items-center gap-1 text-sm font-medium bg-primary-orange text-white hover:text-orange-600"
-                    >
-                      Add Now
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-                <div className="divide-y divide-slate-100">
-                  {loadingProjects ? (
-                    <div className="py-6 text-center text-sm text-slate-400">
-                      Loading projects...
-                    </div>
-                  ) : projects.length === 0 ? (
-                    <div className="py-6 text-center text-sm text-slate-400">
-                      No projects added yet.
-                    </div>
-                  ) : (
-                    projects.map((project) => (
-                      <div
-                        key={project._id || project.id || project.title}
-                        className="flex items-center justify-between py-3"
+          <div className="grid grid-cols-1 mt-4 gap-5 lg:grid-cols-3">
+            {/* Left column */}
+
+            {/* Right column */}
+            <div className="flex flex-col  gap-5 lg:col-span-4">
+              <Card className="flex-1">
+                <CardContent>
+                  <div className=" flex border-b-2 p-1 items-center justify-between">
+                    <h2 className="text-base font-semibold text-primary">
+                      Featured Projects Portfolio
+                    </h2>
+                    <Link href="/student/projects/add">
+                      <Button
+                        variant="ghost"
+                        className="flex items-center gap-1 text-sm font-medium bg-primary-orange text-white hover:text-orange-600"
                       >
-                        <div>
-                          <p className="text-sm font-medium text-slate-800">
-                            {project.title}
-                          </p>
-
-                          <p className="text-xs text-slate-500">
-                            {project.subtitle}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <Badge
-                            className={
-                              statusStyles[project.status] ||
-                              "bg-slate-100 text-slate-600"
-                            }
-                          >
-                            {project.status}
-                          </Badge>
-
-                          <Link href={`/student/projects/${project._id}`}>
-                            <Button
-                              variant="ghost"
-                              className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-orange-500"
-                            >
-                              <Eye className="h-4 w-4" />
-                              View
-                            </Button>
-                          </Link>
-                        </div>
+                        Add Now
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="divide-y divide-slate-100">
+                    {loadingProjects ? (
+                      <div className="py-6 text-center text-sm text-slate-400">
+                        Loading projects...
                       </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                    ) : projects.length === 0 ? (
+                      <div className="py-6 text-center text-sm text-slate-400">
+                        No projects added yet.
+                      </div>
+                    ) : (
+                      projects.map((project) => (
+                        <div
+                          key={project._id || project.id || project.title}
+                          className="flex items-center justify-between py-3"
+                        >
+                          <div>
+                            <p className="text-sm font-medium text-slate-800">
+                              {project.title}
+                            </p>
 
-        {/* Bottom row: Mentor Feedback / Upcoming Events */}
-        {/* <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+                            <p className="text-xs text-slate-500">
+                              {project.subtitle}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <Badge
+                              className={
+                                statusStyles[project.status] ||
+                                "bg-slate-100 text-slate-600"
+                              }
+                            >
+                              {project.status}
+                            </Badge>
+
+                            <Link href={`/student/projects/${project._id}`}>
+                              <Button
+                                variant="ghost"
+                                className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-orange-500"
+                              >
+                                <Eye className="h-4 w-4" />
+                                View
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Bottom row: Mentor Feedback / Upcoming Events */}
+          {/* <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
           <Card>
             <CardContent>
               <h2 className="mb-3 text-base font-semibold text-blue-900">
@@ -219,7 +258,8 @@ export default function DashboardContent() {
             </CardContent>
           </Card>
         </div> */}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

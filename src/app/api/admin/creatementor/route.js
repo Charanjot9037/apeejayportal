@@ -1,7 +1,7 @@
 import { connectDB } from "@/lib/db";
 import User from "../../../../models/user";
 import Mentor from "@/models/mentor";
-
+import { authenticateUser } from "@/lib/authentication";
 import bcrypt from "bcrypt";
 
 import { generateTemporaryPassword } from "@/lib/generatePassword";
@@ -10,8 +10,23 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     await connectDB();
-
-    const { name, email, mobileNumber, department, designation, password } =
+    const auth = await authenticateUser();
+    if (!auth.success) {
+      return NextResponse.json(
+        { success: false, message: auth.message },
+        {
+          status: auth.status,
+        },
+      );
+    }
+    const adminuser = auth.user;
+    if (adminuser.role != "mentor") {
+      return NextResponse.json(
+        { success: false, messgae: "not authorized" },
+        { status: 403 },
+      );
+    }
+    const { name, email, mobileNumber, department, designation } =
       await req.json();
 
     if (!name || !email || !mobileNumber || !department || !designation) {

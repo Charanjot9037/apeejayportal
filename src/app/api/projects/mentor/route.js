@@ -17,6 +17,18 @@ export async function GET(request) {
         { status: auth.status },
       );
     }
+    const user = auth.user;
+    if (user.role !== "mentor") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Access denied. Students only are allowed.",
+        },
+        {
+          status: 403,
+        },
+      );
+    }
 
     const projects = await Project.find({ mentor: auth.user._id })
       .populate({ path: "student", select: "name email " })

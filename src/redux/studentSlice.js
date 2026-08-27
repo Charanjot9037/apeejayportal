@@ -30,6 +30,26 @@ const studentSlice = createSlice({
       state.program = program;
       state.academicBatch = academicBatch;
     },
+    updateStudentProfile: (state, action) => {
+      const { profileImage, department, program, academicBatch } =
+        action.payload;
+
+      if (profileImage !== undefined) {
+        state.profileImage = profileImage;
+      }
+
+      if (department !== undefined) {
+        state.department = department;
+      }
+
+      if (program !== undefined) {
+        state.program = program;
+      }
+
+      if (academicBatch !== undefined) {
+        state.academicBatch = academicBatch;
+      }
+    },
 
     clearStudentProfile: (state) => {
       state.studentId = null;
@@ -42,6 +62,7 @@ const studentSlice = createSlice({
   },
 });
 
-export const { setStudentProfile, clearStudentProfile } = studentSlice.actions;
+export const { setStudentProfile, clearStudentProfile, updateStudentProfile } =
+  studentSlice.actions;
 
 export default studentSlice.reducer;

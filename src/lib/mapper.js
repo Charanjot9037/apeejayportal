@@ -74,6 +74,81 @@ export function mapStudentToProfile(student) {
   };
 }
 
+export function updatemapStudentToProfile(student) {
+  if (!student) {
+    return null;
+  }
+  const complete = calculateProfileCompletion(student);
+  return {
+    // =========================
+    // PERSONAL INFORMATION
+    // =========================
+    profile: {
+      fullName: student.fullName || "",
+      profileImage: student.profileImage || "",
+      department: student.department || "",
+      academicBatch: student.academicBatch || "",
+      lastYear: student.lastYear || "",
+      completion: complete,
+    },
+    personal: {
+      fullName: student.fullName || "",
+      phone: student.phone || "",
+      gender: student.gender || "",
+      email: student.userId.email || " ",
+      address: student.address || "",
+    },
+
+    // =========================
+    // SKILLS & INTERESTS
+    // =========================
+    skills: {
+      skills:
+        student.skills?.flatMap((item) =>
+          item
+            .split(",")
+            .map((skill) => skill.trim())
+            .filter(Boolean),
+        ) || [],
+
+      interests:
+        student.interests?.flatMap((item) =>
+          item
+            .split(",")
+            .map((interest) => interest.trim())
+            .filter(Boolean),
+        ) || [],
+    },
+
+    // =========================
+    // ACADEMIC INFORMATION
+    // =========================
+    academic: {
+      department: student.department || "",
+      program: student.program || "",
+      currentSemester: student.currentSemester || "",
+      rollNumber: student.rollNumber || "",
+      academicBatch: student.academicBatch || "",
+      lastYear: student.lastYear || "",
+      specialization: student.specialization || "",
+    },
+
+    // =========================
+    // ONLINE PROFILES
+    // =========================
+    profiles: {
+      linkedin: student.linkedin || "",
+      github: student.github || "",
+      portfolio: student.portfolio || "",
+      resume: student.resume || "",
+    },
+
+    document: {
+      resume: student.resume || " ",
+      resumeName: student.resumeName || " ",
+    },
+  };
+}
 export function calculateProfileCompletion(student) {
   if (!student) {
     return 0;

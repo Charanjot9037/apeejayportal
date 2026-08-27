@@ -1,16 +1,11 @@
-import { NextResponse } from 'next/server';
-import { connectDB } from '@/lib/db';
-import Student from '@/models/student';
-import { authenticateUser } from '@/lib/authentication';
-
+import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/db";
+import Student from "@/models/student";
+import { authenticateUser } from "@/lib/authentication";
+import User from "@/models/user";
 export async function PATCH(req) {
   try {
     await connectDB();
-
-    // =========================
-    // AUTHENTICATION
-    // =========================
-
     const auth = await authenticateUser();
 
     if (!auth.success) {
@@ -27,15 +22,11 @@ export async function PATCH(req) {
 
     const user = auth.user;
 
-    // =========================
-    // STUDENT ONLY
-    // =========================
-
-    if (user.role !== 'student') {
+    if (user.role !== "student") {
       return NextResponse.json(
         {
           success: false,
-          message: 'Access denied. Students only are allowed.',
+          message: "Access denied. Students only are allowed.",
         },
         {
           status: 403,
@@ -48,7 +39,7 @@ export async function PATCH(req) {
       return NextResponse.json(
         {
           success: false,
-          message: 'User ID is required',
+          message: "User ID is required",
         },
         {
           status: 400,
@@ -62,7 +53,7 @@ export async function PATCH(req) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Section and data are required',
+          message: "Section and data are required",
         },
         {
           status: 400,
@@ -71,18 +62,13 @@ export async function PATCH(req) {
     }
 
     let updateData = {};
-
-    // =========================
-    // PERSONAL INFORMATION
-    // =========================
-
     switch (section) {
-      case 'profile':
+      case "profile":
         updateData = {
           profileImage: data.profileImage,
         };
         break;
-      case 'personal':
+      case "personal":
         updateData = {
           fullName: data.fullName,
           phone: data.phone,
@@ -90,23 +76,14 @@ export async function PATCH(req) {
           address: data.address,
         };
         break;
-
-      // =========================
-      // SKILLS & INTERESTS
-      // =========================
-
-      case 'skills':
+      case "skills":
         updateData = {
           skills: data.technicalSkills || [],
           interests: data.interests || [],
         };
         break;
 
-      // =========================
-      // ACADEMIC
-      // =========================
-
-      case 'academic': {
+      case "academic": {
         const programDuration = {
           MBA: 2,
           MCA: 2,
@@ -122,7 +99,7 @@ export async function PATCH(req) {
           return NextResponse.json(
             {
               success: false,
-              message: 'Invalid program',
+              message: "Invalid program",
             },
             {
               status: 400,
@@ -134,7 +111,7 @@ export async function PATCH(req) {
           return NextResponse.json(
             {
               success: false,
-              message: 'Academic batch is required',
+              message: "Academic batch is required",
             },
             {
               status: 400,
@@ -147,7 +124,7 @@ export async function PATCH(req) {
         updateData = {
           department: data.department,
           program: data.program,
-          specialization: data.specialization || '',
+          specialization: data.specialization || "",
           rollNumber: data.rollNumber,
           academicBatch: data.academicBatch,
           lastYear: String(lastYear),
@@ -155,16 +132,11 @@ export async function PATCH(req) {
 
         break;
       }
-
-      // =========================
-      // ONLINE PROFILES
-      // =========================
-
-      case 'onlineProfiles':
+      case "onlineProfiles":
         updateData = {
-          linkedin: data.linkedin || '',
-          github: data.github || '',
-          portfolio: data.portfolio || '',
+          linkedin: data.linkedin || "",
+          github: data.github || "",
+          portfolio: data.portfolio || "",
         };
         break;
 
@@ -172,10 +144,10 @@ export async function PATCH(req) {
       // RESUME
       // =========================
 
-      case 'resume':
+      case "resume":
         updateData = {
-          resume: data.resume || '',
-          resumeName: data.resumeName || '',
+          resume: data.resume || "",
+          resumeName: data.resumeName || "",
         };
         break;
 
@@ -183,18 +155,28 @@ export async function PATCH(req) {
         return NextResponse.json(
           {
             success: false,
-            message: 'Invalid profile section',
+            message: "Invalid profile section",
           },
           {
             status: 400,
           },
         );
     }
-
-    // =========================
-    // UPDATE PROFILE
-    // =========================
-
+    let updatedUser = null;
+    if (section === "personal" && data.email) {
+      updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          $set: {
+            email: data.email,
+          },
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
+    }
     const profile = await Student.findOneAndUpdate(
       { userId },
       { $set: updateData },
@@ -202,13 +184,18 @@ export async function PATCH(req) {
         new: true,
         runValidators: true,
       },
-    ).lean();
+    )
+      .populate({
+        path: "userId",
+        select: "email",
+      })
+      .lean();
 
     if (!profile) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Student profile not found',
+          message: "Student profile not found",
         },
         {
           status: 404,
@@ -220,6 +207,7 @@ export async function PATCH(req) {
       {
         success: true,
         message: `${section} updated successfully`,
+
         profile,
       },
       {
@@ -227,12 +215,12 @@ export async function PATCH(req) {
       },
     );
   } catch (error) {
-    console.error('Edit student error:', error);
+    console.error("Edit student error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to update student profile',
+        message: error.message || "Failed to update student profile",
       },
       {
         status: 500,

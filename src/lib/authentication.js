@@ -35,9 +35,6 @@ export async function authenticateUser() {
             message: "User not found",
           };
         }
-
-        // Access token is valid
-        // Generate a fresh access token
         const newAccessToken = jwt.sign(
           {
             id: user._id,
@@ -67,9 +64,6 @@ export async function authenticateUser() {
       }
     }
 
-    // --------------------------------
-    // 2. Access failed → Try Refresh
-    // --------------------------------
     if (refreshToken) {
       try {
         const decodedRefresh = jwt.verify(refreshToken, REFRESH_SECRET);
@@ -81,10 +75,6 @@ export async function authenticateUser() {
             message: "User not found",
           };
         }
-
-        // --------------------------------
-        // Verify refresh token from DB
-        // // --------------------------------
         if (user.refreshToken !== refreshToken) {
           return {
             success: false,
@@ -115,10 +105,6 @@ export async function authenticateUser() {
         };
       }
     }
-
-    // --------------------------------
-    // Authentication failed
-    // --------------------------------
 
     return {
       success: false,
