@@ -97,7 +97,6 @@ export function calculateProfileCompletion(student) {
 
     // Academic Information
     student.program,
-    student.currentSemester,
     student.rollNumber,
     student.specialization,
 

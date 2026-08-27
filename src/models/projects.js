@@ -69,7 +69,7 @@ const MentorReviewSchema = new mongoose.Schema(
   {
     status: {
       type: String,
-      enum: ["Pending Approval", "Approved", "Rejected"],
+      enum: ["Pending Approval", "Approved", "Rejected", "In Review"],
     },
     comment: {
       type: String,
@@ -176,26 +176,26 @@ const ProjectSchema = new mongoose.Schema(
     },
 
     presentationFile2: {
-  type: CloudinaryFileSchema,
-  default: null,
-},
+      type: CloudinaryFileSchema,
+      default: null,
+    },
 
-synopsisFile2: {
-  type: CloudinaryFileSchema,
-  default: null,
-},
+    synopsisFile2: {
+      type: CloudinaryFileSchema,
+      default: null,
+    },
 
-reportFile2: {
-  type: CloudinaryFileSchema,
-  default: null,
-},
+    reportFile2: {
+      type: CloudinaryFileSchema,
+      default: null,
+    },
     /* =====================================================
        STATUS
     ===================================================== */
 
     status: {
       type: String,
-      enum: ["Pending Approval", "Approved", "Rejected", "Draft"],
+      enum: ["Pending Approval", "Approved", "Rejected", "In Review"],
       default: "Pending Approval",
     },
     mentorComment: {
@@ -209,7 +209,7 @@ reportFile2: {
       default: null,
     },
 
-      mentorReviews: {
+    mentorReviews: {
       type: [MentorReviewSchema],
       default: [],
     },

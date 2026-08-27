@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import DetailCard from "../DetailCard";
 import { formatDate } from "../../helpers";
 
-const STATUS_OPTIONS = ["Pending Approval", "Approved", "Rejected"];
+const STATUS_OPTIONS = ["Pending Approval", "Approved", "Rejected","In Review"];
 
 export default function MentorReviewSection({ project, onUpdated }) {
   const [status, setStatus] = useState(project.status || "Pending Approval");

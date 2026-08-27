@@ -1,16 +1,16 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { Plus, Eye } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+"use client";
+import { useState, useEffect } from "react";
+import { Plus, Eye } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
-import { StatCards } from './elements';
-import { DashboardHeader } from './elements';
+import { StatCards } from "./elements";
+import { DashboardHeader } from "./elements";
 
-import Link from 'next/link';
+import Link from "next/link";
 
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 import {
   projects as initialProjects,
   events,
@@ -18,75 +18,80 @@ import {
   STD_CARDS,
   STUDENT_DASHBOARD_HEADER,
   dashboardStats,
-} from '@/constants/studentdashboard';
+} from "@/constants/studentdashboard";
 function cn(...classes) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
-
+import { useRouter } from "next/navigation";
 export default function DashboardContent() {
-  const auth = useSelector((state) => state.auth);
-  const [projects, setProjects] = useState(initialProjects);
+  const router = useRouter();
+  const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
-useEffect(() => {
-  const fetchProjects = async () => {
-    try {
-      const response = await fetch('/api/projects', {
-        credentials: 'include', // ensures session cookie is sent
-      });
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch("/api/projects", {
+          credentials: "include", // ensures session cookie is sent
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to fetch projects');
+        if (!response.ok) {
+          throw new Error(result.message || "Failed to fetch projects");
+        }
+
+        setProjects(
+          result.projects.map((project) => ({
+            ...project,
+            id: project._id,
+            title: project.title,
+            subtitle: project.subtitle,
+            status: project.status,
+          })),
+        );
+      } catch (error) {
+        console.error("FETCH_PROJECTS_ERROR:", error);
+      } finally {
+        setLoadingProjects(false);
       }
+    };
 
-      setProjects(
-        result.projects.map((project) => ({
-          ...project,
-          id: project._id,
-          title: project.title,
-          subtitle: project.subtitle,
-          status: project.status,
-        }))
-      );
-    } catch (error) {
-      console.error('FETCH_PROJECTS_ERROR:', error);
-    } finally {
-      setLoadingProjects(false);
-    }
-  };
+    fetchProjects();
+  }, []);
 
-  fetchProjects();
-}, []);
-  console.log('AUTH:', auth);
-  console.log('USER:', auth?.user);
+  const pendingProjects = projects.filter(
+    (project) => project.status == "Pending Approval",
+  ).length;
+  const approvedProjects = projects.filter(
+    (project) => project.status == "Approved",
+  ).length;
+  const inReviewProjects = projects.filter(
+    (project) => project.status == "In Review",
+  ).length;
+  const studentStatCards = STD_CARDS.map((card) => {
+    const values = {
+      approved: approvedProjects, // put your student count here
+      totalprojects: projects.length,
+      pending: pendingProjects,
+      inReview: inReviewProjects,
+    };
 
-  // const handleAddProject = async (formData, values) => {
-  //   const newProject = {
-  //     title: values.title,
-  //     subtitle: values.subtitle,
-  //     description: values.description,
-  //     techStack: values.techStack,
-  //     status: values.status,
-  //     githubLink: values.githubLink,
-  //     liveLink: values.liveLink,
-  //     synopsisFile: values.synopsisFile,
-  //     reportFile: values.reportFile,
-  //   };
-
-  //   setProjects((prev) => [newProject, ...prev]);
-  // };
-
+    return {
+      ...card,
+      value: values[card.id],
+    };
+  });
   return (
     <div className="min-h-screen w-full  ">
       <div className=" ">
-        {/* Header */}
         <DashboardHeader
           {...STUDENT_DASHBOARD_HEADER}
-          onAction={() => console.log('View My Profile')}
+          onAction={() => {
+            router.push("/profile");
+          }}
         />
         {/* <DashboardCards /> */}
-        <StatCards cards={STD_CARDS} />
+        <StatCards cards={studentStatCards} />
 
         <div className="grid grid-cols-1 mt-4 gap-5 lg:grid-cols-3">
           {/* Left column */}
@@ -138,7 +143,7 @@ useEffect(() => {
                           <Badge
                             className={
                               statusStyles[project.status] ||
-                              'bg-slate-100 text-slate-600'
+                              "bg-slate-100 text-slate-600"
                             }
                           >
                             {project.status}
@@ -164,7 +169,7 @@ useEffect(() => {
         </div>
 
         {/* Bottom row: Mentor Feedback / Upcoming Events */}
-        <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+        {/* <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
           <Card>
             <CardContent>
               <h2 className="mb-3 text-base font-semibold text-blue-900">
@@ -173,7 +178,7 @@ useEffect(() => {
               <blockquote className="rounded-lg border-l-4 border-orange-400 bg-slate-50 p-4 text-sm italic text-slate-600">
                 {dashboardStats.mentorFeedback.message}
                 <footer className="mt-2 text-xs font-medium not-italic text-orange-500">
-                  — {dashboardStats.mentorFeedback.mentor}{' '}
+                  — {dashboardStats.mentorFeedback.mentor}{" "}
                 </footer>
               </blockquote>
             </CardContent>
@@ -189,10 +194,10 @@ useEffect(() => {
                   <div key={event.title} className="flex items-center gap-3">
                     <div
                       className={cn(
-                        'flex h-12 w-12 flex-col items-center justify-center rounded-lg text-xs font-semibold',
+                        "flex h-12 w-12 flex-col items-center justify-center rounded-lg text-xs font-semibold",
                         event.highlighted
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-slate-100 text-slate-600',
+                          ? "bg-orange-500 text-white"
+                          : "bg-slate-100 text-slate-600",
                       )}
                     >
                       <span className="text-[10px] uppercase">
@@ -213,7 +218,7 @@ useEffect(() => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </div>
   );
