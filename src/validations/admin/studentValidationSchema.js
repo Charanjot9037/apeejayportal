@@ -2,30 +2,20 @@ export const studentValidationSchema = (students) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const emailCount = {};
-  const guideEmailCount = {};
 
-  // Count duplicate student emails
+  // Count duplicate student emails ONLY
   students.forEach((student) => {
     const email = student.email?.toString().trim().toLowerCase();
 
     if (email) {
       emailCount[email] = (emailCount[email] || 0) + 1;
     }
-
-    const guideEmail = student.guideemail?.toString().trim().toLowerCase();
-
-    if (guideEmail) {
-      guideEmailCount[guideEmail] = (guideEmailCount[guideEmail] || 0) + 1;
-    }
   });
 
   return students.map((student) => {
     const name = student.name?.toString().trim() || "";
-
     const email = student.email?.toString().trim().toLowerCase() || "";
-
     const guidename = student.guidename?.toString().trim() || "";
-
     const guideemail =
       student.guideemail?.toString().trim().toLowerCase() || "";
 
@@ -47,6 +37,7 @@ export const studentValidationSchema = (students) => {
       errors.push("Invalid student email");
     }
 
+    // Duplicate student email IS an error
     if (email && emailCount[email] > 1) {
       errors.push("Duplicate student email");
     }
@@ -67,9 +58,8 @@ export const studentValidationSchema = (students) => {
       errors.push("Invalid guide email");
     }
 
-    if (guideemail && guideEmailCount[guideemail] > 1) {
-      errors.push("Duplicate guide email");
-    }
+    // ❌ DO NOT check duplicate guide email
+    // Multiple students can have the same mentor.
 
     return {
       name,
