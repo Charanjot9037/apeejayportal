@@ -4,7 +4,14 @@ import { X, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import SelectField from "./SelectFiled";
 import InputField from "./InputField";
 
 const StudentEditModal = ({ student, onClose, onUpdated }) => {
@@ -56,7 +63,7 @@ const StudentEditModal = ({ student, onClose, onUpdated }) => {
 
     initialValues: {
       fullName: student?.name || student?.fullName || "",
-
+      status: student?.status || "",
       department: student?.department || "",
 
       program: student?.program || "",
@@ -74,7 +81,7 @@ const StudentEditModal = ({ student, onClose, onUpdated }) => {
 
     validationSchema: Yup.object({
       fullName: Yup.string().trim().required("Full name is required"),
-
+      status: Yup.string().trim().required("status required"),
       department: Yup.string().required("Department is required"),
 
       program: Yup.string().required("Program is required"),
@@ -220,6 +227,7 @@ const StudentEditModal = ({ student, onClose, onUpdated }) => {
             />
 
             {/* SPECIALIZATION */}
+            {/* STATUS */}
 
             <InputField
               label="Specialization"
@@ -233,7 +241,37 @@ const StudentEditModal = ({ student, onClose, onUpdated }) => {
             {/* ==================================
                 MENTOR SELECT
             ================================== */}
+            <div>
+              <label
+                htmlFor="status"
+                className="mb-1.5 block text-sm font-medium text-primary"
+              >
+                STATUS
+              </label>
 
+              <select
+                id="status"
+                name="status"
+                value={formik.values.status || ""}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className={`h-10 w-full rounded-md border bg-slate-100 px-3 text-sm text-gray-700 outline-none transition ${
+                  formik.touched.status && formik.errors.status
+                    ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500/20"
+                    : "border-gray-300 focus:border-main-blue focus:ring-1 focus:ring-main-blue/20"
+                }`}
+              >
+                <option value="">Select status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+
+              {formik.touched.status && formik.errors.status && (
+                <p className="mt-1 text-xs text-red-500">
+                  {formik.errors.status}
+                </p>
+              )}
+            </div>
             <div>
               <label
                 htmlFor="mentorId"

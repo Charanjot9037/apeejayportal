@@ -10,16 +10,20 @@ import {
   ChevronDown,
   Trash2,
 } from "lucide-react";
+import MentorEditModal from "./MentorEditModal";
 import { mapStudentToRoster } from "@/constants/adminData";
 import StudentEditModal from "./StudentEditModal";
 import Avatar from "./avatar";
 import { toast } from "sonner";
+import { newmapMentorToRoster } from "@/constants/adminData";
 import SelectField from "./SelectFiled";
 import { useRouter } from "next/navigation";
 export default function Roster({
   title = "Roster",
   data = [],
   showDelete = false,
+  setData,
+  isMentor,
   showEdit = false,
   columns = [],
   setStudents,
@@ -51,6 +55,11 @@ export default function Roster({
 
       const response = await fetch(`/api/student/${id}`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+
+        body: JSON.stringify({
+          title,
+        }),
       });
 
       const data = await response.json();
@@ -60,9 +69,16 @@ export default function Roster({
       }
 
       toast.success("User deleted successfully");
-
-      setStudents((prev) => prev.filter((student) => student._id !== id));
-
+      setData?.((prevData) =>
+        prevData.map((item) =>
+          item._id === id || item.id === id
+            ? {
+                ...item,
+                status: "inactive",
+              }
+            : item,
+        ),
+      );
       setShowDeleteModal(false);
       setSelectedStudent(null);
     } catch (error) {
@@ -674,30 +690,45 @@ export default function Roster({
           {showAll ? "Show Less" : "View All"}
         </button>
       )}
-      {filteredData.length > initialVisibleRows && (
-        <button type="button" onClick={() => setShowAll((prev) => !prev)}>
-          {showAll ? "Show Less" : "View All"}
-        </button>
-      )}
 
       {/* EDIT STUDENT MODAL */}
-      {editingStudent && (
-        <StudentEditModal
-          student={editingStudent}
-          onClose={() => setEditingStudent(null)}
-          onUpdated={(updatedStudent) => {
-            setStudents((prevStudents) =>
-              prevStudents.map((student) =>
-                student._id === editingStudent._id
-                  ? mapStudentToRoster(updatedStudent)
-                  : student,
-              ),
-            );
+      {editingStudent &&
+        (isMentor ? (
+          <MentorEditModal
+            mentor={editingStudent}
+            onClose={() => setEditingStudent(null)}
+            onUpdated={(updatedMentor) => {
+              const updatedRosterMentor = newmapMentorToRoster(updatedMentor);
 
-            setEditingStudent(null);
-          }}
-        />
-      )}
+              setData((prevData) =>
+                prevData.map((mentor) =>
+                  mentor.id?.toString() ===
+                  (editingStudent.id || editingStudent._id)?.toString()
+                    ? updatedRosterMentor
+                    : mentor,
+                ),
+              );
+
+              setEditingStudent(null);
+            }}
+          />
+        ) : (
+          <StudentEditModal
+            student={editingStudent}
+            onClose={() => setEditingStudent(null)}
+            onUpdated={(updatedStudent) => {
+              setData((prevData) =>
+                prevData.map((student) =>
+                  student._id === editingStudent._id
+                    ? mapStudentToRoster(updatedStudent)
+                    : student,
+                ),
+              );
+
+              setEditingStudent(null);
+            }}
+          />
+        ))}
       {showDeleteModal && selectedStudent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
@@ -708,7 +739,7 @@ export default function Roster({
               </h2>
 
               <p className="mt-2 text-sm text-slate-500">
-                Are you sure you want to delete{" "}
+                Are you sure you want to make status Inactive for{" "}
                 <span className="font-semibold text-slate-700">
                   {selectedStudent.fullName || selectedStudent.name}
                 </span>
@@ -735,7 +766,13 @@ export default function Roster({
 
               <button
                 type="button"
-                onClick={() => handleDelete(selectedStudent._id)}
+                onClick={() =>
+                  handleDelete(
+                    title === "Mentor Roster"
+                      ? selectedStudent.id
+                      : selectedStudent._id,
+                  )
+                }
                 className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
               >
                 Delete

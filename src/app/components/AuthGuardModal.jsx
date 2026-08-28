@@ -32,7 +32,7 @@ export default function AuthGuardModal({
 
           <button
             type="button"
-            onClick={onClose}
+            // onClick={onClose}
             className="text-gray-400 hover:text-gray-700"
           >
             <X size={20} />

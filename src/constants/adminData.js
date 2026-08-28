@@ -185,6 +185,10 @@ export const studentColumns = [
     label: "Specialization",
   },
   {
+    key: "status",
+    label: "status",
+  },
+  {
     key: "mentor",
     label: "Mentor",
   },
@@ -290,7 +294,7 @@ export const mapStudentToRoster = (student) => {
     _id: student?._id,
 
     name: student?.userId?.name || student?.name || "-",
-
+    status: student?.userId?.status || "-",
     email: student?.userId?.email || student?.email || "-",
     rollNumber: student?.rollNumber || "-",
     phone: student?.phone || "-",
@@ -326,6 +330,14 @@ export const MENTOR_ROSTER_COLUMNS = [
     label: "Department",
   },
   {
+    key: "email",
+    label: "Email",
+  },
+  {
+    key: "status",
+    label: "Status",
+  },
+  {
     key: "designation",
     label: "Designation",
   },
@@ -349,7 +361,7 @@ export const MENTOR_FILTER_CONFIG = [
         label: "Management",
       },
       {
-        value: "IT",
+        value: "Information Technology",
         label: "Information Technology",
       },
     ],
@@ -359,9 +371,34 @@ export const MENTOR_FILTER_CONFIG = [
 export const mapMentorToRoster = (mentor) => {
   return {
     id: mentor._id,
+    status: mentor.userId?.status || " empty",
+    email: mentor?.userId?.email || "-",
     name: mentor.userId?.name || "-",
     mobile: mentor.mobileNumber || "-",
     department: mentor.department || "-",
     designation: mentor.designation || "-",
+  };
+};
+export const newmapMentorToRoster = (mentor) => {
+  return {
+    _id: mentor?._id?.toString() || "",
+
+    id: mentor?._id?.toString() || "",
+
+    userId: mentor?.userId?._id?.toString() || "",
+
+    name: mentor?.userId?.name || mentor?.name || "-",
+
+    email: mentor?.userId?.email || mentor?.email || "-",
+
+    status: mentor?.userId?.status || mentor?.status || "-",
+
+    mobileNumber: mentor?.mobileNumber || "-",
+
+    contact: mentor?.mobileNumber || "-",
+
+    department: mentor?.department || "-",
+
+    designation: mentor?.designation || "-",
   };
 };

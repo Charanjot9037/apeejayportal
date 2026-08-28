@@ -66,7 +66,7 @@ export async function POST(request) {
     const students = await Student.find(query)
       .populate({
         path: "userId",
-        select: "name email mentorId",
+        select: "name email mentorId status",
       })
       .lean();
     const studentsWithMentor = await Promise.all(
@@ -146,6 +146,7 @@ export async function PATCH(request) {
       fullName,
       department,
       program,
+      status,
       academicBatch,
       specialization,
       mentorId,
@@ -212,7 +213,7 @@ export async function PATCH(request) {
     user.name = fullName;
 
     user.mentorId = mentorId;
-
+    user.status = status;
     await user.save();
 
     student.department = department;
@@ -229,7 +230,7 @@ export async function PATCH(request) {
     const updatedStudent = await Student.findById(student._id)
       .populate({
         path: "userId",
-        select: "name email mentorId",
+        select: "name email mentorId status",
       })
       .lean();
 

@@ -56,6 +56,7 @@ export async function POST(request) {
     const users = await User.find({
       email: { $in: emails },
       role: "mentor",
+      status: "active",
     }).select("name email");
 
     const mentorMap = new Map(

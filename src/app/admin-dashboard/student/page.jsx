@@ -110,7 +110,7 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-3">
       <AuthGuardModal
         open={authModal.open}
         type={authModal.type}
@@ -198,7 +198,7 @@ export default function Page() {
             <Roster
               title="Student Roster"
               data={students}
-              setStudents={setStudents}
+              setData={setStudents}
               showEdit={true}
               columns={studentColumns}
               showDelete={true}
