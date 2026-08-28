@@ -22,8 +22,10 @@ export default function Roster({
   onRowClick,
   onApplyFilters,
   className = '',
+  onExport,
   defaultFilters = {},
   filterConfig = [],
+   filterContext = {},
   showApplyButton = false,
     initialVisibleRows = 5,
 }) {
@@ -269,19 +271,51 @@ if (column.key === 'contact') {
   /*
    * Search existing data.
    */
-  const filteredData = data.filter((item) => {
-    const searchValue = search.trim().toLowerCase();
+const filteredData = data.filter((item) => {
+  // ==========================================
+  // SEARCH FILTER
+  // ==========================================
 
-    if (!searchValue) {
-      return true;
-    }
+  const searchValue = search.trim().toLowerCase();
 
-    return Object.values(item).some((value) =>
+  const matchesSearch =
+    !searchValue ||
+    Object.values(item).some((value) =>
       String(value ?? '')
         .toLowerCase()
-        .includes(searchValue),
+        .includes(searchValue)
     );
-  });
+
+  if (!matchesSearch) {
+    return false;
+  }
+
+  // ==========================================
+  // DROPDOWN FILTERS
+  // ==========================================
+
+  const matchesFilters = Object.entries(filters).every(
+    ([key, selectedValue]) => {
+      // Ignore empty filters
+      if (!selectedValue) {
+        return true;
+      }
+
+      const itemValue = item[key];
+
+      return (
+        String(itemValue ?? '')
+          .trim()
+          .toLowerCase() ===
+        String(selectedValue)
+          .trim()
+          .toLowerCase()
+      );
+    }
+  );
+
+  return matchesFilters;
+});
 
   /*
    * Show first 5 records initially.
@@ -302,6 +336,7 @@ if (column.key === 'contact') {
         ${className}
       `}
     >
+      <div className='flex justify-between'>
       <div className="px-5 pt-5">
         <div className="flex items-center gap-2">
 
@@ -309,9 +344,36 @@ if (column.key === 'contact') {
             {title}
           </h2>
         </div>
-
         <div className="mt-1 h-0.5 w-8 bg-primary-orange" />
       </div>
+       {onExport && (
+      <button
+        type="button"
+        onClick={() => {
+          console.log(
+            "EXPORT FILTERED DATA:",
+            filteredData
+          );
+
+          onExport(filteredData);
+        }}
+        disabled={filteredData.length === 0}
+        className="m-5
+          rounded-lg
+          bg-[#f2792a]
+          px-4 py-2
+          text-sm font-semibold
+          text-white
+          transition-all
+          hover:bg-[#df681c]
+          disabled:cursor-not-allowed
+          disabled:opacity-50
+        "
+      >
+        Export Report
+      </button>
+    )}
+    </div>
 
       {/* ================= SEARCH + FILTERS ================= */}
 
@@ -394,11 +456,18 @@ if (column.key === 'contact') {
                   placeholder,
                 } = filter;
                 
-const options = filter.dependsOn
-  ? filter.options?.[filters[filter.dependsOn]] || []
-  : Array.isArray(filter.options)
-    ? filter.options
-    : [];
+const department =
+  String(filterContext.department || "")
+    .trim()
+    .toUpperCase();
+
+const options = filter.optionsByDepartment
+  ? filter.optionsByDepartment[department] || []
+  : filter.dependsOn
+    ? filter.options?.[filters[filter.dependsOn]] || []
+    : Array.isArray(filter.options)
+      ? filter.options
+      : [];
                 
 
                 return (

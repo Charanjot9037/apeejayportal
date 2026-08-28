@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -6,7 +5,7 @@ import {
   Roster,
   DashboardHeader,
 } from "@/app/components/elements";
-import { STUDENT_FILTERS } from "@/constants/adminData";
+
 import { HOD_PROJECT_FILTERS } from "@/constants/hodData";
 
 import {
@@ -16,7 +15,6 @@ import {
 
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import StudentFilters from "../elements/StudentFilter";
 
 export default function HODdashboard() {
   // ==========================================
@@ -60,8 +58,14 @@ export default function HODdashboard() {
   const [filters, setFilters] =
     useState({});
 
+  // IMPORTANT:
+  // This contains the FINAL filtered
+  // project roster data.
   const [filteredProjects, setFilteredProjects] =
     useState([]);
+
+  const [exporting, setExporting] =
+    useState(false);
 
   // ==========================================
   // FETCH HOD DATA
@@ -178,9 +182,6 @@ export default function HODdashboard() {
   // ==========================================
   // HOD PROJECTS
   // ==========================================
-  // Only projects belonging to the HOD's
-  // department will be passed to Roster.
-  // ==========================================
 
   const departmentProjects =
     projects.filter((project) => {
@@ -189,7 +190,9 @@ export default function HODdashboard() {
       }
 
       return (
-        String(project.department || "")
+        String(
+          project.department || ""
+        )
           .trim()
           .toLowerCase() ===
         String(hodDepartment)
@@ -267,6 +270,73 @@ export default function HODdashboard() {
         "Mentor verified projects",
     },
   ];
+  const handleExport = async (filteredProjects) => {
+  try {
+    console.log(
+      "FILTERED PROJECTS FOR EXPORT:",
+      filteredProjects
+    );
+
+    if (!filteredProjects || filteredProjects.length === 0) {
+      alert("No projects available to export.");
+      return;
+    }
+
+    const projectIds = filteredProjects
+      .map((project) => project._id || project.id)
+      .filter(Boolean);
+
+    console.log("PROJECT IDS:", projectIds);
+
+    if (projectIds.length === 0) {
+      alert("No valid project IDs found.");
+      return;
+    }
+
+    const response = await fetch(
+      `/api/hod/export?projectIds=${projectIds.join(",")}`,
+      {
+        method: "GET",
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+
+      alert(
+        error?.message || "Failed to export report"
+      );
+
+      return;
+    }
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+
+    link.download = "hod-project-report.xlsx";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    console.error(
+      "EXPORT ERROR:",
+      error
+    );
+
+    alert("Failed to export report.");
+  }
+};
 
   // ==========================================
   // APPLY FILTERS
@@ -294,157 +364,173 @@ export default function HODdashboard() {
       "Selected project:",
       project
     );
-
-    // Later:
-    // router.push(
-    //   `/hod/projects/${project._id}`
-    // );
   };
 
   // ==========================================
-  // EXPORT REPORT
+  // EXPORT EXCEL REPORT
   // ==========================================
 
-  const handleExportReport = () => {
-    if (!filteredProjects.length) {
-      alert(
-        "No projects available to export."
-      );
+  const handleExportReport = async () => {
+    try {
+      // ----------------------------------------
+      // CHECK DATA
+      // ----------------------------------------
 
-      return;
-    }
+      if (!filteredProjects.length) {
+        alert(
+          "No projects available to export."
+        );
 
-    const headers = [
-      "Project Title",
-      "Student",
-      "Mentor",
-      "Status",
-      "Technology Stack",
-      "Department",
-      "Program / Degree",
-      "Specialization",
-      "Academic Batch",
-      "Semester",
-    ];
-
-    const rows =
-      filteredProjects.map(
-        (project) => {
-          const studentName =
-            typeof project.student ===
-            "object"
-              ? project.student?.name
-              : project.student;
-
-          const mentorName =
-            typeof project.mentor ===
-            "object"
-              ? project.mentor?.name
-              : project.mentor;
-
-          return [
-            project.projectTitle ||
-              project.title ||
-              "",
-
-            studentName ||
-              project.name ||
-              "",
-
-            mentorName || "",
-
-            project.status || "",
-
-            Array.isArray(
-              project.techStack
-            )
-              ? project.techStack.join(
-                  ", "
-                )
-              : project.techStack || "",
-
-            project.department ||
-              hodDepartment ||
-              "",
-
-            project.program || "",
-
-            project.specialization ||
-              "",
-
-            project.academicBatch ||
-              "",
-
-            project.currentSemester ||
-              "",
-          ];
-        }
-      );
-
-    // ==========================================
-    // CREATE CSV
-    // ==========================================
-
-    const csvContent = [
-      headers,
-      ...rows,
-    ]
-      .map((row) =>
-        row
-          .map(
-            (value) =>
-              `"${String(
-                value ?? ""
-              ).replace(
-                /"/g,
-                '""'
-              )}"`
-          )
-          .join(",")
-      )
-      .join("\n");
-
-    // ==========================================
-    // DOWNLOAD CSV
-    // ==========================================
-
-    const blob = new Blob(
-      [csvContent],
-      {
-        type:
-          "text/csv;charset=utf-8;",
+        return;
       }
-    );
 
-    const url =
-      URL.createObjectURL(blob);
+      setExporting(true);
 
-    const link =
-      document.createElement("a");
+      // ----------------------------------------
+      // GET PROJECT IDS
+      // ----------------------------------------
 
-    link.href = url;
+      const projectIds =
+        filteredProjects
+          .map(
+            (project) =>
+              project._id || project.id
+          )
+          .filter(Boolean);
 
-    const departmentName =
-      hodDepartment
-        ? hodDepartment
-            .replace(
-              /\s+/g,
-              "_"
-            )
-        : "Department";
+      if (!projectIds.length) {
+        alert(
+          "No valid projects available to export."
+        );
 
-    link.download =
-      `HOD_${departmentName}_Project_Report_${new Date()
-        .toISOString()
-        .split("T")[0]}.csv`;
+        return;
+      }
 
-    document.body.appendChild(link);
+      console.log(
+        "EXPORT PROJECT IDS:",
+        projectIds
+      );
 
-    link.click();
+      // ----------------------------------------
+      // CALL EXPORT API
+      // ----------------------------------------
 
-    document.body.removeChild(link);
+      const response =
+        await fetch(
+          "/api/hod/export",
+          {
+            method: "POST",
 
-    URL.revokeObjectURL(url);
+            credentials: "include",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              projectIds,
+            }),
+          }
+        );
+
+      // ----------------------------------------
+      // HANDLE ERROR
+      // ----------------------------------------
+
+      if (!response.ok) {
+        let errorMessage =
+          "Failed to export report";
+
+        try {
+          const errorData =
+            await response.json();
+
+          errorMessage =
+            errorData.message ||
+            errorMessage;
+        } catch {
+          // Ignore JSON parsing error
+        }
+
+        throw new Error(
+          errorMessage
+        );
+      }
+
+      // ----------------------------------------
+      // GET EXCEL BLOB
+      // ----------------------------------------
+
+      const blob =
+        await response.blob();
+
+      // ----------------------------------------
+      // CREATE DOWNLOAD URL
+      // ----------------------------------------
+
+      const url =
+        window.URL.createObjectURL(
+          blob
+        );
+
+      // ----------------------------------------
+      // CREATE DOWNLOAD LINK
+      // ----------------------------------------
+
+      const link =
+        document.createElement("a");
+
+      link.href = url;
+
+      const departmentName =
+        hodDepartment
+          ? hodDepartment
+              .replace(/\s+/g, "_")
+              .replace(
+                /[^a-zA-Z0-9_-]/g,
+                ""
+              )
+          : "Department";
+
+      const date =
+        new Date()
+          .toISOString()
+          .split("T")[0];
+
+      link.download =
+        `HOD_${departmentName}_Project_Report_${date}.xlsx`;
+
+      document.body.appendChild(
+        link
+      );
+
+      link.click();
+
+      document.body.removeChild(
+        link
+      );
+
+      // ----------------------------------------
+      // CLEAN URL
+      // ----------------------------------------
+
+      window.URL.revokeObjectURL(
+        url
+      );
+    } catch (error) {
+      console.error(
+        "HOD EXPORT ERROR:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Failed to export report"
+      );
+    } finally {
+      setExporting(false);
+    }
   };
 
   // ==========================================
@@ -477,16 +563,13 @@ export default function HODdashboard() {
 
         <DashboardHeader
           {...HOD_DASHBOARD_HEADER}
-          title={`Welcome, ${hodName}`}
-          description="Mentorship & Department Insights"
-          onAction={
-            handleExportReport
-          }
-        />
 
-        {/* ====================================
-            ERROR
-        ==================================== */}
+          title={`Welcome, ${hodName}`}
+          actionLabel={false}
+
+          description="Mentorship & Department Insights"
+
+        />
 
         {error && (
           <p className="mt-4 text-sm text-red-500">
@@ -510,13 +593,11 @@ export default function HODdashboard() {
 
           <Roster
             title="Project Roster"
+            onExport={handleExport}
 
-            /*
-             * IMPORTANT:
-             * Only projects from the HOD's
-             * department are shown.
-             */
-            data={departmentProjects}
+            data={
+              departmentProjects
+            }
 
             columns={
               PROJECT_COLUMNS
@@ -524,8 +605,12 @@ export default function HODdashboard() {
 
             searchPlaceholder="Search projects, students or mentors..."
 
-            defaultFilters={filters}
-
+            defaultFilters={
+              filters
+            }
+            filterContext={{
+  department: hodDepartment,
+}}
             filterConfig={
               HOD_PROJECT_FILTERS
             }
@@ -543,6 +628,15 @@ export default function HODdashboard() {
             }
 
             initialVisibleRows={3}
+
+            // ==================================
+            // IMPORTANT
+            // Get FINAL filtered roster data
+            // ==================================
+
+            onFilteredData={
+              setFilteredProjects
+            }
           />
 
         </div>

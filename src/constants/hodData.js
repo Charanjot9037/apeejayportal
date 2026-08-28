@@ -239,44 +239,72 @@ export const PROJECTS = [
 
 export const PROJECT_COLUMNS = [
   {
-    key: 'projectTitle',
-    label: 'Project',
+    key: "projectTitle",
+    label: "Project",
   },
   {
-    key: 'student',
-    label: 'Student',
+    key: "student",
+    label: "Student",
   },
   {
-    key: 'mentor',
-    label: 'Mentor',
+    key: "mentor",
+    label: "Mentor",
   },
   {
-    key: 'status',
-    label: 'Status',
+    key: "program",
+    label: "Program",
   },
-  {
-    key: 'approvalDate',
-    label: 'Approval Date',
-  },
-];
-// constants/hodFilters.js
-export const HOD_PROJECT_FILTERS = [
   {
     key: "specialization",
     label: "Specialization",
-    placeholder: "All Specializations",
-    options: [
-      "CSE",
-      "ECE",
-      "ME",
-      "CE",
-    ],
+  },
+  {
+    key: "academicBatch",
+    label: "Academic Batch",
+  },
+  {
+    key: "currentSemester",
+    label: "Semester",
+  },
+  {
+    key: "status",
+    label: "Status",
+  },
+  {
+    key: "approvalDate",
+    label: "Approval Date",
+  },
+];
+export const HOD_PROJECT_FILTERS = [
+  {
+    key: "specialization",
+    label: "Stream",
+    placeholder: "All Streams",
+
+    optionsByDepartment: {
+      MANAGEMENT: [
+        "BBA",
+        "MBA",
+      ],
+
+      Engineering: [
+        "B.Tech CSE",
+        "B.Tech AI & ML"
+      ],
+
+
+      IT: [
+        "BCA",
+        "BCOM"
+      ],
+    },
   },
 
   {
     key: "academicBatch",
     label: "Academic Batch",
     placeholder: "All Batches",
+
     options: [
       "2023",
       "2024",

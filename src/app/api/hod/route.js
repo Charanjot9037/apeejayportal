@@ -1,5 +1,4 @@
 
-
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 
@@ -110,7 +109,8 @@ export async function GET() {
       );
     }
 
-    const normalizedDepartment = department.toLowerCase();
+    const normalizedDepartment =
+      department.toLowerCase();
 
     console.log("=================================");
     console.log("HOD:", user.name);
@@ -118,7 +118,7 @@ export async function GET() {
     console.log("=================================");
 
     // =========================================================
-    // 7. GET STUDENTS OF HOD DEPARTMENT
+    // 7. GET ALL STUDENTS OF HOD DEPARTMENT
     // =========================================================
 
     const students = await Student.find({
@@ -147,25 +147,27 @@ export async function GET() {
       "STUDENT PROFILES:",
       students.map((student) => ({
         studentId: String(student._id),
-        userId: String(student.userId),
+        userId: student.userId
+          ? String(student.userId)
+          : null,
         name: student.fullName,
         department: student.department,
       }))
     );
 
     // =========================================================
-    // 8. GET USER IDS FROM STUDENT PROFILES
+    // 8. GET STUDENT USER IDS
     //
-    // IMPORTANT:
+    // Student.userId === Projects.student
     //
-    // Student._id       = Student collection ID
-    // Student.userId    = User collection ID
+    // Student collection:
     //
-    // Project.student references User._id
+    // _id    -> Student document ID
+    // userId -> User document ID
     //
-    // Therefore:
+    // Projects collection:
     //
-    // Student.userId -> Project.student
+    // student -> User document ID
     // =========================================================
 
     const studentUserIds = students
@@ -178,7 +180,7 @@ export async function GET() {
     );
 
     // =========================================================
-    // 9. GET ALL MENTORS OF SAME DEPARTMENT
+    // 9. GET MENTORS OF SAME DEPARTMENT
     // =========================================================
 
     const mentors = await Mentor.find({
@@ -212,9 +214,20 @@ export async function GET() {
     );
 
     // =========================================================
-    // 10. GET PROJECTS OF DEPARTMENT STUDENTS
+    // 10. GET PROJECTS
     //
-    // Project.student references User._id
+    // IMPORTANT:
+    //
+    // Projects.student contains User._id
+    //
+    // Therefore:
+    //
+    // Student.userId
+    //       ↓
+    // Projects.student
+    //
+    // Only projects belonging to students from the
+    // HOD's department will be returned.
     // =========================================================
 
     let rawProjects = [];
@@ -225,29 +238,18 @@ export async function GET() {
           $in: studentUserIds,
         },
       })
-        // Project.student -> User
         .populate({
           path: "student",
           select: "name email",
         })
-
-        // Project.mentor -> User
-        //
-        // DO NOT DO:
-        // populate mentor.userId
-        //
-        // because Project.mentor already references User.
         .populate({
           path: "mentor",
           select: "name email role",
         })
-
-        // Also populate mentor2 if required
         .populate({
           path: "mentor2",
           select: "name email role",
         })
-
         .lean();
     }
 
@@ -257,23 +259,33 @@ export async function GET() {
     );
 
     console.log(
-      "PROJECT STUDENT IDS:",
+      "PROJECT STUDENT MATCHES:",
       rawProjects.map((project) => ({
         projectId: String(project._id),
-        studentId: project.student?._id
-          ? String(project.student._id)
-          : null,
+        title: project.title,
+
+        projectStudentUserId:
+          project.student?._id
+            ? String(project.student._id)
+            : null,
+
+        matchedStudent:
+          students.find(
+            (student) =>
+              String(student.userId) ===
+              String(project.student?._id)
+          )?.fullName || null,
       }))
     );
 
     // =========================================================
     // 11. CREATE STUDENT MAP
     //
-    // Key:
-    // Student.userId
+    // Key = Student.userId
     //
-    // This lets us find the Student profile from
-    // Project.student (User._id).
+    // Project.student = User._id
+    //
+    // Therefore both can be matched directly.
     // =========================================================
 
     const studentMap = new Map();
@@ -292,42 +304,43 @@ export async function GET() {
     // =========================================================
 
     const projects = rawProjects.map((project) => {
-      // -------------------------------------------------------
-      // FIND STUDENT PROFILE
-      // -------------------------------------------------------
+      // =======================================================
+      // PROJECT STUDENT USER ID
+      // =======================================================
 
       const projectStudentUserId =
-        project.student?._id;
+        project.student?._id
+          ? String(project.student._id)
+          : null;
+
+      // =======================================================
+      // FIND STUDENT PROFILE
+      // =======================================================
 
       const studentProfile =
         projectStudentUserId
-          ? studentMap.get(
-              String(projectStudentUserId)
-            )
+          ? studentMap.get(projectStudentUserId)
           : null;
 
-      // -------------------------------------------------------
+      // =======================================================
       // STUDENT NAME
-      // -------------------------------------------------------
+      // =======================================================
 
       const studentName =
         project.student?.name ||
         studentProfile?.fullName ||
         "Unknown Student";
 
-      // -------------------------------------------------------
+      // =======================================================
       // STUDENT EMAIL
-      // -------------------------------------------------------
+      // =======================================================
 
       const studentEmail =
-        project.student?.email ||
-        "";
+        project.student?.email || "";
 
-      // -------------------------------------------------------
+      // =======================================================
       // MENTOR NAME
-      //
-      // Project.mentor -> User
-      // -------------------------------------------------------
+      // =======================================================
 
       let mentorName = "Not Assigned";
 
@@ -340,9 +353,9 @@ export async function GET() {
           "Unknown Mentor";
       }
 
-      // -------------------------------------------------------
-      // SECOND MENTOR NAME
-      // -------------------------------------------------------
+      // =======================================================
+      // SECOND MENTOR
+      // =======================================================
 
       let mentor2Name = "Not Assigned";
 
@@ -355,9 +368,9 @@ export async function GET() {
           "Unknown Mentor";
       }
 
-      // -------------------------------------------------------
+      // =======================================================
       // APPROVAL DATE
-      // -------------------------------------------------------
+      // =======================================================
 
       let approvalDate = "-";
 
@@ -371,16 +384,23 @@ export async function GET() {
         });
       }
 
-      // -------------------------------------------------------
-      // RETURN FORMATTED PROJECT
-      // -------------------------------------------------------
+      // =======================================================
+      // RETURN PROJECT
+      // =======================================================
 
       return {
+        // -----------------------------------------------------
         // IDs
+        // -----------------------------------------------------
+
         _id: String(project._id),
+
         id: String(project._id),
 
-        // Project
+        // -----------------------------------------------------
+        // PROJECT
+        // -----------------------------------------------------
+
         projectTitle:
           project.title || "-",
 
@@ -411,7 +431,7 @@ export async function GET() {
           project.liveLink || "",
 
         // -----------------------------------------------------
-        // Student
+        // STUDENT
         // -----------------------------------------------------
 
         student: studentName,
@@ -422,11 +442,10 @@ export async function GET() {
             : null,
 
         studentUserId:
-          project.student?._id
-            ? String(project.student._id)
-            : null,
+          projectStudentUserId,
 
-        email: studentEmail,
+        email:
+          studentEmail,
 
         rollNo:
           studentProfile?.rollNumber || "-",
@@ -448,15 +467,17 @@ export async function GET() {
           project.semester || "",
 
         // -----------------------------------------------------
-        // Mentor
+        // MENTORS
         // -----------------------------------------------------
 
-        mentor: mentorName,
+        mentor:
+          mentorName,
 
-        mentor2: mentor2Name,
+        mentor2:
+          mentor2Name,
 
         // -----------------------------------------------------
-        // Status
+        // STATUS
         // -----------------------------------------------------
 
         status:
@@ -471,7 +492,7 @@ export async function GET() {
         approvalDate,
 
         // -----------------------------------------------------
-        // Other project data
+        // OTHER PROJECT DATA
         // -----------------------------------------------------
 
         teamMembers:
@@ -553,7 +574,10 @@ export async function GET() {
       {
         success: true,
 
-        // HOD information
+        // -----------------------------------------------------
+        // HOD
+        // -----------------------------------------------------
+
         hod: {
           name: user.name,
           email: user.email,
@@ -561,7 +585,10 @@ export async function GET() {
           designation: mentor.designation,
         },
 
-        // Dashboard statistics
+        // -----------------------------------------------------
+        // STATISTICS
+        // -----------------------------------------------------
+
         statistics: {
           students: students.length,
           mentors: mentors.length,
@@ -570,13 +597,14 @@ export async function GET() {
           mentorVerified,
         },
 
-        // Raw student profiles
+        // -----------------------------------------------------
+        // DATA
+        // -----------------------------------------------------
+
         students,
 
-        // Department mentors
         mentors,
 
-        // Department projects
         projects,
       },
       {
@@ -602,3 +630,5 @@ export async function GET() {
     );
   }
 }
+
+
