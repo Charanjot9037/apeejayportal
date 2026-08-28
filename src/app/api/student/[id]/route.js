@@ -9,38 +9,52 @@ export async function DELETE(req, { params }) {
 
     const { id } = await params;
 
-    // Find student first so we can get the userId
-    const student = await Student.findById(id);
+    // Find mentor
+    const mentor = await Student.findById(id);
 
-    if (!student) {
+    if (!mentor) {
       return NextResponse.json(
         { message: "Student not found" },
         { status: 404 },
       );
     }
 
-    // Get User ID from Student collection
-    const userId = student.userId;
+    // Get User ID from Mentor
+    const userId = mentor.userId;
 
-    // Delete Student
-    await Student.findByIdAndDelete(id);
+    if (!userId) {
+      return NextResponse.json(
+        { message: "User ID not found for this mentor" },
+        { status: 404 },
+      );
+    }
 
-    // Delete associated User
-    if (userId) {
-      await User.findByIdAndDelete(userId);
+    // Update User status
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { status: "inactive" },
+      { new: true },
+    );
+console.log(user);
+    if (!user) {
+      return NextResponse.json(
+        { message: "Associated user not found" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json(
       {
-        message: "Student and associated user deleted successfully",
+        message: "Mentor deactivated successfully",
+        user,
       },
       { status: 200 },
     );
   } catch (error) {
-    console.error("DELETE_STUDENT_ERROR:", error);
+    console.error("DEACTIVATE_MENTOR_ERROR:", error);
 
     return NextResponse.json(
-      { message: "Failed to delete student" },
+      { message: "Failed to deactivate mentor" },
       { status: 500 },
     );
   }
