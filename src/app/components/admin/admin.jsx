@@ -1,16 +1,16 @@
-'use client';
-import { StatCards, DashboardHeader } from '@/app/components/elements';
-import AdminStats from './adminStats';
+"use client";
+import { StatCards, DashboardHeader } from "@/app/components/elements";
+import AdminStats from "./adminStats";
 
-import { STAT_CARDS, ADMIN_DASHBOARD_HEADER } from '@/constants/adminData';
+import { STAT_CARDS, ADMIN_DASHBOARD_HEADER } from "@/constants/adminData";
 
 export default function Admin() {
   return (
     <div className="flex h-full">
-      <main className="flex-1 px-8 py-8">
+      <main className="flex-1 sm:pd-6 lg:p-3">
         <DashboardHeader
           {...ADMIN_DASHBOARD_HEADER}
-          onAction={() => console.log('Pending Approvals')}
+          onAction={() => console.log("Pending Approvals")}
         />
         <StatCards cards={STAT_CARDS} />
         <div className="mt-4">

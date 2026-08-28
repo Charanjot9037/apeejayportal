@@ -1,30 +1,39 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Users, GraduationCap } from 'lucide-react';
-import Roster from '@/app/components/elements/roaster';
-import StudentRosterSkeleton from '@/app/components/admin/skeleton/studentRosterSkeleton';
+import { useEffect, useState } from "react";
+import { Users, GraduationCap } from "lucide-react";
+import Roster from "@/app/components/elements/roaster";
+import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import AuthGuardModal from "@/app/components/AuthGuardModal";
 import {
   studentColumns,
   DEFAULT_FILTERS,
   STUDENT_FILTERS,
   mapStudentToRoster,
-} from '@/constants/adminData';
+} from "@/constants/adminData";
 
 export default function Page() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const [filters, setFilters] = useState({
     ...DEFAULT_FILTERS,
   });
+  const router = useRouter();
 
+  const [authModal, setAuthModal] = useState({
+    open: false,
+    type: "authentication",
+    message: "",
+  });
   const fetchStudents = async (selectedFilters) => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
       const apiFilters = {
         department: selectedFilters.department,
@@ -36,28 +45,48 @@ export default function Page() {
         apiFilters.specialization = selectedFilters.specialization;
       }
 
-      const response = await fetch('/api/student/team-member', {
-        method: 'POST',
+      const response = await fetch("/api/admin/getstudents", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(apiFilters),
       });
-
       const data = await response.json();
+      if (response.status === 401) {
+        setAuthModal({
+          open: true,
+          type: "authentication",
+          message:
+            data.message || "Your session has expired. Please log in again.",
+        });
+
+        return;
+      }
+
+      // Authorization error
+      if (response.status === 403) {
+        setAuthModal({
+          open: true,
+          type: "unauthorized",
+          message:
+            data.message || "You are not authorized to delete this student.",
+        });
+
+        return;
+      }
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Failed to fetch students');
+        throw new Error(data.message || "Failed to fetch students");
       }
 
       const mappedStudents = (data.students || []).map(mapStudentToRoster);
 
       setStudents(mappedStudents);
     } catch (error) {
-      console.error('FETCH_STUDENTS_ERROR:', error);
-
-      setError(error.message || 'Something went wrong');
-
+      console.error("FETCH_STUDENTS_ERROR:", error);
+      toast.error("Dtech errror", error);
+      setError(error.message || "Something went wrong");
       setStudents([]);
     } finally {
       setLoading(false);
@@ -81,7 +110,25 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-3">
+      <AuthGuardModal
+        open={authModal.open}
+        type={authModal.type}
+        message={authModal.message}
+        onClose={() => {
+          if (authModal.type === "unauthorized") {
+            router.back();
+          } else {
+            setAuthModal((prev) => ({
+              ...prev,
+              open: false,
+            }));
+          }
+        }}
+        onLogin={() => {
+          router.push("/login");
+        }}
+      />
       <div className="mx-auto max-w-7xl">
         <div className="mb-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -151,7 +198,10 @@ export default function Page() {
             <Roster
               title="Student Roster"
               data={students}
+              setData={setStudents}
+              showEdit={true}
               columns={studentColumns}
+              showDelete={true}
               searchPlaceholder="Search students..."
               defaultFilters={DEFAULT_FILTERS}
               filterConfig={STUDENT_FILTERS}
@@ -159,7 +209,7 @@ export default function Page() {
               onApplyFilters={handleApplyFilters}
               className="mt-0 shadow-sm"
               onRowClick={(student) => {
-                console.log('Selected student:', student);
+                console.log("Selected student:", student);
               }}
             />
           )}

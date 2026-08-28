@@ -23,9 +23,10 @@ export async function POST(req) {
     }
 
     // Find user
-    const user = await User.findOne({
-      email: email.toLowerCase(),
-    });
+   const user = await User.findOne({
+     email: email.toLowerCase(),
+     status: "active",
+   });
 
     if (!user) {
       return NextResponse.json(
