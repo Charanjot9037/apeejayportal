@@ -1,45 +1,75 @@
+"use client";
 
-
-'use client';
-
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Search,
   Eye,
+  Pencil,
   SlidersHorizontal,
   FolderKanban,
   ChevronDown,
-} from 'lucide-react';
-
-import Avatar from './avatar';
-import SelectField from './SelectFiled';
-
+  Trash2,
+} from "lucide-react";
+import { mapStudentToRoster } from "@/constants/adminData";
+import StudentEditModal from "./StudentEditModal";
+import Avatar from "./avatar";
+import { toast } from "sonner";
+import SelectField from "./SelectFiled";
+import { useRouter } from "next/navigation";
 export default function Roster({
-  title = 'Roster',
+  title = "Roster",
   data = [],
+  showDelete = false,
+  showEdit = false,
   columns = [],
-  searchPlaceholder = 'Search...',
+  setStudents,
+  searchPlaceholder = "Search...",
   onRowClick,
   onApplyFilters,
-  className = '',
+  className = "",
   defaultFilters = {},
   filterConfig = [],
   showApplyButton = false,
-    initialVisibleRows = 5,
+  initialVisibleRows = 5,
 }) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
-  // Controls whether all records are displayed
   const [showAll, setShowAll] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
 
-  /*
-   * Stores currently selected filters.
-   */
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [filters, setFilters] = useState(defaultFilters);
+  const router = useRouter();
+  const handleDeleteClick = (student) => {
+    setSelectedStudent(student);
+    setShowDeleteModal(true);
+  };
+  const handleDelete = async (id) => {
+    try {
+      console.log("Student deleting:", id);
 
-  /*
-   * Handle filter change.
-   */
+      const response = await fetch(`/api/student/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete student");
+      }
+
+      toast.success("User deleted successfully");
+
+      setStudents((prev) => prev.filter((student) => student._id !== id));
+
+      setShowDeleteModal(false);
+      setSelectedStudent(null);
+    } catch (error) {
+      console.error("DELETE_STUDENT_ERROR:", error);
+      toast.error(error.message || "Failed to delete student");
+    }
+  };
   const handleFilterChange = (key, value) => {
     setFilters((previousFilters) => {
       const updatedFilters = {
@@ -47,17 +77,17 @@ export default function Roster({
         [key]: value,
       };
 
-      if (key === 'department') {
-        updatedFilters.program = '';
-        updatedFilters.specialization = '';
-        updatedFilters.currentSemester = '';
+      if (key === "department") {
+        updatedFilters.program = "";
+        updatedFilters.specialization = "";
+        updatedFilters.currentSemester = "";
       }
 
-      if (key === 'program') {
-        updatedFilters.currentSemester = '';
+      if (key === "program") {
+        updatedFilters.currentSemester = "";
       }
 
-      console.log('Roster - filter changed:', updatedFilters);
+      console.log("Roster - filter changed:", updatedFilters);
 
       return updatedFilters;
     });
@@ -67,7 +97,7 @@ export default function Roster({
    * Apply selected filters.
    */
   const handleApplyFilters = () => {
-    console.log('Roster - applying filters:', filters);
+    console.log("Roster - applying filters:", filters);
 
     onApplyFilters?.({
       ...filters,
@@ -80,9 +110,9 @@ export default function Roster({
      * PROJECT COLUMN
      * =========================
      */
-    if (column.key === 'projectTitle') {
+    if (column.key === "projectTitle") {
       return (
-        <div className="flex items-center gap-3">
+        <div className=" bg-red-5000 flex items-center gap-3">
           <div
             className="
               flex h-9 w-9 shrink-0 items-center justify-center
@@ -103,29 +133,26 @@ export default function Roster({
                 group-hover:text-[#1c3a5e]
               "
             >
-              {item.projectTitle || '-'}
+              {item.projectTitle || "-"}
             </p>
-
           </div>
         </div>
       );
     }
-    if (column.key === 'techStack') {
-  return (
-    <span className="text-sm text-slate-600">
-      {Array.isArray(item.techStack)
-        ? item.techStack.join('')
-        : '-'}
-    </span>
-  );
-}
+    if (column.key === "techStack") {
+      return (
+        <span className="text-sm text-slate-600">
+          {Array.isArray(item.techStack) ? item.techStack.join("") : "-"}
+        </span>
+      );
+    }
 
     /*
      * =========================
      * NAME / STUDENT COLUMN
      * =========================
      */
-    if (column.key === 'name' || column.key === 'student') {
+    if (column.key === "name" || column.key === "student") {
       const name = item.name || item.student;
 
       return (
@@ -147,9 +174,9 @@ export default function Roster({
                 group-hover:text-[#1c3a5e]
               "
             >
-              {name || '-'}
+              {name || "-"}
             </p>
-{/* 
+            {/* 
             {(item.rollNo || item.id) && (
               <p className="text-xs text-slate-400">
                 {item.rollNo || item.id}
@@ -165,17 +192,15 @@ export default function Roster({
      * STATUS COLUMN
      * =========================
      */
-    if (column.key === 'status') {
+    if (column.key === "status") {
       const statusStyles = {
-        Verified: 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100',
-        'Pending Approval':
-    'bg-amber-50 text-amber-600 ring-1 ring-amber-100',
-        'Changes Required':
-          'bg-orange-50 text-orange-600 ring-1 ring-orange-100',
-        Placed: 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100',
-        Looking: 'bg-orange-50 text-orange-primary',
-            Approved:
-  'bg-green text-emerald-600 ring-1 ring-emerald-100',
+        Verified: "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100",
+        "Pending Approval": "bg-amber-50 text-amber-600 ring-1 ring-amber-100",
+        "Changes Required":
+          "bg-orange-50 text-orange-600 ring-1 ring-orange-100",
+        Placed: "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100",
+        Looking: "bg-orange-50 text-orange-primary",
+        Approved: "bg-green text-emerald-600 ring-1 ring-emerald-100",
       };
 
       return (
@@ -185,57 +210,56 @@ export default function Roster({
             px-2.5 py-1
             text-xs font-semibold
             transition-all duration-200
-            ${statusStyles[item.status] || 'bg-slate-100 text-slate-600'}
+            ${statusStyles[item.status] || "bg-slate-100 text-slate-600"}
           `}
         >
           <span
             className={`
               mr-1.5 h-1.5 w-1.5 rounded-full
               ${
-                item.status === 'Verified' || item.status === 'Placed'
-                  ? 'bg-emerald-500'
-                  : item.status === 'Pending'
-                    ? 'bg-amber-500'
-                    : item.status === 'Changes Required' ||
-                        item.status === 'Looking'
-                      ? 'bg-orange-500'
-                      : 'bg-slate-400'
+                item.status === "Verified" || item.status === "Placed"
+                  ? "bg-emerald-500"
+                  : item.status === "Pending"
+                    ? "bg-amber-500"
+                    : item.status === "Changes Required" ||
+                        item.status === "Looking"
+                      ? "bg-orange-500"
+                      : "bg-slate-400"
               }
             `}
           />
 
-          {item.status || '-'}
+          {item.status || "-"}
         </span>
       );
     }
-    if (column.key === 'email') {
-  return (
-    <span className="whitespace-nowrap text-slate-600">
-      {item.email || '-'}
-    </span>
-  );
-}
+    if (column.key === "email") {
+      return (
+        <span className="whitespace-nowrap text-slate-600">
+          {item.email || "-"}
+        </span>
+      );
+    }
 
-/* 
- * =========================
- * CONTACT COLUMN
- * =========================
- */
-if (column.key === 'contact') {
-  return (
-    <span className="whitespace-nowrap text-slate-600">
-      {item.contact || '-'}
-    </span>
-  );
-}
-
+    /*
+     * =========================
+     * CONTACT COLUMN
+     * =========================
+     */
+    if (column.key === "contact") {
+      return (
+        <span className="whitespace-nowrap text-slate-600">
+          {item.contact || "-"}
+        </span>
+      );
+    }
 
     /*
      * =========================
      * ACTION COLUMN
      * =========================
      */
-    if (column.key === 'action') {
+    if (column.key === "action") {
       return (
         <button
           type="button"
@@ -263,7 +287,7 @@ if (column.key === 'contact') {
     /*
      * Generic columns
      */
-    return item[column.key] ?? '-';
+    return item[column.key] ?? "-";
   };
 
   /*
@@ -277,7 +301,7 @@ if (column.key === 'contact') {
     }
 
     return Object.values(item).some((value) =>
-      String(value ?? '')
+      String(value ?? "")
         .toLowerCase()
         .includes(searchValue),
     );
@@ -304,10 +328,7 @@ if (column.key === 'contact') {
     >
       <div className="px-5 pt-5">
         <div className="flex items-center gap-2">
-
-          <h2 className="text-lg font-bold text-[#1c3a5e]">
-            {title}
-          </h2>
+          <h2 className="text-lg font-bold text-[#1c3a5e]">{title}</h2>
         </div>
 
         <div className="mt-1 h-0.5 w-8 bg-primary-orange" />
@@ -386,38 +407,27 @@ if (column.key === 'contact') {
               </div>
 
               {/* Filter fields */}
-              
+
               {filterConfig.map((filter) => {
-                const {
-                  key,
-                  label,
-                  placeholder,
-                } = filter;
-                
-const options = filter.dependsOn
-  ? filter.options?.[filters[filter.dependsOn]] || []
-  : Array.isArray(filter.options)
-    ? filter.options
-    : [];
-                
+                const { key, label, placeholder } = filter;
+
+                const options = filter.dependsOn
+                  ? filter.options?.[filters[filter.dependsOn]] || []
+                  : Array.isArray(filter.options)
+                    ? filter.options
+                    : [];
 
                 return (
-                  <div
-                    key={key}
-                    className="w-full lg:w-[150px]"
-                  >
+                  <div key={key} className="w-full lg:w-[150px]">
                     <label className="mb-1.5 block text-xs font-semibold text-slate-500">
                       {label}
                     </label>
 
                     <div className="relative">
                       <select
-                        value={filters[key] ?? ''}
+                        value={filters[key] ?? ""}
                         onChange={(e) =>
-                          handleFilterChange(
-                            key,
-                            e.target.value,
-                          )
+                          handleFilterChange(key, e.target.value)
                         }
                         className="
                           w-full appearance-none
@@ -441,32 +451,24 @@ const options = filter.dependsOn
                           cursor-pointer
                         "
                       >
-                        {placeholder && (
-                          <option value="">
-                            {placeholder}
-                          </option>
-                        )}
+                        {placeholder && <option value="">{placeholder}</option>}
 
-                       {options.map((option, index) => {
-  const value =
-    typeof option === 'object'
-      ? option.value
-      : option;
+                        {options.map((option, index) => {
+                          const value =
+                            typeof option === "object" ? option.value : option;
 
-  const label =
-    typeof option === 'object'
-      ? option.label
-      : option;
+                          const label =
+                            typeof option === "object" ? option.label : option;
 
-  return (
-    <option
-      key={`${key}-${value}-${index}`}
-      value={value}
-    >
-      {label}
-    </option>
-  );
-})}
+                          return (
+                            <option
+                              key={`${key}-${value}-${index}`}
+                              value={value}
+                            >
+                              {label}
+                            </option>
+                          );
+                        })}
                       </select>
 
                       <ChevronDown
@@ -539,19 +541,18 @@ const options = filter.dependsOn
               "
             >
               {columns.map((column) => (
-                <th
-                  key={column.key}
-                  className="px-3 py-2.5 font-medium"
-                >
+                <th key={column.key} className="px-3 py-2.5 font-medium">
                   {column.label}
                 </th>
               ))}
 
               {/* ONE ACTION COLUMN */}
 
-              <th className="px-5 py-2.5 text-right font-medium">
-                Action
-              </th>
+              <th className="px-5 py-2.5 text-right font-medium">Action</th>
+
+              {showDelete && (
+                <th className="px-5 py-2.5 text-right font-medium">Delete</th>
+              )}
             </tr>
           </thead>
 
@@ -592,33 +593,38 @@ const options = filter.dependsOn
                   {/* ACTION */}
 
                   <td className="px-5 py-3 text-right">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRowClick?.(item);
-                      }}
-                      title="View"
-                      aria-label="View"
-                      className="
-                        ml-auto flex h-8 w-8
-                        items-center justify-center
-                        rounded-lg
-                        text-slate-400
-
-                        transition-all duration-200 ease-out
-
-                        hover:bg-blue-50
-                        hover:text-blue-600
-                        hover:scale-105
-
-                        active:scale-95
-
-                        cursor-pointer
-                      "
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
+                    {showEdit ? (
+                      <button
+                        type="button"
+                        onClick={() => setEditingStudent(item)}
+                        className="rounded-lg p-2 text-slate-500 transition hover:bg-orange-50 hover:text-primary-orange"
+                        title="Edit student"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onRowClick?.(row)}
+                        className="rounded-lg p-2 text-slate-500 transition hover:bg-blue-50 hover:text-blue-600"
+                        title="View student"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                    )}
+                  </td>
+                  <td className="px-5 py-3 text-right">
+                    {" "}
+                    {showDelete && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteClick(item)}
+                        className="rounded-lg p-2 text-slate-500 transition hover:bg-orange-50 hover:text-primary-orange"
+                        title="Edit student"
+                      >
+                        <Trash2 className="h-5 w-5 text-red-500" />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
@@ -665,8 +671,78 @@ const options = filter.dependsOn
             cursor-pointer
           "
         >
-          {showAll ? 'Show Less' : 'View All'}
+          {showAll ? "Show Less" : "View All"}
         </button>
+      )}
+      {filteredData.length > initialVisibleRows && (
+        <button type="button" onClick={() => setShowAll((prev) => !prev)}>
+          {showAll ? "Show Less" : "View All"}
+        </button>
+      )}
+
+      {/* EDIT STUDENT MODAL */}
+      {editingStudent && (
+        <StudentEditModal
+          student={editingStudent}
+          onClose={() => setEditingStudent(null)}
+          onUpdated={(updatedStudent) => {
+            setStudents((prevStudents) =>
+              prevStudents.map((student) =>
+                student._id === editingStudent._id
+                  ? mapStudentToRoster(updatedStudent)
+                  : student,
+              ),
+            );
+
+            setEditingStudent(null);
+          }}
+        />
+      )}
+      {showDeleteModal && selectedStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            {/* Header */}
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold text-slate-900">
+                Delete Student
+              </h2>
+
+              <p className="mt-2 text-sm text-slate-500">
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-slate-700">
+                  {selectedStudent.fullName || selectedStudent.name}
+                </span>
+                ?
+              </p>
+
+              <p className="mt-2 text-sm text-red-500">
+                This action cannot be undone.
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedStudent(null);
+                }}
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDelete(selectedStudent._id)}
+                className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
