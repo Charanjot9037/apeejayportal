@@ -30,11 +30,15 @@ export async function GET(request) {
       );
     }
 
-    const projects = await Project.find({ mentor: auth.user._id })
-      .populate({ path: "student", select: "name email " })
+    const projects = await Project.find({
+      $or: [{ mentor: auth.user._id }, { mentor2: auth.user._id }],
+    })
+      .populate({
+        path: "student",
+        select: "name email",
+      })
       .sort({ createdAt: -1 })
       .lean();
-    console.log("projects:", projects);
 
     // Get Student academic details for each project's student (User._id)
     const studentUserIds = projects.map((p) => p.student?._id).filter(Boolean);

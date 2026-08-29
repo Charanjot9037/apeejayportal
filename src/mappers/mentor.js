@@ -7,7 +7,7 @@ export const mapMentorProjectToRoster = (project) => {
     department: project.student?.department || "-",
     semester: project.semester || "-",
     projectType: project.projectType || "-",
-    specialization: project.student.specialization || [],
+
     status: project.status || "-",
     lastReviewed: project.mentorReviewedAt || null,
   };

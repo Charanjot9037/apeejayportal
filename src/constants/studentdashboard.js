@@ -17,9 +17,14 @@ export const projects = [
 ];
 
 export const statusStyles = {
-  Approved: "bg-amber-100 text-amber-800",
-  "Changes Requested": "bg-rose-100 text-rose-700",
+  "Pending Approval": "bg-yellow-100 text-yellow-700",
+
+  Approved: "bg-green-100 text-green-700",
+
+  Rejected: "bg-red-100 text-red-700",
+
   Draft: "bg-slate-100 text-slate-600",
+
 };
 
 export const events = [

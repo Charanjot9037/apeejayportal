@@ -4,6 +4,8 @@ import { Link as LinkIcon, Code2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { useSelector } from "react-redux";
+import TechStackModal from "../../TechStackModal";
+import { useState } from "react";
 /* =========================================================
    TECHNICAL DETAILS SECTION
 ========================================================= */
@@ -15,6 +17,7 @@ export default function TechnicalDetailsSection({
 }) {
   const student = useSelector((state) => state.student);
   const department = student.department;
+   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <section className="mt-6">
@@ -49,9 +52,9 @@ export default function TechnicalDetailsSection({
             </span>
           ))}
 
-          <button
+            <button
             type="button"
-            onClick={addTechnology}
+            onClick={() => setIsModalOpen(true)}
             className="text-xs text-slate-400 hover:text-orange-500"
           >
             + Add tech...
@@ -121,6 +124,11 @@ export default function TechnicalDetailsSection({
           </div>
         </div>
       )}
+        <TechStackModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAdd={addTechnology}
+      />
     </section>
   );
 }

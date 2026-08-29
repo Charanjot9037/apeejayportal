@@ -238,12 +238,23 @@ export default function BulkImport() {
   const validCount = validatedStudents.filter(
     (student) => student.isValid,
   ).length;
+
   const validateMentors = async (students) => {
     try {
-      const mentors = students.map((student) => ({
-        name: student.guidename,
-        email: student.guideemail,
-      }));
+      // Get unique mentors by email
+      const uniqueMentors = [
+        ...new Map(
+          students
+            .map((student) => ({
+              name: student.guidename?.trim(),
+              email: student.guideemail?.trim().toLowerCase(),
+            }))
+            .filter((mentor) => mentor.email)
+            .map((mentor) => [mentor.email, mentor]),
+        ).values(),
+      ];
+
+      console.log("Unique mentors:", uniqueMentors);
 
       const response = await fetch("/api/admin/bulkImport/validate-mentor", {
         method: "POST",
@@ -252,7 +263,8 @@ export default function BulkImport() {
         },
         credentials: "include",
         body: JSON.stringify({
-          mentors,
+          students: students,
+          mentors: uniqueMentors,
         }),
       });
 
@@ -285,7 +297,28 @@ export default function BulkImport() {
         return null;
       }
 
-      return data.mentors;
+      // Create map of validation result by email
+      const mentorResultMap = new Map(
+        data.mentors.map((mentor) => [
+          mentor.email?.trim().toLowerCase(),
+          mentor,
+        ]),
+      );
+
+      // Return validation result for EACH student
+      return students.map((student) => {
+        const email = student.guideemail?.trim().toLowerCase();
+
+        return (
+          mentorResultMap.get(email) || {
+            email: student.guideemail,
+            name: student.guidename,
+            exists: false,
+            nameMatches: false,
+            errors: [`Mentor email "${student.guideemail}" does not exist`],
+          }
+        );
+      });
     } catch (error) {
       console.error("MENTOR_VALIDATION_ERROR:", error);
 

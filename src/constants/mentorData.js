@@ -72,10 +72,6 @@ export const MENTOR_STUDENT_COLUMNS = [
     label: "Semester",
   },
   {
-    key: "specialization",
-    label: "Specialization",
-  },
-  {
     key: "status",
     label: "Status",
   },

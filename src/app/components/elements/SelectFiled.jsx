@@ -6,7 +6,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-function SelectField({ label, name, value, onChange, onBlur, error, options }) {
+function SelectField({
+  label,
+  name,
+  value,
+  onChange,
+  onBlur,
+  error,
+  options = [],
+  required = false,
+}) {
   return (
     <div>
       <label
@@ -14,14 +23,13 @@ function SelectField({ label, name, value, onChange, onBlur, error, options }) {
         className="mb-1.5 block text-sm font-medium text-primary"
       >
         {label}
+        {required && <span className="ml-1 text-main-blue">*</span>}
       </label>
 
       <Select
-        className="rounded-md h-10"
-        value={value}
+        value={value || ""}
         onValueChange={(selectedValue) => {
           onChange(selectedValue);
-          onBlur?.();
         }}
       >
         <SelectTrigger

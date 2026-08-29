@@ -177,6 +177,20 @@ export async function PATCH(req) {
         },
       );
     }
+    if (section === "personal" && data.fullName) {
+      updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+          $set: {
+            name: data.fullName,
+          },
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
+    }
     const profile = await Student.findOneAndUpdate(
       { userId },
       { $set: updateData },

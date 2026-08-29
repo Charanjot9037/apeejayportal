@@ -1,9 +1,9 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Users, UserRound, BriefcaseBusiness } from 'lucide-react';
+import { Users, UserRound } from 'lucide-react';
 import Roster from '@/app/components/elements/roaster';
-
 
 const MENTOR_COLUMNS = [
   {
@@ -34,201 +34,240 @@ const MENTOR_COLUMNS = [
 
 const MENTOR_FILTERS = [
   {
-    key: 'department',
-    label: 'Department',
-    placeholder: 'All Departments',
-    options: [
-      'Computer Science',
-      'Information Technology',
-      'Management',
-      'Electronics',
-      'Mechanical',
-    ],
-  },
-  {
     key: 'designation',
     label: 'Designation',
     placeholder: 'All Designations',
     options: [
-      'Professor',
-      'Associate Professor',
-      'Assistant Professor',
-      'Lecturer',
+      {
+        value: 'HOD',
+        label: 'HOD',
+      },
+      {
+        value: 'Professor',
+        label: 'Professor',
+      },
+      {
+        value: 'Associate Professor',
+        label: 'Associate Professor',
+      },
+      {
+        value: 'Assistant-Professor',
+        label: 'Assistant Professor',
+      },
+      {
+        value: 'Lecturer',
+        label: 'Lecturer',
+      },
     ],
   },
 ];
 
-/* =========================================================
-   DEFAULT FILTERS
-   ========================================================= */
-
 const DEFAULT_FILTERS = {
-  department: '',
   designation: '',
 };
 
 /* =========================================================
-   MENTOR DATA
+   NORMALIZE VALUE
+   =========================================================
+   Converts:
+   "Assistant Professor"
+   "ASSISTANT-PROFESSOR"
+   "assistant professor"
+   " assistant-professor "
+
+   into the same comparable value.
    ========================================================= */
 
-const MENTORS = [
-  {
-    id: 1,
-    name: 'Dr. Neha Sharma',
-    employeeId: 'FAC001',
-    email: 'neha.sharma@college.edu',
-    contact: '+91 98765 43210',
-    department: 'Computer Science',
-    designation: 'Professor',
-  },
-  {
-    id: 2,
-    name: 'Dr. A. Gupta',
-    employeeId: 'FAC002',
-    email: 'a.gupta@college.edu',
-    contact: '+91 98765 43211',
-    department: 'Computer Science',
-    designation: 'Associate Professor',
-  },
-  {
-    id: 3,
-    name: 'Prof. V. Kumar',
-    employeeId: 'FAC003',
-    email: 'v.kumar@college.edu',
-    contact: '+91 98765 43212',
-    department: 'Information Technology',
-    designation: 'Assistant Professor',
-  },
-  {
-    id: 4,
-    name: 'Dr. S. Reddy',
-    employeeId: 'FAC004',
-    email: 's.reddy@college.edu',
-    contact: '+91 98765 43213',
-    department: 'Information Technology',
-    designation: 'Professor',
-  },
-  {
-    id: 5,
-    name: 'Dr. R. Kapoor',
-    employeeId: 'FAC005',
-    email: 'r.kapoor@college.edu',
-    contact: '+91 98765 43214',
-    department: 'Management',
-    designation: 'Associate Professor',
-  },
-  {
-    id: 6,
-    name: 'Prof. M. Singh',
-    employeeId: 'FAC006',
-    email: 'm.singh@college.edu',
-    contact: '+91 98765 43215',
-    department: 'Computer Science',
-    designation: 'Assistant Professor',
-  },
-  {
-    id: 7,
-    name: 'Dr. P. Sharma',
-    employeeId: 'FAC007',
-    email: 'p.sharma@college.edu',
-    contact: '+91 98765 43216',
-    department: 'Electronics',
-    designation: 'Professor',
-  },
-  {
-    id: 8,
-    name: 'Dr. S. Bhatia',
-    employeeId: 'FAC008',
-    email: 's.bhatia@college.edu',
-    contact: '+91 98765 43217',
-    department: 'Computer Science',
-    designation: 'Associate Professor',
-  },
-  {
-    id: 9,
-    name: 'Prof. R. Arora',
-    employeeId: 'FAC009',
-    email: 'r.arora@college.edu',
-    contact: '+91 98765 43218',
-    department: 'Management',
-    designation: 'Assistant Professor',
-  },
-  {
-    id: 10,
-    name: 'Dr. N. Verma',
-    employeeId: 'FAC010',
-    email: 'n.verma@college.edu',
-    contact: '+91 98765 43219',
-    department: 'Information Technology',
-    designation: 'Professor',
-  },
-];
+const normalizeValue = (value) => {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ');
+};
 
 export default function Page() {
   const [mentors, setMentors] = useState([]);
+  const [allMentors, setAllMentors] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const [hodDepartment, setHodDepartment] = useState('');
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
-  useEffect(() => {
-    fetchMentors(DEFAULT_FILTERS);
-  }, []);
+  /* =========================================================
+     FETCH HOD DATA
+     ========================================================= */
 
-  const fetchMentors = async (selectedFilters) => {
+  const fetchMentors = async (selectedFilters = DEFAULT_FILTERS) => {
     try {
       setLoading(true);
       setError('');
 
-      /*
-       * Replace this with your mentor API later.
-       *
-       * Example:
-       * const response = await fetch('/api/mentor');
-       */
+      const response = await fetch('/api/hod', {
+        method: 'GET',
+        cache: 'no-store',
+      });
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const data = await response.json();
 
-      let filteredMentors = [...MENTORS];
-
-      if (selectedFilters.department) {
-        filteredMentors = filteredMentors.filter(
-          (mentor) =>
-            mentor.department === selectedFilters.department,
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message || 'Failed to fetch mentors'
         );
       }
 
-      if (selectedFilters.designation) {
-        filteredMentors = filteredMentors.filter(
-          (mentor) =>
-            mentor.designation === selectedFilters.designation,
-        );
-      }
+      /* =======================================================
+         GET HOD DEPARTMENT
+         ======================================================= */
 
-      if (selectedFilters.status) {
-        filteredMentors = filteredMentors.filter(
-          (mentor) =>
-            mentor.status === selectedFilters.status,
-        );
+      const department = data.hod?.department || '';
+
+      setHodDepartment(department);
+
+      /* =======================================================
+         GET MENTORS FROM /api/hod
+
+         API should already return mentors belonging to
+         the logged-in HOD's department.
+         ======================================================= */
+
+      const departmentMentors = Array.isArray(data.mentors)
+        ? data.mentors
+        : [];
+
+      /* =======================================================
+         MAP DATABASE MENTORS
+         ======================================================= */
+
+      const mappedMentors = departmentMentors.map((mentor) => ({
+        id: mentor._id
+          ? String(mentor._id)
+          : mentor.userId?._id
+            ? String(mentor.userId._id)
+            : '',
+
+        _id: mentor._id
+          ? String(mentor._id)
+          : '',
+
+        name:
+          mentor.userId?.name ||
+          mentor.name ||
+          'Unknown Mentor',
+
+        email:
+          mentor.userId?.email ||
+          mentor.email ||
+          '-',
+
+        contact:
+          mentor.mobileNumber ||
+          mentor.contact ||
+          '-',
+
+        designation:
+          mentor.designation ||
+          '-',
+
+        department:
+          mentor.department ||
+          department,
+      }));
+
+      /* =======================================================
+         SAVE ALL DEPARTMENT MENTORS
+         ======================================================= */
+
+      setAllMentors(mappedMentors);
+
+      /* =======================================================
+         APPLY DESIGNATION FILTER
+         ======================================================= */
+
+      const selectedDesignation =
+        normalizeValue(selectedFilters?.designation);
+
+      let filteredMentors = mappedMentors;
+
+      if (selectedDesignation) {
+        filteredMentors = mappedMentors.filter((mentor) => {
+          const mentorDesignation = normalizeValue(
+            mentor.designation
+          );
+
+          return mentorDesignation === selectedDesignation;
+        });
       }
 
       setMentors(filteredMentors);
     } catch (error) {
-      console.error('FETCH_MENTORS_ERROR:', error);
+      console.error(
+        'FETCH_HOD_MENTORS_ERROR:',
+        error
+      );
 
       setError(
-        error.message || 'Something went wrong while loading mentors',
+        error.message ||
+          'Something went wrong while loading mentors'
       );
 
       setMentors([]);
+      setAllMentors([]);
     } finally {
       setLoading(false);
     }
   };
 
+  /* =========================================================
+     INITIAL LOAD
+     ========================================================= */
+
+  useEffect(() => {
+    fetchMentors(DEFAULT_FILTERS);
+  }, []);
+
+  /* =========================================================
+     APPLY FILTER
+     ========================================================= */
+
   const handleApplyFilters = (selectedFilters) => {
     setFilters(selectedFilters);
-    fetchMentors(selectedFilters);
+
+    const selectedDesignation = normalizeValue(
+      selectedFilters?.designation
+    );
+
+    /* ---------------------------------------------------------
+       No designation selected
+       → Show ALL mentors from HOD department
+       --------------------------------------------------------- */
+
+    if (!selectedDesignation) {
+      setMentors(allMentors);
+      return;
+    }
+
+    /* ---------------------------------------------------------
+       Designation selected
+       → Compare both sides after lowercase normalization
+       --------------------------------------------------------- */
+
+    const filtered = allMentors.filter((mentor) => {
+      const mentorDesignation = normalizeValue(
+        mentor.designation
+      );
+
+      return mentorDesignation === selectedDesignation;
+    });
+
+    setMentors(filtered);
   };
+
+  /* =========================================================
+     RETRY
+     ========================================================= */
 
   const handleRetry = () => {
     fetchMentors(filters);
@@ -238,9 +277,12 @@ export default function Page() {
     <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
 
-        {/* ================= PAGE HEADER ================= */}
+        {/* =====================================================
+            PAGE HEADER
+        ===================================================== */}
 
         <div className="mb-6">
+
           <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400">
             <span>Dashboard</span>
             <span>/</span>
@@ -252,6 +294,7 @@ export default function Page() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
             <div>
+
               <div className="flex items-center gap-2">
 
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-50">
@@ -259,18 +302,26 @@ export default function Page() {
                 </div>
 
                 <h1 className="text-2xl font-bold text-[#1c3a5e]">
-                  Mentors
+                  My Department Mentors
                 </h1>
 
               </div>
 
               <p className="mt-2 text-sm text-slate-500">
-                View and manage mentors, their assigned students,
-                projects and academic responsibilities.
+                View all mentors belonging to your department.
+
+                {hodDepartment && (
+                  <span className="ml-1 font-semibold text-[#1c3a5e]">
+                    Department: {hodDepartment}
+                  </span>
+                )}
               </p>
+
             </div>
 
-            {/* TOTAL MENTORS */}
+            {/* =================================================
+                TOTAL MENTORS
+            ================================================= */}
 
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
 
@@ -279,6 +330,7 @@ export default function Page() {
               </div>
 
               <div>
+
                 <p className="text-xs font-medium text-slate-400">
                   Total Mentors
                 </p>
@@ -286,14 +338,18 @@ export default function Page() {
                 <p className="text-lg font-bold text-[#1c3a5e]">
                   {mentors.length}
                 </p>
+
               </div>
 
             </div>
 
           </div>
+
         </div>
 
-        {/* ================= ERROR ================= */}
+        {/* =====================================================
+            ERROR
+        ===================================================== */}
 
         {error && (
           <div className="mb-5 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
@@ -315,63 +371,37 @@ export default function Page() {
               <button
                 type="button"
                 onClick={handleRetry}
-                className="
-                  mt-5 rounded-lg
-                  bg-primary-orange
-                  px-4 py-2
-                  text-sm font-semibold text-white
-                  transition
-                  hover:bg-[#df681c]
-                  cursor-pointer
-                "
+                className="mt-5 rounded-lg bg-primary-orange px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#df681c]"
               >
                 Try Again
               </button>
 
             </div>
+
           </div>
         )}
 
-        {/* ================= ROSTER ================= */}
+        {/* =====================================================
+            ROSTER
+        ===================================================== */}
 
         <div className="relative rounded-2xl">
-{loading && (
-  <div
-    className="
-      absolute inset-0 z-20
-      flex items-center justify-center
-      rounded-2xl
-      bg-white/60
-      backdrop-blur-[1px]
-    "
-  >
-    <div
-      className="
-        flex items-center gap-3
-        rounded-xl
-        border border-slate-200
-        bg-white
-        px-5 py-3
-        shadow-md
-      "
-    >
-      <div
-        className="
-          h-5 w-5
-          animate-spin
-          rounded-full
-          border-2
-          border-slate-200
-          border-t-primary-orange
-        "
-      />
 
-      <span className="text-sm font-medium text-slate-600">
-        Loading mentors...
-      </span>
-    </div>
-  </div>
-)}
+          {loading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
+
+              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-md">
+
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-primary-orange" />
+
+                <span className="text-sm font-medium text-slate-600">
+                  Loading mentors...
+                </span>
+
+              </div>
+
+            </div>
+          )}
 
           <Roster
             title="Mentor Roster"
@@ -382,10 +412,13 @@ export default function Page() {
             filterConfig={MENTOR_FILTERS}
             showApplyButton={true}
             onApplyFilters={handleApplyFilters}
-            className="mt-0 shadow-sm"
             initialVisibleRows={5}
+            className="mt-0 shadow-sm"
             onRowClick={(mentor) => {
-              console.log('Selected mentor:', mentor);
+              console.log(
+                'Selected mentor:',
+                mentor
+              );
             }}
           />
 

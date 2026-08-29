@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Users, GraduationCap } from "lucide-react";
 import Roster from "@/app/components/elements/roaster";
 import MentorRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
-
+import AuthGuardModal from "@/app/components/AuthGuardModal";
+import { useRouter } from "next/navigation";
 import {
   MENTOR_ROSTER_COLUMNS,
   MENTOR_DEFAULT_FILTERS,
@@ -16,10 +17,15 @@ export default function MentorManagement() {
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const [authModal, setAuthModal] = useState({
+    open: false,
+    type: "authentication",
+    message: "",
+  });
   const [filters, setFilters] = useState({
     ...MENTOR_DEFAULT_FILTERS,
   });
+  const router=useRouter();
 
   const fetchMentors = async (selectedFilters) => {
     try {
@@ -35,7 +41,34 @@ export default function MentorManagement() {
       });
 
       const data = await response.json();
+      if (response.status === 401) {
+        setAuthModal({
+          open: true,
+          type: "authentication",
+          message:
+            data.message || "Your session has expired. Please log in again.",
+        });
 
+        return;
+      }
+
+      // ==============================
+      // AUTHORIZATION ERROR
+      // ==============================
+
+      if (response.status === 403) {
+        setAuthModal({
+          open: true,
+          type: "unauthorized",
+          message: data.message || "You are not authorized to access mentors.",
+        });
+
+        return;
+      }
+
+      // ==============================
+      // OTHER ERRORS
+      // ==============================
       if (!response.ok || !data.success) {
         throw new Error(data.message || "Failed to fetch mentors");
       }
@@ -71,7 +104,26 @@ export default function MentorManagement() {
   };
 
   return (
-    <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-3">
+      <AuthGuardModal
+        open={authModal.open}
+        type={authModal.type}
+        message={authModal.message}
+        onClose={() => {
+          if (authModal.type === "unauthorized") {
+            router.back();
+          } else {
+            setAuthModal((prev) => ({
+              ...prev,
+              open: false,
+            }));
+          }
+        }}
+        onLogin={() => {
+          router.push("/login");
+        }}
+      />
+
       <div className="mx-auto max-w-7xl">
         <div className="mb-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -139,6 +191,10 @@ export default function MentorManagement() {
             <Roster
               title="Mentor Roster"
               data={mentors}
+              isMentor={true}
+              showEdit={true}
+              setData={setMentors}
+              showDelete={true}
               columns={MENTOR_ROSTER_COLUMNS}
               searchPlaceholder="Search mentors..."
               filterConfig={MENTOR_FILTER_CONFIG}

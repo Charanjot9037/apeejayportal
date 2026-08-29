@@ -271,6 +271,7 @@ const Login = () => {
 
         const role = data?.user?.role;
         const designation = data?.user?.designation;
+        console.log("designation: ",designation);
 
         switch (role) {
           case "student":
@@ -287,7 +288,9 @@ const Login = () => {
                 router.push("/admin-dashboard");
                 break;
 
-              case "dean":
+              case "hod":
+                router.push("/hod-dashboard");
+                break;
               case "assistant professor":
               case "associate professor":
               case "professor":

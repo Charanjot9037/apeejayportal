@@ -66,7 +66,7 @@ export default function Admin() {
 
   return (
     <div className="flex h-full">
-      <main className="flex-1 px-8 py-8">
+      <main className="flex-1 sm:pd-6 lg:p-3">
         <DashboardHeader
           {...ADMIN_DASHBOARD_HEADER}
           onAction={() => console.log('Pending Approvals')}
