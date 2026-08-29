@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -16,23 +15,58 @@ export default function MentorLayout({ children }) {
     const fetchHODData = async () => {
       try {
         const response = await fetch("/api/hod/dashboard", {
-          method: "GET",
+          method: "POST",
           credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          // No filters for sidebar
+          body: JSON.stringify({}),
         });
 
-        const result = await response.json();
+        // Safely read JSON
+        const text = await response.text();
 
-        if (!response.ok || !result.success) {
+        if (!text) {
           throw new Error(
-            result.message || "Failed to fetch HOD data"
+            "Empty response received from HOD dashboard API"
           );
         }
 
-        console.log("HOD SIDEBAR DATA:", result.hod);
+        let result;
+
+        try {
+          result = JSON.parse(text);
+        } catch (jsonError) {
+          console.error(
+            "HOD SIDEBAR NON-JSON RESPONSE:",
+            text
+          );
+
+          throw new Error(
+            "Invalid JSON response from HOD dashboard API"
+          );
+        }
+
+        if (!response.ok || !result.success) {
+          throw new Error(
+            result.message ||
+              "Failed to fetch HOD data"
+          );
+        }
+
+        console.log(
+          "HOD SIDEBAR DATA:",
+          result.hod
+        );
 
         setHod(result.hod);
       } catch (error) {
-        console.error("HOD SIDEBAR ERROR:", error);
+        console.error(
+          "HOD SIDEBAR ERROR:",
+          error
+        );
       } finally {
         setLoading(false);
       }
@@ -50,6 +84,11 @@ export default function MentorLayout({ children }) {
 
     // Keep existing navigation
     navItems: hodDashboardData.navItems,
+
+    // Keep HOD data available
+    ...(hod && {
+      hod,
+    }),
   };
 
   return (

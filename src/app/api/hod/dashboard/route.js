@@ -8,7 +8,7 @@ import Projects from "@/models/projects";
 
 import { authenticateUser } from "@/lib/authentication";
 
-export async function GET() {
+export async function POST(request) {
   try {
     // =========================================================
     // 1. CONNECT DATABASE
@@ -17,7 +17,26 @@ export async function GET() {
     await connectDB();
 
     // =========================================================
-    // 2. AUTHENTICATE LOGGED-IN USER
+    // 2. GET FILTERS FROM ROSTER
+    // =========================================================
+
+    const filters = await request.json();
+    console.log("filters : ",filters);
+
+    const {
+      program,
+      semester,
+      specialization,
+      status,
+      mentor,
+    } = filters || {};
+
+
+  
+
+console.log(program,specialization,semester);
+    // =========================================================
+    // 3. AUTHENTICATE LOGGED-IN USER
     // =========================================================
 
     const auth = await authenticateUser();
@@ -34,9 +53,7 @@ export async function GET() {
       );
     }
 
-    // =========================================================
-    // 3. GET USER
-    // =========================================================
+   
 
     const user = await User.findById(auth.user._id)
       .select("name email role")
@@ -54,13 +71,9 @@ export async function GET() {
       );
     }
 
-    // =========================================================
-    // 4. CHECK MENTOR ROLE
-    // =========================================================
 
-    if (
-      user.role?.trim().toLowerCase() !== "mentor"
-    ) {
+
+    if (user.role?.trim().toLowerCase() !== "mentor") {
       return NextResponse.json(
         {
           success: false,
@@ -72,17 +85,15 @@ export async function GET() {
       );
     }
 
-    // =========================================================
-    // 5. GET MENTOR PROFILE
-    // =========================================================
 
-    const mentor = await Mentor.findOne({
+
+    const mentorProfile = await Mentor.findOne({
       userId: user._id,
     })
       .select("department designation")
       .lean();
 
-    if (!mentor) {
+    if (!mentorProfile) {
       return NextResponse.json(
         {
           success: false,
@@ -94,19 +105,16 @@ export async function GET() {
       );
     }
 
-    // =========================================================
-    // 6. CHECK HOD DESIGNATION
-    // =========================================================
+
 
     const designation =
-      mentor.designation?.trim().toLowerCase();
+      mentorProfile.designation?.trim().toLowerCase();
 
     if (designation !== "hod") {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Only HODs can access this dashboard",
+          message: "Only HODs can access this dashboard",
         },
         {
           status: 403,
@@ -114,12 +122,10 @@ export async function GET() {
       );
     }
 
-    // =========================================================
-    // 7. GET HOD DEPARTMENT
-    // =========================================================
+
 
     const department =
-      mentor.department?.trim();
+      mentorProfile.department?.trim();
 
     if (!department) {
       return NextResponse.json(
@@ -132,179 +138,266 @@ export async function GET() {
         }
       );
     }
-
+console.log("teacher dep",department);
     const normalizedDepartment =
       department.toLowerCase();
 
-    // =========================================================
-    // 8. GET STUDENTS FROM HOD DEPARTMENT
-    //
-    // Student.department
-    //        ↓
-    // Student.userId
-    //        ↓
-    // Projects.student
-    // =========================================================
 
-    const students = await Student.find({
-      $expr: {
-        $eq: [
-          {
-            $toLower: {
-              $trim: {
-                input: {
-                  $ifNull: [
-                    "$department",
-                    "",
-                  ],
-                },
+// 9. BUILD STUDENT FILTER
+//
+// These filters belong to Student collection:
+//
+// department
+// program
+// currentSemester
+// specialization
+// =========================================================
+
+const studentConditions = [
+  // ---------------------------------------------------------
+  // HOD DEPARTMENT
+  // ---------------------------------------------------------
+
+  {
+    $expr: {
+      $eq: [
+        {
+          $toLower: {
+            $trim: {
+              input: {
+                $ifNull: ["$department", ""],
               },
             },
           },
-          normalizedDepartment,
-        ],
-      },
-    })
-      .select("userId")
-      .lean();
-
-    // =========================================================
-    // 9. GET STUDENT USER IDS
-    // =========================================================
-
-    const studentUserIds = students
-      .map(
-        (student) => student.userId
-      )
-      .filter(Boolean);
-
-    // =========================================================
-    // 10. GET MENTOR COUNT
-    //
-    // Mentors belonging to same department
-    // =========================================================
-
-    const mentorCount =
-      await Mentor.countDocuments({
-        $expr: {
-          $eq: [
-            {
-              $toLower: {
-                $trim: {
-                  input: {
-                    $ifNull: [
-                      "$department",
-                      "",
-                    ],
-                  },
-                },
-              },
-            },
-            normalizedDepartment,
-          ],
         },
-      });
+        normalizedDepartment,
+      ],
+    },
+  },
+];
 
-    // =========================================================
-    // 11. GET PROJECTS
-    //
-    // Only projects belonging to students
-    // from HOD's department.
-    //
-    // projectType and status come directly
-    // from Projects collection.
-    // =========================================================
+// ---------------------------------------------------------
+// PROGRAM
+// ---------------------------------------------------------
 
-    let rawProjects = [];
-
-    if (studentUserIds.length > 0) {
-      rawProjects =
-        await Projects.find({
-          student: {
-            $in: studentUserIds,
+if (program) {
+  studentConditions.push({
+    $expr: {
+      $eq: [
+        {
+          $toLower: {
+            $trim: {
+              input: {
+                $ifNull: ["$program", ""],
+              },
+            },
           },
-        })
-          .select(
-            "_id title subtitle semester student mentor status mentorReviewedAt createdAt updatedAt"
-          )
-          .populate({
-            path: "student",
-            select: "name email",
-          })
-          .populate({
-            path: "mentor",
-            select: "name",
-          })
-          .sort({
-            createdAt: -1,
-          })
-          .lean();
-    }
+        },
+        program.trim().toLowerCase(),
+      ],
+    },
+  });
+}
 
-    // =========================================================
-    // 12. PROJECT STATISTICS
-    // =========================================================
+
+if (specialization) {
+  studentConditions.push({
+    $expr: {
+      $eq: [
+        {
+          $toLower: {
+            $trim: {
+              input: {
+                $ifNull: [
+                  "$specialization",
+                  "",
+                ],
+              },
+            },
+          },
+        },
+        specialization.trim().toLowerCase(),
+      ],
+    },
+  });
+}
+
+
+const studentQuery = {
+  $and: studentConditions,
+};
+
+
+
+
+const students =
+  await Student.find(studentQuery)
+    .select("userId fullName program specialization")
+    .lean();
+
+console.log(
+  "FILTERED STUDENTS:",
+  students
+);
+
+
+
+const studentUserIds = students
+  .map(
+    (student) => student.userId
+  )
+  .filter(Boolean);
+
+
+
+const mentorCount = await Mentor.countDocuments({
+  $expr: {
+    $eq: [
+      {
+        $toLower: {
+          $trim: {
+            input: {
+              $ifNull: ["$department", ""],
+            },
+          },
+        },
+      },
+      normalizedDepartment,
+    ],
+  },
+});
+
+
+let rawProjects = [];
+
+if (studentUserIds.length > 0) {
+const projectQuery = {
+  $or: [
+    {
+      student: {
+        $in: studentUserIds,
+      },
+    },
+    {
+      teamMembers: {
+        $in: studentUserIds,
+      },
+    },
+  ],
+};
+  // -------------------------------------------------------
+  // PROJECT SEMESTER
+  // -------------------------------------------------------
+
+  if (semester) {
+    projectQuery.semester = {
+      $in: [
+        String(semester),
+        Number(semester),
+      ],
+    };
+  }
+//   // -------------------------------------------------------
+//   // PROJECT STATUS
+//   // -------------------------------------------------------
+
+  if (status) {
+    projectQuery.status = status;
+  }
+
+  // -------------------------------------------------------
+  // PROJECT MENTOR
+  // -------------------------------------------------------
+
+  if (mentor) {
+    projectQuery.mentor = mentor;
+  }
+
+  console.log(
+    "PROJECT QUERY:",
+    JSON.stringify(
+      projectQuery,
+      null,
+      2
+    )
+  );
+
+
+rawProjects = await Projects.find(projectQuery)
+  .select(
+    "_id title subtitle semester student mentor status mentorReviewedAt createdAt updatedAt"
+  )
+  .populate({
+    path: "student",
+    select: "name email",
+  })
+  .populate({
+    path: "mentor",
+    select: "name email",
+  })
+  .sort({
+    createdAt: -1,
+  })
+  .lean();
+}
+
+
+
+  
+      console.log(
+  "RAW PROJECTS:",
+  rawProjects
+);
+
+  
+
+
 
     let pendingReviews = 0;
     let mentorVerified = 0;
 
     rawProjects.forEach((project) => {
-      const status =
+      const projectStatus =
         project.status
           ?.trim()
           .toLowerCase();
 
-      // Pending
       if (
-        status === "pending approval" ||
-        status === "in review"
+        projectStatus === "pending approval" ||
+        projectStatus === "in review"
       ) {
         pendingReviews++;
       }
 
-      // Verified
-      if (
-        status === "approved"
-      ) {
+      if (projectStatus === "approved") {
         mentorVerified++;
       }
     });
 
-    // =========================================================
-    // 13. FORMAT PROJECTS FOR ROSTER
-    // =========================================================
 
-    const projects =
-      rawProjects.map((project) => {
+    const projects = rawProjects.map(
+      (project) => {
         let approvalDate = "-";
 
         if (project.mentorReviewedAt) {
-          approvalDate =
-            new Date(
-              project.mentorReviewedAt
-            ).toLocaleDateString(
-              "en-GB",
-              {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              }
-            );
+          approvalDate = new Date(
+            project.mentorReviewedAt
+          ).toLocaleDateString(
+            "en-GB",
+            {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            }
+          );
         }
 
         return {
-          // ---------------------------------------
           // IDs
-          // ---------------------------------------
-
           _id: String(project._id),
-
           id: String(project._id),
 
-          // ---------------------------------------
           // PROJECT
-          // ---------------------------------------
-
           projectTitle:
             project.title || "-",
 
@@ -314,91 +407,50 @@ export async function GET() {
           subtitle:
             project.subtitle || "",
 
-
           semester:
             project.semester || "",
 
-          // ---------------------------------------
           // STUDENT
-          // ---------------------------------------
-
           student:
             project.student?.name ||
             "Unknown Student",
 
-          // ---------------------------------------
-          // MENTORS
-          // ---------------------------------------
 
+          // MENTOR
           mentor:
             project.mentor?.name ||
             "Not Assigned",
 
 
-          // ---------------------------------------
           // STATUS
-          // ---------------------------------------
-
           status:
             project.status || "-",
 
-          // ---------------------------------------
           // APPROVAL
-          // ---------------------------------------
-
           approvalDate,
 
-          mentorReviewedAt:
-            project.mentorReviewedAt ||
-            null,
-
         };
-      });
-
+      }
+    );
+console.log("projects: ",projects);
     // =========================================================
-    // 14. RESPONSE
+    // 17. RESPONSE
     // =========================================================
 
     return NextResponse.json(
       {
         success: true,
-
-        // ---------------------------------------
-        // HOD INFORMATION
-        // ---------------------------------------
-
-        hod: {
-          name: user.name,
-          email: user.email,
-          department,
-          designation:
-            mentor.designation,
-        },
-
-        // ---------------------------------------
-        // DASHBOARD STATISTICS
-        // ---------------------------------------
-
         statistics: {
-          students:
-            students.length,
+      students: students.length,
+      mentors: mentorCount,
+      projects: projects.length,
+      pendingReviews,
+      mentorVerified,
+    },
 
-          mentors:
-            mentorCount,
-
-          projects:
-            projects.length,
-
-          pendingReviews,
-
-          mentorVerified,
-        },
-
-        // ---------------------------------------
-        // PROJECT ROSTER
-        // ---------------------------------------
 
         projects,
+      
       },
       {
         status: 200,

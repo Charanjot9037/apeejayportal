@@ -1,421 +1,281 @@
 "use client";
 
-import {
-  StatCards,
-  Roster,
-  DashboardHeader,
-} from "@/app/components/elements";
-
-import { useRouter } from "next/navigation";
-import { HOD_PROJECT_FILTERS } from "@/constants/hodData";
-
-import {
-  HOD_DASHBOARD_HEADER,
-  PROJECT_COLUMNS,
-} from "@/constants/hodData";
-
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
+import Roster from "@/app/components/elements/roaster";
+import { toast } from "sonner";
+import AuthGuardModal from "@/app/components/AuthGuardModal";
+import { DashboardHeader } from "../elements";
+import { StatCards } from "../elements";
+import { HOD_DASHBOARD_HEADER } from "@/constants/hodData";
+import ExcelJS from "exceljs";
 
-export default function HODdashboard() {
-  // ==========================================
-  // LOGGED-IN USER
-  // ==========================================
 
-  const { user } = useSelector((state) => state.auth);
 
-  // ==========================================
-  // HOD DATA
-  // ==========================================
+import {
+  projectColumns,
+  DEFAULT_PROJECT_FILTERS,
+  HOD_PROJECT_FILTERS,
+  mapProjectToRoster,
+  HOD_STAT_CARDS
+} from "@/constants/hodData";
+import StudentRosterSkeleton from "../admin/skeleton/studentRosterSkeleton";
+import { useRouter } from "next/navigation";
 
-  const [hodData, setHodData] = useState({
-    hod: null,
-
-    statistics: {
-      students: 0,
-      mentors: 0,
-      projects: 0,
-      pendingReviews: 0,
-      mentorVerified: 0,
-    },
-
-    students: [],
-    mentors: [],
-    projects: [],
-  });
-
-  // ==========================================
-  // STATES
-  // ==========================================
-
+export default function HODProjects() {
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+ const [authModal, setAuthModal] = useState({
+    open: false,
+    type: "authentication",
+    message: "",
+  });
+  const [filters, setFilters] = useState({
+    ...DEFAULT_PROJECT_FILTERS,
+  });
+  const router=useRouter();
+  const [statistics, setStatistics] = useState({
+  students: 0,
+  mentors: 0,
+  projects: 0,
+  pendingReviews: 0,
+  mentorVerified: 0,
+});
 
+  // =========================================================
+  // FETCH PROJECTS
+  // =========================================================
 
-  const [exporting, setExporting] = useState(false);
+  const fetchProjects = async (selectedFilters) => {
+    try {
+      setLoading(true);
+      setError("");
 
-  // ==========================================
-  // FETCH HOD DATA
-  // ==========================================
+      const apiFilters = {
+        program: selectedFilters.program,
+        semester: selectedFilters.semester,
+        specialization: selectedFilters.specialization,
+        status: selectedFilters.status,
+        mentor: selectedFilters.mentor,
+      };
+
+      // Remove empty filters
+      Object.keys(apiFilters).forEach((key) => {
+        if (
+          apiFilters[key] === "" ||
+          apiFilters[key] === null ||
+          apiFilters[key] === undefined ||
+          apiFilters[key] === "all"
+        ) {
+          delete apiFilters[key];
+        }
+      });
+
+      const response = await fetch("/api/hod/dashboard", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiFilters),
+      });
+
+      const data = await response.json();
+        if (response.status === 401) {
+        setAuthModal({
+          open: true,
+          type: "authentication",
+          message:
+            data.message || "Your session has expired. Please log in again.",
+        });
+
+        return;
+      }
+
+      // Authorization error
+      if (response.status === 403) {
+        setAuthModal({
+          open: true,
+          type: "unauthorized",
+          message:
+            data.message || "You are not authorized ",
+        });
+
+        return;
+      }
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message || "Failed to fetch HOD projects"
+        );
+      }
+      setStatistics(
+  data.statistics || {
+    students: 0,
+    mentors: 0,
+    projects: 0,
+    pendingReviews: 0,
+    mentorVerified: 0,
+  }
+);
+      // console.log("data in hod : ",data);
+        console.log("project",data.projects);
+
+      const mappedProjects = (data.projects || []).map(
+        mapProjectToRoster
+      );
+      console.log("mapped projects : ",mappedProjects);
+
+      setProjects(mappedProjects);
+    } catch (error) {
+      console.error("FETCH_HOD_PROJECTS_ERROR:", error);
+
+      toast.error(error.message || "Failed to fetch projects");
+
+      setError(
+        error.message || "Something went wrong"
+      );
+
+      setProjects([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =========================================================
+  // INITIAL FETCH
+  // =========================================================
 
   useEffect(() => {
-    const fetchHODData = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await fetch("/api/hod/dashboard", {
-          method: "GET",
-          credentials: "include",
-        });
-
-        const result = await response.json();
-
-        console.log("HOD API RESPONSE:", result);
-
-        if (!response.ok || !result.success) {
-          throw new Error(
-            result.message || "Failed to fetch HOD data"
-          );
-        }
-
-        setHodData({
-          hod: result.hod || null,
-
-          statistics: {
-            students: result.statistics?.students || 0,
-            mentors: result.statistics?.mentors || 0,
-            projects: result.statistics?.projects || 0,
-            pendingReviews:
-              result.statistics?.pendingReviews || 0,
-            mentorVerified:
-              result.statistics?.mentorVerified || 0,
-          },
-
-          students: result.students || [],
-          mentors: result.mentors || [],
-
-          // Projects are already filtered by HOD department
-          projects: result.projects || [],
-        });
-      } catch (error) {
-        console.error("HOD DASHBOARD ERROR:", error);
-
-        setError(
-          error.message || "Unable to load dashboard"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHODData();
+    fetchProjects(DEFAULT_PROJECT_FILTERS);
   }, []);
 
-  // ==========================================
-  // EXTRACT DATA
-  // ==========================================
-
-  const {
-    hod,
-    statistics,
-    projects,
-  } = hodData;
-
-  // ==========================================
-  // HOD INFORMATION
-  // ==========================================
-
-  const hodName =
-    hod?.name ||
-    user?.name ||
-    "HOD";
-
-  const hodDepartment =
-    hod?.department ||
-    user?.department ||
-    "";
-
-  // ==========================================
-  // HOD PROJECTS
-  // ==========================================
-  //
-  // IMPORTANT:
-  // API already returns projects belonging
-  // to students of this HOD's department.
-  //
-  // DO NOT filter by project.department here
-  // because project.department does not exist.
-  // ==========================================
-  const [filters, setFilters] = useState({
-  projectType: "",
-  status: "",
-  semester: "",
-});
-
-const departmentProjects = projects;
-
-const filteredProjects = departmentProjects.filter((project) => {
-  // Project Type
-  if (
-    filters.projectType &&
-    String(project.projectType || "").toLowerCase() !==
-      String(filters.projectType).toLowerCase()
-  ) {
-    return false;
-  }
-
-  // Status
-  if (
-    filters.status &&
-    String(project.status || "").toLowerCase() !==
-      String(filters.status).toLowerCase()
-  ) {
-    return false;
-  }
-
-  // Semester
-  if (
-    filters.semester &&
-    String(project.semester || "").toLowerCase() !==
-      String(filters.semester).toLowerCase()
-  ) {
-    return false;
-  }
-
-  return true;
-});
-
-  // ==========================================
-  // DEBUG
-  // ==========================================
-
-  console.log(
-    "HOD DEPARTMENT:",
-    hodDepartment
-  );
-
-  console.log(
-    "HOD PROJECTS:",
-    departmentProjects
-  );
-
-  // ==========================================
-  // STAT CARDS
-  // ==========================================
-
-  const hodStatCards = [
-    {
-      id: "students",
-
-      title: "Total Students",
-
-      value: loading
-        ? "..."
-        : statistics.students.toLocaleString(),
-
-      icon: "GraduationCap",
-
-      description: `Students in ${
-        hodDepartment || "your department"
-      }`,
-    },
-
-    {
-      id: "mentors",
-
-      title: "Total Mentors",
-
-      value: loading
-        ? "..."
-        : statistics.mentors.toLocaleString(),
-
-      icon: "UserRound",
-
-      description: `Mentors in ${
-        hodDepartment || "your department"
-      }`,
-    },
-
-    {
-      id: "pending-reviews",
-
-      title: "Pending Reviews",
-
-      value: loading
-        ? "..."
-        : statistics.pendingReviews.toLocaleString(),
-
-      icon: "FileText",
-
-      description:
-        "Projects awaiting review",
-    },
-
-    {
-      id: "mentor-verified",
-
-      title: "Mentor Verified",
-
-      value: loading
-        ? "..."
-        : statistics.mentorVerified.toLocaleString(),
-
-      icon: "BadgeCheck",
-
-      description:
-        "Mentor verified projects",
-    },
-  ];
-
-  // ==========================================
+  // =========================================================
   // APPLY FILTERS
-  // ==========================================
+  // =========================================================
 
   const handleApplyFilters = (selectedFilters) => {
-    setFilters(selectedFilters);
+    setFilters({
+      ...selectedFilters,
+    });
 
-    console.log(
-      "Applied HOD filters:",
-      selectedFilters
-    );
+    fetchProjects(selectedFilters);
   };
 
-  // ==========================================
-  // PROJECT CLICK
-  // ==========================================
-
-  const router = useRouter();
-
-  const handleViewProject = (project) => {
-    const projectId =
-      project._id || project.id;
-
-    if (!projectId) {
-      console.error(
-        "Project ID not found:",
-        project
-      );
-
-      return;
-    }
-
-    router.push(
-      `/hod-dashboard/projects/${projectId}`
-    );
-  };
-
-  // ==========================================
-  // EXPORT
-  // ==========================================
-
-  const handleExport = async (filteredProjects) => {
+   const handleExportProjects = async (filteredProjects) => {
     try {
-      console.log(
-        "FILTERED PROJECTS FOR EXPORT:",
-        filteredProjects
-      );
-
-      if (
-        !filteredProjects ||
-        filteredProjects.length === 0
-      ) {
-        alert(
-          "No projects available to export."
-        );
-
+      if (!filteredProjects || filteredProjects.length === 0) {
+        toast.error("No projects available to export");
         return;
       }
 
-      const projectIds = filteredProjects
-        .map(
-          (project) =>
-            project._id || project.id
-        )
-        .filter(Boolean);
+      const workbook = new ExcelJS.Workbook();
 
-      console.log(
-        "PROJECT IDS:",
-        projectIds
-      );
+      const worksheet = workbook.addWorksheet("Project Roster");
 
-      if (projectIds.length === 0) {
-        alert(
-          "No valid project IDs found."
-        );
+      // -------------------------------------------------------
+      // TITLE
+      // -------------------------------------------------------
 
-        return;
-      }
+      worksheet.mergeCells("A1:F1");
 
-      const response = await fetch(
-        "/api/hod/export",
+      worksheet.getCell("A1").value =
+        "HOD Project Roster";
+
+      worksheet.getCell("A1").font = {
+        bold: true,
+        size: 16,
+      };
+
+      worksheet.getCell("A1").alignment = {
+        horizontal: "center",
+      };
+
+      // -------------------------------------------------------
+      // HEADERS
+      // -------------------------------------------------------
+
+      worksheet.addRow([]);
+
+      const headerRow = worksheet.addRow([
+        "Project",
+        "Student",
+        "Mentor",
+        "Semester",
+        "Status",
+        "Approval Date",
+      ]);
+
+      headerRow.font = {
+        bold: true,
+      };
+
+      // -------------------------------------------------------
+      // PROJECT DATA
+      // -------------------------------------------------------
+
+      filteredProjects.forEach((project) => {
+        worksheet.addRow([
+          project.projectTitle || "-",
+          project.student || "-",
+          project.mentor || "-",
+          project.semester || "-",
+          project.status || "-",
+          project.approvalDate || "-",
+        ]);
+      });
+
+      // -------------------------------------------------------
+      // COLUMN WIDTHS
+      // -------------------------------------------------------
+
+      worksheet.columns = [
         {
-          method: "POST",
+          key: "project",
+          width: 40,
+        },
+        {
+          key: "student",
+          width: 25,
+        },
+        {
+          key: "mentor",
+          width: 25,
+        },
+        {
+          key: "semester",
+          width: 15,
+        },
+        {
+          key: "status",
+          width: 22,
+        },
+        {
+          key: "approvalDate",
+          width: 20,
+        },
+      ];
 
-          credentials: "include",
+      // -------------------------------------------------------
+      // DOWNLOAD
+      // -------------------------------------------------------
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+      const buffer = await workbook.xlsx.writeBuffer();
 
-          body: JSON.stringify({
-            projectIds,
-          }),
+      const blob = new Blob(
+        [buffer],
+        {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         }
       );
 
-      if (!response.ok) {
-        let errorMessage =
-          "Failed to export report";
+      const url = window.URL.createObjectURL(blob);
 
-        try {
-          const errorData =
-            await response.json();
-
-          errorMessage =
-            errorData.message ||
-            errorMessage;
-        } catch {
-          // Ignore
-        }
-
-        throw new Error(
-          errorMessage
-        );
-      }
-
-      const blob =
-        await response.blob();
-
-      const url =
-        window.URL.createObjectURL(
-          blob
-        );
-
-      const link =
-        document.createElement("a");
+      const link = document.createElement("a");
 
       link.href = url;
-
-      const departmentName =
-        hodDepartment
-          ? hodDepartment
-              .replace(/\s+/g, "_")
-              .replace(
-                /[^a-zA-Z0-9_-]/g,
-                ""
-              )
-          : "Department";
-
-      const date =
-        new Date()
-          .toISOString()
-          .split("T")[0];
-
-      link.download =
-        `HOD_${departmentName}_Project_Report_${date}.xlsx`;
+      link.download = `HOD_Project_Roster_${new Date()
+        .toISOString()
+        .slice(0, 10)}.xlsx`;
 
       document.body.appendChild(link);
 
@@ -424,111 +284,137 @@ const filteredProjects = departmentProjects.filter((project) => {
       document.body.removeChild(link);
 
       window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error(
-        "HOD EXPORT ERROR:",
-        error
-      );
 
-      alert(
-        error.message ||
-          "Failed to export report"
+      toast.success(
+        `${filteredProjects.length} projects exported successfully`
       );
+    } catch (error) {
+      console.error("EXPORT_PROJECTS_ERROR:", error);
+
+      toast.error("Failed to export projects");
     }
   };
+  // =========================================================
+  // RETRY
+  // =========================================================
 
-  // ==========================================
-  // LOADING
-  // ==========================================
+  const handleRetry = () => {
+    fetchProjects(filters);
+  };
 
-  if (loading) {
-    return (
-      <StudentRosterSkeleton/>
-    );
+  const statCards = HOD_STAT_CARDS.map((card) => {
+  if (card.title === "Total Students") {
+    return {
+      ...card,
+      value: statistics.students,
+    };
   }
 
-  // ==========================================
-  // DASHBOARD
-  // ==========================================
+  if (card.title === "Total Mentors") {
+    return {
+      ...card,
+      value: statistics.mentors,
+    };
+  }
 
-  return (
-    <div className="flex h-full">
-      <main className="min-w-0 flex-1 px-8 py-8">
+  if (card.title === "Total Projects") {
+    return {
+      ...card,
+      value: statistics.projects,
+    };
+  }
 
-        {/* HEADER */}
+  if (card.title === "Pending Approvals") {
+    return {
+      ...card,
+      value: statistics.pendingReviews,
+    };
+  }
 
-        <DashboardHeader
-          {...HOD_DASHBOARD_HEADER}
-          title={`Welcome, ${hodName}`}
-          actionLabel={false}
-          description="Mentorship & Department Insights"
-        />
+  return card;
+});
 
-        {/* ERROR */}
+   return (
+    <div className="w-full px-6 py-6">
 
-        {error && (
-          <p className="mt-4 text-sm text-red-500">
+      {/* ================= HEADER ================= */}
+
+      <DashboardHeader
+        {...HOD_DASHBOARD_HEADER}
+        onAction={() =>
+          console.log("Pending Approvals")
+        }
+      />
+
+      {/* ================= STAT CARDS ================= */}
+
+      <StatCards cards={statCards} />
+
+      {/* ================= AUTH MODAL ================= */}
+
+      <AuthGuardModal
+        open={authModal.open}
+        type={authModal.type}
+        message={authModal.message}
+        onClose={() => {
+          if (authModal.type === "unauthorized") {
+            router.back();
+          } else {
+            setAuthModal((prev) => ({
+              ...prev,
+              open: false,
+            }));
+          }
+        }}
+        onLogin={() => {
+          router.push("/login");
+        }}
+      />
+
+      {/* ================= ERROR ================= */}
+
+      {error && (
+        <div className="mb-4 rounded-xl bg-white p-5">
+          <p className="text-sm text-red-500">
             {error}
           </p>
-        )}
 
-        {/* STATISTICS */}
-
-        <StatCards
-          cards={hodStatCards}
-        />
-
-        {/* PROJECT ROSTER */}
-
-        <div className="mt-2 w-full">
-
-          <Roster
-            title="Project Roster"
-
-            onExport={handleExport}
-
-            /*
-             * API has already filtered projects
-             * according to HOD department.
-             */
-            data={departmentProjects}
-
-            /*
-             * PROJECT_COLUMNS should contain:
-             * projectTitle
-             * student
-             * mentor
-             * projectType
-             * status
-             */
-            columns={PROJECT_COLUMNS}
-
-            onRowClick={handleViewProject}
-
-            searchPlaceholder="Search projects, students or mentors..."
-
-            defaultFilters={filters}
-
-            filterContext={{
-              department: hodDepartment,
-            }}
-
-            filterConfig={HOD_PROJECT_FILTERS}
-
-            showApplyButton={true}
-
-            onApplyFilters={
-              handleApplyFilters
-            }
-
-            className="w-full shadow-sm"
-
-            initialVisibleRows={3}
-
-          />
-
+          <button
+            onClick={handleRetry}
+            className="mt-3 rounded-lg bg-primary-orange px-4 py-2 text-sm text-white"
+          >
+            Try Again
+          </button>
         </div>
-      </main>
+      )}
+
+      {/* ================= PROJECT ROSTER ================= */}
+
+      {loading ? (
+        <div>
+          <StudentRosterSkeleton />
+        </div>
+      ) : (
+        <Roster
+          title="Project Roster"
+          data={projects}
+          setData={setProjects}
+          columns={projectColumns}
+          searchPlaceholder="Search projects..."
+          defaultFilters={DEFAULT_PROJECT_FILTERS}
+          filterConfig={HOD_PROJECT_FILTERS}
+           onExport={handleExportProjects}
+          showApplyButton={true}
+          onApplyFilters={handleApplyFilters}
+          className="mt-4 shadow-sm"
+          onRowClick={(project) => {
+            console.log(
+              "Selected project:",
+              project
+            );
+          }}
+        />
+      )}
     </div>
   );
 }

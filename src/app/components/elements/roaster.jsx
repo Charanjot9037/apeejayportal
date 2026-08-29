@@ -330,29 +330,33 @@ const filteredData = data.filter((item) => {
     return false;
   }
 
-  // ==========================================
-  // DROPDOWN FILTERS
-  // ==========================================
 
   const matchesFilters = Object.entries(filters).every(
-    ([key, selectedValue]) => {
-      // Ignore empty filters
-      if (!selectedValue) {
-        return true;
-      }
-
-      const itemValue = item[key];
-
-      return (
-        String(itemValue ?? "")
-          .trim()
-          .toLowerCase() ===
-        String(selectedValue)
-          .trim()
-          .toLowerCase()
-      );
+  ([key, selectedValue]) => {
+    // Empty filter = no filtering
+    if (!selectedValue) {
+      return true;
     }
-  );
+
+    if (
+      key === "program" ||
+      key === "specialization"
+    ) {
+      return true;
+    }
+
+    const itemValue = item[key];
+
+    return (
+      String(itemValue ?? "")
+        .trim()
+        .toLowerCase() ===
+      String(selectedValue)
+        .trim()
+        .toLowerCase()
+    );
+  }
+);
 
   return matchesFilters;
 });

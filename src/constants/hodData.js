@@ -35,7 +35,6 @@ export const hodDashboardData = {
 export const HOD_DASHBOARD_HEADER = {
   title: 'HOD Dashboard',
   description: 'Overview of department performance and project status.',
-  actionLabel: 'Export Report',
 };
 export const PROJECTS = [
   {
@@ -175,18 +174,34 @@ export const PROJECTS = [
   },
 ];
 
+// =========================================================
+// HOD PROJECT DEFAULT FILTERS
+// =========================================================
 
+export const DEFAULT_PROJECT_FILTERS = {
+  program: "BTech",
+  semester: "1",
+  specialization: "CSE",
+  status: "",
+  mentor: "",
+};
 export const HOD_PROJECT_FILTERS = [
-
-
   {
-    key: "status",
-    label: "Status",
+    key: "program",
+    label: "Program",
     options: [
-      "Pending Approval",
-      "In Review",
-      "Approved",
-      "Rejected",
+      {
+        label: "B.Tech",
+        value: "BTech",
+      },
+      {
+        label: "BBA",
+        value: "BBA",
+      },
+      {
+        label: "MBA",
+        value: "MBA",
+      },
     ],
   },
 
@@ -194,53 +209,191 @@ export const HOD_PROJECT_FILTERS = [
     key: "semester",
     label: "Semester",
     options: [
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
+      {
+        label: "1st Semester",
+        value: "1",
+      },
+      {
+        label: "2nd Semester",
+        value: "2",
+      },
+      {
+        label: "3rd Semester",
+        value: "3",
+      },
+      {
+        label: "4th Semester",
+        value: "4",
+      },
+      {
+        label: "5th Semester",
+        value: "5",
+      },
+      {
+        label: "6th Semester",
+        value: "6",
+      },
+      {
+        label: "7th Semester",
+        value: "7",
+      },
+      {
+        label: "8th Semester",
+        value: "8",
+      },
+    ],
+  },
+
+  {
+    key: "specialization",
+    label: "Specialization",
+    options: [
+      {
+        label: "CSE",
+        value: "CSE",
+      },
+      {
+        label: "ECE",
+        value: "ECE",
+      },
+      {
+        label: "ME",
+        value: "ME",
+      },
+    ],
+  },
+
+  {
+    key: "status",
+    label: "Status",
+    options: [
+      {
+        label: "All Status",
+        value: "",
+      },
+      {
+        label: "Pending Approval",
+        value: "Pending Approval",
+      },
+      {
+        label: "In Review",
+        value: "In Review",
+      },
+      {
+        label: "Approved",
+        value: "Approved",
+      },
+      {
+        label: "Rejected",
+        value: "Rejected",
+      },
     ],
   },
 ];
-
 
 // =========================================================
 // HOD PROJECT COLUMNS
 // =========================================================
 
-export const PROJECT_COLUMNS = [
+export const projectColumns = [
   {
     key: "projectTitle",
     label: "Project",
   },
-
   {
     key: "student",
     label: "Student",
   },
-
   {
     key: "mentor",
     label: "Mentor",
   },
-
-
-
   {
     key: "semester",
     label: "Semester",
   },
-
   {
     key: "status",
     label: "Status",
   },
-
   {
     key: "approvalDate",
     label: "Approval Date",
+  },
+];
+
+export const mapProjectToRoster = (project) => ({
+  _id: project._id,
+  id: project.id,
+
+  projectTitle:
+    project.projectTitle ||
+    "-",
+
+  title:
+    project.title ||
+    "-",
+
+  subtitle:
+    project.subtitle || "",
+
+  student:
+    project.student ||
+    "Unknown Student",
+
+  studentEmail:
+    project.studentEmail ||
+    "",
+
+  mentor:
+    project.mentor ||
+    "Not Assigned",
+
+
+  semester:
+    project.semester ||
+    "",
+
+  status:
+    project.status ||
+    "-",
+
+  approvalDate:
+    project.approvalDate ||
+    "-",
+
+  mentorReviewedAt:
+    project.mentorReviewedAt ||
+    null,
+});
+
+export const HOD_STAT_CARDS = [
+  {
+    id: "students",
+    title: "Total Students",
+    value: 0,
+    description: "Students in your department",
+    icon: "GraduationCap",
+  },
+  {
+    id: "mentors",
+    title: "Total Mentors",
+    value: 0,
+    description: "Mentors in your department",
+    icon: "UserRound",
+  },
+  {
+    id: "projects",
+    title: "Total Projects",
+    value: 0,
+    description: "Projects in your department",
+    icon: "FolderKanban",
+  },
+  {
+    id: "pending",
+    title: "Pending Approvals",
+    value: 0,
+    description: "Projects awaiting approval",
+    icon: "Clock3",
   },
 ];
