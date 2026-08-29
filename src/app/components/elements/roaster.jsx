@@ -32,6 +32,7 @@ export default function Roster({
   onRowClick,
   onApplyFilters,
   className = '',
+  onExport,
   defaultFilters = {},
   filterConfig = [],
    filterContext = {},
@@ -315,15 +316,17 @@ const filteredData = data.filter((item) => {
   // ==========================================
   // SEARCH FILTER
   // ==========================================
+const filteredData = data.filter((item) => {
+  // ==========================================
+  // SEARCH FILTER
+  // ==========================================
 
   const searchValue = search.trim().toLowerCase();
 
-    if (!searchValue) {
-      return true;
-    }
-
-    return Object.values(item).some((value) =>
-      String(value ?? '')
+  const matchesSearch =
+    !searchValue ||
+    Object.values(item).some((value) =>
+      String(value ?? "")
         .toLowerCase()
         .includes(searchValue)
     );
@@ -346,7 +349,7 @@ const filteredData = data.filter((item) => {
       const itemValue = item[key];
 
       return (
-        String(itemValue ?? '')
+        String(itemValue ?? "")
           .trim()
           .toLowerCase() ===
         String(selectedValue)
@@ -358,7 +361,6 @@ const filteredData = data.filter((item) => {
 
   return matchesFilters;
 });
-
   /*
    * Show first 5 records initially.
    */
@@ -489,18 +491,20 @@ const filteredData = data.filter((item) => {
               {/* Filter fields */}
 
               {filterConfig.map((filter) => {
-                const {
-                  key,
-                  label,
-                  placeholder,
-                } = filter;
-                
-const options = filter.dependsOn
+                const { key, label, placeholder } = filter;
+
+                const department =
+  String(filterContext.department || "")
+    .trim()
+    .toUpperCase();
+
+const options = filter.optionsByDepartment
+  ? filter.optionsByDepartment[department] || []
+  : filter.dependsOn
   ? filter.options?.[filters[filter.dependsOn]] || []
   : Array.isArray(filter.options)
     ? filter.options
     : [];
-                
 
                 return (
                   <div key={key} className="w-full lg:w-[150px]">
