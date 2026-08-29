@@ -11,12 +11,16 @@ import DocumentItem from "../DocumentItem";
 
 export default function DocumentsSection({ project, ownerName, teamMemberName }) {
   const hasNoOwnerDocuments =
-    !project.synopsisFile && !project.reportFile && !project.presentationFile;
+    !project.synopsisFile &&
+    !project.reportFile &&
+    !project.presentationFile &&
+    !project.certificateFile;
 
   const hasNoTeamMemberDocuments =
     !project.synopsisFile2 &&
     !project.reportFile2 &&
-    !project.presentationFile2;
+    !project.presentationFile2 &&
+    !project.certificateFile2;
 
   const isTeamProject = project.projectType === "team" && teamMemberName;
 
@@ -41,6 +45,11 @@ export default function DocumentsSection({ project, ownerName, teamMemberName })
           <DocumentItem
             label="Final Presentation"
             file={project.presentationFile}
+          />
+
+          <DocumentItem
+            label="Certificate"
+            file={project.certificateFile}
           />
 
           {hasNoOwnerDocuments && (
@@ -72,6 +81,11 @@ export default function DocumentsSection({ project, ownerName, teamMemberName })
             <DocumentItem
               label="Final Presentation"
               file={project.presentationFile2}
+            />
+
+            <DocumentItem
+              label="Certificate"
+              file={project.certificateFile2}
             />
 
             {hasNoTeamMemberDocuments && (

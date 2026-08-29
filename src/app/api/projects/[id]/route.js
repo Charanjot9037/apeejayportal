@@ -174,6 +174,8 @@ export async function PUT(request, context) {
       presentationFile2,
       synopsisFile2,
       reportFile2,
+      certificateFile,
+      certificateFile2,
     } = projectData;
 
     /* =====================================================
@@ -250,7 +252,14 @@ export async function PUT(request, context) {
         );
       }
       project.reportFile = newReport;
-
+ const newCertificate = certificateFile || null;
+      if (isDifferentFile(project.certificateFile, newCertificate)) {
+        await deleteFromCloudinary(
+          project.certificateFile.publicId,
+          project.certificateFile.resourceType || "raw",
+        );
+      }
+      project.certificateFile = newCertificate;
       /* PROJECT IMAGES */
       const oldImages = project.projectImages || [];
       const newImages = Array.isArray(projectImages) ? projectImages : [];
@@ -306,6 +315,14 @@ export async function PUT(request, context) {
         );
       }
       project.reportFile2 = newReport2;
+       const newCertificate2 = certificateFile2 || null;
+      if (isDifferentFile(project.certificateFile2, newCertificate2)) {
+        await deleteFromCloudinary(
+          project.certificateFile2.publicId,
+          project.certificateFile2.resourceType || "raw",
+        );
+      }
+      project.certificateFile2 = newCertificate2;
     }
 
     /* =====================================================
@@ -593,6 +610,12 @@ export async function DELETE(request, context) {
         project.reportFile.resourceType || "raw",
       );
     }
+       if (project.certificateFile?.publicId) {
+      await deleteFromCloudinary(
+        project.certificateFile.publicId,
+        project.certificateFile.resourceType || "raw",
+      );
+    }
 
     /* =====================================================
        DELETE TEAM MEMBER DOCUMENTS
@@ -616,6 +639,12 @@ export async function DELETE(request, context) {
       await deleteFromCloudinary(
         project.reportFile2.publicId,
         project.reportFile2.resourceType || "raw",
+      );
+    }
+     if (project.certificateFile2?.publicId) {
+      await deleteFromCloudinary(
+        project.certificateFile2.publicId,
+        project.certificateFile2.resourceType || "raw",
       );
     }
 

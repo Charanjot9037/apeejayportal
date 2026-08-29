@@ -127,7 +127,7 @@ export default function ProjectImagesSection({ formik, isEdit }) {
           Upload screenshots or images of your project. Maximum{" "}
           {MAX_PROJECT_IMAGES} images in total.
         </p>
-        EXISTING IMAGES
+        
         {isEdit && formik.values.existingProjectImages?.length > 0 && (
           <ExistingImagesGrid
             images={formik.values.existingProjectImages}

@@ -11,6 +11,7 @@ import { DashboardHeader } from "./elements";
 import Link from "next/link";
 
 import { useSelector } from "react-redux";
+
 import {
   projects as initialProjects,
   events,
@@ -173,8 +174,8 @@ export default function DashboardContent() {
                               {project.title}
                             </p>
 
-                            <p className="text-xs text-slate-500">
-                              {project.subtitle}
+                            <p className="text-xs text-slate-500 line-clamp-1 w-2xl">
+                              {project.description}
                             </p>
                           </div>
 

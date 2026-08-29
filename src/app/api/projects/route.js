@@ -41,6 +41,8 @@ export async function POST(request) {
       presentationFile2,
       synopsisFile2,
       reportFile2,
+       certificateFile,
+      certificateFile2,
     } = body;
 
     const mentor1 = await User.findById(userId).select("mentorId");
@@ -95,12 +97,13 @@ export async function POST(request) {
       presentationFile2: presentationFile2 || null,
       synopsisFile2: synopsisFile2 || null,
       reportFile2: reportFile2 || null,
-
+    certificateFile: certificateFile || null,
+      certificateFile2: certificateFile2 || null,
       status: "Pending Approval",
 
       student: userId,
     });
-
+console.log("CERT RECEIVED:", certificateFile);
     return NextResponse.json(
       {
         success: true,

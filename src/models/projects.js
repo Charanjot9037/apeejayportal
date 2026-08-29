@@ -189,6 +189,15 @@ const ProjectSchema = new mongoose.Schema(
       type: CloudinaryFileSchema,
       default: null,
     },
+    certificateFile: {
+      type: CloudinaryFileSchema,
+      default: null,
+    },
+
+    certificateFile2: {
+      type: CloudinaryFileSchema,
+      default: null,
+    },
     /* =====================================================
        STATUS
     ===================================================== */

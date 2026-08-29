@@ -156,9 +156,9 @@ export default function MentorReviewSection({ project, onUpdated }) {
           <div className="space-y-2 border-t border-slate-100 pt-3">
             <p className="text-xs font-semibold text-slate-500">Review History</p>
             <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
-       {history.map((entry) => (
+ {history.map((entry, index) => (
   <div
-    key={entry._id}
+    key={entry._id || `${entry.reviewedAt}-${index}`}
     className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs"
   >
     <div className="flex items-center justify-between text-slate-400">

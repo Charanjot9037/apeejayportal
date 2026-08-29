@@ -18,6 +18,8 @@ export default function MediaDocumentsSection({
     presentationFile2: false,
     synopsisFile2: false,
     reportFile2: false,
+     certificateFile: false,
+    certificateFile2: false,
   });
 
   const uploadDocument = async (file, fieldName) => {
@@ -116,6 +118,18 @@ export default function MediaDocumentsSection({
           onChange={(file) => uploadDocument(file, "reportFile")}
           onRemove={() => removeFile("reportFile")}
         />
+             <DocumentUpload
+          title="Certificate"
+          description="PDF • Max 5MB"
+          accept=".pdf"
+          file={formik.values.certificateFile}
+          idSuffix="owner"
+          error={getFileError("certificateFile")}
+          loading={uploading.certificateFile}
+          disabled={isOwnerFieldsDisabled}
+          onChange={(file) => uploadDocument(file, "certificateFile")}
+          onRemove={() => removeFile("certificateFile")}
+        />
       </div>
 
       {/* TEAM MEMBER'S DOCUMENTS */}
@@ -162,6 +176,19 @@ export default function MediaDocumentsSection({
               disabled={isTeamMemberFieldsDisabled}
               onChange={(file) => uploadDocument(file, "reportFile2")}
               onRemove={() => removeFile("reportFile2")}
+            />
+                        <DocumentUpload
+              title="Certificate"
+              
+              description="PDF • Max 5MB"
+              accept=".pdf"
+              file={formik.values.certificateFile2}
+              idSuffix="member"
+              error={getFileError("certificateFile2")}
+              loading={uploading.certificateFile2}
+              disabled={isTeamMemberFieldsDisabled}
+              onChange={(file) => uploadDocument(file, "certificateFile2")}
+              onRemove={() => removeFile("certificateFile2")}
             />
           </div>
         </>
