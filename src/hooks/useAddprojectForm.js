@@ -92,6 +92,11 @@ export function useAddProjectForm({ mode = "create", project = null }) {
 
       reportFile2:
         isEdit && project?.reportFile2 ? project.reportFile2 : null,
+        certificateFile:
+        isEdit && project?.certificateFile ? project.certificateFile : null,
+
+      certificateFile2:
+        isEdit && project?.certificateFile2 ? project.certificateFile2 : null,
     },
 
     validationSchema,
@@ -139,6 +144,10 @@ export function useAddProjectForm({ mode = "create", project = null }) {
           synopsisFile2: values.synopsisFile2 || null,
 
           reportFile2: values.reportFile2 || null,
+
+          certificateFile: values.certificateFile || null,
+
+          certificateFile2: values.certificateFile2 || null,
         };
 
         console.log("PROJECT DATA:", projectData);
@@ -226,8 +235,7 @@ export function useAddProjectForm({ mode = "create", project = null }) {
      TECH STACK
   ======================================================= */
 
-  const addTechnology = () => {
-    const technology = window.prompt("Enter technology");
+  const addTechnology = (technology) => {
 
     if (technology && technology.trim()) {
       const cleanTechnology = technology.trim();

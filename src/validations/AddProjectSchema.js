@@ -47,7 +47,7 @@ export const validationSchema = Yup.object({
   techStack: Yup.array()
     .of(Yup.string().trim())
     .min(1, "Add at least one technology")
-    .required("Tech stack is required"),
+  .default([]),
   teamMembers: Yup.string()
     .nullable()
     .when("projectType", {
