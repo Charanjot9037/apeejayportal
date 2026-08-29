@@ -15,7 +15,7 @@ export default function MentorLayout({ children }) {
   useEffect(() => {
     const fetchHODData = async () => {
       try {
-        const response = await fetch("/api/hod", {
+        const response = await fetch("/api/hod/dashboard", {
           method: "GET",
           credentials: "include",
         });
@@ -47,17 +47,6 @@ export default function MentorLayout({ children }) {
 
   const sidebarData = {
     ...hodDashboardData,
-
-    // Real HOD name
-    title: hod?.name || "HOD Portal",
-
-    // Real department + designation
-    subtitle: hod
-      ? `${hod.department} • HOD`
-      : "Loading...",
-
-    // You can keep this static
-    profileUrl: "/profile.png",
 
     // Keep existing navigation
     navItems: hodDashboardData.navItems,

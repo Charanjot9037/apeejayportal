@@ -31,7 +31,7 @@ export default function Page() {
       // HOD API
       // -------------------------------------------------------
 
-      const response = await fetch('/api/hod', {
+      const response = await fetch('/api/hod/my-students', {
         method: 'GET',
         credentials: 'include',
       });

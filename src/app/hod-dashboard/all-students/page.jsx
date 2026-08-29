@@ -40,7 +40,7 @@ export default function Page() {
       setLoading(true);
       setError('');
 
-      const response = await fetch('/api/hod');
+      const response = await fetch('/api/hod/students');
 
       const data = await response.json();
 
@@ -64,6 +64,7 @@ export default function Page() {
       const mappedStudents = (
         data.students || []
       ).map(mapStudentToRoster);
+    
 
       setStudents(mappedStudents);
 

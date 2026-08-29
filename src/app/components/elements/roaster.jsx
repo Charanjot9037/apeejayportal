@@ -32,7 +32,6 @@ export default function Roster({
   onRowClick,
   onApplyFilters,
   className = '',
-  onExport,
   defaultFilters = {},
   filterConfig = [],
    filterContext = {},
@@ -316,10 +315,6 @@ const filteredData = data.filter((item) => {
   // ==========================================
   // SEARCH FILTER
   // ==========================================
-const filteredData = data.filter((item) => {
-  // ==========================================
-  // SEARCH FILTER
-  // ==========================================
 
   const searchValue = search.trim().toLowerCase();
 
@@ -361,6 +356,7 @@ const filteredData = data.filter((item) => {
 
   return matchesFilters;
 });
+
   /*
    * Show first 5 records initially.
    */
@@ -491,20 +487,18 @@ const filteredData = data.filter((item) => {
               {/* Filter fields */}
 
               {filterConfig.map((filter) => {
-                const { key, label, placeholder } = filter;
-
-                const department =
-  String(filterContext.department || "")
-    .trim()
-    .toUpperCase();
-
-const options = filter.optionsByDepartment
-  ? filter.optionsByDepartment[department] || []
-  : filter.dependsOn
+                const {
+                  key,
+                  label,
+                  placeholder,
+                } = filter;
+                
+const options = filter.dependsOn
   ? filter.options?.[filters[filter.dependsOn]] || []
   : Array.isArray(filter.options)
     ? filter.options
     : [];
+                
 
                 return (
                   <div key={key} className="w-full lg:w-[150px]">

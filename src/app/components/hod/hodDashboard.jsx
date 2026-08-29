@@ -5,8 +5,8 @@ import {
   Roster,
   DashboardHeader,
 } from "@/app/components/elements";
-import { useRouter } from "next/navigation";
 
+import { useRouter } from "next/navigation";
 import { HOD_PROJECT_FILTERS } from "@/constants/hodData";
 
 import {
@@ -16,15 +16,14 @@ import {
 
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 
 export default function HODdashboard() {
   // ==========================================
   // LOGGED-IN USER
   // ==========================================
 
-  const { user } = useSelector(
-    (state) => state.auth
-  );
+  const { user } = useSelector((state) => state.auth);
 
   // ==========================================
   // HOD DATA
@@ -50,23 +49,11 @@ export default function HODdashboard() {
   // STATES
   // ==========================================
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const [error, setError] =
-    useState("");
 
-  const [filters, setFilters] =
-    useState({});
-
-  // IMPORTANT:
-  // This contains the FINAL filtered
-  // project roster data.
-  const [filteredProjects, setFilteredProjects] =
-    useState([]);
-
-  const [exporting, setExporting] =
-    useState(false);
+  const [exporting, setExporting] = useState(false);
 
   // ==========================================
   // FETCH HOD DATA
@@ -78,29 +65,18 @@ export default function HODdashboard() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          "/api/hod",
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
+        const response = await fetch("/api/hod/dashboard", {
+          method: "GET",
+          credentials: "include",
+        });
 
-        const result =
-          await response.json();
+        const result = await response.json();
 
-        console.log(
-          "HOD API RESPONSE:",
-          result
-        );
+        console.log("HOD API RESPONSE:", result);
 
-        if (
-          !response.ok ||
-          !result.success
-        ) {
+        if (!response.ok || !result.success) {
           throw new Error(
-            result.message ||
-              "Failed to fetch HOD data"
+            result.message || "Failed to fetch HOD data"
           );
         }
 
@@ -108,45 +84,26 @@ export default function HODdashboard() {
           hod: result.hod || null,
 
           statistics: {
-            students:
-              result.statistics
-                ?.students || 0,
-
-            mentors:
-              result.statistics
-                ?.mentors || 0,
-
-            projects:
-              result.statistics
-                ?.projects || 0,
-
+            students: result.statistics?.students || 0,
+            mentors: result.statistics?.mentors || 0,
+            projects: result.statistics?.projects || 0,
             pendingReviews:
-              result.statistics
-                ?.pendingReviews || 0,
-
+              result.statistics?.pendingReviews || 0,
             mentorVerified:
-              result.statistics
-                ?.mentorVerified || 0,
+              result.statistics?.mentorVerified || 0,
           },
 
-          students:
-            result.students || [],
+          students: result.students || [],
+          mentors: result.mentors || [],
 
-          mentors:
-            result.mentors || [],
-
-          projects:
-            result.projects || [],
+          // Projects are already filtered by HOD department
+          projects: result.projects || [],
         });
       } catch (error) {
-        console.error(
-          "HOD DASHBOARD ERROR:",
-          error
-        );
+        console.error("HOD DASHBOARD ERROR:", error);
 
         setError(
-          error.message ||
-            "Unable to load dashboard"
+          error.message || "Unable to load dashboard"
         );
       } finally {
         setLoading(false);
@@ -183,24 +140,66 @@ export default function HODdashboard() {
   // ==========================================
   // HOD PROJECTS
   // ==========================================
+  //
+  // IMPORTANT:
+  // API already returns projects belonging
+  // to students of this HOD's department.
+  //
+  // DO NOT filter by project.department here
+  // because project.department does not exist.
+  // ==========================================
+  const [filters, setFilters] = useState({
+  projectType: "",
+  status: "",
+  semester: "",
+});
 
-  const departmentProjects =
-    projects.filter((project) => {
-      if (!hodDepartment) {
-        return false;
-      }
+const departmentProjects = projects;
 
-      return (
-        String(
-          project.department || ""
-        )
-          .trim()
-          .toLowerCase() ===
-        String(hodDepartment)
-          .trim()
-          .toLowerCase()
-      );
-    });
+const filteredProjects = departmentProjects.filter((project) => {
+  // Project Type
+  if (
+    filters.projectType &&
+    String(project.projectType || "").toLowerCase() !==
+      String(filters.projectType).toLowerCase()
+  ) {
+    return false;
+  }
+
+  // Status
+  if (
+    filters.status &&
+    String(project.status || "").toLowerCase() !==
+      String(filters.status).toLowerCase()
+  ) {
+    return false;
+  }
+
+  // Semester
+  if (
+    filters.semester &&
+    String(project.semester || "").toLowerCase() !==
+      String(filters.semester).toLowerCase()
+  ) {
+    return false;
+  }
+
+  return true;
+});
+
+  // ==========================================
+  // DEBUG
+  // ==========================================
+
+  console.log(
+    "HOD DEPARTMENT:",
+    hodDepartment
+  );
+
+  console.log(
+    "HOD PROJECTS:",
+    departmentProjects
+  );
 
   // ==========================================
   // STAT CARDS
@@ -219,8 +218,7 @@ export default function HODdashboard() {
       icon: "GraduationCap",
 
       description: `Students in ${
-        hodDepartment ||
-        "your department"
+        hodDepartment || "your department"
       }`,
     },
 
@@ -236,8 +234,7 @@ export default function HODdashboard() {
       icon: "UserRound",
 
       description: `Mentors in ${
-        hodDepartment ||
-        "your department"
+        hodDepartment || "your department"
       }`,
     },
 
@@ -271,82 +268,12 @@ export default function HODdashboard() {
         "Mentor verified projects",
     },
   ];
-  const handleExport = async (filteredProjects) => {
-  try {
-    console.log(
-      "FILTERED PROJECTS FOR EXPORT:",
-      filteredProjects
-    );
-
-    if (!filteredProjects || filteredProjects.length === 0) {
-      alert("No projects available to export.");
-      return;
-    }
-
-    const projectIds = filteredProjects
-      .map((project) => project._id || project.id)
-      .filter(Boolean);
-
-    console.log("PROJECT IDS:", projectIds);
-
-    if (projectIds.length === 0) {
-      alert("No valid project IDs found.");
-      return;
-    }
-
-    const response = await fetch(
-      `/api/hod/export?projectIds=${projectIds.join(",")}`,
-      {
-        method: "GET",
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-
-      alert(
-        error?.message || "Failed to export report"
-      );
-
-      return;
-    }
-
-    const blob = await response.blob();
-
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-
-    link.href = url;
-
-    link.download = "hod-project-report.xlsx";
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    link.remove();
-
-    window.URL.revokeObjectURL(url);
-
-  } catch (error) {
-    console.error(
-      "EXPORT ERROR:",
-      error
-    );
-
-    alert("Failed to export report.");
-  }
-};
 
   // ==========================================
   // APPLY FILTERS
   // ==========================================
 
-
-  const handleApplyFilters = (
-    selectedFilters
-  ) => {
+  const handleApplyFilters = (selectedFilters) => {
     setFilters(selectedFilters);
 
     console.log(
@@ -359,30 +286,41 @@ export default function HODdashboard() {
   // PROJECT CLICK
   // ==========================================
 
-    const router=useRouter();
+  const router = useRouter();
 
- const handleViewProject = (project) => {
-  const projectId = project._id || project.id;
+  const handleViewProject = (project) => {
+    const projectId =
+      project._id || project.id;
 
-  if (!projectId) {
-    console.error("Project ID not found:", project);
-    return;
-  }
+    if (!projectId) {
+      console.error(
+        "Project ID not found:",
+        project
+      );
 
-  router.push(`/hod-dashboard/projects/${projectId}`);
-};
+      return;
+    }
+
+    router.push(
+      `/hod-dashboard/projects/${projectId}`
+    );
+  };
 
   // ==========================================
-  // EXPORT EXCEL REPORT
+  // EXPORT
   // ==========================================
 
-  const handleExportReport = async () => {
+  const handleExport = async (filteredProjects) => {
     try {
-      // ----------------------------------------
-      // CHECK DATA
-      // ----------------------------------------
+      console.log(
+        "FILTERED PROJECTS FOR EXPORT:",
+        filteredProjects
+      );
 
-      if (!filteredProjects.length) {
+      if (
+        !filteredProjects ||
+        filteredProjects.length === 0
+      ) {
         alert(
           "No projects available to export."
         );
@@ -390,59 +328,43 @@ export default function HODdashboard() {
         return;
       }
 
-      setExporting(true);
+      const projectIds = filteredProjects
+        .map(
+          (project) =>
+            project._id || project.id
+        )
+        .filter(Boolean);
 
-      // ----------------------------------------
-      // GET PROJECT IDS
-      // ----------------------------------------
+      console.log(
+        "PROJECT IDS:",
+        projectIds
+      );
 
-      const projectIds =
-        filteredProjects
-          .map(
-            (project) =>
-              project._id || project.id
-          )
-          .filter(Boolean);
-
-      if (!projectIds.length) {
+      if (projectIds.length === 0) {
         alert(
-          "No valid projects available to export."
+          "No valid project IDs found."
         );
 
         return;
       }
 
-      console.log(
-        "EXPORT PROJECT IDS:",
-        projectIds
+      const response = await fetch(
+        "/api/hod/export",
+        {
+          method: "POST",
+
+          credentials: "include",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            projectIds,
+          }),
+        }
       );
-
-      // ----------------------------------------
-      // CALL EXPORT API
-      // ----------------------------------------
-
-      const response =
-        await fetch(
-          "/api/hod/export",
-          {
-            method: "POST",
-
-            credentials: "include",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-              projectIds,
-            }),
-          }
-        );
-
-      // ----------------------------------------
-      // HANDLE ERROR
-      // ----------------------------------------
 
       if (!response.ok) {
         let errorMessage =
@@ -456,7 +378,7 @@ export default function HODdashboard() {
             errorData.message ||
             errorMessage;
         } catch {
-          // Ignore JSON parsing error
+          // Ignore
         }
 
         throw new Error(
@@ -464,25 +386,13 @@ export default function HODdashboard() {
         );
       }
 
-      // ----------------------------------------
-      // GET EXCEL BLOB
-      // ----------------------------------------
-
       const blob =
         await response.blob();
-
-      // ----------------------------------------
-      // CREATE DOWNLOAD URL
-      // ----------------------------------------
 
       const url =
         window.URL.createObjectURL(
           blob
         );
-
-      // ----------------------------------------
-      // CREATE DOWNLOAD LINK
-      // ----------------------------------------
 
       const link =
         document.createElement("a");
@@ -507,23 +417,13 @@ export default function HODdashboard() {
       link.download =
         `HOD_${departmentName}_Project_Report_${date}.xlsx`;
 
-      document.body.appendChild(
-        link
-      );
+      document.body.appendChild(link);
 
       link.click();
 
-      document.body.removeChild(
-        link
-      );
+      document.body.removeChild(link);
 
-      // ----------------------------------------
-      // CLEAN URL
-      // ----------------------------------------
-
-      window.URL.revokeObjectURL(
-        url
-      );
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(
         "HOD EXPORT ERROR:",
@@ -534,8 +434,6 @@ export default function HODdashboard() {
         error.message ||
           "Failed to export report"
       );
-    } finally {
-      setExporting(false);
     }
   };
 
@@ -545,13 +443,7 @@ export default function HODdashboard() {
 
   if (loading) {
     return (
-      <div className="flex h-full">
-        <main className="min-w-0 flex-1 px-8 py-8">
-          <p className="text-sm text-gray-500">
-            Loading HOD dashboard...
-          </p>
-        </main>
-      </div>
+      <StudentRosterSkeleton/>
     );
   }
 
@@ -563,19 +455,16 @@ export default function HODdashboard() {
     <div className="flex h-full">
       <main className="min-w-0 flex-1 px-8 py-8">
 
-        {/* ====================================
-            HEADER
-        ==================================== */}
+        {/* HEADER */}
 
         <DashboardHeader
           {...HOD_DASHBOARD_HEADER}
-
           title={`Welcome, ${hodName}`}
           actionLabel={false}
-
           description="Mentorship & Department Insights"
-
         />
+
+        {/* ERROR */}
 
         {error && (
           <p className="mt-4 text-sm text-red-500">
@@ -583,44 +472,48 @@ export default function HODdashboard() {
           </p>
         )}
 
-        {/* ====================================
-            STATISTICS
-        ==================================== */}
+        {/* STATISTICS */}
 
         <StatCards
           cards={hodStatCards}
         />
 
-        {/* ====================================
-            PROJECT ROSTER
-        ==================================== */}
+        {/* PROJECT ROSTER */}
 
         <div className="mt-2 w-full">
 
           <Roster
             title="Project Roster"
+
             onExport={handleExport}
-    
 
-            data={
-              departmentProjects
-            }
+            /*
+             * API has already filtered projects
+             * according to HOD department.
+             */
+            data={departmentProjects}
 
-            columns={
-              PROJECT_COLUMNS
-            }
-onRowClick={handleViewProject}
+            /*
+             * PROJECT_COLUMNS should contain:
+             * projectTitle
+             * student
+             * mentor
+             * projectType
+             * status
+             */
+            columns={PROJECT_COLUMNS}
+
+            onRowClick={handleViewProject}
+
             searchPlaceholder="Search projects, students or mentors..."
 
-            defaultFilters={
-              filters
-            }
+            defaultFilters={filters}
+
             filterContext={{
-  department: hodDepartment,
-}}
-            filterConfig={
-              HOD_PROJECT_FILTERS
-            }
+              department: hodDepartment,
+            }}
+
+            filterConfig={HOD_PROJECT_FILTERS}
 
             showApplyButton={true}
 
@@ -630,21 +523,11 @@ onRowClick={handleViewProject}
 
             className="w-full shadow-sm"
 
-
             initialVisibleRows={3}
 
-            // ==================================
-            // IMPORTANT
-            // Get FINAL filtered roster data
-            // ==================================
-
-            onFilteredData={
-              setFilteredProjects
-            }
           />
 
         </div>
-
       </main>
     </div>
   );

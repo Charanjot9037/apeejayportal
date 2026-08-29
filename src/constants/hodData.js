@@ -175,232 +175,72 @@ export const PROJECTS = [
   },
 ];
 
+
+export const HOD_PROJECT_FILTERS = [
+
+
+  {
+    key: "status",
+    label: "Status",
+    options: [
+      "Pending Approval",
+      "In Review",
+      "Approved",
+      "Rejected",
+    ],
+  },
+
+  {
+    key: "semester",
+    label: "Semester",
+    options: [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+    ],
+  },
+];
+
+
+// =========================================================
+// HOD PROJECT COLUMNS
+// =========================================================
+
 export const PROJECT_COLUMNS = [
   {
     key: "projectTitle",
     label: "Project",
   },
+
   {
     key: "student",
     label: "Student",
   },
+
   {
     key: "mentor",
     label: "Mentor",
   },
+
+
+
   {
-    key: "program",
-    label: "Program",
-  },
-  {
-    key: "specialization",
-    label: "Specialization",
-  },
-  {
-    key: "academicBatch",
-    label: "Academic Batch",
-  },
-  {
-    key: "currentSemester",
+    key: "semester",
     label: "Semester",
   },
+
   {
     key: "status",
     label: "Status",
   },
+
   {
     key: "approvalDate",
     label: "Approval Date",
-  },
-];
-export const HOD_PROJECT_FILTERS = [
-  {
-    key: "specialization",
-    label: "Stream",
-    placeholder: "All Streams",
-
-    optionsByDepartment: {
-      MANAGEMENT: [
-        "BBA",
-        "MBA",
-      ],
-
-      ENGINEERING: [
-        "B.Tech CSE",
-        "B.Tech AI & ML",
-        "B.Tech CS-IOT"
-      ],
-
-
-      IT: [
-        "BCA",
-        "BCOM"
-      ],
-    },
-  },
-
-  {
-    key: "academicBatch",
-    label: "Academic Batch",
-    placeholder: "All Batches",
-
-    options: [
-      "2023",
-      "2024",
-      "2025",
-      "2026",
-      "2027",
-      "2028",
-    ],
-  },
-];
-export const HOD_STUDENT_FILTERS = [
-  {
-    key: 'department',
-    label: 'Department',
-    options: [
-      {
-        value: 'ENGINEERING',
-        label: 'Engineering',
-      },
-      {
-        value: 'MANAGEMENT',
-        label: 'Management',
-      },
-      {
-        value: 'IT',
-        label: 'IT',
-      },
-    ],
-  },
-
-  {
-    key: 'program',
-    label: 'Program / Degree',
-    dependsOn: 'department',
-
-    options: {
-      ENGINEERING: [
-        {
-          value: 'BTECH',
-          label: 'B.Tech',
-        },
-      ],
-
-      MANAGEMENT: [
-        {
-          value: 'MBA',
-          label: 'MBA',
-        },
-        {
-          value: 'BBA',
-          label: 'BBA',
-        },
-        {
-          value: 'BCOM',
-          label: 'B.Com',
-        },
-      ],
-
-      IT: [
-        {
-          value: 'MCA',
-          label: 'MCA',
-        },
-        {
-          value: 'BCA',
-          label: 'BCA',
-        },
-      ],
-    },
-  },
-
-  {
-    key: 'specialization',
-    label: 'Specialization',
-    dependsOn: 'department',
-
-    options: {
-      ENGINEERING: [
-        {
-          value: 'CSE',
-          label: 'Computer Science & Engineering',
-        },
-        {
-          value: 'IOT',
-          label: 'Internet of Things',
-        },
-        {
-          value: 'AI_ML',
-          label: 'Artificial Intelligence & Machine Learning',
-        },
-      ],
-
-      MANAGEMENT: [
-        {
-          value: 'FINANCE',
-          label: 'Finance',
-        },
-        {
-          value: 'MARKETING',
-          label: 'Marketing',
-        },
-        {
-          value: 'HR',
-          label: 'Human Resource Management',
-        },
-        {
-          value: 'BUSINESS_ANALYTICS',
-          label: 'Business Analytics',
-        },
-      ],
-
-      IT: [
-        {
-          value: 'SOFTWARE_DEVELOPMENT',
-          label: 'Software Development',
-        },
-        {
-          value: 'DATA_SCIENCE',
-          label: 'Data Science',
-        },
-        {
-          value: 'AI_ML',
-          label: 'Artificial Intelligence & Machine Learning',
-        },
-        {
-          value: 'CYBER_SECURITY',
-          label: 'Cyber Security',
-        },
-        {
-          value: 'CLOUD_COMPUTING',
-          label: 'Cloud Computing',
-        },
-      ],
-    },
-  },
-
-  {
-    key: 'academicBatch',
-    label: 'Academic Batch',
-
-    options: [
-      {
-        value: '2023',
-        label: '2023',
-      },
-      {
-        value: '2024',
-        label: '2024',
-      },
-      {
-        value: '2025',
-        label: '2025',
-      },
-      {
-        value: '2026',
-        label: '2026',
-      },
-    ],
   },
 ];
