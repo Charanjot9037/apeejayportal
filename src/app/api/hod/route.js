@@ -565,6 +565,28 @@ export async function GET() {
           status === "mentor verified"
         );
       }).length;
+      const assignedStudentUserIds = new Set();
+
+projects.forEach((project) => {
+  const mentorName = project.mentor?.trim().toLowerCase();
+  const mentor2Name = project.mentor2?.trim().toLowerCase();
+
+  if (
+    mentorName === user.name.trim().toLowerCase() ||
+    mentor2Name === user.name.trim().toLowerCase()
+  ) {
+    if (project.studentUserId) {
+      assignedStudentUserIds.add(
+        String(project.studentUserId)
+      );
+    }
+  }
+});
+
+const assignedStudents = students.filter((student) =>
+  student.userId &&
+  assignedStudentUserIds.has(String(student.userId))
+);
 
     // =========================================================
     // 14. RESPONSE

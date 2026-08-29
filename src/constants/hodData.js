@@ -30,11 +30,6 @@ export const hodDashboardData = {
       icon: Users,
       href: '/hod-dashboard/mentors',
     },
-    {
-      label: 'Tools',
-      icon: FileText,
-      href: '/hod-dashboard/tools',
-    },
   ],
 };
 export const HOD_DASHBOARD_HEADER = {
@@ -42,63 +37,6 @@ export const HOD_DASHBOARD_HEADER = {
   description: 'Overview of department performance and project status.',
   actionLabel: 'Export Report',
 };
-
-// export const PROJECTS = [
-//   {
-//     id: 1,
-//     projectTitle: 'AI-Based Crop Disease Detection',
-//     student: 'Rahul Sharma',
-//     rollNo: '24CS001',
-//     mentor: 'Dr. A. Gupta',
-//     status: 'Verified',
-//     approvalDate: '12 Oct 2023',
-//   },
-//   {
-//     id: 2,
-//     projectTitle: 'Blockchain Supply Chain',
-//     student: 'Priya Singh',
-//     rollNo: '24CS015',
-//     mentor: 'Prof. V. Kumar',
-//     status: 'Pending',
-//     approvalDate: '-',
-//   },
-//   {
-//     id: 3,
-//     projectTitle: 'Smart Campus IoT Network',
-//     student: 'Amit Patel',
-//     rollNo: '24IT042',
-//     mentor: 'Dr. S. Reddy',
-//     status: 'Changes Required',
-//     approvalDate: '10 Oct 2023',
-//   },
-//   {
-//     id: 4,
-//     projectTitle: 'AI Powered Healthcare Assistant',
-//     student: 'Simar Kaur',
-//     rollNo: '24CS023',
-//     mentor: 'Dr. Neha Sharma',
-//     status: 'Verified',
-//     approvalDate: '08 Oct 2023',
-//   },
-//   {
-//     id: 5,
-//     projectTitle: 'Smart Campus IoT Network',
-//     student: 'Amit Patel',
-//     rollNo: '24IT042',
-//     mentor: 'Dr. S. Reddy',
-//     status: 'Changes Required',
-//     approvalDate: '10 Oct 2023',
-//   },
-//   {
-//     id: 6,
-//     projectTitle: 'AI Powered Healthcare Assistant',
-//     student: 'Simar Kaur',
-//     rollNo: '24CS023',
-//     mentor: 'Dr. Neha Sharma',
-//     status: 'Verified',
-//     approvalDate: '08 Oct 2023',
-//   },
-// ];
 export const PROJECTS = [
   {
     id: 1,
@@ -287,9 +225,10 @@ export const HOD_PROJECT_FILTERS = [
         "MBA",
       ],
 
-      Engineering: [
+      ENGINEERING: [
         "B.Tech CSE",
-        "B.Tech AI & ML"
+        "B.Tech AI & ML",
+        "B.Tech CS-IOT"
       ],
 
 
@@ -312,6 +251,156 @@ export const HOD_PROJECT_FILTERS = [
       "2026",
       "2027",
       "2028",
+    ],
+  },
+];
+export const HOD_STUDENT_FILTERS = [
+  {
+    key: 'department',
+    label: 'Department',
+    options: [
+      {
+        value: 'ENGINEERING',
+        label: 'Engineering',
+      },
+      {
+        value: 'MANAGEMENT',
+        label: 'Management',
+      },
+      {
+        value: 'IT',
+        label: 'IT',
+      },
+    ],
+  },
+
+  {
+    key: 'program',
+    label: 'Program / Degree',
+    dependsOn: 'department',
+
+    options: {
+      ENGINEERING: [
+        {
+          value: 'BTECH',
+          label: 'B.Tech',
+        },
+      ],
+
+      MANAGEMENT: [
+        {
+          value: 'MBA',
+          label: 'MBA',
+        },
+        {
+          value: 'BBA',
+          label: 'BBA',
+        },
+        {
+          value: 'BCOM',
+          label: 'B.Com',
+        },
+      ],
+
+      IT: [
+        {
+          value: 'MCA',
+          label: 'MCA',
+        },
+        {
+          value: 'BCA',
+          label: 'BCA',
+        },
+      ],
+    },
+  },
+
+  {
+    key: 'specialization',
+    label: 'Specialization',
+    dependsOn: 'department',
+
+    options: {
+      ENGINEERING: [
+        {
+          value: 'CSE',
+          label: 'Computer Science & Engineering',
+        },
+        {
+          value: 'IOT',
+          label: 'Internet of Things',
+        },
+        {
+          value: 'AI_ML',
+          label: 'Artificial Intelligence & Machine Learning',
+        },
+      ],
+
+      MANAGEMENT: [
+        {
+          value: 'FINANCE',
+          label: 'Finance',
+        },
+        {
+          value: 'MARKETING',
+          label: 'Marketing',
+        },
+        {
+          value: 'HR',
+          label: 'Human Resource Management',
+        },
+        {
+          value: 'BUSINESS_ANALYTICS',
+          label: 'Business Analytics',
+        },
+      ],
+
+      IT: [
+        {
+          value: 'SOFTWARE_DEVELOPMENT',
+          label: 'Software Development',
+        },
+        {
+          value: 'DATA_SCIENCE',
+          label: 'Data Science',
+        },
+        {
+          value: 'AI_ML',
+          label: 'Artificial Intelligence & Machine Learning',
+        },
+        {
+          value: 'CYBER_SECURITY',
+          label: 'Cyber Security',
+        },
+        {
+          value: 'CLOUD_COMPUTING',
+          label: 'Cloud Computing',
+        },
+      ],
+    },
+  },
+
+  {
+    key: 'academicBatch',
+    label: 'Academic Batch',
+
+    options: [
+      {
+        value: '2023',
+        label: '2023',
+      },
+      {
+        value: '2024',
+        label: '2024',
+      },
+      {
+        value: '2025',
+        label: '2025',
+      },
+      {
+        value: '2026',
+        label: '2026',
+      },
     ],
   },
 ];
