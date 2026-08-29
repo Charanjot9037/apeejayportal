@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { Users, UserRound } from 'lucide-react';
 import Roster from '@/app/components/elements/roaster';
+import StudentRosterSkeleton from '@/app/components/admin/skeleton/studentRosterSkeleton';
 
 const MENTOR_COLUMNS = [
   {
@@ -37,6 +38,7 @@ const MENTOR_FILTERS = [
     key: 'designation',
     label: 'Designation',
     placeholder: 'All Designations',
+
     options: [
       {
         value: 'HOD',
@@ -66,29 +68,8 @@ const DEFAULT_FILTERS = {
   designation: '',
 };
 
-/* =========================================================
-   NORMALIZE VALUE
-   =========================================================
-   Converts:
-   "Assistant Professor"
-   "ASSISTANT-PROFESSOR"
-   "assistant professor"
-   " assistant-professor "
-
-   into the same comparable value.
-   ========================================================= */
-
-const normalizeValue = (value) => {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[-_]+/g, ' ')
-    .replace(/\s+/g, ' ');
-};
-
 export default function Page() {
   const [mentors, setMentors] = useState([]);
-  const [allMentors, setAllMentors] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -97,111 +78,103 @@ export default function Page() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
   /* =========================================================
-     FETCH HOD DATA
+     FETCH MENTORS FROM API
      ========================================================= */
 
-  const fetchMentors = async (selectedFilters = DEFAULT_FILTERS) => {
+  const fetchMentors = async (
+    selectedFilters = DEFAULT_FILTERS
+  ) => {
     try {
       setLoading(true);
       setError('');
 
+      // -------------------------------------------------------
+      // SEND FILTERS TO BACKEND
+      // -------------------------------------------------------
+
       const response = await fetch('/api/hod/mentors', {
-        method: 'GET',
-        cache: 'no-store',
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        credentials: 'include',
+
+        body: JSON.stringify(
+          selectedFilters || {}
+        ),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
         throw new Error(
-          data.message || 'Failed to fetch mentors'
+          data.message ||
+            'Failed to fetch mentors'
         );
       }
 
-      /* =======================================================
-         GET HOD DEPARTMENT
-         ======================================================= */
+      // -------------------------------------------------------
+      // HOD INFORMATION
+      // -------------------------------------------------------
 
-      const department = data.hod?.department || '';
+      setHodDepartment(
+        data.hod?.department || ''
+      );
 
-      setHodDepartment(department);
+      // -------------------------------------------------------
+      // API ALREADY RETURNS FILTERED MENTORS
+      // -------------------------------------------------------
 
-      /* =======================================================
-         GET MENTORS FROM /api/hod
+      const departmentMentors =
+        Array.isArray(data.mentors)
+          ? data.mentors
+          : [];
 
-         API should already return mentors belonging to
-         the logged-in HOD's department.
-         ======================================================= */
+      // -------------------------------------------------------
+      // MAP DATABASE DATA FOR ROSTER
+      // -------------------------------------------------------
 
-      const departmentMentors = Array.isArray(data.mentors)
-        ? data.mentors
-        : [];
+      const mappedMentors =
+        departmentMentors.map((mentor) => ({
+          id: mentor._id
+            ? String(mentor._id)
+            : mentor.userId?._id
+              ? String(mentor.userId._id)
+              : '',
 
-      /* =======================================================
-         MAP DATABASE MENTORS
-         ======================================================= */
-
-      const mappedMentors = departmentMentors.map((mentor) => ({
-        id: mentor._id
-          ? String(mentor._id)
-          : mentor.userId?._id
-            ? String(mentor.userId._id)
+          _id: mentor._id
+            ? String(mentor._id)
             : '',
 
-        _id: mentor._id
-          ? String(mentor._id)
-          : '',
+          name:
+            mentor.userId?.name ||
+            mentor.name ||
+            'Unknown Mentor',
 
-        name:
-          mentor.userId?.name ||
-          mentor.name ||
-          'Unknown Mentor',
+          email:
+            mentor.userId?.email ||
+            mentor.email ||
+            '-',
 
-        email:
-          mentor.userId?.email ||
-          mentor.email ||
-          '-',
+          contact:
+            mentor.mobileNumber ||
+            mentor.contact ||
+            '-',
 
-        contact:
-          mentor.mobileNumber ||
-          mentor.contact ||
-          '-',
+          designation:
+            mentor.designation ||
+            '-',
 
-        designation:
-          mentor.designation ||
-          '-',
+          department:
+            mentor.department ||
+            data.hod?.department ||
+            '-',
+        }));
 
-        department:
-          mentor.department ||
-          department,
-      }));
+      setMentors(mappedMentors);
 
-      /* =======================================================
-         SAVE ALL DEPARTMENT MENTORS
-         ======================================================= */
-
-      setAllMentors(mappedMentors);
-
-      /* =======================================================
-         APPLY DESIGNATION FILTER
-         ======================================================= */
-
-      const selectedDesignation =
-        normalizeValue(selectedFilters?.designation);
-
-      let filteredMentors = mappedMentors;
-
-      if (selectedDesignation) {
-        filteredMentors = mappedMentors.filter((mentor) => {
-          const mentorDesignation = normalizeValue(
-            mentor.designation
-          );
-
-          return mentorDesignation === selectedDesignation;
-        });
-      }
-
-      setMentors(filteredMentors);
     } catch (error) {
       console.error(
         'FETCH_HOD_MENTORS_ERROR:',
@@ -214,7 +187,6 @@ export default function Page() {
       );
 
       setMentors([]);
-      setAllMentors([]);
     } finally {
       setLoading(false);
     }
@@ -232,37 +204,16 @@ export default function Page() {
      APPLY FILTER
      ========================================================= */
 
-  const handleApplyFilters = (selectedFilters) => {
+  const handleApplyFilters = (
+    selectedFilters
+  ) => {
     setFilters(selectedFilters);
 
-    const selectedDesignation = normalizeValue(
-      selectedFilters?.designation
-    );
+    // -------------------------------------------------------
+    // FILTERING IS NOW DONE BY API
+    // -------------------------------------------------------
 
-    /* ---------------------------------------------------------
-       No designation selected
-       → Show ALL mentors from HOD department
-       --------------------------------------------------------- */
-
-    if (!selectedDesignation) {
-      setMentors(allMentors);
-      return;
-    }
-
-    /* ---------------------------------------------------------
-       Designation selected
-       → Compare both sides after lowercase normalization
-       --------------------------------------------------------- */
-
-    const filtered = allMentors.filter((mentor) => {
-      const mentorDesignation = normalizeValue(
-        mentor.designation
-      );
-
-      return mentorDesignation === selectedDesignation;
-    });
-
-    setMentors(filtered);
+    fetchMentors(selectedFilters);
   };
 
   /* =========================================================
@@ -277,18 +228,26 @@ export default function Page() {
     <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
 
-        {/* =====================================================
+        {/* ===================================================
             PAGE HEADER
-        ===================================================== */}
+        =================================================== */}
 
         <div className="mb-6">
 
           <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400">
-            <span>Dashboard</span>
-            <span>/</span>
+
+            <span>
+              Dashboard
+            </span>
+
+            <span>
+              /
+            </span>
+
             <span className="text-slate-500">
               Mentors
             </span>
+
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -298,7 +257,9 @@ export default function Page() {
               <div className="flex items-center gap-2">
 
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-50">
+
                   <UserRound className="h-5 w-5 text-primary-orange" />
+
                 </div>
 
                 <h1 className="text-2xl font-bold text-[#1c3a5e]">
@@ -308,6 +269,7 @@ export default function Page() {
               </div>
 
               <p className="mt-2 text-sm text-slate-500">
+
                 View all mentors belonging to your department.
 
                 {hodDepartment && (
@@ -315,6 +277,7 @@ export default function Page() {
                     Department: {hodDepartment}
                   </span>
                 )}
+
               </p>
 
             </div>
@@ -326,7 +289,9 @@ export default function Page() {
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
 
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
+
                 <Users className="h-4 w-4 text-blue-600" />
+
               </div>
 
               <div>
@@ -357,7 +322,9 @@ export default function Page() {
             <div className="flex flex-col items-center justify-center text-center">
 
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
+
                 <Users className="h-5 w-5 text-red-500" />
+
               </div>
 
               <h2 className="mt-4 text-base font-semibold text-slate-700">
@@ -388,32 +355,32 @@ export default function Page() {
         <div className="relative rounded-2xl">
 
           {loading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
-
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-md">
-
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-primary-orange" />
-
-                <span className="text-sm font-medium text-slate-600">
-                  Loading mentors...
-                </span>
-
-              </div>
-
-            </div>
+            <StudentRosterSkeleton/>
           )}
 
           <Roster
             title="Mentor Roster"
+
             data={mentors}
+
             columns={MENTOR_COLUMNS}
+
             searchPlaceholder="Search mentors..."
+
             defaultFilters={filters}
+
             filterConfig={MENTOR_FILTERS}
+
             showApplyButton={true}
-            onApplyFilters={handleApplyFilters}
+
+            onApplyFilters={
+              handleApplyFilters
+            }
+
             initialVisibleRows={5}
+
             className="mt-0 shadow-sm"
+
             onRowClick={(mentor) => {
               console.log(
                 'Selected mentor:',

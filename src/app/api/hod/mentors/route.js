@@ -5,7 +5,7 @@ import Mentor from "@/models/mentor";
 
 import { getHODContext } from "@/lib/getHODContext";
 
-export async function GET() {
+export async function POST(request) {
   try {
     await connectDB();
 
@@ -35,46 +35,102 @@ export async function GET() {
     } = hod;
 
     // =====================================================
-    // GET MENTORS FROM SAME DEPARTMENT
+    // GET FILTERS FROM FRONTEND
     // =====================================================
 
-    const mentors = await Mentor.find({
-      $expr: {
-        $eq: [
-          {
-            $toLower: {
-              $trim: {
-                input: {
-                  $ifNull: ["$department", ""],
+    const filters = await request.json().catch(() => ({}));
+
+    const {
+      designation,
+    } = filters || {};
+
+
+
+    // =====================================================
+    // BUILD MENTOR QUERY
+    // =====================================================
+
+    const mentorConditions = [
+      // ---------------------------------------------------
+      // HOD DEPARTMENT
+      // ---------------------------------------------------
+
+      {
+        $expr: {
+          $eq: [
+            {
+              $toLower: {
+                $trim: {
+                  input: {
+                    $ifNull: ["$department", ""],
+                  },
                 },
               },
             },
-          },
-          normalizedDepartment,
-        ],
+            normalizedDepartment,
+          ],
+        },
       },
-    })
+    ];
+
+    // =====================================================
+    // DESIGNATION FILTER
+    // =====================================================
+
+    if (designation) {
+      mentorConditions.push({
+        $expr: {
+          $eq: [
+            {
+              $toLower: {
+                $trim: {
+                  input: {
+                    $ifNull: ["$designation", ""],
+                  },
+                },
+              },
+            },
+            String(designation)
+              .trim()
+              .toLowerCase(),
+          ],
+        },
+      });
+    }
+
+    // =====================================================
+    // FINAL QUERY
+    // =====================================================
+
+    const mentorQuery = {
+      $and: mentorConditions,
+    };
+
+    
+
+
+    // =====================================================
+    // GET MENTORS
+    // =====================================================
+
+    const mentors = await Mentor.find(
+      mentorQuery
+    )
       .populate({
         path: "userId",
-        select: "name email status profileImage",
+        select:
+          "name email status profileImage",
       })
       .select(
         "userId mobileNumber department designation"
       )
       .lean();
 
-    console.log("=================================");
-    console.log("HOD:", user.name);
-    console.log("HOD DEPARTMENT:", department);
-    console.log(
-      "DEPARTMENT MENTORS:",
-      mentors.length
-    );
-    console.log("=================================");
-
     // =====================================================
     // RESPONSE
     // =====================================================
+
+
 
     return NextResponse.json(
       {

@@ -117,13 +117,12 @@ export default function HODProjects() {
     mentorVerified: 0,
   }
 );
-      // console.log("data in hod : ",data);
-        console.log("project",data.projects);
+
 
       const mappedProjects = (data.projects || []).map(
         mapProjectToRoster
       );
-      console.log("mapped projects : ",mappedProjects);
+      
 
       setProjects(mappedProjects);
     } catch (error) {
@@ -407,12 +406,17 @@ export default function HODProjects() {
           showApplyButton={true}
           onApplyFilters={handleApplyFilters}
           className="mt-4 shadow-sm"
-          onRowClick={(project) => {
-            console.log(
-              "Selected project:",
-              project
-            );
-          }}
+        
+        onRowClick={(project) => {
+  const projectId = project?.id || project?._id;
+
+  if (!projectId) {
+    toast.error("Project ID not found");
+    return;
+  }
+
+  router.push(`/hod-dashboard/projects/${projectId}`);
+}}
         />
       )}
     </div>

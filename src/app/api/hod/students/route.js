@@ -4,12 +4,12 @@ import { connectDB } from "@/lib/db";
 import Student from "@/models/student";
 import { getHODContext } from "@/lib/getHODContext";
 
-export async function GET() {
+export async function POST(request) {
   try {
     await connectDB();
 
     // =====================================================
-    // HOD AUTHENTICATION
+    // 1. HOD AUTHENTICATION
     // =====================================================
 
     const hod = await getHODContext();
@@ -34,40 +34,139 @@ export async function GET() {
     } = hod;
 
     // =====================================================
-    // GET ALL STUDENTS OF HOD DEPARTMENT
+    // 2. GET FILTERS FROM FRONTEND
     // =====================================================
 
-    const students = await Student.find({
-      $expr: {
-        $eq: [
-          {
-            $toLower: {
-              $trim: {
-                input: {
-                  $ifNull: ["$department", ""],
+    const filters = await request.json();
+
+    const {
+      program,
+      semester,
+      specialization,
+    } = filters || {};
+
+    
+    // =====================================================
+    // 3. BUILD STUDENT CONDITIONS
+    // =====================================================
+
+    const studentConditions = [
+      // ---------------------------------------------------
+      // HOD DEPARTMENT
+      // ---------------------------------------------------
+
+      {
+        $expr: {
+          $eq: [
+            {
+              $toLower: {
+                $trim: {
+                  input: {
+                    $ifNull: ["$department", ""],
+                  },
                 },
               },
             },
-          },
-          normalizedDepartment,
-        ],
+            normalizedDepartment,
+          ],
+        },
       },
-    })
+    ];
+
+    // =====================================================
+    // PROGRAM
+    // =====================================================
+
+    if (program) {
+      studentConditions.push({
+        $expr: {
+          $eq: [
+            {
+              $toLower: {
+                $trim: {
+                  input: {
+                    $ifNull: ["$program", ""],
+                  },
+                },
+              },
+            },
+            program.trim().toLowerCase(),
+          ],
+        },
+      });
+    }
+
+    // =====================================================
+    // CURRENT SEMESTER
+    // =====================================================
+
+    if (semester) {
+      studentConditions.push({
+        $expr: {
+          $eq: [
+            {
+              $toString: {
+                $ifNull: ["$currentSemester", ""],
+              },
+            },
+            String(semester).trim(),
+          ],
+        },
+      });
+    }
+
+    // =====================================================
+    // SPECIALIZATION
+    // =====================================================
+
+    if (specialization) {
+      studentConditions.push({
+        $expr: {
+          $eq: [
+            {
+              $toLower: {
+                $trim: {
+                  input: {
+                    $ifNull: ["$specialization", ""],
+                  },
+                },
+              },
+            },
+            specialization.trim().toLowerCase(),
+          ],
+        },
+      });
+    }
+
+    // =====================================================
+    // 4. FINAL QUERY
+    // =====================================================
+
+    const studentQuery = {
+      $and: studentConditions,
+    };
+
+    console.log(
+      "STUDENT QUERY:",
+      JSON.stringify(studentQuery, null, 2)
+    );
+
+    // =====================================================
+    // 5. GET FILTERED STUDENTS
+    // =====================================================
+
+    const students = await Student.find(studentQuery)
       .populate({
         path: "userId",
         select: "name email status",
       })
       .lean();
 
-    console.log("=================================");
-    console.log("HOD:", user.name);
-    console.log("HOD DEPARTMENT:", department);
-    console.log("ALL STUDENTS:", students.length);
-    console.log("=================================");
+    // =====================================================
+    // 6. RESPONSE
+    // =====================================================
 
-    // =====================================================
-    // RESPONSE
-    // =====================================================
+    console.log("FILTERED STUDENTS:", students.length);
 
     return NextResponse.json(
       {
@@ -78,6 +177,12 @@ export async function GET() {
           email: user.email,
           department,
           designation: mentor.designation,
+        },
+
+        filters: {
+          program: program || "",
+          semester: semester || "",
+          specialization: specialization || "",
         },
 
         count: students.length,

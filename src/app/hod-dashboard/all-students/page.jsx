@@ -1,148 +1,233 @@
+"use client";
 
+import { useEffect, useState } from "react";
+import { Users, GraduationCap } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-'use client';
-
-import { useEffect, useState } from 'react';
-import { Users, GraduationCap } from 'lucide-react';
-import Roster from '@/app/components/elements/roaster';
-// import { STUDENT_FILTERS } from '@/constants/hodData';
+import Roster from "@/app/components/elements/roaster";
+import AuthGuardModal from "@/app/components/AuthGuardModal";
+import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 
 import {
   studentColumns,
   mapStudentToRoster,
-  STUDENT_FILTERS
-} from '@/constants/adminData';
+} from "@/constants/adminData";
+import { DEFAULT_FILTERS,STUDENT_FILTERS } from "@/constants/adminData";
 
 export default function Page() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  // HOD department
-  const [hodDepartment, setHodDepartment] = useState('');
+  const [hodDepartment, setHodDepartment] = useState("");
 
-  /*
-   * ----------------------------------------------------------
-   * FETCH ALL HOD DEPARTMENT STUDENTS
-   * ----------------------------------------------------------
-   *
-   * /api/hod already:
-   *
-   * 1. Authenticates HOD
-   * 2. Gets HOD department
-   * 3. Finds students from that department
-   * 4. Matches Student.userId with Projects.student
-   *
-   * We only need the students here.
-   */
-  const fetchStudents = async () => {
+  const [filters, setFilters] = useState({
+    ...DEFAULT_FILTERS,
+  });
+
+  const [authModal, setAuthModal] = useState({
+    open: false,
+    type: "authentication",
+    message: "",
+  });
+
+  const router = useRouter();
+
+  // =====================================================
+  // FETCH FILTERED STUDENTS
+  // =====================================================
+
+  const fetchStudents = async (selectedFilters) => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
-      const response = await fetch('/api/hod/students');
+      const apiFilters = {
+        program: selectedFilters?.program,
+        semester: selectedFilters?.semester,
+        specialization:
+          selectedFilters?.specialization,
+      };
+
+      // Remove empty filters
+      Object.keys(apiFilters).forEach((key) => {
+        if (
+          apiFilters[key] === "" ||
+          apiFilters[key] === null ||
+          apiFilters[key] === undefined ||
+          apiFilters[key] === "all"
+        ) {
+          delete apiFilters[key];
+        }
+      });
+
+    
+
+      // =================================================
+      // POST FILTERS TO API
+      // =================================================
+
+      const response = await fetch(
+        "/api/hod/students",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiFilters),
+        }
+      );
 
       const data = await response.json();
 
+      // =================================================
+      // AUTHENTICATION
+      // =================================================
+
+      if (response.status === 401) {
+        setAuthModal({
+          open: true,
+          type: "authentication",
+          message:
+            data.message ||
+            "Your session has expired. Please log in again.",
+        });
+
+        return;
+      }
+
+      // =================================================
+      // AUTHORIZATION
+      // =================================================
+
+      if (response.status === 403) {
+        setAuthModal({
+          open: true,
+          type: "unauthorized",
+          message:
+            data.message ||
+            "You are not authorized to access this page.",
+        });
+
+        return;
+      }
+
+      // =================================================
+      // API ERROR
+      // =================================================
+
       if (!response.ok || !data.success) {
         throw new Error(
-          data.message || 'Failed to fetch students'
+          data.message ||
+            "Failed to fetch students"
         );
       }
 
-      /*
-       * Save HOD department
-       */
+      // =================================================
+      // HOD DEPARTMENT
+      // =================================================
+
       setHodDepartment(
-        data.hod?.department || ''
+        data.hod?.department || ""
       );
 
-      /*
-       * /api/hod already returns only students
-       * belonging to the HOD department.
-       */
+      // =================================================
+      // MAP STUDENTS
+      // =================================================
+
       const mappedStudents = (
         data.students || []
       ).map(mapStudentToRoster);
+
     
 
       setStudents(mappedStudents);
-
     } catch (error) {
       console.error(
-        'FETCH_HOD_STUDENTS_ERROR:',
+        "FETCH_HOD_STUDENTS_ERROR:",
         error
+      );
+
+      toast.error(
+        error.message ||
+          "Failed to fetch students"
       );
 
       setError(
         error.message ||
-        'Something went wrong'
+          "Something went wrong"
       );
 
       setStudents([]);
-
     } finally {
       setLoading(false);
     }
   };
 
-  /*
-   * Fetch once when page loads.
-   *
-   * This useEffect is in the PAGE,
-   * NOT inside Roster.
-   */
+  // =====================================================
+  // INITIAL FETCH
+  // =====================================================
+
   useEffect(() => {
-    fetchStudents();
+    fetchStudents(
+      DEFAULT_FILTERS
+    );
   }, []);
 
-  const handleRetry = () => {
-    fetchStudents();
+  // =====================================================
+  // APPLY FILTERS
+  // =====================================================
+
+  const handleApplyFilters = (
+    selectedFilters
+  ) => {
+  
+
+    setFilters({
+      ...selectedFilters,
+    });
+
+    fetchStudents(selectedFilters);
   };
 
-  /*
-   * ----------------------------------------------------------
-   * HOD DEPARTMENT FILTER
-   * ----------------------------------------------------------
-   *
-   * Only show the HOD's department in the department dropdown.
-   */
-  // const hodStudentFilters = STUDENT_FILTERS.map(
-  //   (filter) => {
-  //     if (filter.key !== 'department') {
-  //       return filter;
-  //     }
+  // =====================================================
+  // RETRY
+  // =====================================================
 
-  //     return {
-  //       ...filter,
-  //       options: hodDepartment
-  //         ? [hodDepartment]
-  //         : [],
-  //     };
-  //   }
-  // );
-  const hodStudentFilters = STUDENT_FILTERS.map((filter) => {
-  // Department
-  if (filter.key === 'department') {
-    return {
-      ...filter,
-      options: hodDepartment
-        ? [
-            {
-              value: hodDepartment.toUpperCase(),
-              label: hodDepartment,
-            },
-          ]
-        : [],
-    };
-  }
-
-  return filter;
-});
+  const handleRetry = () => {
+    fetchStudents(filters);
+  };
 
   return (
     <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
+
+        {/* =====================================================
+            AUTH MODAL
+        ===================================================== */}
+
+        <AuthGuardModal
+          open={authModal.open}
+          type={authModal.type}
+          message={authModal.message}
+          onClose={() => {
+            if (
+              authModal.type ===
+              "unauthorized"
+            ) {
+              router.back();
+            } else {
+              setAuthModal((prev) => ({
+                ...prev,
+                open: false,
+              }));
+            }
+          }}
+          onLogin={() => {
+            router.push("/login");
+          }}
+        />
 
         {/* =====================================================
             HEADER
@@ -175,7 +260,8 @@ export default function Page() {
               </div>
 
               <p className="mt-2 text-sm text-slate-500">
-                View all students belonging to your department.
+                View students belonging to your department.
+
                 {hodDepartment && (
                   <span className="ml-1 font-semibold text-[#1c3a5e]">
                     Department: {hodDepartment}
@@ -185,7 +271,9 @@ export default function Page() {
 
             </div>
 
-            {/* TOTAL STUDENTS */}
+            {/* =================================================
+                TOTAL STUDENTS
+            ================================================= */}
 
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
 
@@ -252,19 +340,7 @@ export default function Page() {
         <div className="relative rounded-2xl">
 
           {loading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
-
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-md">
-
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-primary-orange" />
-
-                <span className="text-sm font-medium text-slate-600">
-                  Loading students...
-                </span>
-
-              </div>
-
-            </div>
+            <StudentRosterSkeleton/>
           )}
 
           <Roster
@@ -272,28 +348,25 @@ export default function Page() {
 
             data={students}
 
+            setData={setStudents}
+
             columns={studentColumns}
 
             searchPlaceholder="Search students..."
 
-            /*
-             * IMPORTANT:
-             *
-             * We don't need API filtering anymore.
-             * Roster filters the already-loaded department
-             * students locally.
-             */
-            filterConfig={STUDENT_FILTERS}
+            defaultFilters={
+              DEFAULT_FILTERS
+            }
 
-            /*
-             * Pass HOD department to Roster.
-             * This can also be used by dependent filters.
-             */
-            filterContext={{
-              department: hodDepartment,
-            }}
+            filterConfig={
+              STUDENT_FILTERS
+            }
 
-            showApplyButton={false}
+            showApplyButton={true}
+
+            onApplyFilters={
+              handleApplyFilters
+            }
 
             initialVisibleRows={5}
 
@@ -301,7 +374,7 @@ export default function Page() {
 
             onRowClick={(student) => {
               console.log(
-                'Selected student:',
+                "Selected student:",
                 student
               );
             }}

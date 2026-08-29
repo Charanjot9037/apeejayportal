@@ -311,54 +311,71 @@ export default function Roster({
   /*
    * Search existing data.
    */
-const filteredData = data.filter((item) => {
-  // ==========================================
-  // SEARCH FILTER
-  // ==========================================
+// const filteredData = data.filter((item) => {
+//   // ==========================================
+//   // SEARCH FILTER
+//   // ==========================================
 
+//   const searchValue = search.trim().toLowerCase();
+
+//   const matchesSearch =
+//     !searchValue ||
+//     Object.values(item).some((value) =>
+//       String(value ?? "")
+//         .toLowerCase()
+//         .includes(searchValue)
+//     );
+
+//   if (!matchesSearch) {
+//     return false;
+//   }
+
+
+//   const matchesFilters = Object.entries(filters).every(
+//   ([key, selectedValue]) => {
+//     // Empty filter = no filtering
+//     if (!selectedValue) {
+//       return true;
+//     }
+
+//     if (
+//       key === "program" ||
+//       key === "specialization"
+//     ) {
+//       return true;
+//     }
+
+//     const itemValue = item[key];
+
+//     return (
+//       String(itemValue ?? "")
+//         .trim()
+//         .toLowerCase() ===
+//       String(selectedValue)
+//         .trim()
+//         .toLowerCase()
+//     );
+//   }
+// );
+
+//   return matchesFilters;
+// });
+/*
+ * Data is already filtered by the backend.
+ * Roster only handles SEARCH locally.
+ */
+const filteredData = data.filter((item) => {
   const searchValue = search.trim().toLowerCase();
 
-  const matchesSearch =
-    !searchValue ||
-    Object.values(item).some((value) =>
-      String(value ?? "")
-        .toLowerCase()
-        .includes(searchValue)
-    );
-
-  if (!matchesSearch) {
-    return false;
+  if (!searchValue) {
+    return true;
   }
 
-
-  const matchesFilters = Object.entries(filters).every(
-  ([key, selectedValue]) => {
-    // Empty filter = no filtering
-    if (!selectedValue) {
-      return true;
-    }
-
-    if (
-      key === "program" ||
-      key === "specialization"
-    ) {
-      return true;
-    }
-
-    const itemValue = item[key];
-
-    return (
-      String(itemValue ?? "")
-        .trim()
-        .toLowerCase() ===
-      String(selectedValue)
-        .trim()
-        .toLowerCase()
-    );
-  }
-);
-
-  return matchesFilters;
+  return Object.values(item).some((value) =>
+    String(value ?? "")
+      .toLowerCase()
+      .includes(searchValue)
+  );
 });
 
   /*

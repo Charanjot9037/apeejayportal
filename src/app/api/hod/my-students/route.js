@@ -6,7 +6,7 @@ import Projects from "@/models/projects";
 
 import { getHODContext } from "@/lib/getHODContext";
 
-export async function GET() {
+export async function POST(request) {
   try {
     await connectDB();
 
@@ -36,11 +36,29 @@ export async function GET() {
     } = hod;
 
     // =====================================================
-    // GET STUDENTS FROM HOD DEPARTMENT
+    // RECEIVE FILTERS
     // =====================================================
 
-    const departmentStudents =
-      await Student.find({
+    const filters = await request.json();
+
+    const {
+      program,
+      semester,
+      specialization,
+    } = filters || {};
+
+  
+
+    // =====================================================
+    // BUILD STUDENT FILTER
+    // =====================================================
+
+    const studentConditions = [
+      // ---------------------------------------------------
+      // HOD DEPARTMENT
+      // ---------------------------------------------------
+
+      {
         $expr: {
           $eq: [
             {
@@ -55,21 +73,134 @@ export async function GET() {
             normalizedDepartment,
           ],
         },
-      })
+      },
+    ];
+
+    // =====================================================
+    // PROGRAM
+    // =====================================================
+
+    if (program) {
+      studentConditions.push({
+        $expr: {
+          $eq: [
+            {
+              $toLower: {
+                $trim: {
+                  input: {
+                    $ifNull: ["$program", ""],
+                  },
+                },
+              },
+            },
+            program.trim().toLowerCase(),
+          ],
+        },
+      });
+    }
+
+    // =====================================================
+    // SPECIALIZATION
+    // =====================================================
+
+    if (specialization) {
+      studentConditions.push({
+        $expr: {
+          $eq: [
+            {
+              $toLower: {
+                $trim: {
+                  input: {
+                    $ifNull: ["$specialization", ""],
+                  },
+                },
+              },
+            },
+            specialization.trim().toLowerCase(),
+          ],
+        },
+      });
+    }
+
+    // =====================================================
+    // SEMESTER
+    // =====================================================
+
+    if (semester) {
+      studentConditions.push({
+        $expr: {
+          $eq: [
+            {
+              $toString: "$currentSemester",
+            },
+            String(semester),
+          ],
+        },
+      });
+    }
+
+    // =====================================================
+    // FINAL STUDENT QUERY
+    // =====================================================
+
+    const studentQuery = {
+      $and: studentConditions,
+    };
+
+
+    // =====================================================
+    // GET FILTERED DEPARTMENT STUDENTS
+    // =====================================================
+
+    const departmentStudents =
+      await Student.find(studentQuery)
         .populate({
           path: "userId",
           select: "name email status",
         })
         .lean();
 
+   
     // =====================================================
-    // GET USER IDS OF DEPARTMENT STUDENTS
+    // GET USER IDS
     // =====================================================
 
     const studentUserIds =
       departmentStudents
-        .map((student) => student.userId?._id || student.userId)
+        .map(
+          (student) =>
+            student.userId?._id ||
+            student.userId
+        )
         .filter(Boolean);
+
+    // =====================================================
+    // IF NO STUDENTS MATCH FILTER
+    // =====================================================
+
+    if (studentUserIds.length === 0) {
+      return NextResponse.json(
+        {
+          success: true,
+
+          hod: {
+            name: user.name,
+            email: user.email,
+            department,
+            designation: mentor.designation,
+          },
+
+          count: 0,
+
+          students: [],
+
+          projects: [],
+        },
+        {
+          status: 200,
+        }
+      );
+    }
 
     // =====================================================
     // GET PROJECTS ASSIGNED TO LOGGED-IN HOD
@@ -104,7 +235,7 @@ export async function GET() {
       .lean();
 
     // =====================================================
-    // GET UNIQUE STUDENT USER IDS
+    // GET UNIQUE STUDENTS HAVING HOD PROJECT
     // =====================================================
 
     const assignedStudentUserIds =
@@ -136,18 +267,11 @@ export async function GET() {
         );
       });
 
-    console.log("=================================");
-    console.log("HOD:", user.name);
-    console.log("HOD DEPARTMENT:", department);
-    console.log(
-      "MY STUDENTS:",
-      myStudents.length
-    );
-    console.log(
-      "MY PROJECTS:",
-      projects.length
-    );
-    console.log("=================================");
+    // =====================================================
+    // LOG
+    // =====================================================
+
+   
 
     // =====================================================
     // RESPONSE
