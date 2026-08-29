@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { StatCards, DashboardHeader } from '@/app/components/elements';
-
+import AdminStats from './adminStats';
 import { ADMIN_DASHBOARD_HEADER } from '@/constants/adminData';
 
 export default function Admin() {
@@ -77,6 +77,8 @@ export default function Admin() {
         ) : (
           <StatCards cards={dynamicStatCards} />
         )}
+
+        <AdminStats />
       </main>
     </div>
   );

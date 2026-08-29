@@ -1,193 +1,196 @@
 // app/projectDetail/handlers/sections/MentorReviewSection.jsx
-"use client";
+'use client';
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { ClipboardCheck, MessageSquarePlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import DetailCard from "../DetailCard";
-import { formatDate } from "../../helpers";
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { MessageSquarePlus } from 'lucide-react';
 
-const STATUS_OPTIONS = ["Pending Approval", "Approved", "Rejected","In Review"];
+import { Button } from '@/components/ui/button';
+import DetailCard from '../DetailCard';
+import { formatDate } from '../../helpers';
 
 export default function MentorReviewSection({ project, onUpdated }) {
-  const [status, setStatus] = useState(project.status || "Pending Approval");
-  const [comment, setComment] = useState("");
-  const [savingStatus, setSavingStatus] = useState(false);
+  const [comment, setComment] = useState('');
   const [savingComment, setSavingComment] = useState(false);
 
-  const patchReview = async (payload) => {
-    const response = await fetch(`/api/projects/${project._id}/mentor-review`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || "Failed to update review.");
-    }
-
-    return result.project;
-  };
-
-  const handleDeleteReview = async (reviewId) => {
-  try {
-    const response = await fetch(
-      `/api/projects/${project._id}/mentor-review`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          reviewId,
-        }),
-      },
-    );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || "Failed to delete review.");
-    }
-
-    toast.success("Review deleted.");
-    onUpdated?.(result.project);
-  } catch (error) {
-    console.error("MENTOR_REVIEW_DELETE_ERROR:", error);
-    toast.error(error.message || "Failed to delete review.");
-  }
-};
-
-  const handleStatusSave = async () => {
-    try {
-      setSavingStatus(true);
-      const updated = await patchReview({ status });
-      toast.success("Status updated.");
-      onUpdated?.(updated);
-    } catch (error) {
-      console.error("MENTOR_STATUS_SAVE_ERROR:", error);
-      toast.error(error.message || "Failed to update status.");
-    } finally {
-      setSavingStatus(false);
-    }
-  };
+  // =========================================================
+  // ADD COMMENT
+  // =========================================================
 
   const handleCommentSave = async () => {
     if (!comment.trim()) {
-      toast.error("Write a comment before submitting.");
+      toast.error('Write a comment before submitting.');
       return;
     }
+
     try {
       setSavingComment(true);
-      const updated = await patchReview({ comment });
-      toast.success("Review submitted.");
-      setComment("");
-      onUpdated?.(updated);
+
+      const response = await fetch(
+        `/api/projects/${project._id}/mentor-review`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            comment,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to submit review.');
+      }
+
+      toast.success('Review submitted.');
+
+      setComment('');
+
+      onUpdated?.(result.project);
     } catch (error) {
-      console.error("MENTOR_COMMENT_SAVE_ERROR:", error);
-      toast.error(error.message || "Failed to submit review.");
+      console.error('MENTOR_COMMENT_SAVE_ERROR:', error);
+
+      toast.error(error.message || 'Failed to submit review.');
     } finally {
       setSavingComment(false);
     }
   };
 
+  // =========================================================
+  // DELETE REVIEW
+  // =========================================================
+
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      const response = await fetch(
+        `/api/projects/${project._id}/mentor-review`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            reviewId,
+          }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to delete review.');
+      }
+
+      toast.success('Review deleted.');
+
+      onUpdated?.(result.project);
+    } catch (error) {
+      console.error('MENTOR_REVIEW_DELETE_ERROR:', error);
+
+      toast.error(error.message || 'Failed to delete review.');
+    }
+  };
+
+  // Latest review first
   const history = [...(project.mentorReviews || [])].reverse();
 
   return (
-    <DetailCard title="Mentor Review" icon={<ClipboardCheck />}>
+    <DetailCard title="Mentor Feedback" icon={<MessageSquarePlus />}>
       <div className="space-y-5">
-        {/* Status action */}
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold text-slate-500">
-            Project Status
-          </label>
-          <div>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 focus:border-[rgb(242,121,42)] focus:outline-none"
-            >
-              {STATUS_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-            <Button
-              type="button"
-              onClick={handleStatusSave}
-              disabled={savingStatus || status === project.status}
-              className="bg-[rgb(242,121,42)] text-white hover:bg-[#df681c] mt-3"
-            >
-              {savingStatus ? "Saving..." : "Update Status"}
-            </Button>
-          </div>
-        </div>
+        {/* =====================================================
+            ADD FEEDBACK
+        ===================================================== */}
 
-        {/* New review/comment action */}
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold text-slate-500">
-            Add Feedback for Student
-          </label>
+        <div className="space-y-3 rounded-xl border border-orange-200 bg-orange-50/50 p-4">
+          {/* Feedback Heading */}
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100">
+              <MessageSquarePlus className="h-4 w-4 text-[rgb(242,121,42)]" />
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-slate-700">
+                Add Feedback for Student
+              </p>
+
+              <p className="text-xs text-slate-500">
+                Share feedback or suggestions about the project.
+              </p>
+            </div>
+          </div>
+
+          {/* Feedback Textarea */}
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={4}
             placeholder="Write feedback the student will see..."
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 focus:border-[rgb(242,121,42)] focus:outline-none"
+            className="w-full resize-none rounded-lg border border-orange-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm transition focus:border-[rgb(242,121,42)] focus:outline-none focus:ring-1 focus:ring-[rgb(242,121,42)]"
           />
+
+          {/* Submit Button */}
           <Button
             type="button"
             onClick={handleCommentSave}
             disabled={savingComment}
-            variant="outline"
-            className="w-full gap-2 border-[rgb(242,121,42)] text-[rgb(242,121,42)] hover:bg-primary-orange/10"
+            className="w-full gap-2 bg-[rgb(242,121,42)] text-white hover:bg-[#df681c]"
           >
             <MessageSquarePlus className="h-4 w-4" />
-            {savingComment ? "Submitting..." : "Submit Review"}
+
+            {savingComment ? 'Submitting...' : 'Submit Review'}
           </Button>
         </div>
 
-        {/* History */}
+        {/* =====================================================
+            REVIEW HISTORY
+        ===================================================== */}
+
         {history.length > 0 && (
           <div className="space-y-2 border-t border-slate-100 pt-3">
-            <p className="text-xs font-semibold text-slate-500">Review History</p>
+            <p className="text-xs font-semibold text-slate-500">
+              Review History
+            </p>
+
             <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
- {history.map((entry, index) => (
-  <div
-    key={entry._id || `${entry.reviewedAt}-${index}`}
-    className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs"
-  >
-    <div className="flex items-center justify-between text-slate-400">
-      <span>{formatDate(entry.reviewedAt)}</span>
+              {history.map((entry, index) => (
+                <div
+                  key={entry._id || `${entry.reviewedAt}-${index}`}
+                  className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs"
+                >
+                  {/* Date / Status / Delete */}
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span>{formatDate(entry.reviewedAt)}</span>
 
-      <div className="flex items-center gap-2">
-        {entry.status && (
-          <span className="rounded-full bg-slate-200 px-2 py-0.5 font-medium text-slate-600">
-            {entry.status}
-          </span>
-        )}
+                    <div className="flex items-center gap-2">
+                      {/* Status shown in history */}
+                      {entry.status && (
+                        <span className="rounded-full bg-slate-200 px-2 py-0.5 font-medium text-slate-600">
+                          {entry.status}
+                        </span>
+                      )}
 
-        <button
-          type="button"
-          onClick={() => handleDeleteReview(entry._id)}
-          className="text-red-500 hover:text-red-700"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
+                      {/* Delete */}
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteReview(entry._id)}
+                        className="text-red-500 transition hover:text-red-700"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
 
-    {entry.comment && (
-      <p className="mt-1 text-sm text-slate-600">
-        {entry.comment}
-      </p>
-    )}
-  </div>
-))}
+                  {/* Comment */}
+                  {entry.comment && (
+                    <p className="mt-1 text-sm text-slate-600">
+                      {entry.comment}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}

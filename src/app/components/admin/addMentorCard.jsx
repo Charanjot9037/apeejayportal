@@ -237,7 +237,7 @@ const AddMentor = () => {
                   },
                 ]}
               />
-                <SelectField
+                {/* <SelectField
                   label="Designation / Role"
                   name="designation"
                   required
@@ -263,7 +263,7 @@ const AddMentor = () => {
                       label: "Engineer",
                     },
                   ]}
-                />
+                /> */}
 
                 <div className="flex p-4 justify-end">
                   <button
