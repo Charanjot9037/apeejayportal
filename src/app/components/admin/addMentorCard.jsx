@@ -205,6 +205,38 @@ const AddMentor = () => {
                   </div>
                 </div>
 
+              <SelectField
+                label="Designation / Role"
+                name="designation"
+                required
+                value={formik.values.designation}
+                onChange={(value) => formik.setFieldValue('designation', value)}
+                onBlur={() => formik.setFieldTouched('designation', true)}
+                error={getError('designation')}
+                icon={<BriefcaseBusiness size={13} />}
+                options={[
+                  {
+                    value: 'ASSISTANT-PROFESSOR',
+                    label: 'assistant_professor',
+                  },
+                  {
+                    value: 'hod',
+                    label: 'HOD',
+                  },
+                  {
+                    value: 'dean',
+                    label: 'Dean',
+                  },
+                  {
+                    value: 'director',
+                    label: 'Director',
+                  },
+                  {
+                    value: 'engineer',
+                    label: 'Engineer',
+                  },
+                ]}
+              />
                 <SelectField
                   label="Designation / Role"
                   name="designation"
