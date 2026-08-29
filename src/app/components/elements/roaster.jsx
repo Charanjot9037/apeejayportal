@@ -621,7 +621,7 @@ export default function Roster({
                     ) : (
                       <button
                         type="button"
-                        onClick={() => onRowClick?.(row)}
+                        onClick={() => onRowClick?.(item)}
                         className="rounded-lg p-2 text-slate-500 transition hover:bg-blue-50 hover:text-blue-600"
                         title="View student"
                       >
