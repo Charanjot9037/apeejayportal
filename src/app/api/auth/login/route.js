@@ -25,7 +25,7 @@ export async function POST(req) {
     // Find user
    const user = await User.findOne({
      email: email.toLowerCase(),
-    //  status: "active",
+     status: "active",
    });
 
     if (!user) {
