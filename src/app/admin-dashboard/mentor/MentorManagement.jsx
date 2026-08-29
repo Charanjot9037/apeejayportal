@@ -5,6 +5,7 @@ import { Users, GraduationCap } from "lucide-react";
 import Roster from "@/app/components/elements/roaster";
 import MentorRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 import AuthGuardModal from "@/app/components/AuthGuardModal";
+import { useRouter } from "next/navigation";
 import {
   MENTOR_ROSTER_COLUMNS,
   MENTOR_DEFAULT_FILTERS,
@@ -24,6 +25,7 @@ export default function MentorManagement() {
   const [filters, setFilters] = useState({
     ...MENTOR_DEFAULT_FILTERS,
   });
+  const router=useRouter();
 
   const fetchMentors = async (selectedFilters) => {
     try {
