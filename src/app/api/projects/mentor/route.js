@@ -17,22 +17,35 @@ export async function GET(request) {
         { status: auth.status },
       );
     }
-  
+    const user = auth.user;
+    if (user.role !== "mentor") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Access denied. Students only are allowed.",
+        },
+        {
+          status: 403,
+        },
+      );
+    }
 
-    const projects = await Project.find({ mentor:  auth.user._id })
-      .populate({ path: "student", select: "name email" })
+    const projects = await Project.find({
+      $or: [{ mentor: auth.user._id }, { mentor2: auth.user._id }],
+    })
+      .populate({
+        path: "student",
+        select: "name email",
+      })
       .sort({ createdAt: -1 })
       .lean();
-        console.log("projects:",projects);
 
     // Get Student academic details for each project's student (User._id)
-    const studentUserIds = projects
-      .map((p) => p.student?._id)
-      .filter(Boolean);
+    const studentUserIds = projects.map((p) => p.student?._id).filter(Boolean);
 
     const studentProfiles = await Student.find({
       userId: { $in: studentUserIds },
-    }).select("userId department program rollNumber");
+    }).select("userId department program rollNumber specialization");
 
     // Map userId -> student profile for quick lookup
     const profileMap = {};
@@ -49,10 +62,12 @@ export async function GET(request) {
             department: profileMap[p.student._id.toString()]?.department || "",
             program: profileMap[p.student._id.toString()]?.program || "",
             rollNumber: profileMap[p.student._id.toString()]?.rollNumber || "",
+
+            specialization:
+              profileMap[p.student._id.toString()]?.specialization || "",
           }
         : null,
     }));
-     console.log("enrichedprojects:",enrichedProjects);
 
     return NextResponse.json({
       success: true,

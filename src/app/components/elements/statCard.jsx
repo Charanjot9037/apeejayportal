@@ -1,16 +1,28 @@
-'use client';
+"use client";
 
 import {
   GraduationCap,
   UserRound,
   CalendarClock,
   ArrowUpRight,
-} from 'lucide-react';
+  CheckCircle,
+  Eye,
+  FolderKanban,
+  FileSearch,
+  Clock3,
+  CircleCheck,
+} from "lucide-react";
 
 const iconMap = {
   GraduationCap,
   UserRound,
   CalendarClock,
+  Eye,
+  CheckCircle,
+  FolderKanban,
+  FileSearch,
+  Clock3,
+  CircleCheck,
 };
 
 export default function StatCards({ cards = [] }) {

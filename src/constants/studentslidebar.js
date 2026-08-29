@@ -6,18 +6,15 @@ import {
   Trophy,
   User,
   LogOut,
-} from 'lucide-react';
-import StudentProfileCard from '../app/components/elements/StudentProfileCard';
+} from "lucide-react";
+import StudentProfileCard from "../app/components/elements/StudentProfileCard";
 const dashboardStats = {
   profileStrength: 85,
   // ...
 };
 export const studentSidebarData = {
   title: "Student Portal",
-  subtitle: "Academic Year 2024-25",
-
-  profileUrl: "/profile.png",
-
+  role: "student",
   navItems: [
     {
       label: "Dashboard",
@@ -25,24 +22,9 @@ export const studentSidebarData = {
       icon: LayoutDashboard,
     },
     {
-      label: "Projects",
-      href: "/projects",
-      icon: BookOpen,
-    },
-    {
       label: "Profile",
       href: "/profile",
       icon: User,
-    },
-    {
-      label: "Resume",
-      href: "/student/resume",
-      icon: Calendar,
-    },
-    {
-      label: "Achievements",
-      href: "/student/achievements",
-      icon: Trophy,
     },
   ],
   customComponent: (

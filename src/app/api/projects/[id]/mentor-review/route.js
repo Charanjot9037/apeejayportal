@@ -1,5 +1,3 @@
-
-
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/projects";
@@ -13,6 +11,7 @@ const ALLOWED_STATUSES = [
   "Approved",
   "Rejected",
   "Pending Approval",
+  "In Review",
 ];
 
 export async function PATCH(request, context) {
@@ -29,7 +28,7 @@ export async function PATCH(request, context) {
           success: false,
           message: auth.message,
         },
-        { status: auth.status }
+        { status: auth.status },
       );
     }
 
@@ -39,8 +38,6 @@ export async function PATCH(request, context) {
     // =====================================================
 
     const loggedInUserId = auth.user._id;
-
-
 
     // =====================================================
     // FIND PROJECT
@@ -65,24 +62,22 @@ export async function PATCH(request, context) {
           success: false,
           message: "Project not found.",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-   
     // =====================================================
 
     if (
       !project.mentor ||
-      project.mentor._id.toString() !==
-        loggedInUserId.toString()
+      project.mentor._id.toString() !== loggedInUserId.toString()
     ) {
       return NextResponse.json(
         {
           success: false,
           message: "You are not assigned to this project.",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -98,16 +93,13 @@ export async function PATCH(request, context) {
     // VALIDATE STATUS
     // =====================================================
 
-    if (
-      status &&
-      !ALLOWED_STATUSES.includes(status)
-    ) {
+    if (status && !ALLOWED_STATUSES.includes(status)) {
       return NextResponse.json(
         {
           success: false,
           message: "Invalid status value.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -119,10 +111,9 @@ export async function PATCH(request, context) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Provide a status or comment to update.",
+          message: "Provide a status or comment to update.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -130,16 +121,13 @@ export async function PATCH(request, context) {
     // VALIDATE COMMENT
     // =====================================================
 
-    if (
-      comment !== undefined &&
-      comment.trim() === ""
-    ) {
+    if (comment !== undefined && comment.trim() === "") {
       return NextResponse.json(
         {
           success: false,
           message: "Comment cannot be empty.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -200,22 +188,15 @@ export async function PATCH(request, context) {
     // Project.mentor is populated User
     // =====================================================
 
-    const mentorName =
-      project.mentor?.name ||
-      auth.user.name ||
-      "Your Mentor";
-
+    const mentorName = project.mentor?.name || auth.user.name || "Your Mentor";
 
     // =====================================================
     // STATUS EMAIL
     // =====================================================
 
-    if (status) {     
-
+    if (status) {
       if (!project.student?.email) {
-        console.error(
-          "STATUS EMAIL ERROR: Student email not found."
-        );
+        console.error("STATUS EMAIL ERROR: Student email not found.");
       } else {
         try {
           await sendMentorStatusUpdateEmail({
@@ -228,13 +209,10 @@ export async function PATCH(request, context) {
 
           console.log(
             "STATUS EMAIL SENT SUCCESSFULLY to:",
-            project.student.email
+            project.student.email,
           );
         } catch (emailError) {
-          console.error(
-            "STATUS EMAIL FAILED:",
-            emailError
-          );
+          console.error("STATUS EMAIL FAILED:", emailError);
         }
       }
     }
@@ -244,12 +222,8 @@ export async function PATCH(request, context) {
     // =====================================================
 
     if (comment?.trim()) {
-      
-
       if (!project.student?.email) {
-        console.error(
-          "FEEDBACK EMAIL ERROR: Student email not found."
-        );
+        console.error("FEEDBACK EMAIL ERROR: Student email not found.");
       } else {
         try {
           await sendMentorFeedbackEmail({
@@ -262,13 +236,10 @@ export async function PATCH(request, context) {
 
           console.log(
             "FEEDBACK EMAIL SENT SUCCESSFULLY to:",
-            project.student.email
+            project.student.email,
           );
         } catch (emailError) {
-          console.error(
-            "FEEDBACK EMAIL FAILED:",
-            emailError
-          );
+          console.error("FEEDBACK EMAIL FAILED:", emailError);
         }
       }
     }
@@ -305,22 +276,17 @@ export async function PATCH(request, context) {
         message: "Review updated.",
         project: updatedProject,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
-    console.error(
-      "MENTOR_REVIEW_ERROR:",
-      error
-    );
+    console.error("MENTOR_REVIEW_ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message:
-          error.message ||
-          "Failed to update review.",
+        message: error.message || "Failed to update review.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -339,7 +305,7 @@ export async function DELETE(request, context) {
           success: false,
           message: auth.message,
         },
-        { status: auth.status }
+        { status: auth.status },
       );
     }
 
@@ -363,7 +329,7 @@ export async function DELETE(request, context) {
           success: false,
           message: "Project not found.",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -376,16 +342,14 @@ export async function DELETE(request, context) {
 
     if (
       !project.mentor ||
-      project.mentor._id.toString() !==
-        auth.user._id.toString()
+      project.mentor._id.toString() !== auth.user._id.toString()
     ) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "You are not assigned to this project.",
+          message: "You are not assigned to this project.",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -403,7 +367,7 @@ export async function DELETE(request, context) {
           success: false,
           message: "Review ID is required.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -417,7 +381,7 @@ export async function DELETE(request, context) {
           success: false,
           message: "No reviews found.",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -426,8 +390,7 @@ export async function DELETE(request, context) {
     // =====================================================
 
     const review = project.mentorReviews.find(
-      (item) =>
-        item._id.toString() === reviewId
+      (item) => item._id.toString() === reviewId,
     );
 
     if (!review) {
@@ -436,7 +399,7 @@ export async function DELETE(request, context) {
           success: false,
           message: "Review not found.",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -446,16 +409,14 @@ export async function DELETE(request, context) {
 
     if (
       !review.reviewedBy ||
-      review.reviewedBy.toString() !==
-        auth.user._id.toString()
+      review.reviewedBy.toString() !== auth.user._id.toString()
     ) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "You are not allowed to delete this review.",
+          message: "You are not allowed to delete this review.",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -463,11 +424,9 @@ export async function DELETE(request, context) {
     // REMOVE REVIEW
     // =====================================================
 
-    project.mentorReviews =
-      project.mentorReviews.filter(
-        (item) =>
-          item._id.toString() !== reviewId
-      );
+    project.mentorReviews = project.mentorReviews.filter(
+      (item) => item._id.toString() !== reviewId,
+    );
 
     await project.save();
 
@@ -475,48 +434,41 @@ export async function DELETE(request, context) {
     // RETURN UPDATED PROJECT
     // =====================================================
 
-    const updatedProject =
-      await Project.findById(id)
-        .populate({
-          path: "student",
+    const updatedProject = await Project.findById(id)
+      .populate({
+        path: "student",
+        select: "name email",
+      })
+      .populate({
+        path: "mentor",
+        select: "name email",
+      })
+      .populate({
+        path: "teamMembers",
+        select: "fullName profileImage",
+        populate: {
+          path: "userId",
           select: "name email",
-        })
-        .populate({
-          path: "mentor",
-          select: "name email",
-        })
-        .populate({
-          path: "teamMembers",
-          select: "fullName profileImage",
-          populate: {
-            path: "userId",
-            select: "name email",
-          },
-        });
+        },
+      });
 
     return NextResponse.json(
       {
         success: true,
-        message:
-          "Review deleted successfully.",
+        message: "Review deleted successfully.",
         project: updatedProject,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
-    console.error(
-      "MENTOR_REVIEW_DELETE_ERROR:",
-      error
-    );
+    console.error("MENTOR_REVIEW_DELETE_ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message:
-          error.message ||
-          "Failed to delete review.",
+        message: error.message || "Failed to delete review.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

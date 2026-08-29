@@ -31,7 +31,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "student",
     },
-
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
     refreshToken: {
       type: String,
       default: "",

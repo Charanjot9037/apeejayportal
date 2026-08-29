@@ -1,42 +1,77 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { updateStudentProfile } from "@/redux/studentSlice";
+import ProfileHeader from "../profile/ProfileHeader";
+import PersonalInformation from "./ProfileInformation";
+import OnlineProfiles from "./OnlineProfile";
+import ResumeDocuments from "./ResumeDocuments";
+import SkillsAndInterests from "./SkillInterest";
+import AcademicInformation from "./AcadamicInformation";
+import { apiRequest } from "@/lib/apiRequest";
+import AuthGuardModal from "../AuthGuardModal";
+import { useDispatch } from "react-redux";
+import { loginSuccess, updateUser } from "@/redux/authSlice";
 
-import ProfileHeader from '../profile/ProfileHeader';
-import PersonalInformation from './ProfileInformation';
-import OnlineProfiles from './OnlineProfile';
-import ResumeDocuments from './ResumeDocuments';
-import SkillsAndInterests from './SkillInterest';
-import AcademicInformation from './AcadamicInformation';
-
-import { mapStudentToProfile } from '@/lib/mapper';
-
+import { useRouter } from "next/navigation";
+import { mapStudentToProfile, updatemapStudentToProfile } from "@/lib/mapper";
+import { toast } from "sonner";
 export default function Profile() {
   const [imageLoading, setImageLoading] = useState(false);
   const [studentData, setStudentData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
+  const [authModal, setAuthModal] = useState({
+    open: false,
+    type: null,
+    message: "",
+  });
+  const handleAuthError = (result) => {
+    if (result?.status === 401) {
+      setAuthModal({
+        open: true,
+        type: "authentication",
+        message:
+          result.message || "Your session has expired. Please login again.",
+      });
+
+      return true;
+    }
+
+    if (result?.status === 403) {
+      setAuthModal({
+        open: true,
+        type: "unauthorized",
+        message:
+          result.message || "You are not authorized to perform this action.",
+      });
+
+      return true;
+    }
+
+    return false;
+  };
+  const dispatch = useDispatch();
   useEffect(() => {
     const getStudentProfile = async () => {
       try {
-        const response = await fetch('/api/student/profile', {
-          method: 'GET',
-          credentials: 'include',
+        const result = await apiRequest("/api/student/profile", {
+          method: "GET",
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch student profile');
+        if (handleAuthError(result)) {
+          return;
         }
 
-        const mappedData = mapStudentToProfile(data.data);
+        if (!result.success) {
+          throw new Error(result.message || "Failed to fetch student profile");
+        }
 
-        console.log('Student profile:', mappedData);
+        const mappedData = mapStudentToProfile(result.data.data);
 
         setStudentData(mappedData);
       } catch (error) {
-        console.error('Failed to load student profile:', error);
+        console.error("Failed to load student profile:", error);
       } finally {
         setLoading(false);
       }
@@ -47,15 +82,14 @@ export default function Profile() {
 
   const handlePersonalSave = async (data) => {
     try {
-      alert('going to update');
-      const response = await fetch('/api/editprofile', {
-        method: 'PATCH',
+      const response = await fetch("/api/editprofile", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
-          section: 'personal',
+          section: "personal",
           data,
         }),
       });
@@ -64,11 +98,16 @@ export default function Profile() {
 
       if (!response.ok) {
         throw new Error(
-          result.message || 'Failed to update personal information',
+          result.message || "Failed to update personal information",
         );
       }
-      alert('updated');
-      console.log('Personal updated:', result.profile);
+      toast.success("Personal Information Updated");
+      dispatch(
+        updateUser({
+          email: result?.profile?.userId?.email,
+          name: result?.profile?.fullName,
+        }),
+      );
 
       setStudentData((prev) => ({
         ...prev,
@@ -79,26 +118,26 @@ export default function Profile() {
         profile: {
           ...prev.profile,
           fullName: data.fullName,
-          profileImage: data.profileImage,
+          profileImage: data.profileImage ?? prev.profile.profileImage,
         },
       }));
 
       return result;
     } catch (error) {
-      console.error('Personal update error:', error);
+      console.error("Personal update error:", error);
       throw error;
     }
   };
 
   const handleSkillsSave = async (data) => {
     try {
-      const response = await fetch('/api/editprofile', {
-        method: 'PATCH',
+      const response = await fetch("/api/editprofile", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          section: 'skills',
+          section: "skills",
           data,
         }),
       });
@@ -106,10 +145,10 @@ export default function Profile() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to update skills');
+        throw new Error(result.message || "Failed to update skills");
       }
 
-      console.log('Skills updated:', result.profile);
+      console.log("Skills updated:", result.profile);
 
       setStudentData((prev) => ({
         ...prev,
@@ -121,7 +160,7 @@ export default function Profile() {
 
       return result;
     } catch (error) {
-      console.error('Skills update error:', error);
+      console.error("Skills update error:", error);
       throw error;
     }
   };
@@ -132,13 +171,13 @@ export default function Profile() {
 
   const handleAcademicSave = async (data) => {
     try {
-      const response = await fetch('/api/editprofile', {
-        method: 'PATCH',
+      const response = await fetch("/api/editprofile", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          section: 'academic',
+          section: "academic",
           data,
         }),
       });
@@ -147,17 +186,22 @@ export default function Profile() {
 
       if (!response.ok) {
         throw new Error(
-          result.message || 'Failed to update academic information',
+          result.message || "Failed to update academic information",
         );
       }
-
-      const updatedProfile = mapStudentToProfile(result.profile);
+      const updatedProfile = updatemapStudentToProfile(result.profile);
 
       setStudentData(updatedProfile);
-
+      dispatch(
+        updateStudentProfile({
+          department: result?.profile?.department,
+          program: result?.profile?.program,
+          academicBatch: result?.profile?.academicBatch,
+        }),
+      );
       return result;
     } catch (error) {
-      console.error('Academic update error:', error);
+      console.error("Academic update error:", error);
       throw error;
     }
   };
@@ -168,14 +212,14 @@ export default function Profile() {
 
   const handleOnlineProfilesSave = async (data) => {
     try {
-      const response = await fetch('/api/editprofile', {
-        method: 'PATCH',
+      const response = await fetch("/api/editprofile", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
-          section: 'onlineProfiles',
+          section: "onlineProfiles",
           data,
         }),
       });
@@ -183,10 +227,10 @@ export default function Profile() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to update online profiles');
+        throw new Error(result.message || "Failed to update online profiles");
       }
 
-      console.log('Online profiles updated:', result.profile);
+      console.log("Online profiles updated:", result.profile);
 
       setStudentData((prev) => ({
         ...prev,
@@ -198,7 +242,7 @@ export default function Profile() {
 
       return result;
     } catch (error) {
-      console.error('Online profiles update error:', error);
+      console.error("Online profiles update error:", error);
 
       throw error;
     }
@@ -210,14 +254,14 @@ export default function Profile() {
 
   const handleResumeSave = async (data) => {
     try {
-      const response = await fetch('/api/editprofile', {
-        method: 'PATCH',
+      const response = await fetch("/api/editprofile", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
-          section: 'resume',
+          section: "resume",
           data,
         }),
       });
@@ -225,10 +269,8 @@ export default function Profile() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to update resume');
+        throw new Error(result.message || "Failed to update resume");
       }
-
-      console.log('Resume updated:', result.profile);
 
       setStudentData((prev) => ({
         ...prev,
@@ -240,7 +282,7 @@ export default function Profile() {
 
       return result;
     } catch (error) {
-      console.error('Resume update error:', error);
+      console.error("Resume update error:", error);
       throw error;
     }
   };
@@ -250,27 +292,27 @@ export default function Profile() {
       setImageLoading(true);
       const formData = new FormData();
 
-      formData.append('file', file);
+      formData.append("file", file);
 
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
         body: formData,
       });
 
       const uploadData = await uploadResponse.json();
 
       if (!uploadResponse.ok) {
-        throw new Error(uploadData.message || 'Image upload failed');
+        throw new Error(uploadData.message || "Image upload failed");
       }
 
-      console.log('Uploaded image:', uploadData.url);
-      const response = await fetch('/api/editprofile', {
-        method: 'PATCH',
+      console.log("Uploaded image:", uploadData.url);
+      const response = await fetch("/api/editprofile", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          section: 'profile',
+          section: "profile",
           data: {
             profileImage: uploadData.url,
           },
@@ -280,7 +322,7 @@ export default function Profile() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to update profile image');
+        throw new Error(result.message || "Failed to update profile image");
       }
 
       setStudentData((prev) => ({
@@ -292,9 +334,9 @@ export default function Profile() {
         },
       }));
 
-      console.log('Profile image saved:', result.profile);
+      console.log("Profile image saved:", result.profile);
     } catch (error) {
-      console.error('Profile image update failed:', error);
+      console.error("Profile image update failed:", error);
     } finally {
       setImageLoading(false);
     }
@@ -308,74 +350,90 @@ export default function Profile() {
   }
 
   return (
-    <main className="min-h-screen">
-      <div className="mx-auto  flex flex-col gap-3">
-        <div>
-          <h1 className="text-3xl font-Manrope font-semibold text-blue-900">
-            My Profile
-          </h1>
+    <>
+      <AuthGuardModal
+        open={authModal.open}
+        type={authModal.type}
+        message={authModal.message}
+        onClose={() =>
+          setAuthModal({
+            open: false,
+            type: null,
+            message: "",
+          })
+        }
+        onLogin={() => router.push("/login")}
+        onBack={() => router.back()}
+      />
+      <main className="min-h-screen">
+        <div className="mx-auto  flex flex-col gap-3">
+          <div>
+            <h1 className="text-3xl font-Manrope font-semibold text-blue-900">
+              My Profile
+            </h1>
 
-          <p className="text-sm text-gray-500">
-            Manage your personal and academic information.
-          </p>
-        </div>
-
-        <ProfileHeader
-          mode="edit"
-          name={studentData?.profile?.fullName}
-          image={studentData?.profile?.profileImage}
-          subtitle={`${studentData?.profile?.department} | ${studentData?.profile?.academicBatch}- ${studentData?.profile?.lastYear}`}
-          onImageChange={handleProfileImageSave}
-          completion={studentData?.profile?.completion}
-          imageLoading={imageLoading}
-        />
-
-        {/* ================= PERSONAL + SKILLS ================= */}
-
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="w-full md:w-1/2">
-            <PersonalInformation
-              data={studentData?.personal}
-              onSave={handlePersonalSave}
-            />
+            <p className="text-sm text-gray-500">
+              Manage your personal and academic information.
+            </p>
           </div>
 
-          <div className="w-full md:w-1/2">
-            <SkillsAndInterests
-              data={studentData?.skills}
-              onSave={handleSkillsSave}
-            />
-          </div>
-        </div>
-
-        {/* ================= ACADEMIC + ONLINE ================= */}
-
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="w-full md:w-1/2">
-            <AcademicInformation
-              mode="edit"
-              data={studentData?.academic}
-              onSave={handleAcademicSave}
-            />
-          </div>
-
-          <div className=" w-full md:w-1/2">
-            <OnlineProfiles
-              data={studentData?.profiles}
-              onSave={handleOnlineProfilesSave}
-            />
-          </div>
-        </div>
-
-        {/* ================= RESUME ================= */}
-
-        <div className="w-full md:w-1/3">
-          <ResumeDocuments
-            data={studentData?.document}
-            onSave={handleResumeSave}
+          <ProfileHeader
+            mode="edit"
+            name={studentData?.profile?.fullName}
+            image={studentData?.profile?.profileImage}
+            subtitle={`${studentData?.profile?.department} | ${studentData?.profile?.academicBatch}- ${studentData?.profile?.lastYear}`}
+            onImageChange={handleProfileImageSave}
+            completion={studentData?.profile?.completion}
+            imageLoading={imageLoading}
           />
+
+          {/* ================= PERSONAL + SKILLS ================= */}
+
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="w-full md:w-1/2">
+              <PersonalInformation
+                data={studentData?.personal}
+                onSave={handlePersonalSave}
+              />
+            </div>
+
+            <div className="w-full md:w-1/2">
+              <SkillsAndInterests
+                data={studentData?.skills}
+                onSave={handleSkillsSave}
+              />
+            </div>
+          </div>
+
+          {/* ================= ACADEMIC + ONLINE ================= */}
+
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="w-full md:w-1/2">
+              <AcademicInformation
+                mode="edit"
+                data={studentData?.academic}
+                onSave={handleAcademicSave}
+              />
+            </div>
+
+            <div className=" w-full md:w-1/2">
+              <OnlineProfiles
+                data={studentData?.profiles}
+                onSave={handleOnlineProfilesSave}
+              />
+            </div>
+          </div>
+
+          {/* ================= RESUME ================= */}
+
+          <div className="w-full md:w-1/3">
+            <ResumeDocuments
+              data={studentData?.document}
+              onSave={handleResumeSave}
+            />
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
