@@ -1,59 +1,97 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { HelpCircle, LogOut } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
-import { logout } from "@/redux/authSlice";
-import { useSelector } from "react-redux";
-import SidebarOverlay from "@/app/components/elements/sidebarOverlay";
+import Image from 'next/image';
+import Link from 'next/link';
+import { HelpCircle, LogOut, Menu, ArrowLeft } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '@/redux/authSlice';
+import SidebarOverlay from '@/app/components/elements/sidebarOverlay';
 
 export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
+
   const auth = useSelector((state) => state.auth);
   const student = useSelector((state) => state.student);
+
   const profileUrl = student?.profileImage;
+
+  const { title, subtitle, role, navItems = [] } = sidebarData;
+
+  const showProfilePicture = role === 'student' && profileUrl;
+
   const handleLogout = async () => {
     try {
-      alert("going to log out");
-
-      await fetch("/api/auth/logout", {
-        method: "POST",
+      await fetch('/api/auth/logout', {
+        method: 'POST',
       });
 
       dispatch(logout());
 
-      router.push("/login");
+      router.push('/login');
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error('Logout failed:', error);
     }
   };
 
   function handleHelp() {
-  router.push("/help");
+    router.push('/help');
+
+    // Close sidebar on mobile
+    setSidebarOpen(false);
   }
 
-  const { title, subtitle, role, navItems = [] } = sidebarData;
+  function handleNavClick() {
+    // Close sidebar on mobile after clicking a navigation item
+    setSidebarOpen(false);
+  }
 
-  const showProfilePicture = role === "student" && profileUrl;
+  function handleCloseSidebar() {
+    setSidebarOpen(false);
+  }
 
   return (
     <>
+      {/* ================= MOBILE HAMBURGER ================= */}
+      {!sidebarOpen && (
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-orange text-white shadow-md lg:hidden"
+          aria-label="Open sidebar"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+      )}
+
+      {/* ================= SIDEBAR OVERLAY ================= */}
       <SidebarOverlay
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
 
+      {/* ================= SIDEBAR ================= */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col overflow-hidden bg-primary-orange p-5 text-white transition-transform duration-200
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col overflow-hidden bg-primary-orange p-5 text-white transition-transform duration-200 ease-in-out
           lg:static lg:h-screen lg:translate-x-0
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
+        {/* ================= MOBILE CLOSE BUTTON ================= */}
+        <div className="mb-2 flex justify-end lg:hidden">
+          <button
+            type="button"
+            onClick={handleCloseSidebar}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-white transition-colors hover:bg-white hover:text-primary-orange"
+            aria-label="Close sidebar"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* ================= PROFILE SECTION ================= */}
         <div className="flex flex-col items-center gap-2 border-b py-5">
           <div className="flex h-[68px] w-[67px] items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
             {showProfilePicture ? (
@@ -67,7 +105,7 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-slate-100">
                 <span className="text-2xl font-bold text-primary-orange">
-                  {title?.charAt(0)?.toUpperCase() || "U"}
+                  {title?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
               </div>
             )}
@@ -75,18 +113,18 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
 
           <div className="flex flex-col gap-2 text-center">
             <p className="text-sm font-bold text-white">{title}</p>
+
             {auth?.user?.name && (
-              <>
-                <p className="text-sm font-bold text-white">
-                  Hi,{auth?.user?.name}
-                </p>
-              </>
+              <p className="text-sm font-bold text-white">
+                Hi, {auth?.user?.name}
+              </p>
             )}
 
             <p className="text-sm font-bold text-white">{subtitle}</p>
           </div>
         </div>
 
+        {/* ================= NAVIGATION ================= */}
         <nav className="flex flex-1 flex-col gap-1 py-4">
           {navItems.map(({ label, icon: Icon, href }) => {
             const isActive = pathname === href;
@@ -95,10 +133,11 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
               <Link
                 key={label}
                 href={href}
+                onClick={handleNavClick}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-white text-primary-orange shadow-sm"
-                    : "text-white hover:bg-white hover:text-primary hover:shadow-sm"
+                    ? 'bg-white text-primary-orange shadow-sm'
+                    : 'text-white hover:bg-white hover:text-primary hover:shadow-sm'
                 }`}
               >
                 <Icon className="h-4 w-4" strokeWidth={2} />
@@ -109,6 +148,7 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
           })}
         </nav>
 
+        {/* ================= BOTTOM BUTTONS ================= */}
         <div className="mt-auto flex flex-col gap-1 border-t border-white/20 pt-4">
           <button
             type="button"
