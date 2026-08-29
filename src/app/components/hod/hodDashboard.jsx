@@ -5,6 +5,7 @@ import {
   Roster,
   DashboardHeader,
 } from "@/app/components/elements";
+import { useRouter } from "next/navigation";
 
 import { HOD_PROJECT_FILTERS } from "@/constants/hodData";
 
@@ -342,6 +343,7 @@ export default function HODdashboard() {
   // APPLY FILTERS
   // ==========================================
 
+
   const handleApplyFilters = (
     selectedFilters
   ) => {
@@ -357,14 +359,18 @@ export default function HODdashboard() {
   // PROJECT CLICK
   // ==========================================
 
-  const handleViewProject = (
-    project
-  ) => {
-    console.log(
-      "Selected project:",
-      project
-    );
-  };
+    const router=useRouter();
+
+ const handleViewProject = (project) => {
+  const projectId = project._id || project.id;
+
+  if (!projectId) {
+    console.error("Project ID not found:", project);
+    return;
+  }
+
+  router.push(`/hod-dashboard/projects/${projectId}`);
+};
 
   // ==========================================
   // EXPORT EXCEL REPORT
@@ -603,7 +609,7 @@ export default function HODdashboard() {
             columns={
               PROJECT_COLUMNS
             }
-
+onRowClick={handleViewProject}
             searchPlaceholder="Search projects, students or mentors..."
 
             defaultFilters={
@@ -624,9 +630,6 @@ export default function HODdashboard() {
 
             className="w-full shadow-sm"
 
-            onRowClick={
-              handleViewProject
-            }
 
             initialVisibleRows={3}
 

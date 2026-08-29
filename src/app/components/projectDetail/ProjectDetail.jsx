@@ -22,8 +22,11 @@ import MentorFeedbackSection from "../projectDetail/handlers/sections/MentorFeed
    component is just layout + composition of sections.
 ========================================================= */
 
-export default function ProjectDetail() {
-  const { project, viewerRole, loading, deleting, handleDelete } =
+export default function ProjectDetail(
+  {backHref = "/student", 
+    backLabel = "Back to Dashboard", 
+  }) {
+  const { project, viewerRole, loading, deleting, handleDelete} =
     useProjectDetail();
 
   if (loading) {
@@ -44,6 +47,8 @@ export default function ProjectDetail() {
       <DetailHeader
         project={project}
         deleting={deleting}
+        backHref={backHref}
+         backLabel={backLabel}
         onDelete={handleDelete}
         viewerRole={viewerRole}
       />
