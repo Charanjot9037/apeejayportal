@@ -26,6 +26,7 @@ export default function Roster({
   isMentor,
   showEdit = false,
   columns = [],
+  onExport,
   setStudents,
   searchPlaceholder = "Search...",
   onRowClick,
