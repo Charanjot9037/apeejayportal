@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
-import StudentData from '@/app/components/elements/StudentData';
+import StudentData from "@/app/components/elements/StudentData";
 
 function LoadingState() {
   return (
@@ -26,7 +26,7 @@ export default function StudentProfilePage() {
   const [projects, setProjects] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -34,22 +34,22 @@ export default function StudentProfilePage() {
     const fetchStudentData = async () => {
       try {
         setLoading(true);
-        setError('');
+        setError("");
 
         const response = await fetch(`/api/studentData/${id}`);
 
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(result.message || 'Failed to fetch student data');
+          throw new Error(result.message || "Failed to fetch student data");
         }
 
         setStudent(result.student);
         setProjects(result.projects || []);
       } catch (error) {
-        console.error('FETCH_STUDENT_DATA_ERROR:', error);
+        console.error("FETCH_STUDENT_DATA_ERROR:", error);
 
-        setError(error.message || 'Something went wrong');
+        setError(error.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
@@ -71,7 +71,7 @@ export default function StudentProfilePage() {
           </h2>
 
           <p className="mt-2 text-sm text-slate-500">
-            {error || 'Unable to load this student profile.'}
+            {error || "Unable to load this student profile."}
           </p>
         </div>
       </div>
