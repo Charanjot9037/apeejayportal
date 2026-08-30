@@ -126,12 +126,7 @@ export default function DocumentItem({ label, file }) {
      DOWNLOAD URL
   ========================================================= */
 
-  const downloadUrl = fileUrl.includes("/upload/")
-    ? fileUrl.replace(
-        "/upload/",
-        `/upload/fl_attachment:${encodeURIComponent(fileName)}/`,
-      )
-    : fileUrl;
+  const downloadUrl = fileUrl;
 
   /* =========================================================
      OPEN MODAL
