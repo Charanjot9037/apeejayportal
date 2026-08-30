@@ -16,6 +16,11 @@ export const hodDashboardData = {
       href: '/hod-dashboard',
     },
     {
+      label: 'Department Projects',
+      icon: Users,
+      href: '/hod-dashboard/department-projects',
+    },
+    {
       label: 'All Students',
       icon: Users,
       href: '/hod-dashboard/all-students',
@@ -34,6 +39,10 @@ export const hodDashboardData = {
 };
 export const HOD_DASHBOARD_HEADER = {
   title: 'HOD Dashboard',
+  description: 'Overview of department performance and project status.',
+};
+export const DEPARTEMENT_DASHBOARD_HEADER = {
+  title: 'Department',
   description: 'Overview of department performance and project status.',
 };
 export const PROJECTS = [

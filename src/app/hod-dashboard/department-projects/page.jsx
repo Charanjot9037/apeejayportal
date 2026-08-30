@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import Roster from "@/app/components/elements/roaster";
 import { toast } from "sonner";
 import AuthGuardModal from "@/app/components/AuthGuardModal";
-import { DashboardHeader } from "../elements";
-import { StatCards } from "../elements";
-import { HOD_DASHBOARD_HEADER } from "@/constants/hodData";
+import { DashboardHeader } from "@/app/components/elements";
+import { StatCards } from "@/app/components/elements";
+import { DEPARTEMENT_DASHBOARD_HEADER, HOD_DASHBOARD_HEADER } from "@/constants/hodData";
 import ExcelJS from "exceljs";
 
 
@@ -18,7 +18,7 @@ import {
   mapProjectToRoster,
   HOD_STAT_CARDS
 } from "@/constants/hodData";
-import StudentRosterSkeleton from "../admin/skeleton/studentRosterSkeleton";
+import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 import { useRouter } from "next/navigation";
 
 export default function HODProjects() {
@@ -339,7 +339,7 @@ export default function HODProjects() {
       {/* ================= HEADER ================= */}
 
       <DashboardHeader
-        {...HOD_DASHBOARD_HEADER}
+        {...DEPARTEMENT_DASHBOARD_HEADER}
         onAction={() =>
           console.log("Pending Approvals")
         }
