@@ -31,10 +31,10 @@ export default function Roster({
   searchPlaceholder = "Search...",
   onRowClick,
   onApplyFilters,
-  className = '',
+  className = "",
   defaultFilters = {},
   filterConfig = [],
-   filterContext = {},
+  filterContext = {},
   showApplyButton = false,
   initialVisibleRows = 5,
 }) {
@@ -312,72 +312,71 @@ export default function Roster({
   /*
    * Search existing data.
    */
-// const filteredData = data.filter((item) => {
-//   // ==========================================
-//   // SEARCH FILTER
-//   // ==========================================
+  // const filteredData = data.filter((item) => {
+  //   // ==========================================
+  //   // SEARCH FILTER
+  //   // ==========================================
 
-//   const searchValue = search.trim().toLowerCase();
+  //   const searchValue = search.trim().toLowerCase();
 
-//   const matchesSearch =
-//     !searchValue ||
-//     Object.values(item).some((value) =>
-//       String(value ?? "")
-//         .toLowerCase()
-//         .includes(searchValue)
-//     );
+  //   const matchesSearch =
+  //     !searchValue ||
+  //     Object.values(item).some((value) =>
+  //       String(value ?? "")
+  //         .toLowerCase()
+  //         .includes(searchValue)
+  //     );
 
-//   if (!matchesSearch) {
-//     return false;
-//   }
+  //   if (!matchesSearch) {
+  //     return false;
+  //   }
 
+  //   const matchesFilters = Object.entries(filters).every(
+  //   ([key, selectedValue]) => {
+  //     // Empty filter = no filtering
+  //     if (!selectedValue) {
+  //       return true;
+  //     }
 
-//   const matchesFilters = Object.entries(filters).every(
-//   ([key, selectedValue]) => {
-//     // Empty filter = no filtering
-//     if (!selectedValue) {
-//       return true;
-//     }
+  //     if (
+  //       key === "program" ||
+  //       key === "specialization"
+  //     ) {
+  //       return true;
+  //     }
 
-//     if (
-//       key === "program" ||
-//       key === "specialization"
-//     ) {
-//       return true;
-//     }
+  //     const itemValue = item[key];
 
-//     const itemValue = item[key];
+  //     return (
+  //       String(itemValue ?? "")
+  //         .trim()
+  //         .toLowerCase() ===
+  //       String(selectedValue)
+  //         .trim()
+  //         .toLowerCase()
+  //     );
+  //   }
+  // );
 
-//     return (
-//       String(itemValue ?? "")
-//         .trim()
-//         .toLowerCase() ===
-//       String(selectedValue)
-//         .trim()
-//         .toLowerCase()
-//     );
-//   }
-// );
+  //   return matchesFilters;
+  // });
+  /*
+   * Data is already filtered by the backend.
+   * Roster only handles SEARCH locally.
+   */
+  const filteredData = data.filter((item) => {
+    const searchValue = search.trim().toLowerCase();
 
-//   return matchesFilters;
-// });
-/*
- * Data is already filtered by the backend.
- * Roster only handles SEARCH locally.
- */
-const filteredData = data.filter((item) => {
-  const searchValue = search.trim().toLowerCase();
+    if (!searchValue) {
+      return true;
+    }
 
-  if (!searchValue) {
-    return true;
-  }
-
-  return Object.values(item).some((value) =>
-    String(value ?? "")
-      .toLowerCase()
-      .includes(searchValue)
-  );
-});
+    return Object.values(item).some((value) =>
+      String(value ?? "")
+        .toLowerCase()
+        .includes(searchValue),
+    );
+  });
 
   /*
    * Show first 5 records initially.
@@ -398,26 +397,23 @@ const filteredData = data.filter((item) => {
         ${className}
       `}
     >
-      <div className='flex justify-between'>
-      <div className="px-5 pt-5">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-bold text-[#1c3a5e]">{title}</h2>
+      <div className="flex justify-between">
+        <div className="px-5 pt-5">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold text-[#1c3a5e]">{title}</h2>
+          </div>
+          <div className="mt-1 h-0.5 w-8 bg-primary-orange" />
         </div>
-        <div className="mt-1 h-0.5 w-8 bg-primary-orange" />
-      </div>
-       {onExport && (
-      <button
-        type="button"
-        onClick={() => {
-          console.log(
-            "EXPORT FILTERED DATA:",
-            filteredData
-          );
+        {onExport && (
+          <button
+            type="button"
+            onClick={() => {
+              console.log("EXPORT FILTERED DATA:", filteredData);
 
-          onExport(filteredData);
-        }}
-        disabled={filteredData.length === 0}
-        className="m-5
+              onExport(filteredData);
+            }}
+            disabled={filteredData.length === 0}
+            className="m-5
           rounded-lg
           bg-[#f2792a]
           px-4 py-2
@@ -428,48 +424,39 @@ const filteredData = data.filter((item) => {
           disabled:cursor-not-allowed
           disabled:opacity-50
         "
-      >
-        Export Report
-      </button>
-    )}
-    </div>
+          >
+            Export Report
+          </button>
+        )}
+      </div>
 
       {/* ================= SEARCH + FILTERS ================= */}
+      <div className="px-5 py-2">
+        <div className="w-full ">
+          <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+            Search
+          </label>
 
-      <div className="px-5 pt-4">
-        <div
-          className="
-            flex flex-col gap-3
-            lg:flex-row lg:items-end
-          "
-        >
-          {/* SEARCH */}
-
-          <div className="w-full lg:flex-1">
-            <label className="mb-1.5 block text-xs font-semibold text-slate-500">
-              Search
-            </label>
-
-            <div className="group relative">
-              <Search
-                className="
+          <div className="group relative">
+            <Search
+              className="
                   pointer-events-none absolute left-3 top-1/2
                   h-4 w-4 -translate-y-1/2
                   text-slate-400
                   transition-colors duration-200
                   group-focus-within:text-[#f2792a]
                 "
-              />
+            />
 
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setShowAll(false);
-                }}
-                placeholder={searchPlaceholder}
-                className="
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setShowAll(false);
+              }}
+              placeholder={searchPlaceholder}
+              className="
                   w-full rounded-lg
                   border border-slate-200
                   bg-slate-50
@@ -488,9 +475,18 @@ const filteredData = data.filter((item) => {
                   focus:ring-2
                   focus:ring-[#f2792a]/10
                 "
-              />
-            </div>
+            />
           </div>
+        </div>
+      </div>
+      <div className="px-5 pt-4">
+        <div
+          className="
+            flex flex-col gap-3
+            lg:flex-row lg:items-end
+          "
+        >
+          {/* SEARCH */}
 
           {/* FILTERS */}
 
@@ -509,18 +505,13 @@ const filteredData = data.filter((item) => {
               {/* Filter fields */}
 
               {filterConfig.map((filter) => {
-                const {
-                  key,
-                  label,
-                  placeholder,
-                } = filter;
-                
-const options = filter.dependsOn
-  ? filter.options?.[filters[filter.dependsOn]] || []
-  : Array.isArray(filter.options)
-    ? filter.options
-    : [];
-                
+                const { key, label, placeholder } = filter;
+
+                const options = filter.dependsOn
+                  ? filter.options?.[filters[filter.dependsOn]] || []
+                  : Array.isArray(filter.options)
+                    ? filter.options
+                    : [];
 
                 return (
                   <div key={key} className="w-full lg:w-[150px]">
@@ -534,10 +525,12 @@ const options = filter.dependsOn
 
                       > */}
                       <select
-  value={filters[key] ?? ""}
-  onChange={(e) => handleFilterChange(key, e.target.value)}
-  disabled={filter.disabled}
-  className="
+                        value={filters[key] ?? ""}
+                        onChange={(e) =>
+                          handleFilterChange(key, e.target.value)
+                        }
+                        disabled={filter.disabled}
+                        className="
     w-full appearance-none
     rounded-lg
     border border-slate-200
@@ -558,7 +551,7 @@ const options = filter.dependsOn
     disabled:text-slate-500
     disabled:opacity-70
   "
->
+                      >
                         {placeholder && <option value="">{placeholder}</option>}
 
                         {options.map((option, index) => {
