@@ -1,214 +1,96 @@
+"use client";
 
-'use client';
-
-import { useEffect, useState } from 'react';
-import { Users, GraduationCap } from 'lucide-react';
-import Roster from '@/app/components/elements/roaster';
+import { useEffect, useState } from "react";
+import { Users, GraduationCap } from "lucide-react";
+import Roster from "@/app/components/elements/roaster";
+import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 
 import {
   studentColumns,
   DEFAULT_FILTERS,
   STUDENT_FILTERS,
   mapStudentToRoster,
-} from '@/constants/adminData';
+} from "@/constants/adminData";
 
 export default function Page() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-
-  // =========================================================
-  // FETCH HOD STUDENTS
-  // =========================================================
 
   const fetchStudents = async (selectedFilters = {}) => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
-      // -------------------------------------------------------
-      // HOD API
-      // -------------------------------------------------------
-
-      const response = await fetch('/api/hod', {
-        method: 'GET',
-        credentials: 'include',
-      });
+      const response = await fetch(
+        "/api/hod/my-students",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(selectedFilters),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
         throw new Error(
-          data.message || 'Failed to fetch HOD students'
+          data.message ||
+            "Failed to fetch HOD students"
         );
       }
 
-      // -------------------------------------------------------
-      // HOD INFORMATION
-      // -------------------------------------------------------
 
-      const hodName = data.hod?.name?.trim().toLowerCase();
 
-      if (!hodName) {
-        throw new Error('HOD name not found');
-      }
-
-      // -------------------------------------------------------
-      // ALL DEPARTMENT STUDENTS
-      // -------------------------------------------------------
-
-      const departmentStudents = data.students || [];
-
-      // -------------------------------------------------------
-      // ALL DEPARTMENT PROJECTS
-      // -------------------------------------------------------
-
-      const projects = data.projects || [];
-
-      // =======================================================
-      // FILTER ONLY STUDENTS ASSIGNED TO LOGGED-IN HOD
-      // =======================================================
-
-      const assignedStudents = departmentStudents.filter(
-        (student) => {
-          return projects.some((project) => {
-            // -------------------------------------------------
-            // Check whether this project belongs to student
-            // -------------------------------------------------
-
-            const sameStudent =
-              String(project.studentUserId) ===
-              String(student.userId);
-
-            if (!sameStudent) {
-              return false;
-            }
-
-            // -------------------------------------------------
-            // Check HOD assignment
-            // -------------------------------------------------
-
-            const mentorName =
-              project.mentor?.trim().toLowerCase();
-
-            const mentor2Name =
-              project.mentor2?.trim().toLowerCase();
-
-            const assignedToHod =
-              mentorName === hodName ||
-              mentor2Name === hodName;
-
-            return assignedToHod;
-          });
-        }
-      );
-
-      console.log('=================================');
-      console.log('HOD:', data.hod?.name);
-      console.log('DEPARTMENT:', data.hod?.department);
-      console.log(
-        'TOTAL DEPARTMENT STUDENTS:',
-        departmentStudents.length
-      );
-      console.log(
-        'ASSIGNED HOD STUDENTS:',
-        assignedStudents.length
-      );
-      console.log(
-        'ASSIGNED STUDENTS:',
-        assignedStudents
-      );
-      console.log('=================================');
-
-      // =======================================================
-      // APPLY FRONTEND FILTERS
-      // =======================================================
-
-      let filteredStudents = assignedStudents;
-
-      if (selectedFilters?.program) {
-        filteredStudents = filteredStudents.filter(
-          (student) =>
-            student.program?.toLowerCase() ===
-            selectedFilters.program.toLowerCase()
-        );
-      }
-
-      if (selectedFilters?.specialization) {
-        filteredStudents = filteredStudents.filter(
-          (student) =>
-            student.specialization?.toLowerCase() ===
-            selectedFilters.specialization.toLowerCase()
-        );
-      }
-
-      if (selectedFilters?.academicBatch) {
-        filteredStudents = filteredStudents.filter(
-          (student) =>
-            String(student.academicBatch) ===
-            String(selectedFilters.academicBatch)
-        );
-      }
-
-      // -------------------------------------------------------
-      // MAP FOR ROSTER
-      // -------------------------------------------------------
-
-      const mappedStudents =
-        filteredStudents.map(mapStudentToRoster);
+      const mappedStudents = (
+        data.students || []
+      ).map(mapStudentToRoster);
 
       setStudents(mappedStudents);
+
     } catch (error) {
-      console.error('FETCH_HOD_STUDENTS_ERROR:', error);
+      console.error(
+        "FETCH_HOD_STUDENTS_ERROR:",
+        error
+      );
 
       setError(
-        error.message || 'Something went wrong'
+        error.message ||
+          "Something went wrong"
       );
 
       setStudents([]);
+
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================================================
-  // INITIAL LOAD
-  // =========================================================
-
   useEffect(() => {
-    fetchStudents(DEFAULT_FILTERS);
+    fetchStudents({});
   }, []);
 
-  // =========================================================
-  // APPLY FILTERS
-  // =========================================================
-
   const handleApplyFilters = (selectedFilters) => {
+   
+
     setFilters(selectedFilters);
 
     fetchStudents(selectedFilters);
   };
 
-  // =========================================================
-  // RETRY
-  // =========================================================
-
   const handleRetry = () => {
     fetchStudents(filters);
   };
-
-  // =========================================================
-  // UI
-  // =========================================================
 
   return (
     <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
 
-        {/* ===================================================
-            HEADER
-        =================================================== */}
+        {/* HEADER */}
 
         <div className="mb-6">
 
@@ -243,9 +125,7 @@ export default function Page() {
 
             </div>
 
-            {/* =================================================
-                TOTAL STUDENTS
-            ================================================= */}
+            {/* TOTAL STUDENTS */}
 
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
 
@@ -271,9 +151,7 @@ export default function Page() {
 
         </div>
 
-        {/* =====================================================
-            ERROR
-        ===================================================== */}
+        {/* ERROR */}
 
         {error && (
           <div className="mb-5 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
@@ -305,26 +183,12 @@ export default function Page() {
           </div>
         )}
 
-        {/* =====================================================
-            ROSTER
-        ===================================================== */}
+        {/* ROSTER */}
 
         <div className="relative rounded-2xl">
 
           {loading && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
-
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-md">
-
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-primary-orange" />
-
-                <span className="text-sm font-medium text-slate-600">
-                  Loading students...
-                </span>
-
-              </div>
-
-            </div>
+           <StudentRosterSkeleton/>
           )}
 
           <Roster
@@ -339,7 +203,7 @@ export default function Page() {
             className="mt-0 shadow-sm"
             onRowClick={(student) => {
               console.log(
-                'Selected student:',
+                "Selected student:",
                 student
               );
             }}
@@ -351,4 +215,3 @@ export default function Page() {
     </div>
   );
 }
-

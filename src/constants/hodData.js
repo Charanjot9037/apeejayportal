@@ -35,7 +35,6 @@ export const hodDashboardData = {
 export const HOD_DASHBOARD_HEADER = {
   title: 'HOD Dashboard',
   description: 'Overview of department performance and project status.',
-  actionLabel: 'Export Report',
 };
 export const PROJECTS = [
   {
@@ -175,7 +174,128 @@ export const PROJECTS = [
   },
 ];
 
-export const PROJECT_COLUMNS = [
+// =========================================================
+// HOD PROJECT DEFAULT FILTERS
+// =========================================================
+
+export const DEFAULT_PROJECT_FILTERS = {
+  program: "BTech",
+  semester: "1",
+  specialization: "CSE",
+  status: "",
+  mentor: "",
+};
+export const HOD_PROJECT_FILTERS = [
+  {
+    key: "program",
+    label: "Program",
+    options: [
+      {
+        label: "B.Tech",
+        value: "BTech",
+      },
+      {
+        label: "BBA",
+        value: "BBA",
+      },
+      {
+        label: "MBA",
+        value: "MBA",
+      },
+    ],
+  },
+
+  {
+    key: "semester",
+    label: "Semester",
+    options: [
+      {
+        label: "1st Semester",
+        value: "1",
+      },
+      {
+        label: "2nd Semester",
+        value: "2",
+      },
+      {
+        label: "3rd Semester",
+        value: "3",
+      },
+      {
+        label: "4th Semester",
+        value: "4",
+      },
+      {
+        label: "5th Semester",
+        value: "5",
+      },
+      {
+        label: "6th Semester",
+        value: "6",
+      },
+      {
+        label: "7th Semester",
+        value: "7",
+      },
+      {
+        label: "8th Semester",
+        value: "8",
+      },
+    ],
+  },
+
+  {
+    key: "specialization",
+    label: "Specialization",
+    options: [
+      {
+        label: "CSE",
+        value: "CSE",
+      },
+      {
+        label: "ECE",
+        value: "ECE",
+      },
+      {
+        label: "ME",
+        value: "ME",
+      },
+    ],
+  },
+
+  {
+    key: "status",
+    label: "Status",
+    options: [
+      {
+        label: "All Status",
+        value: "",
+      },
+      {
+        label: "Pending Approval",
+        value: "Pending Approval",
+      },
+      {
+        label: "In Review",
+        value: "In Review",
+      },
+      {
+        label: "Approved",
+        value: "Approved",
+      },
+      {
+        label: "Rejected",
+        value: "Rejected",
+      },
+    ],
+  },
+];
+
+// =========================================================
+// HOD PROJECT COLUMNS
+// =========================================================
+
+export const projectColumns = [
   {
     key: "projectTitle",
     label: "Project",
@@ -189,19 +309,7 @@ export const PROJECT_COLUMNS = [
     label: "Mentor",
   },
   {
-    key: "program",
-    label: "Program",
-  },
-  {
-    key: "specialization",
-    label: "Specialization",
-  },
-  {
-    key: "academicBatch",
-    label: "Academic Batch",
-  },
-  {
-    key: "currentSemester",
+    key: "semester",
     label: "Semester",
   },
   {
@@ -213,194 +321,79 @@ export const PROJECT_COLUMNS = [
     label: "Approval Date",
   },
 ];
-export const HOD_PROJECT_FILTERS = [
+
+export const mapProjectToRoster = (project) => ({
+  _id: project._id,
+  id: project.id,
+
+  projectTitle:
+    project.projectTitle ||
+    "-",
+
+  title:
+    project.title ||
+    "-",
+
+  subtitle:
+    project.subtitle || "",
+
+  student:
+    project.student ||
+    "Unknown Student",
+
+  studentEmail:
+    project.studentEmail ||
+    "",
+
+  mentor:
+    project.mentor ||
+    "Not Assigned",
+
+
+  semester:
+    project.semester ||
+    "",
+
+  status:
+    project.status ||
+    "-",
+
+  approvalDate:
+    project.approvalDate ||
+    "-",
+
+  mentorReviewedAt:
+    project.mentorReviewedAt ||
+    null,
+});
+
+export const HOD_STAT_CARDS = [
   {
-    key: "specialization",
-    label: "Stream",
-    placeholder: "All Streams",
-
-    optionsByDepartment: {
-      MANAGEMENT: [
-        "BBA",
-        "MBA",
-      ],
-
-      ENGINEERING: [
-        "B.Tech CSE",
-        "B.Tech AI & ML",
-        "B.Tech CS-IOT"
-      ],
-
-
-      IT: [
-        "BCA",
-        "BCOM"
-      ],
-    },
+    id: "students",
+    title: "Total Students",
+    value: 0,
+    description: "Students in your department",
+    icon: "GraduationCap",
   },
-
   {
-    key: "academicBatch",
-    label: "Academic Batch",
-    placeholder: "All Batches",
-
-    options: [
-      "2023",
-      "2024",
-      "2025",
-      "2026",
-      "2027",
-      "2028",
-    ],
+    id: "mentors",
+    title: "Total Mentors",
+    value: 0,
+    description: "Mentors in your department",
+    icon: "UserRound",
   },
-];
-export const HOD_STUDENT_FILTERS = [
   {
-    key: 'department',
-    label: 'Department',
-    options: [
-      {
-        value: 'ENGINEERING',
-        label: 'Engineering',
-      },
-      {
-        value: 'MANAGEMENT',
-        label: 'Management',
-      },
-      {
-        value: 'IT',
-        label: 'IT',
-      },
-    ],
+    id: "projects",
+    title: "Total Projects",
+    value: 0,
+    description: "Projects in your department",
+    icon: "FolderKanban",
   },
-
   {
-    key: 'program',
-    label: 'Program / Degree',
-    dependsOn: 'department',
-
-    options: {
-      ENGINEERING: [
-        {
-          value: 'BTECH',
-          label: 'B.Tech',
-        },
-      ],
-
-      MANAGEMENT: [
-        {
-          value: 'MBA',
-          label: 'MBA',
-        },
-        {
-          value: 'BBA',
-          label: 'BBA',
-        },
-        {
-          value: 'BCOM',
-          label: 'B.Com',
-        },
-      ],
-
-      IT: [
-        {
-          value: 'MCA',
-          label: 'MCA',
-        },
-        {
-          value: 'BCA',
-          label: 'BCA',
-        },
-      ],
-    },
-  },
-
-  {
-    key: 'specialization',
-    label: 'Specialization',
-    dependsOn: 'department',
-
-    options: {
-      ENGINEERING: [
-        {
-          value: 'CSE',
-          label: 'Computer Science & Engineering',
-        },
-        {
-          value: 'IOT',
-          label: 'Internet of Things',
-        },
-        {
-          value: 'AI_ML',
-          label: 'Artificial Intelligence & Machine Learning',
-        },
-      ],
-
-      MANAGEMENT: [
-        {
-          value: 'FINANCE',
-          label: 'Finance',
-        },
-        {
-          value: 'MARKETING',
-          label: 'Marketing',
-        },
-        {
-          value: 'HR',
-          label: 'Human Resource Management',
-        },
-        {
-          value: 'BUSINESS_ANALYTICS',
-          label: 'Business Analytics',
-        },
-      ],
-
-      IT: [
-        {
-          value: 'SOFTWARE_DEVELOPMENT',
-          label: 'Software Development',
-        },
-        {
-          value: 'DATA_SCIENCE',
-          label: 'Data Science',
-        },
-        {
-          value: 'AI_ML',
-          label: 'Artificial Intelligence & Machine Learning',
-        },
-        {
-          value: 'CYBER_SECURITY',
-          label: 'Cyber Security',
-        },
-        {
-          value: 'CLOUD_COMPUTING',
-          label: 'Cloud Computing',
-        },
-      ],
-    },
-  },
-
-  {
-    key: 'academicBatch',
-    label: 'Academic Batch',
-
-    options: [
-      {
-        value: '2023',
-        label: '2023',
-      },
-      {
-        value: '2024',
-        label: '2024',
-      },
-      {
-        value: '2025',
-        label: '2025',
-      },
-      {
-        value: '2026',
-        label: '2026',
-      },
-    ],
+    id: "pending",
+    title: "Pending Approvals",
+    value: 0,
+    description: "Projects awaiting approval",
+    icon: "Clock3",
   },
 ];

@@ -22,11 +22,11 @@ import MentorFeedbackSection from "../projectDetail/handlers/sections/MentorFeed
    component is just layout + composition of sections.
 ========================================================= */
 
-export default function ProjectDetail(
-  {backHref = "/student", 
-    backLabel = "Back to Dashboard", 
-  }) {
-  const { project, viewerRole, loading, deleting, handleDelete} =
+export default function ProjectDetail({
+  backHref = "/student",
+  backLabel = "Back to Dashboard",
+}) {
+  const { project, viewerRole, loading, deleting, handleDelete } =
     useProjectDetail();
 
   if (loading) {
@@ -48,7 +48,7 @@ export default function ProjectDetail(
         project={project}
         deleting={deleting}
         backHref={backHref}
-         backLabel={backLabel}
+        backLabel={backLabel}
         onDelete={handleDelete}
         viewerRole={viewerRole}
       />
@@ -56,15 +56,15 @@ export default function ProjectDetail(
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_250px]">
         <div className="space-y-4">
           <OverviewSection project={project} />
-          <MentorFeedbackSection project={project} />
-
           <TechnologiesSection project={project} />
           <GallerySection project={project} />
-  <DocumentsSection
+          <DocumentsSection
             project={project}
             ownerName={ownerName}
             teamMemberName={teamMemberName}
-          />        </div>
+          />{" "}
+          <MentorFeedbackSection project={project} />
+        </div>
 
         {/* RIGHT COLUMN */}
         <div className="space-y-4">
