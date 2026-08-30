@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Users, GraduationCap } from "lucide-react";
+import { useSelector } from "react-redux";
+
 import Roster from "@/app/components/elements/roaster";
 import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 
@@ -12,11 +14,112 @@ import {
   mapStudentToRoster,
 } from "@/constants/adminData";
 
+import {
+  programOptions,
+  specializationOptions,
+  semesterOptions,
+} from "@/constants/gloabl";
+
+
+// =====================================================
+// HOD STUDENT FILTER CONFIG
+// =====================================================
+
+const getHODStudentFilters = (department) => {
+  const normalizedDepartment = department?.toUpperCase();
+
+  if (!normalizedDepartment) {
+    return [];
+  }
+
+  const programs =
+    programOptions[normalizedDepartment] || [];
+
+  const specializations =
+    specializationOptions[normalizedDepartment] || [];
+
+  return [
+    // =================================================
+    // DEPARTMENT
+    // =================================================
+
+    {
+      key: "department",
+      label: "Department",
+      placeholder: "Department",
+
+      options: [
+        {
+          value: normalizedDepartment,
+          label: normalizedDepartment,
+        },
+      ],
+
+      disabled: true,
+    },
+
+    // =================================================
+    // PROGRAM
+    // =================================================
+
+    {
+      key: "program",
+      label: "Program",
+      placeholder: "All Programs",
+      options: programs,
+    },
+
+    // =================================================
+    // SPECIALIZATION
+    // =================================================
+
+    ...(specializations.length > 0
+      ? [
+          {
+            key: "specialization",
+            label: "Specialization",
+            placeholder: "All Specializations",
+            options: specializations,
+          },
+        ]
+      : []),
+
+    // =================================================
+    // SEMESTER
+    // =================================================
+
+    {
+      key: "semester",
+      label: "Semester",
+      placeholder: "All Semesters",
+      options: semesterOptions,
+      dependsOn: "program",
+    },
+  ];
+};
+
+
 export default function Page() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+
+  // =====================================================
+  // GET HOD DEPARTMENT FROM REDUX
+  // =====================================================
+
+  const department = useSelector(
+    (state) => state.mentor?.department
+  );
+
+  // =====================================================
+  // CREATE FILTERS BASED ON HOD DEPARTMENT
+  // =====================================================
+
+  const hodStudentFilters =
+    getHODStudentFilters(department);
+
 
   const fetchStudents = async (selectedFilters = {}) => {
     try {
@@ -44,8 +147,6 @@ export default function Page() {
         );
       }
 
-
-
       const mappedStudents = (
         data.students || []
       ).map(mapStudentToRoster);
@@ -70,21 +171,49 @@ export default function Page() {
     }
   };
 
+
+  // =====================================================
+  // INITIAL FETCH
+  // =====================================================
+
   useEffect(() => {
-    fetchStudents({});
-  }, []);
+    if (!department) return;
+
+    const initialFilters = {
+      ...DEFAULT_FILTERS,
+      department: department.toUpperCase(),
+      program: "",
+      specialization: "",
+      semester: "",
+    };
+
+    setFilters(initialFilters);
+
+    fetchStudents(initialFilters);
+
+  }, [department]);
+
+
+  // =====================================================
+  // APPLY FILTERS
+  // =====================================================
 
   const handleApplyFilters = (selectedFilters) => {
-   
 
     setFilters(selectedFilters);
 
     fetchStudents(selectedFilters);
   };
 
+
+  // =====================================================
+  // RETRY
+  // =====================================================
+
   const handleRetry = () => {
     fetchStudents(filters);
   };
+
 
   return (
     <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
@@ -151,6 +280,7 @@ export default function Page() {
 
         </div>
 
+
         {/* ERROR */}
 
         {error && (
@@ -183,24 +313,34 @@ export default function Page() {
           </div>
         )}
 
+
         {/* ROSTER */}
 
         <div className="relative rounded-2xl">
 
           {loading && (
-           <StudentRosterSkeleton/>
+            <StudentRosterSkeleton/>
           )}
 
           <Roster
             title="Student Roster"
+
             data={students}
+
             columns={studentColumns}
+
             searchPlaceholder="Search students..."
+
             defaultFilters={filters}
-            filterConfig={STUDENT_FILTERS}
+
+            filterConfig={hodStudentFilters}
+
             showApplyButton={true}
+
             onApplyFilters={handleApplyFilters}
+
             className="mt-0 shadow-sm"
+
             onRowClick={(student) => {
               console.log(
                 "Selected student:",
