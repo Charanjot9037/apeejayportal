@@ -477,9 +477,9 @@ export async function GET(request, context) {
 
     let viewerRole = "viewer";
 
-    if (project.student.toString() === auth.user._id.toString()) {
-      viewerRole = "owner";
-    } else if (
+ if (project.student._id.toString() === auth.user._id.toString()) {
+  viewerRole = "owner";
+} else if (
       currentStudentProfile &&
       project.teamMembers &&
       project.teamMembers._id?.toString() ===

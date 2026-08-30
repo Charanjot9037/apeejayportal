@@ -91,7 +91,7 @@ export default function DocumentUpload({
       {/* UPLOAD AREA */}
       <label
         htmlFor={disabled ? undefined : inputId}
-        className={`flex min-h-[130px] flex-col items-center justify-center rounded-md border border-dashed px-4 py-5 text-center transition ${
+        className={`flex min-h-32.5 flex-col items-center justify-center rounded-md border border-dashed px-4 py-5 text-center transition ${
           disabled
             ? "cursor-not-allowed border-slate-200 bg-slate-100"
             : loading
