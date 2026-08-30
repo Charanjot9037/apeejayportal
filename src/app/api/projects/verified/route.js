@@ -191,11 +191,6 @@ export async function GET(request) {
 
     const hasMore = skip + projects.length < total;
 
-    console.log(
-      `VERIFIED PROJECTS PAGE ${page}:`,
-      mappedProjects
-    );
-
     return NextResponse.json({
       success: true,
 
