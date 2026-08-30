@@ -8,7 +8,8 @@ import { DashboardHeader } from "@/app/components/elements";
 import { StatCards } from "@/app/components/elements";
 import { DEPARTEMENT_DASHBOARD_HEADER, HOD_DASHBOARD_HEADER } from "@/constants/hodData";
 import ExcelJS from "exceljs";
-
+import { programOptions,specializationOptions,semesterOptions } from "@/constants/gloabl";
+import { getHODFilterConfig } from "@/lib/getHODFilterConfig";
 
 
 import {
@@ -20,11 +21,117 @@ import {
 } from "@/constants/hodData";
 import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+
+const getHODProjectFilters = (department) => {
+  const normalizedDepartment = department?.toUpperCase();
+
+  if (!normalizedDepartment) {
+    return [];
+  }
+
+  const programs = programOptions[normalizedDepartment] || [];
+
+  const specializations =
+    specializationOptions[normalizedDepartment] || [];
+
+  return [
+    // =========================
+    // DEPARTMENT
+    // =========================
+    {
+      key: "department",
+      label: "Department",
+      placeholder: "Department",
+      options: [
+        {
+          value: normalizedDepartment,
+          label: normalizedDepartment,
+        },
+      ],
+      disabled: true,
+    },
+
+    // =========================
+    // PROGRAM
+    // =========================
+    {
+      key: "program",
+      label: "Program",
+      placeholder: "All Programs",
+      options: programs,
+    },
+
+    // =========================
+    // SPECIALIZATION
+    // Only show if department has specialization
+    // =========================
+    ...(specializations.length > 0
+      ? [
+          {
+            key: "specialization",
+            label: "Specialization",
+            placeholder: "All Specializations",
+            options: specializations,
+          },
+        ]
+      : []),
+
+    // =========================
+    // SEMESTER
+    // Depends on Program
+    // =========================
+    {
+      key: "semester",
+      label: "Semester",
+      placeholder: "All Semesters",
+      options: semesterOptions,
+      dependsOn: "program",
+    },
+
+    // =========================
+    // STATUS
+    // =========================
+    {
+      key: "status",
+      label: "Status",
+      options: [
+        {
+          label: "All Status",
+          value: "",
+        },
+        {
+          label: "Pending Approval",
+          value: "Pending Approval",
+        },
+        {
+          label: "In Review",
+          value: "In Review",
+        },
+        {
+          label: "Approved",
+          value: "Approved",
+        },
+        {
+          label: "Rejected",
+          value: "Rejected",
+        },
+      ],
+    },
+  ];
+};
 
 export default function HODProjects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+
+  const department = useSelector(
+  (state) => state.mentor?.department
+);
+const hodProjectFilters = getHODProjectFilters(department);
+
  const [authModal, setAuthModal] = useState({
     open: false,
     type: "authentication",
@@ -52,6 +159,7 @@ export default function HODProjects() {
       setError("");
 
       const apiFilters = {
+        department:department,
         program: selectedFilters.program,
         semester: selectedFilters.semester,
         specialization: selectedFilters.specialization,
@@ -144,9 +252,21 @@ export default function HODProjects() {
   // INITIAL FETCH
   // =========================================================
 
-  useEffect(() => {
-    fetchProjects(DEFAULT_PROJECT_FILTERS);
-  }, []);
+ useEffect(() => {
+  if (!department) return;
+
+  const initialFilters = {
+    ...DEFAULT_PROJECT_FILTERS,
+    department: department.toUpperCase(),
+    program: "",
+    specialization: "",
+    semester: "",
+  };
+
+  setFilters(initialFilters);
+
+  fetchProjects(initialFilters);
+}, [department]);
 
   // =========================================================
   // APPLY FILTERS
@@ -394,30 +514,63 @@ export default function HODProjects() {
           <StudentRosterSkeleton />
         </div>
       ) : (
-        <Roster
-          title="Project Roster"
-          data={projects}
-          setData={setProjects}
-          columns={projectColumns}
-          searchPlaceholder="Search projects..."
-          defaultFilters={DEFAULT_PROJECT_FILTERS}
-          filterConfig={HOD_PROJECT_FILTERS}
-           onExport={handleExportProjects}
-          showApplyButton={true}
-          onApplyFilters={handleApplyFilters}
-          className="mt-4 shadow-sm"
+//         <Roster
+//           title="Project Roster"
+//           data={projects}
+//           setData={setProjects}
+//           columns={projectColumns}
+//           searchPlaceholder="Search projects..."
+//           defaultFilters={DEFAULT_PROJECT_FILTERS}
+//           filterConfig={HOD_PROJECT_FILTERS}
+//            onExport={handleExportProjects}
+//           showApplyButton={true}
+//           onApplyFilters={handleApplyFilters}
+//           className="mt-4 shadow-sm"
         
-        onRowClick={(project) => {
-  const projectId = project?.id || project?._id;
+//         onRowClick={(project) => {
+//   const projectId = project?.id || project?._id;
 
-  if (!projectId) {
-    toast.error("Project ID not found");
-    return;
-  }
+//   if (!projectId) {
+//     toast.error("Project ID not found");
+//     return;
+//   }
 
-  router.push(`/hod-dashboard/projects/${projectId}`);
-}}
-        />
+//   router.push(`/hod-dashboard/projects/${projectId}`);
+// }}
+//         />
+<Roster
+  title="Project Roster"
+  data={projects}
+  setData={setProjects}
+  columns={projectColumns}
+  searchPlaceholder="Search projects..."
+  
+  defaultFilters={{
+    department: department?.toUpperCase() || "",
+    program: "",
+    specialization: "",
+    semester: "",
+    status: "",
+  }}
+
+  filterConfig={hodProjectFilters}
+
+  onExport={handleExportProjects}
+  showApplyButton={true}
+  onApplyFilters={handleApplyFilters}
+  className="mt-4 shadow-sm"
+
+  onRowClick={(project) => {
+    const projectId = project?.id || project?._id;
+
+    if (!projectId) {
+      toast.error("Project ID not found");
+      return;
+    }
+
+    router.push(`/hod-dashboard/projects/${projectId}`);
+  }}
+/>
       )}
     </div>
   );
