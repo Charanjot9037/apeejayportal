@@ -288,15 +288,18 @@ export const STUDENT_FILTERS = [
     ],
   },
 ];
-
 export const mapStudentToRoster = (student) => {
   return {
     _id: student?._id,
 
-    name: student?.userId?.name || student?.name || "-",
-    status: student?.userId?.status || "-",
-    email: student?.userId?.email || student?.email || "-",
+    name: student?.fullName || student?.name || "-",
+
+    status: student?.status || "-",
+
+    email: student?.email || "-",
+
     rollNumber: student?.rollNumber || "-",
+
     phone: student?.phone || "-",
 
     department: student?.department || "-",
@@ -307,12 +310,14 @@ export const mapStudentToRoster = (student) => {
 
     specialization: student?.specialization || "-",
 
-    mentor: student?.mentor?.userId?.name || student?.mentor?.name || "-",
+    mentor:
+      student?.mentor?.userId?.name ||
+      student?.mentor?.name ||
+      "-",
 
     mentorId:
       student?.mentor?.userId?._id ||
       student?.mentorId ||
-      student?.userId?.mentorId ||
       "-",
   };
 };
