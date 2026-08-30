@@ -4,7 +4,6 @@ import AdminStats from "./adminStats";
 
 import { useEffect, useState } from "react";
 
-import AdminStats from "./adminStats";
 import { ADMIN_DASHBOARD_HEADER } from "@/constants/adminData";
 
 export default function Admin() {
