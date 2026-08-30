@@ -334,7 +334,7 @@ export default function HODProjects() {
 });
 
    return (
-    <div className="w-full">
+    <div className="w-full px-6 py-6">
 
       {/* ================= HEADER ================= */}
 
