@@ -1,8 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { StatCards, Roster, DashboardHeader } from "@/app/components/elements";
-import { MENTOR_STUDENTS_COLUMNS } from "@/constants/mentorData";
+import { Roster, DashboardHeader } from "@/app/components/elements";
+import {
+  MENTOR_DASHBOARD_HEADER,
+  MENTOR_STUDENTS_COLUMNS,
+} from "@/constants/mentorData";
 import { mapStudentsToRoster } from "@/mappers/mentor";
 
 export default function Student() {
@@ -35,6 +38,10 @@ export default function Student() {
   }, []);
 
   console.log(students);
+  const mentorDashboardHeader = {
+    ...MENTOR_DASHBOARD_HEADER,
+    actionLabel: null,
+  };
   const rosterData = students?.map(mapStudentsToRoster);
   console.log(rosterData);
   return (
@@ -44,15 +51,18 @@ export default function Student() {
         {error && <p className="text-red-500">{error}</p>}
 
         {!loading && !error && (
-          <Roster
-            title="Student Roster"
-            data={rosterData}
-            columns={MENTOR_STUDENTS_COLUMNS}
-            searchPlaceholder="Search students..."
+          <>
+            <DashboardHeader {...mentorDashboardHeader} />
+            <Roster
+              title="Student Roster"
+              data={rosterData}
+              columns={MENTOR_STUDENTS_COLUMNS}
+              searchPlaceholder="Search students..."
 
-            onViewAll={() => console.log("View all students")}
-            viewAllLabel="View All Students"
-          />
+              onViewAll={() => console.log("View all students")}
+              viewAllLabel="View All Students"
+            />
+          </>
         )}
       </main>
     </div>
