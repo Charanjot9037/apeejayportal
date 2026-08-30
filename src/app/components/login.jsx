@@ -216,6 +216,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/redux/authSlice";
+import { Loader2 } from "lucide-react";
 import { DashboardHeader } from "./elements";
 import { setStudentProfile } from "@/redux/studentSlice";
 import { setMentorProfile } from "@/redux/mentorSlice";
@@ -225,7 +226,7 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -236,6 +237,7 @@ const Login = () => {
 
     onSubmit: async (values) => {
       try {
+        setLoading(true);
         const response = await fetch("/api/auth/login", {
           method: "POST",
           headers: {
@@ -269,35 +271,35 @@ const Login = () => {
         //     profileImage: data?.user?.profileImage,
         //   }),
         // );
-if (data?.user?.role === "student") {
-  dispatch(
-    setStudentProfile({
-      department: data.user?.department,
-      program: data.user?.program,
-      academicBatch: data.user?.academicBatch,
-      profileImage: data.user?.profileImage,
-    })
-  );
-}
+        if (data?.user?.role === "student") {
+          dispatch(
+            setStudentProfile({
+              department: data.user?.department,
+              program: data.user?.program,
+              academicBatch: data.user?.academicBatch,
+              profileImage: data.user?.profileImage,
+            }),
+          );
+        }
 
-// ==========================================
-// MENTOR REDUX
-// ==========================================
+        // ==========================================
+        // MENTOR REDUX
+        // ==========================================
 
-if (data?.user?.role === "mentor") {
-  dispatch(
-    setMentorProfile({
-      id: data.user?.id,
-      name: data.user?.name,
-      email: data.user?.email,
-      department: data.user?.mentorDepartment,
-      designation: data.user?.designation,
-    })
-  );
-}
+        if (data?.user?.role === "mentor") {
+          dispatch(
+            setMentorProfile({
+              id: data.user?.id,
+              name: data.user?.name,
+              email: data.user?.email,
+              department: data.user?.mentorDepartment,
+              designation: data.user?.designation,
+            }),
+          );
+        }
         const role = data?.user?.role;
         const designation = data?.user?.designation;
-        console.log("designation: ",designation);
+        console.log("designation: ", designation);
 
         switch (role) {
           case "student":
@@ -309,7 +311,6 @@ if (data?.user?.role === "mentor") {
             break;
 
           case "mentor":
-
             switch (designation?.toLowerCase()) {
               case "engineer":
                 router.push("/admin-dashboard");
@@ -337,6 +338,8 @@ if (data?.user?.role === "mentor") {
       } catch (error) {
         console.log(error.message);
         alert(error.message);
+      } finally {
+        setLoading(false);
       }
     },
   });
@@ -439,11 +442,18 @@ if (data?.user?.role === "mentor") {
           {/* Login Button */}
           <Button
             type="submit"
-            className="h-10 w-full cursor-pointer bg-orange-500 text-white transition-colors hover:bg-orange-600 sm:h-11"
+            disabled={loading}
+            className="h-10 w-full cursor-pointer bg-orange-500 text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70 sm:h-11"
           >
-            Login
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
           </Button>
-
           {/* Divider */}
         </form>
       </div>
