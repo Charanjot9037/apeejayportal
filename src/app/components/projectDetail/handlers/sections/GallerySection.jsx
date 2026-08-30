@@ -16,15 +16,14 @@ export default function GallerySection({ project }) {
           {project.projectImages.map((image, index) => (
             <div
               key={image.publicId || index}
-              className="overflow-hidden rounded border border-slate-200 bg-white"
+              className="overflow-hidden rounded-lg border border-slate-200 bg-white"
             >
-              <div className="group relative aspect-[16/8.5] overflow-hidden bg-slate-100">
+              <div className="group relative h-48 overflow-hidden bg-slate-100">
                 <img
                   src={image.url}
                   alt={image.originalName || `Project image ${index + 1}`}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
                 />
-
                 {/* View button */}
                 <a
                   href={image.url}

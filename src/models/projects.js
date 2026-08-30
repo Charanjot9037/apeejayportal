@@ -77,7 +77,7 @@ const MentorReviewSchema = new mongoose.Schema(
     },
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Mentor",
+      ref: "User",
     },
     reviewedAt: {
       type: Date,
