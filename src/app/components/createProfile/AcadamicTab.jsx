@@ -5,143 +5,14 @@ import { GraduationCap } from 'lucide-react';
 import InputField from '../elements/InputField';
 import YearField from '../elements/Calendar';
 import SelectField from '../elements/SelectFiled';
+import { programOptions,specializationOptions } from '@/constants/gloabl';
 export default function AcademicInformationTab({
   formik,
   getError,
   onBack,
   onNext,
 }) {
-  const specializationOptions = {
-    ENGINEERING: [
-      {
-        value: 'CSE',
-        label: 'Computer Science & Engineering',
-      },
-      {
-        value: 'ECE',
-        label: 'Electronics & Communication Engineering',
-      },
-      {
-        value: 'ME',
-        label: 'Mechanical Engineering',
-      },
-      {
-        value: 'CIVIL',
-        label: 'Civil Engineering',
-      },
-      {
-        value: 'EEE',
-        label: 'Electrical & Electronics Engineering',
-      },
-    ],
-
-    MANAGEMENT: [
-      {
-        value: 'FINANCE',
-        label: 'Finance',
-      },
-      {
-        value: 'MARKETING',
-        label: 'Marketing',
-      },
-      {
-        value: 'HR',
-        label: 'Human Resource Management',
-      },
-      {
-        value: 'BUSINESS_ANALYTICS',
-        label: 'Business Analytics',
-      },
-    ],
-
-    IT: [
-      {
-        value: 'SOFTWARE_DEVELOPMENT',
-        label: 'Software Development',
-      },
-      {
-        value: 'DATA_SCIENCE',
-        label: 'Data Science',
-      },
-      {
-        value: 'AI_ML',
-        label: 'Artificial Intelligence & Machine Learning',
-      },
-      {
-        value: 'CYBER_SECURITY',
-        label: 'Cyber Security',
-      },
-      {
-        value: 'CLOUD_COMPUTING',
-        label: 'Cloud Computing',
-      },
-    ],
-  };
-  const programOptions = {
-    ENGINEERING: [
-      {
-        value: 'BTECH',
-        label: 'B.Tech',
-      },
-    ],
-
-    IT: [
-      {
-        value: 'MCA',
-        label: 'MCA',
-      },
-      {
-        value: 'BCA',
-        label: 'BCA',
-      },
-    ],
-
-    MANAGEMENT: [
-      {
-        value: 'MBA',
-        label: 'MBA',
-      },
-      {
-        value: 'BBA',
-        label: 'BBA',
-      },
-      {
-        value: 'BCOM',
-        label: 'B.Com',
-      },
-    ],
-  };
-  const semesterOptions = {
-    BTECH: Array.from({ length: 8 }, (_, index) => ({
-      value: String(index + 1),
-      label: String(index + 1),
-    })),
-
-    BCA: Array.from({ length: 6 }, (_, index) => ({
-      value: String(index + 1),
-      label: String(index + 1),
-    })),
-
-    BBA: Array.from({ length: 6 }, (_, index) => ({
-      value: String(index + 1),
-      label: String(index + 1),
-    })),
-
-    BCOM: Array.from({ length: 6 }, (_, index) => ({
-      value: String(index + 1),
-      label: String(index + 1),
-    })),
-
-    MCA: Array.from({ length: 4 }, (_, index) => ({
-      value: String(index + 1),
-      label: String(index + 1),
-    })),
-
-    MBA: Array.from({ length: 4 }, (_, index) => ({
-      value: String(index + 1),
-      label: String(index + 1),
-    })),
-  };
+ 
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
