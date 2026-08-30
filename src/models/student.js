@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { refresh } from 'next/cache';
 
 const studentSchema = new mongoose.Schema(
   {

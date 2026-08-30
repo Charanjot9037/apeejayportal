@@ -252,7 +252,7 @@ export async function PUT(request, context) {
         );
       }
       project.reportFile = newReport;
- const newCertificate = certificateFile || null;
+      const newCertificate = certificateFile || null;
       if (isDifferentFile(project.certificateFile, newCertificate)) {
         await deleteFromCloudinary(
           project.certificateFile.publicId,
@@ -266,9 +266,7 @@ export async function PUT(request, context) {
 
       const newImageIds = new Set(
         newImages
-          .map((image) =>
-            typeof image === "string" ? image : image?.publicId,
-          )
+          .map((image) => (typeof image === "string" ? image : image?.publicId))
           .filter(Boolean),
       );
 
@@ -315,7 +313,7 @@ export async function PUT(request, context) {
         );
       }
       project.reportFile2 = newReport2;
-       const newCertificate2 = certificateFile2 || null;
+      const newCertificate2 = certificateFile2 || null;
       if (isDifferentFile(project.certificateFile2, newCertificate2)) {
         await deleteFromCloudinary(
           project.certificateFile2.publicId,
@@ -347,7 +345,9 @@ export async function PUT(request, context) {
       project.title = projectName;
 
       project.subtitle =
-        projectType === "team" ? "Team Project • 1 Member" : "Individual Project";
+        projectType === "team"
+          ? "Team Project • 1 Member"
+          : "Individual Project";
 
       project.description = description;
 
@@ -431,27 +431,31 @@ export async function GET(request, context) {
       );
     }
 
-   const project = await Project.findById(id)
-  .populate({
-    path: "student",
-    select: "name email",
-  })
-  .populate({
-    path: "mentor",
-    select: "name",
-  })
-  .populate({
-    path: "mentor2",
-    select: "name",
-  })
-  .populate({
-    path: "teamMembers",
-    select: "fullName profileImage",
-    populate: {
-      path: "userId",
-      select: "name email",
-    },
-  });
+    const project = await Project.findById(id)
+      .populate({
+        path: "student",
+        select: "name email",
+      })
+      .populate({
+        path: "mentor",
+        select: "name",
+      })
+      .populate({
+        path: "mentorReviews.reviewedBy",
+        select: "name",
+      })
+      .populate({
+        path: "mentor2",
+        select: "name",
+      })
+      .populate({
+        path: "teamMembers",
+        select: "fullName profileImage",
+        populate: {
+          path: "userId",
+          select: "name email",
+        },
+      });
 
     if (!project) {
       return NextResponse.json(
@@ -610,7 +614,7 @@ export async function DELETE(request, context) {
         project.reportFile.resourceType || "raw",
       );
     }
-       if (project.certificateFile?.publicId) {
+    if (project.certificateFile?.publicId) {
       await deleteFromCloudinary(
         project.certificateFile.publicId,
         project.certificateFile.resourceType || "raw",
@@ -641,7 +645,7 @@ export async function DELETE(request, context) {
         project.reportFile2.resourceType || "raw",
       );
     }
-     if (project.certificateFile2?.publicId) {
+    if (project.certificateFile2?.publicId) {
       await deleteFromCloudinary(
         project.certificateFile2.publicId,
         project.certificateFile2.resourceType || "raw",
