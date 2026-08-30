@@ -1,12 +1,8 @@
-
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  Download,
-  Loader2,
-} from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 
 import StudentFilters from "../components/elements/StudentFilter";
 import StudentCard from "../components/elements/StudentCard";
@@ -19,8 +15,7 @@ const StudentSearch = () => {
   // INITIAL SEARCH
   // ============================================================
 
-  const initialSearch =
-    searchParams.get("search") || "";
+  const initialSearch = searchParams.get("search") || "";
 
   // ============================================================
   // STUDENTS
@@ -28,11 +23,9 @@ const StudentSearch = () => {
 
   const [students, setStudents] = useState([]);
 
-  const [loadingStudents, setLoadingStudents] =
-    useState(true);
+  const [loadingStudents, setLoadingStudents] = useState(true);
 
-  const [loadingMore, setLoadingMore] =
-    useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // ============================================================
   // PAGINATION
@@ -40,8 +33,7 @@ const StudentSearch = () => {
 
   const [page, setPage] = useState(1);
 
-  const [hasMore, setHasMore] =
-    useState(true);
+  const [hasMore, setHasMore] = useState(true);
 
   // Prevent multiple requests
   const isFetching = useRef(false);
@@ -53,37 +45,29 @@ const StudentSearch = () => {
   // FILTERS
   // ============================================================
 
-  const [search, setSearch] =
-    useState(initialSearch);
+  const [search, setSearch] = useState(initialSearch);
 
-  const [department, setDepartment] =
-    useState("all");
+  const [department, setDepartment] = useState("all");
 
-  const [skill, setSkill] =
-    useState("all");
+  const [skill, setSkill] = useState("all");
 
-  const [appliedFilters, setAppliedFilters] =
-    useState({
-      search: initialSearch,
-      department: "all",
-      skill: "all",
-    });
+  const [appliedFilters, setAppliedFilters] = useState({
+    search: initialSearch,
+    department: "all",
+    skill: "all",
+  });
 
   // ============================================================
   // DOWNLOAD
   // ============================================================
 
-  const [downloading, setDownloading] =
-    useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   // ============================================================
   // FETCH STUDENTS
   // ============================================================
 
-  const fetchStudents = async (
-    pageNumber,
-    append = false
-  ) => {
+  const fetchStudents = async (pageNumber, append = false) => {
     if (isFetching.current) return;
 
     try {
@@ -95,24 +79,17 @@ const StudentSearch = () => {
         setLoadingStudents(true);
       }
 
-      const response = await fetch(
-        `/api/students?page=${pageNumber}`,
-        {
-          cache: "no-store",
-        }
-      );
+      const response = await fetch(`/api/students?page=${pageNumber}`, {
+        cache: "no-store",
+      });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          result.message ||
-            "Failed to fetch students"
-        );
+        throw new Error(result.message || "Failed to fetch students");
       }
 
-      const newStudents =
-        result.students || [];
+      const newStudents = result.students || [];
 
       // ----------------------------------------------------------
       // FIRST PAGE
@@ -125,31 +102,19 @@ const StudentSearch = () => {
       // ----------------------------------------------------------
       // NEXT PAGES
       // ----------------------------------------------------------
-
       else {
-        setStudents((prev) => [
-          ...prev,
-          ...newStudents,
-        ]);
+        setStudents((prev) => [...prev, ...newStudents]);
       }
 
       // ----------------------------------------------------------
       // PAGINATION
       // ----------------------------------------------------------
 
-      setPage(
-        result.pagination?.page ||
-          pageNumber
-      );
+      setPage(result.pagination?.page || pageNumber);
 
-      setHasMore(
-        result.pagination?.hasMore || false
-      );
+      setHasMore(result.pagination?.hasMore || false);
     } catch (error) {
-      console.error(
-        "FETCH_STUDENTS_ERROR:",
-        error
-      );
+      console.error("FETCH_STUDENTS_ERROR:", error);
 
       if (!append) {
         setStudents([]);
@@ -179,46 +144,34 @@ const StudentSearch = () => {
 
     if (!target) return;
 
-    const observer =
-      new IntersectionObserver(
-        (entries) => {
-          const firstEntry = entries[0];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0];
 
-          if (
-            firstEntry.isIntersecting &&
-            hasMore &&
-            !loadingStudents &&
-            !loadingMore &&
-            !isFetching.current
-          ) {
-            fetchStudents(
-              page + 1,
-              true
-            );
-          }
-        },
-        {
-          root: null,
-
-          // Start loading before the user
-          // actually reaches the bottom
-          rootMargin: "300px",
-
-          threshold: 0,
+        if (
+          firstEntry.isIntersecting &&
+          hasMore &&
+          !loadingStudents &&
+          !loadingMore &&
+          !isFetching.current
+        ) {
+          fetchStudents(page + 1, true);
         }
-      );
+      },
+      {
+        root: null,
+        rootMargin: "300px",
+
+        threshold: 0,
+      },
+    );
 
     observer.observe(target);
 
     return () => {
       observer.disconnect();
     };
-  }, [
-    page,
-    hasMore,
-    loadingStudents,
-    loadingMore,
-  ]);
+  }, [page, hasMore, loadingStudents, loadingMore]);
 
   // ============================================================
   // DEPARTMENTS
@@ -226,10 +179,7 @@ const StudentSearch = () => {
 
   const departments = useMemo(() => {
     const values = students
-      .map(
-        (student) =>
-          student.department
-      )
+      .map((student) => student.department)
       .filter(Boolean);
 
     return [...new Set(values)];
@@ -240,16 +190,11 @@ const StudentSearch = () => {
   // ============================================================
 
   const availableSkills = useMemo(() => {
-    const values = students.flatMap(
-      (student) =>
-        Array.isArray(student.skills)
-          ? student.skills
-          : []
+    const values = students.flatMap((student) =>
+      Array.isArray(student.skills) ? student.skills : [],
     );
 
-    return [...new Set(values)].filter(
-      Boolean
-    );
+    return [...new Set(values)].filter(Boolean);
   }, [students]);
 
   // ============================================================
@@ -270,15 +215,9 @@ const StudentSearch = () => {
 
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
-      const searchValue =
-        appliedFilters.search
-          .toLowerCase()
-          .trim();
+      const searchValue = appliedFilters.search.toLowerCase().trim();
 
-      const studentSkills =
-        Array.isArray(student.skills)
-          ? student.skills
-          : [];
+      const studentSkills = Array.isArray(student.skills) ? student.skills : [];
 
       // ----------------------------------------------------------
       // SEARCH
@@ -286,19 +225,11 @@ const StudentSearch = () => {
 
       const matchesSearch =
         !searchValue ||
-        (student.fullName || "")
-          .toLowerCase()
-          .includes(searchValue) ||
-        (student.program || "")
-          .toLowerCase()
-          .includes(searchValue) ||
-        (student.department || "")
-          .toLowerCase()
-          .includes(searchValue) ||
+        (student.fullName || "").toLowerCase().includes(searchValue) ||
+        (student.program || "").toLowerCase().includes(searchValue) ||
+        (student.department || "").toLowerCase().includes(searchValue) ||
         studentSkills.some((item) =>
-          String(item)
-            .toLowerCase()
-            .includes(searchValue)
+          String(item).toLowerCase().includes(searchValue),
         );
 
       // ----------------------------------------------------------
@@ -306,30 +237,21 @@ const StudentSearch = () => {
       // ----------------------------------------------------------
 
       const matchesDepartment =
-        appliedFilters.department ===
-          "all" ||
-        student.department ===
-          appliedFilters.department;
+        appliedFilters.department === "all" ||
+        student.department === appliedFilters.department;
 
       // ----------------------------------------------------------
       // SKILL
       // ----------------------------------------------------------
 
       const matchesSkill =
-        appliedFilters.skill ===
-          "all" ||
+        appliedFilters.skill === "all" ||
         studentSkills.some(
           (item) =>
-            String(item)
-              .toLowerCase() ===
-            appliedFilters.skill.toLowerCase()
+            String(item).toLowerCase() === appliedFilters.skill.toLowerCase(),
         );
 
-      return (
-        matchesSearch &&
-        matchesDepartment &&
-        matchesSkill
-      );
+      return matchesSearch && matchesDepartment && matchesSkill;
     });
   }, [students, appliedFilters]);
 
@@ -341,60 +263,35 @@ const StudentSearch = () => {
     try {
       setDownloading(true);
 
-      const params =
-        new URLSearchParams();
+      const params = new URLSearchParams();
 
       if (appliedFilters.search) {
-        params.set(
-          "search",
-          appliedFilters.search
-        );
+        params.set("search", appliedFilters.search);
       }
 
-      if (
-        appliedFilters.department !==
-        "all"
-      ) {
-        params.set(
-          "department",
-          appliedFilters.department
-        );
+      if (appliedFilters.department !== "all") {
+        params.set("department", appliedFilters.department);
       }
 
-      if (
-        appliedFilters.skill !== "all"
-      ) {
-        params.set(
-          "skill",
-          appliedFilters.skill
-        );
+      if (appliedFilters.skill !== "all") {
+        params.set("skill", appliedFilters.skill);
       }
 
-      const response = await fetch(
-        `/api/students/export?${params.toString()}`
-      );
+      const response = await fetch(`/api/students/export?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error(
-          "Failed to download students"
-        );
+        throw new Error("Failed to download students");
       }
 
-      const blob =
-        await response.blob();
+      const blob = await response.blob();
 
-      const url =
-        window.URL.createObjectURL(
-          blob
-        );
+      const url = window.URL.createObjectURL(blob);
 
-      const link =
-        document.createElement("a");
+      const link = document.createElement("a");
 
       link.href = url;
 
-      link.download =
-        "student-profiles.xlsx";
+      link.download = "student-profiles.xlsx";
 
       document.body.appendChild(link);
 
@@ -404,10 +301,7 @@ const StudentSearch = () => {
 
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error(
-        "DOWNLOAD_ERROR:",
-        error
-      );
+      console.error("DOWNLOAD_ERROR:", error);
     } finally {
       setDownloading(false);
     }
@@ -418,10 +312,7 @@ const StudentSearch = () => {
   // ============================================================
 
   const handleSave = (student) => {
-    console.log(
-      "Saved student:",
-      student
-    );
+    console.log("Saved student:", student);
   };
 
   // ============================================================
@@ -520,9 +411,7 @@ const StudentSearch = () => {
             type="button"
             onClick={handleDownload}
             disabled={
-              downloading ||
-              loadingStudents ||
-              filteredStudents.length === 0
+              downloading || loadingStudents || filteredStudents.length === 0
             }
             className="
               inline-flex
@@ -623,15 +512,13 @@ const StudentSearch = () => {
                 lg:grid-cols-4
               "
             >
-              {filteredStudents.map(
-                (student) => (
-                  <StudentCard
-                    key={student._id}
-                    student={student}
-                    onSave={handleSave}
-                  />
-                )
-              )}
+              {filteredStudents.map((student) => (
+                <StudentCard
+                  key={student._id}
+                  student={student}
+                  onSave={handleSave}
+                />
+              ))}
             </div>
 
             {/* --------------------------------------------------
@@ -667,23 +554,21 @@ const StudentSearch = () => {
                       text-orange-500
                     "
                   />
-
                   Loading more students...
                 </div>
               )}
 
-              {!hasMore &&
-                students.length > 0 && (
-                  <p
-                    className="
+              {!hasMore && students.length > 0 && (
+                <p
+                  className="
                       text-xs
                       font-medium
                       text-slate-400
                     "
-                  >
-                    You have reached the end.
-                  </p>
-                )}
+                >
+                  You have reached the end.
+                </p>
+              )}
             </div>
           </>
         ) : (
@@ -721,8 +606,7 @@ const StudentSearch = () => {
                 text-slate-500
               "
             >
-              Try adjusting your search or
-              filters.
+              Try adjusting your search or filters.
             </p>
           </div>
         )}
@@ -732,4 +616,3 @@ const StudentSearch = () => {
 };
 
 export default StudentSearch;
-
