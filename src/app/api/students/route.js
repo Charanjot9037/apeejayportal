@@ -42,10 +42,7 @@ export async function GET(request) {
       .limit(limit)
       .lean();
 
-    console.log(
-      `STUDENTS PAGE ${page}:`,
-      students
-    );
+    
 
     // ------------------------------------------------------------
     // PAGINATION INFO
