@@ -34,9 +34,7 @@ export async function POST(request) {
       normalizedDepartment,
     } = hod;
 
-    // =====================================================
-    // GET FILTERS FROM FRONTEND
-    // =====================================================
+ 
 
     const filters = await request.json().catch(() => ({}));
 
@@ -119,7 +117,7 @@ export async function POST(request) {
       .populate({
         path: "userId",
         select:
-          "name email status profileImage",
+          "name email status",
       })
       .select(
         "userId mobileNumber department designation"

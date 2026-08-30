@@ -1,6 +1,7 @@
 import User from "@/models/user";
 import Mentor from "@/models/mentor";
 import { authenticateUser } from "@/lib/authentication";
+import user from "@/models/user";
 
 export async function getHODContext() {
   const auth = await authenticateUser();
@@ -14,28 +15,29 @@ export async function getHODContext() {
       },
     };
   }
+const user=auth.user;
 
-  const user = await User.findById(auth.user._id).lean();
+  // const user = await User.findById(auth.user._id).lean();
 
-  if (!user) {
-    return {
-      success: false,
-      response: {
-        message: "User not found",
-        status: 404,
-      },
-    };
-  }
+  // if (!user) {
+  //   return {
+  //     success: false,
+  //     response: {
+  //       message: "User not found",
+  //       status: 404,
+  //     },
+  //   };
+  // }
 
-  if (user.role?.trim().toLowerCase() !== "mentor") {
-    return {
-      success: false,
-      response: {
-        message: "Access denied",
-        status: 403,
-      },
-    };
-  }
+  // if (user.role?.trim().toLowerCase() !== "mentor") {
+  //   return {
+  //     success: false,
+  //     response: {
+  //       message: "Access denied",
+  //       status: 403,
+  //     },
+  //   };
+  // }
 
   const mentor = await Mentor.findOne({
     userId: user._id,
