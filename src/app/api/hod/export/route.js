@@ -1,20 +1,17 @@
-
 import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
-import { PassThrough } from "stream";
 
 import { connectDB } from "@/lib/db";
 
 import User from "@/models/user";
 import Mentor from "@/models/mentor";
-import Student from "@/models/student";
 import Projects from "@/models/projects";
 
 import { authenticateUser } from "@/lib/authentication";
 
 export const runtime = "nodejs";
 
-export async function GET(request) {
+export async function POST(request) {
   try {
     await connectDB();
 
@@ -99,18 +96,14 @@ export async function GET(request) {
     }
 
     // =========================================================
-    // 6. GET PROJECT IDS FROM FILTERED ROSTER
+    // 6. GET PROJECT IDS FROM REQUEST BODY
     // =========================================================
 
-    const { searchParams } = new URL(request.url);
+    const body = await request.json();
 
-    const projectIdsParam =
-      searchParams.get("projectIds") || "";
-
-    const projectIds = projectIdsParam
-      .split(",")
-      .map((id) => id.trim())
-      .filter(Boolean);
+    const projectIds = Array.isArray(body.projectIds)
+      ? body.projectIds.filter(Boolean)
+      : [];
 
     if (projectIds.length === 0) {
       return NextResponse.json(
@@ -143,110 +136,40 @@ export async function GET(request) {
       })
       .lean();
 
-    // =========================================================
-    // 8. GET STUDENT USER IDS
-    // =========================================================
-
-    const studentUserIds = projects
-      .map((project) => project.student?._id)
-      .filter(Boolean);
-
-    // =========================================================
-    // 9. GET STUDENT PROFILES
-    // =========================================================
-
-    const studentProfiles = await Student.find({
-      userId: { $in: studentUserIds },
-    }).lean();
-
-    // =========================================================
-    // 10. CREATE STUDENT MAP
-    // =========================================================
-
-    const studentMap = new Map();
-
-    studentProfiles.forEach((student) => {
-      studentMap.set(
-        String(student.userId),
-        student
+    if (projects.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "No projects found",
+        },
+        { status: 404 }
       );
-    });
+    }
 
     // =========================================================
-    // 11. CREATE EXCEL
+    // 8. CREATE EXCEL WORKBOOK
     // =========================================================
 
-    const stream = new PassThrough();
+    const workbook = new ExcelJS.Workbook();
 
-    const workbook =
-      new ExcelJS.stream.xlsx.WorkbookWriter({
-        stream,
-        useStyles: true,
-        useSharedStrings: true,
-      });
-
-    const worksheet =
-      workbook.addWorksheet("HOD Project Report");
+    const worksheet = workbook.addWorksheet(
+      "HOD Project Report"
+    );
 
     // =========================================================
-    // 12. EXCEL COLUMNS
+    // 9. ONLY PROJECT ROSTER FIELDS
     // =========================================================
 
     worksheet.columns = [
-      {
-        header: "Student Name",
-        key: "studentName",
-        width: 28,
-      },
-      {
-        header: "Email",
-        key: "email",
-        width: 35,
-      },
-      {
-        header: "Roll Number",
-        key: "rollNumber",
-        width: 18,
-      },
-      {
-        header: "Department",
-        key: "department",
-        width: 20,
-      },
-      {
-        header: "Program",
-        key: "program",
-        width: 18,
-      },
-      {
-        header: "Specialization",
-        key: "specialization",
-        width: 20,
-      },
-      {
-        header: "Academic Batch",
-        key: "academicBatch",
-        width: 18,
-      },
-      {
-        header: "Semester",
-        key: "semester",
-        width: 15,
-      },
       {
         header: "Project Title",
         key: "projectTitle",
         width: 35,
       },
       {
-        header: "Project Type",
-        key: "projectType",
-        width: 18,
-      },
-      {
-        header: "Tech Stack",
-        key: "techStack",
-        width: 40,
+        header: "Student",
+        key: "student",
+        width: 25,
       },
       {
         header: "Mentor",
@@ -259,14 +182,24 @@ export async function GET(request) {
         width: 25,
       },
       {
-        header: "Status",
-        key: "status",
+        header: "Project Type",
+        key: "projectType",
         width: 20,
       },
       {
-        header: "Approval Date",
-        key: "approvalDate",
-        width: 20,
+        header: "Tech Stack",
+        key: "techStack",
+        width: 40,
+      },
+      {
+        header: "Status",
+        key: "status",
+        width: 22,
+      },
+      {
+        header: "Semester",
+        key: "semester",
+        width: 15,
       },
       {
         header: "GitHub",
@@ -281,154 +214,104 @@ export async function GET(request) {
     ];
 
     // =========================================================
-    // 13. HEADER STYLE
+    // 10. HEADER STYLE
     // =========================================================
 
-    worksheet.getRow(1).font = {
+    const headerRow = worksheet.getRow(1);
+
+    headerRow.font = {
       bold: true,
     };
 
-    worksheet.getRow(1).commit();
+    headerRow.alignment = {
+      vertical: "middle",
+      horizontal: "center",
+    };
 
     // =========================================================
-    // 14. WRITE FILTERED PROJECT STUDENTS
+    // 11. ADD PROJECT ROWS
     // =========================================================
 
     for (const project of projects) {
-      const studentUserId =
-        project.student?._id;
+      const techStack = Array.isArray(project.techStack)
+        ? [
+            ...new Set(
+              project.techStack
+                .filter(Boolean)
+                .map((item) => String(item).trim())
+            ),
+          ].join(", ")
+        : "";
 
-      const studentProfile =
-        studentUserId
-          ? studentMap.get(
-              String(studentUserId)
-            )
-          : null;
+      worksheet.addRow({
+        projectTitle: project.title || "-",
 
-      const approvalDate =
-        project.mentorReviewedAt
-          ? new Date(
-              project.mentorReviewedAt
-            ).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })
-          : "-";
+        student:
+          project.student?.name ||
+          "Not Assigned",
 
-      const techStack =
-        Array.isArray(project.techStack)
-          ? [
-              ...new Set(
-                project.techStack
-                  .filter(Boolean)
-                  .map((item) =>
-                    String(item).trim()
-                  )
-              ),
-            ].join(", ")
-          : "";
+        mentor:
+          project.mentor?.name ||
+          "Not Assigned",
 
-      worksheet
-        .addRow({
-          studentName:
-            project.student?.name ||
-            studentProfile?.fullName ||
-            "",
+        mentor2:
+          project.mentor2?.name ||
+          "Not Assigned",
 
-          email:
-            project.student?.email || "",
+        projectType:
+          project.projectType || "-",
 
-          rollNumber:
-            studentProfile?.rollNumber || "",
+        techStack,
 
-          department:
-            studentProfile?.department ||
-            mentor.department ||
-            "",
+        status:
+          project.status || "-",
 
-          program:
-            studentProfile?.program || "",
+        semester:
+          project.semester || "-",
 
-          specialization:
-            studentProfile?.specialization || "",
+        githubLink:
+          project.githubLink || "-",
 
-          academicBatch:
-            studentProfile?.academicBatch || "",
-
-          semester:
-            project.semester ||
-            studentProfile?.lastYear ||
-            "",
-
-          projectTitle:
-            project.title || "",
-
-          projectType:
-            project.projectType || "",
-
-          techStack,
-
-          mentor:
-            project.mentor?.name ||
-            "Not Assigned",
-
-          mentor2:
-            project.mentor2?.name ||
-            "Not Assigned",
-
-          status:
-            project.status || "",
-
-          approvalDate,
-
-          githubLink:
-            project.githubLink || "",
-
-          liveLink:
-            project.liveLink || "",
-        })
-        .commit();
+        liveLink:
+          project.liveLink || "-",
+      });
     }
 
     // =========================================================
-    // 15. COMPLETE EXCEL
+    // 12. FORMAT WORKSHEET
     // =========================================================
 
-    await worksheet.commit();
-    await workbook.commit();
+    worksheet.eachRow((row, rowNumber) => {
+      row.alignment = {
+        vertical: "middle",
+      };
 
-    // =========================================================
-    // 16. DOWNLOAD
-    // =========================================================
-
-    return new NextResponse(
-      new ReadableStream({
-        start(controller) {
-          stream.on("data", (chunk) => {
-            controller.enqueue(chunk);
-          });
-
-          stream.on("end", () => {
-            controller.close();
-          });
-
-          stream.on("error", (error) => {
-            controller.error(error);
-          });
-        },
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type":
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-
-          "Content-Disposition":
-            'attachment; filename="hod-project-report.xlsx"',
-        },
+      if (rowNumber !== 1) {
+        row.height = 22;
       }
-    );
+    });
+
+    // =========================================================
+    // 13. GENERATE XLSX BUFFER
+    // =========================================================
+
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    // =========================================================
+    // 14. DOWNLOAD
+    // =========================================================
+
+    return new NextResponse(buffer, {
+      status: 200,
+
+      headers: {
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+        "Content-Disposition":
+          'attachment; filename="hod-project-report.xlsx"',
+      },
+    });
   } catch (error) {
     console.error(
       "HOD_EXPORT_ERROR:",
@@ -448,4 +331,3 @@ export async function GET(request) {
     );
   }
 }
-
