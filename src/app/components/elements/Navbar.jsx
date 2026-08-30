@@ -52,10 +52,10 @@ export default function Navbar() {
       return;
     }
 
-       if (role === "admin" || designation === "hod") {
-         router.push("/hod-dashboard");
-         return;
-       }
+    if (role === "admin" || designation === "hod") {
+      router.push("/hod-dashboard");
+      return;
+    }
     router.push("/dashboard");
   };
 
@@ -63,9 +63,9 @@ export default function Navbar() {
   const hideAuthSection = pathname === "/" || pathname === "/studentSearch";
 
   return (
-    <nav className="flex flex-col items-center justify-between border px-2 py-4 md:flex-row md:px-8">
+    <nav className="flex  items-center justify-between border px-2 py-4 md:flex-row md:px-8">
       {/* Left Side */}
-      <div className="flex gap-7">
+      <div className="flex gap-7 justify-end">
         <Image
           src="/logo.png"
           alt="Apeejay Logo"
@@ -87,31 +87,28 @@ export default function Navbar() {
       </div>
 
       {/* Right Side */}
-    
-        <div className="mt-4 flex items-center gap-3 md:mt-0">
-          {!isLoggedIn ? (
-            /* Not Logged In */
-            <button
-              onClick={() => router.push("/login")}
-              className="cursor-pointer rounded-md bg-secondary px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
-            >
-              Login
-            </button>
-          ) : (
-            /* Logged In */
-            <>
-              <button
-                onClick={handleDashboard}
-                className="cursor-pointer rounded-md bg-primary px-5 py-2 text-sm font-medium text-white transition hover:opacity-90"
-              >
-                Dashboard
-              </button>
 
-              
-            </>
-          )}
-        </div>
-    
+      <div className="mt-4 flex items-center gap-3 md:mt-0">
+        {!isLoggedIn ? (
+          /* Not Logged In */
+          <button
+            onClick={() => router.push("/login")}
+            className="cursor-pointer rounded-md bg-secondary px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
+          >
+            Login
+          </button>
+        ) : (
+          /* Logged In */
+          <>
+            <button
+              onClick={handleDashboard}
+              className="cursor-pointer rounded-md bg-primary px-5 py-2 text-sm font-medium text-white transition hover:opacity-90"
+            >
+              Dashboard
+            </button>
+          </>
+        )}
+      </div>
     </nav>
   );
 }

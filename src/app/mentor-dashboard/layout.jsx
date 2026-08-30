@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Sidebar from '@/app/components/elements/sidebar';
-import { mentorDashboardData } from '@/constants/mentorData';
+import { useState } from "react";
+import Sidebar from "@/app/components/elements/sidebar";
+import { mentorDashboardData } from "@/constants/mentorData";
 export default function MentorLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -13,9 +13,9 @@ export default function MentorLayout({ children }) {
         setSidebarOpen={setSidebarOpen}
         sidebarData={mentorDashboardData}
       />
-
-  <main className="flex-1 overflow-y-auto p-4">
+      <main className="flex-1 overflow-y-auto p-4 pt-[68px] lg:pt-0">
         {children}
-      </main>    </div>
+      </main>{" "}
+    </div>
   );
 }
