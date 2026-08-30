@@ -685,23 +685,6 @@ export default function RecruiterProjectDetail({
                     </Badge>
                   )}
 
-                  {project.projectType && (
-                    <Badge
-                      className="
-                        border-white/30
-                        bg-black/30
-                        text-[9px]
-                        text-white
-                        backdrop-blur-sm
-                        hover:bg-black/30
-                      "
-                    >
-                      {project.projectType === "team"
-                        ? "Team Project"
-                        : "Individual Project"}
-                    </Badge>
-                  )}
-
                 </div>
 
                 <h1

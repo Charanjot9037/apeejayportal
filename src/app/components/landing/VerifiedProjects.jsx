@@ -8,6 +8,7 @@ import ProjectFilters from "@/app/components/elements/ProjectFilters";
 import ProjectCard from "@/app/components/elements/ProjectCard";
 
 import { Button } from "@/components/ui/button";
+import ProjectCardSkeleton from "@/components/ui/projectCardSkeleton";
 
 const VerifiedProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -376,11 +377,7 @@ const VerifiedProjects = () => {
         "
       >
         {loadingProjects ? (
-          <div className="col-span-full flex justify-center py-12">
-            <p className="text-sm text-slate-500">
-              Loading verified projects...
-            </p>
-          </div>
+          <ProjectCardSkeleton/>
         ) : (
           projects.map((project) => (
             <ProjectCard

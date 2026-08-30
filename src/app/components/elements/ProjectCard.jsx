@@ -189,6 +189,7 @@ const ProjectCard = ({ project }) => {
             className="
               flex
               items-center
+              bg-primary
               gap-1.5
               rounded-md
               bg-slate-50
@@ -196,7 +197,7 @@ const ProjectCard = ({ project }) => {
               py-2
             "
           >
-            <GraduationCap className="h-3.5 w-3.5 text-orange-500" />
+            <GraduationCap className="h-3.5 w-3.5 text-white" />
 
             <div className="min-w-0">
               <p className="text-[10px] uppercase font-medium tracking-wide text-slate-400">
