@@ -1,14 +1,9 @@
+'use client';
 
+import Link from 'next/link';
+import { getSkillList } from '@/utils/skillHandler';
 
-"use client";
-
-import Link from "next/link";
-import { getSkillList } from "@/utils/skillHandler";
-
-import {
-  BriefcaseBusiness,
-  CheckCircle2,
-} from "lucide-react";
+import { BriefcaseBusiness, CheckCircle2 } from 'lucide-react';
 
 const StudentCard = ({ student, onSave }) => {
   const {
@@ -42,8 +37,8 @@ const StudentCard = ({ student, onSave }) => {
         hover:shadow-lg
       "
     >
-    <div
-  className="
+      <div
+        className="
     relative
     overflow-hidden
     bg-slate-100
@@ -51,13 +46,13 @@ const StudentCard = ({ student, onSave }) => {
      w-75
      flex
   "
->
-  {profileImage ? (
-    <img
-      src={profileImage}
-      alt={fullName || "Student"}
-      sizes="(max-width: 768px) 100vw, 33vw"
-      className="
+      >
+        {profileImage ? (
+          <img
+            src={profileImage}
+            alt={fullName || 'Student'}
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="
       object-fill
       h-full
       w-full
@@ -66,15 +61,15 @@ const StudentCard = ({ student, onSave }) => {
         ease-out
         group-hover:scale-[1.03]
       "
-    />
-  ) : (
-    <div className="flex h-full w-full items-center justify-center text-slate-400">
-      No profile image
-    </div>
-  )}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-slate-400">
+            No profile image
+          </div>
+        )}
 
-  <div
-    className="
+        <div
+          className="
       pointer-events-none
       absolute
       inset-0
@@ -83,8 +78,8 @@ const StudentCard = ({ student, onSave }) => {
       via-transparent
       to-transparent
     "
-  />
-</div>
+        />
+      </div>
 
       {/* ================= Content ================= */}
 
@@ -133,13 +128,13 @@ const StudentCard = ({ student, onSave }) => {
         </p>
 
         {/* ================= Skills ================= */}
-{/* ================= Skills ================= */}
+        {/* ================= Skills ================= */}
 
-<div className="mt-3 flex flex-wrap gap-1.5">
-  {skillList.slice(0, 4).map((skill, index) => (
-    <span
-      key={`${skill}-${index}`}
-      className="
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {skillList.slice(0, 4).map((skill, index) => (
+            <span
+              key={`${skill}-${index}`}
+              className="
         rounded-full
         border
         border-slate-200
@@ -150,14 +145,14 @@ const StudentCard = ({ student, onSave }) => {
         font-medium
         text-slate-600
       "
-    >
-      {skill}
-    </span>
-  ))}
+            >
+              {skill}
+            </span>
+          ))}
 
-  {skillList.length > 4 && (
-    <span
-      className="
+          {skillList.length > 4 && (
+            <span
+              className="
         rounded-full
         border
         border-[#064a82]/10
@@ -168,16 +163,16 @@ const StudentCard = ({ student, onSave }) => {
         font-medium
         text-[#064a82]
       "
-    >
-      +{skillList.length - 4}
-    </span>
-  )}
-</div>
+            >
+              +{skillList.length - 4}
+            </span>
+          )}
+        </div>
         {/* ================= Actions ================= */}
 
         <div className="pt-3">
           <Link
-            href={`/students/${_id}`}
+            href={`/student/${_id}`}
             className="
               flex
               h-10

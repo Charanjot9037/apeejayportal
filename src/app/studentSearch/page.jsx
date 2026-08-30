@@ -388,58 +388,44 @@
 
 // export default StudentSearch;
 
+// // to map data use this code -- DONT DELETE >> IMP
+'use client';
 
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Download, Loader2 } from 'lucide-react';
 
+import StudentFilters from '../components/elements/StudentFilter';
+import StudentCard from '../components/elements/StudentCard';
 
-
-// // to map data use this code -- DONT DELETE >> IMP 
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import {
-  Download,
-  Loader2,
-} from "lucide-react";
-
-import StudentFilters from "../components/elements/StudentFilter";
-import StudentCard from "../components/elements/StudentCard";
-
-import ProjectHeader from "../components/elements/ProjectHeader";
+import ProjectHeader from '../components/elements/ProjectHeader';
 
 const StudentSearch = () => {
   const searchParams = useSearchParams();
 
   // ================= INITIAL SEARCH =================
 
-  const initialSearch =
-    searchParams.get("search") || "";
+  const initialSearch = searchParams.get('search') || '';
 
   // ================= STUDENTS =================
 
   const [students, setStudents] = useState([]);
-  const [loadingStudents, setLoadingStudents] =
-    useState(true);
+  const [loadingStudents, setLoadingStudents] = useState(true);
 
   // ================= FILTERS =================
 
-  const [search, setSearch] =
-    useState(initialSearch);
+  const [search, setSearch] = useState(initialSearch);
 
-  const [department, setDepartment] =
-    useState("all");
+  const [department, setDepartment] = useState('all');
 
-  const [skill, setSkill] =
-    useState("all");
+  const [skill, setSkill] = useState('all');
 
-    const [downloading, setDownloading] =
-  useState(false);
-  const [appliedFilters, setAppliedFilters] =
-    useState({
-      search: initialSearch,
-      department: "all",
-      skill: "all",
-    });
+  const [downloading, setDownloading] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState({
+    search: initialSearch,
+    department: 'all',
+    skill: 'all',
+  });
 
   // ================= FETCH STUDENTS =================
 
@@ -448,24 +434,17 @@ const StudentSearch = () => {
       try {
         setLoadingStudents(true);
 
-        const response =
-          await fetch("/api/students");
+        const response = await fetch('/api/students');
 
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            result.message ||
-              "Failed to fetch students"
-          );
+          throw new Error(result.message || 'Failed to fetch students');
         }
 
         setStudents(result.students || []);
       } catch (error) {
-        console.error(
-          "FETCH_STUDENTS_ERROR:",
-          error
-        );
+        console.error('FETCH_STUDENTS_ERROR:', error);
 
         setStudents([]);
       } finally {
@@ -486,77 +465,57 @@ const StudentSearch = () => {
     return [...new Set(values)];
   }, [students]);
   const handleDownload = async () => {
-  try {
-    setDownloading(true);
+    try {
+      setDownloading(true);
 
-    const params = new URLSearchParams();
+      const params = new URLSearchParams();
 
-    if (appliedFilters.search) {
-      params.set(
-        "search",
-        appliedFilters.search
-      );
+      if (appliedFilters.search) {
+        params.set('search', appliedFilters.search);
+      }
+
+      if (appliedFilters.department !== 'all') {
+        params.set('department', appliedFilters.department);
+      }
+
+      if (appliedFilters.skill !== 'all') {
+        params.set('skill', appliedFilters.skill);
+      }
+
+      const response = await fetch(`/api/students/export?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to download students');
+      }
+
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = 'student-profiles.xlsx';
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('DOWNLOAD_ERROR:', error);
+    } finally {
+      setDownloading(false);
     }
-
-    if (
-      appliedFilters.department !== "all"
-    ) {
-      params.set(
-        "department",
-        appliedFilters.department
-      );
-    }
-
-    if (appliedFilters.skill !== "all") {
-      params.set(
-        "skill",
-        appliedFilters.skill
-      );
-    }
-
-    const response = await fetch(
-      `/api/students/export?${params.toString()}`
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        "Failed to download students"
-      );
-    }
-
-    const blob = await response.blob();
-
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "student-profiles.xlsx";
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    link.remove();
-
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error(
-      "DOWNLOAD_ERROR:",
-      error
-    );
-  } finally {
-    setDownloading(false);
-  }
-};
+  };
 
   // ================= SKILLS =================
 
   const availableSkills = useMemo(() => {
     const values = students.flatMap((student) =>
-      Array.isArray(student.skills)
-        ? student.skills
-        : []
+      Array.isArray(student.skills) ? student.skills : [],
     );
 
     return [...new Set(values)].filter(Boolean);
@@ -576,68 +535,44 @@ const StudentSearch = () => {
 
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
-      const searchValue =
-        appliedFilters.search
-          .toLowerCase()
-          .trim();
+      const searchValue = appliedFilters.search.toLowerCase().trim();
 
-      const studentSkills =
-        Array.isArray(student.skills)
-          ? student.skills
-          : [];
+      const studentSkills = Array.isArray(student.skills) ? student.skills : [];
 
       // Search
 
       const matchesSearch =
         !searchValue ||
-        (student.fullName || "")
-          .toLowerCase()
-          .includes(searchValue) ||
-        (student.program || "")
-          .toLowerCase()
-          .includes(searchValue) ||
-        (student.department || "")
-          .toLowerCase()
-          .includes(searchValue) ||
+        (student.fullName || '').toLowerCase().includes(searchValue) ||
+        (student.program || '').toLowerCase().includes(searchValue) ||
+        (student.department || '').toLowerCase().includes(searchValue) ||
         studentSkills.some((item) =>
-          String(item)
-            .toLowerCase()
-            .includes(searchValue)
+          String(item).toLowerCase().includes(searchValue),
         );
 
       // Department
 
       const matchesDepartment =
-        appliedFilters.department ===
-          "all" ||
-        student.department ===
-          appliedFilters.department;
+        appliedFilters.department === 'all' ||
+        student.department === appliedFilters.department;
 
       // Skill
 
       const matchesSkill =
-        appliedFilters.skill === "all" ||
+        appliedFilters.skill === 'all' ||
         studentSkills.some(
           (item) =>
-            String(item).toLowerCase() ===
-            appliedFilters.skill.toLowerCase()
+            String(item).toLowerCase() === appliedFilters.skill.toLowerCase(),
         );
 
-      return (
-        matchesSearch &&
-        matchesDepartment &&
-        matchesSkill
-      );
+      return matchesSearch && matchesDepartment && matchesSkill;
     });
   }, [students, appliedFilters]);
 
   // ================= SAVE =================
 
   const handleSave = (student) => {
-    console.log(
-      "Saved student:",
-      student
-    );
+    console.log('Saved student:', student);
   };
 
   // ================= RETURN =================
@@ -680,9 +615,9 @@ const StudentSearch = () => {
           departments={departments}
           skills={availableSkills}
         />
-       
+
         {/* ================= Results Header ================= */}
-{/* 
+        {/* 
         <div
           className="
             mt-7
@@ -716,7 +651,7 @@ const StudentSearch = () => {
           </div>
         </div> */}
         <div
-  className="
+          className="
     mt-7
     flex
     flex-col
@@ -725,40 +660,38 @@ const StudentSearch = () => {
     sm:items-center
     sm:justify-between
   "
->
-  <div>
-    <p
-      className="
+        >
+          <div>
+            <p
+              className="
         text-sm
         font-semibold
         text-slate-800
       "
-    >
-      Student Profiles
-    </p>
+            >
+              Student Profiles
+            </p>
 
-    <p
-      className="
+            <p
+              className="
         mt-0.5
         text-[10px]
         text-slate-500
       "
-    >
-      {loadingStudents
-        ? "Loading students..."
-        : `${filteredStudents.length} students found`}
-    </p>
-  </div>
+            >
+              {loadingStudents
+                ? 'Loading students...'
+                : `${filteredStudents.length} students found`}
+            </p>
+          </div>
 
-  <button
-    type="button"
-    onClick={handleDownload}
-    disabled={
-      downloading ||
-      loadingStudents ||
-      filteredStudents.length === 0
-    }
-    className="
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={
+              downloading || loadingStudents || filteredStudents.length === 0
+            }
+            className="
       inline-flex
       items-center
       justify-center
@@ -777,22 +710,20 @@ const StudentSearch = () => {
       disabled:cursor-not-allowed
       disabled:opacity-50
     "
-  >
-    {downloading ? (
-      <>
-        <Loader2
-          className="h-4 w-4 animate-spin"
-        />
-        Preparing...
-      </>
-    ) : (
-      <>
-        <Download className="h-4 w-4" />
-        Download Excel
-      </>
-    )}
-  </button>
-</div>
+          >
+            {downloading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Preparing...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                Download Excel
+              </>
+            )}
+          </button>
+        </div>
 
         {/* ================= Student Grid ================= */}
 
@@ -831,15 +762,13 @@ const StudentSearch = () => {
               lg:grid-cols-4
             "
           >
-            {filteredStudents.map(
-              (student) => (
-                <StudentCard
-                  key={student._id}
-                  student={student}
-                  onSave={handleSave}
-                />
-              )
-            )}
+            {filteredStudents.map((student) => (
+              <StudentCard
+                key={student._id}
+                student={student}
+                onSave={handleSave}
+              />
+            ))}
           </div>
         ) : (
           <div
@@ -872,8 +801,7 @@ const StudentSearch = () => {
                 text-slate-500
               "
             >
-              Try adjusting your search or
-              filters.
+              Try adjusting your search or filters.
             </p>
           </div>
         )}
@@ -883,5 +811,3 @@ const StudentSearch = () => {
 };
 
 export default StudentSearch;
-
-

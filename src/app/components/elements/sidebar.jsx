@@ -54,18 +54,36 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
 
   return (
     <>
-      {/* ================= MOBILE HAMBURGER ================= */}
       {!sidebarOpen && (
-        <button
-          type="button"
-          onClick={() => setSidebarOpen(true)}
-          className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-orange text-white shadow-md lg:hidden"
-          aria-label="Open sidebar"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-      )}
+        <div className="fixed left-0  right-0 top-0 z-50 border-b border-primary-orange bg-white/95 px-4 py-3 shadow-sm backdrop-blur-md lg:hidden">
+          <div className="flex items-center justify-between">
+            {/* Menu Button */}
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="
+          flex h-10 w-10
+          items-center justify-center
+          rounded-xl
+          bg-primary-orange
+          text-white
+          shadow-md
+          transition-all
+          duration-200
+          hover:scale-105
+          hover:shadow-lg
+          active:scale-95
+        "
+              aria-label="Open sidebar"
+            >
+              <Menu className="h-5 w-5" strokeWidth={2.5} />
+            </button>
 
+            {/* Right Spacer */}
+            <div className="w-10" />
+          </div>
+        </div>
+      )}
       {/* ================= SIDEBAR OVERLAY ================= */}
       <SidebarOverlay
         sidebarOpen={sidebarOpen}
