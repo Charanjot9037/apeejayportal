@@ -5,10 +5,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  Download,
-  Loader2,
-} from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 
 import StudentFilters from "../components/elements/StudentFilter";
 import StudentCard from "../components/elements/StudentCard";
@@ -19,8 +16,7 @@ const StudentSearch = () => {
 
   // ================= INITIAL SEARCH =================
 
-  const initialSearch =
-    searchParams.get("search") || "";
+  const initialSearch = searchParams.get("search") || "";
 
   // ================= STUDENTS =================
 
@@ -47,14 +43,11 @@ const StudentSearch = () => {
 
   // ================= FILTERS =================
 
-  const [search, setSearch] =
-    useState(initialSearch);
+  const [search, setSearch] = useState(initialSearch);
 
-  const [department, setDepartment] =
-    useState("all");
+  const [department, setDepartment] = useState("all");
 
-  const [skill, setSkill] =
-    useState("all");
+  const [skill, setSkill] = useState("all");
 
   const [downloading, setDownloading] =
     useState(false);
@@ -321,42 +314,26 @@ const StudentSearch = () => {
 
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
-      const searchValue =
-        appliedFilters.search
-          .toLowerCase()
-          .trim();
+      const searchValue = appliedFilters.search.toLowerCase().trim();
 
-      const studentSkills =
-        Array.isArray(student.skills)
-          ? student.skills
-          : [];
+      const studentSkills = Array.isArray(student.skills) ? student.skills : [];
 
       // ---------------- SEARCH ----------------
 
       const matchesSearch =
         !searchValue ||
-        (student.fullName || "")
-          .toLowerCase()
-          .includes(searchValue) ||
-        (student.program || "")
-          .toLowerCase()
-          .includes(searchValue) ||
-        (student.department || "")
-          .toLowerCase()
-          .includes(searchValue) ||
+        (student.fullName || "").toLowerCase().includes(searchValue) ||
+        (student.program || "").toLowerCase().includes(searchValue) ||
+        (student.department || "").toLowerCase().includes(searchValue) ||
         studentSkills.some((item) =>
-          String(item)
-            .toLowerCase()
-            .includes(searchValue)
+          String(item).toLowerCase().includes(searchValue),
         );
 
       // ---------------- DEPARTMENT ----------------
 
       const matchesDepartment =
-        appliedFilters.department ===
-          "all" ||
-        student.department ===
-          appliedFilters.department;
+        appliedFilters.department === "all" ||
+        student.department === appliedFilters.department;
 
       // ---------------- SKILL ----------------
 
@@ -370,11 +347,7 @@ const StudentSearch = () => {
             appliedFilters.skill.toLowerCase()
         );
 
-      return (
-        matchesSearch &&
-        matchesDepartment &&
-        matchesSkill
-      );
+      return matchesSearch && matchesDepartment && matchesSkill;
     });
   }, [students, appliedFilters]);
 
@@ -383,10 +356,7 @@ const StudentSearch = () => {
   // ============================================================
 
   const handleSave = (student) => {
-    console.log(
-      "Saved student:",
-      student
-    );
+    console.log("Saved student:", student);
   };
 
   // ============================================================
@@ -662,8 +632,7 @@ const StudentSearch = () => {
                 text-slate-500
               "
             >
-              Try adjusting your search or
-              filters.
+              Try adjusting your search or filters.
             </p>
           </div>
         )}
@@ -673,4 +642,3 @@ const StudentSearch = () => {
 };
 
 export default StudentSearch;
-

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { StatCards, Roster, DashboardHeader } from "@/app/components/elements";
 import { MENTOR_STUDENT_COLUMNS } from "@/constants/mentorData";
 import { mapMentorProjectToRoster } from "@/mappers/mentor";
+import { MENTOR_DASHBOARD_HEADER } from "@/constants/mentorData";
 
 export default function AllProject() {
   const router = useRouter();
@@ -39,7 +40,10 @@ export default function AllProject() {
   const handleViewProject = (item) => {
     router.push(`/mentor-dashboard/projects/${item.id}`);
   };
-
+  const mentorDashboardHeader = {
+    ...MENTOR_DASHBOARD_HEADER,
+    actionLabel: null,
+  };
   return (
     <div className="flex h-full">
       <main className="flex-1 ">
@@ -47,15 +51,18 @@ export default function AllProject() {
         {error && <p className="text-red-500">{error}</p>}
 
         {!loading && !error && (
-          <Roster
-            title="Project Roster"
-            data={rosterData}
-            columns={MENTOR_STUDENT_COLUMNS}
-            searchPlaceholder="Search students..."
-            onRowClick={handleViewProject}
-            onViewAll={() => console.log("View all students")}
-            viewAllLabel="View All Students"
-          />
+          <>
+            <DashboardHeader {...mentorDashboardHeader} />
+            <Roster
+              title="Project Roster"
+              data={rosterData}
+              columns={MENTOR_STUDENT_COLUMNS}
+              searchPlaceholder="Search students..."
+              onRowClick={handleViewProject}
+              onViewAll={() => console.log("View all students")}
+              viewAllLabel="View All Students"
+            />
+          </>
         )}
       </main>
     </div>

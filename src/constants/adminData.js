@@ -186,7 +186,7 @@ export const studentColumns = [
   },
   {
     key: "status",
-    label: "status",
+    label: "Status",
   },
   {
     key: "mentor",
@@ -289,12 +289,13 @@ export const STUDENT_FILTERS = [
   },
 ];
 export const mapStudentToRoster = (student) => {
+
   return {
     _id: student?._id,
 
     name: student?.fullName || student?.name || "-",
 
-    status: student?.status || "-",
+    status: student?.userId?.status || "-",
 
     email: student?.email || "-",
 
@@ -310,15 +311,9 @@ export const mapStudentToRoster = (student) => {
 
     specialization: student?.specialization || "-",
 
-    mentor:
-      student?.mentor?.userId?.name ||
-      student?.mentor?.name ||
-      "-",
+    mentor: student?.mentor?.userId?.name || student?.mentor?.name || "-",
 
-    mentorId:
-      student?.mentor?.userId?._id ||
-      student?.mentorId ||
-      "-",
+    mentorId: student?.mentor?.userId?._id || student?.mentorId || "-",
   };
 };
 export const MENTOR_ROSTER_COLUMNS = [
