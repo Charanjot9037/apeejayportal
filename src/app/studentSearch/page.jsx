@@ -421,13 +421,7 @@ const StudentSearch = () => {
           "all" ||
         studentSkills.some(
           (item) =>
-<<<<<<< HEAD
             String(item).toLowerCase() === appliedFilters.skill.toLowerCase(),
-=======
-            String(item)
-              .toLowerCase() ===
-            appliedFilters.skill.toLowerCase()
->>>>>>> 6d03cf97f962f16480150847572e776a7c115233
         );
 
       return matchesSearch && matchesDepartment && matchesSkill;
