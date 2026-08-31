@@ -65,7 +65,7 @@ export default function StudentProfilePage() {
   if (error || !student) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-5">
-        <div className="rounded-2xl border border-slate-200 bg-white px-8 py-10 text-center shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-10 text-center shadow-sm">
           <h2 className="text-lg font-semibold text-slate-800">
             Student not found
           </h2>
