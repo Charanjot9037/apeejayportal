@@ -213,10 +213,10 @@ import { Input, Label, Button } from "@/components/ui";
 import { useFormik } from "formik";
 import { loginSchema } from "@/validations/loginSchema";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff,Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/redux/authSlice";
-import { Loader2 } from "lucide-react";
+
 import { DashboardHeader } from "./elements";
 import { setStudentProfile } from "@/redux/studentSlice";
 import { setMentorProfile } from "@/redux/mentorSlice";
@@ -440,20 +440,20 @@ const Login = () => {
           </div>
 
           {/* Login Button */}
-     <Button
-  type="submit"
-  disabled={formik.isSubmitting}
-  className="h-10 w-full cursor-pointer bg-orange-500 text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70 sm:h-11"
->
-  {formik.isSubmitting ? (
-    <span className="flex items-center justify-center gap-2">
-      <Loader2 className="h-4 w-4 animate-spin" />
-      Logging in...
-    </span>
-  ) : (
-    "Login"
-  )}
-</Button>
+          <Button
+            type="submit"
+            disabled={formik.isSubmitting}
+            className="h-10 w-full cursor-pointer bg-orange-500 text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70 sm:h-11"
+          >
+            {formik.isSubmitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Logging in...
+              </span>
+            ) : (
+              "Login"
+            )}
+          </Button>
 
           {/* Divider */}
         </form>
