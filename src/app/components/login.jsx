@@ -38,7 +38,6 @@ const Login = () => {
 
         const data = await response.json();
 
-        console.log("data", data);
 
         if (!response.ok) {
           throw new Error(data.message);
@@ -64,7 +63,7 @@ const Login = () => {
 
         const role = data?.user?.role;
         const designation = data?.user?.designation;
-        console.log("designation: ",designation);
+
 
         switch (role) {
           case "student":
