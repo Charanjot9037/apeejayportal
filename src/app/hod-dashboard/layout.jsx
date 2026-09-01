@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -29,9 +28,7 @@ export default function MentorLayout({ children }) {
         const text = await response.text();
 
         if (!text) {
-          throw new Error(
-            "Empty response received from HOD dashboard API"
-          );
+          throw new Error("Empty response received from HOD dashboard API");
         }
 
         let result;
@@ -39,34 +36,20 @@ export default function MentorLayout({ children }) {
         try {
           result = JSON.parse(text);
         } catch (jsonError) {
-          console.error(
-            "HOD SIDEBAR NON-JSON RESPONSE:",
-            text
-          );
+          console.error("HOD SIDEBAR NON-JSON RESPONSE:", text);
 
-          throw new Error(
-            "Invalid JSON response from HOD dashboard API"
-          );
+          throw new Error("Invalid JSON response from HOD dashboard API");
         }
 
         if (!response.ok || !result.success) {
-          throw new Error(
-            result.message ||
-              "Failed to fetch HOD data"
-          );
+          throw new Error(result.message || "Failed to fetch HOD data");
         }
 
-        console.log(
-          "HOD SIDEBAR DATA:",
-          result.hod
-        );
+        console.log("HOD SIDEBAR DATA:", result.hod);
 
         setHod(result.hod);
       } catch (error) {
-        console.error(
-          "HOD SIDEBAR ERROR:",
-          error
-        );
+        console.error("HOD SIDEBAR ERROR:", error);
       } finally {
         setLoading(false);
       }
@@ -99,7 +82,7 @@ export default function MentorLayout({ children }) {
         setSidebarOpen={setSidebarOpen}
       />
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 px-6 py-4 overflow-y-auto pt-[68px] lg:pt-0">
         {children}
       </main>
     </div>

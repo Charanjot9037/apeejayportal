@@ -7,7 +7,7 @@ export default function DashboardHeader({
   onAction,
 }) {
   return (
-    <div className="flex items-start justify-between">
+    <div className="flex items-start mt-9 lg:mt-0 justify-between">
       <div>
         <h1 className="text-2xl font-bold text-[#1c3a5e]">{title}</h1>
 

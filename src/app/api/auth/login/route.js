@@ -25,8 +25,9 @@ export async function POST(req) {
     // Find user
    const user = await User.findOne({
      email: email.toLowerCase(),
-     status: "active",
+    //  status: "active",
    });
+
 
     if (!user) {
       return NextResponse.json(
@@ -59,6 +60,7 @@ export async function POST(req) {
     let program = null;
     let profileImage = null;
     let academicBatch = null;
+    let mentorDepartment=null;
     // Fetch Student only for student role
     if (user.role === "student") {
       const student = await Student.findOne({
@@ -76,9 +78,10 @@ export async function POST(req) {
     if (user.role === "mentor") {
       const mentor = await Mentor.findOne({
         userId: user._id,
-      }).select("designation");
+      }).select("designation department");
 
       designation = mentor?.designation || null;
+      mentorDepartment=mentor?.department || null;
     }
 
     // ==========================================
@@ -112,6 +115,7 @@ export async function POST(req) {
           program,
           // Mentor/Admin designation
           designation,
+          mentorDepartment,
           academicBatch,
         },
       },

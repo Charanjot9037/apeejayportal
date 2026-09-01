@@ -2,25 +2,28 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { HelpCircle, LogOut } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
+import { HelpCircle, LogOut, Menu, ArrowLeft } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/authSlice";
-import { useSelector } from "react-redux";
 import SidebarOverlay from "@/app/components/elements/sidebarOverlay";
 
 export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
+
   const auth = useSelector((state) => state.auth);
   const student = useSelector((state) => state.student);
+
   const profileUrl = student?.profileImage;
+
+  const { title, subtitle, role, navItems = [] } = sidebarData;
+
+  const showProfilePicture = role === "student" && profileUrl;
+
   const handleLogout = async () => {
     try {
-      alert("going to log out");
-
       await fetch("/api/auth/logout", {
         method: "POST",
       });
@@ -34,26 +37,80 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
   };
 
   function handleHelp() {
-  router.push("/help");
+    router.push("/help");
+
+    // Close sidebar on mobile
+    setSidebarOpen(false);
   }
 
-  const { title, subtitle, role, navItems = [] } = sidebarData;
+  function handleNavClick() {
+    // Close sidebar on mobile after clicking a navigation item
+    setSidebarOpen(false);
+  }
 
-  const showProfilePicture = role === "student" && profileUrl;
+  function handleCloseSidebar() {
+    setSidebarOpen(false);
+  }
 
   return (
     <>
+      {!sidebarOpen && (
+        <div className="fixed left-0  right-0 top-0 z-50 border-b bg-primary-orange  px-4 py-3 shadow-sm backdrop-blur-md lg:hidden">
+          <div className="flex items-center justify-between">
+            {/* Menu Button */}
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="
+          flex h-10 w-10
+          items-center justify-center
+          rounded-xl
+          
+          text-white
+          
+          transition-all
+          duration-200
+          hover:scale-105
+          hover:shadow-lg
+          active:scale-95
+        "
+              aria-label="Open sidebar"
+            >
+              <Menu className="h-5 w-5" strokeWidth={2.5} />
+            </button>
+
+            {/* Right Spacer */}
+            <div className="w-10" />
+            <p className="text-white font-semibold">Apeejay Porject Portal</p>
+          </div>
+        </div>
+      )}
+      {/* ================= SIDEBAR OVERLAY ================= */}
       <SidebarOverlay
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
 
+      {/* ================= SIDEBAR ================= */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col overflow-hidden bg-primary-orange p-5 text-white transition-transform duration-200
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col overflow-hidden bg-primary-orange p-5 text-white transition-transform duration-200 ease-in-out
           lg:static lg:h-screen lg:translate-x-0
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
+        {/* ================= MOBILE CLOSE BUTTON ================= */}
+        <div className="mb-2 flex justify-end lg:hidden">
+          <button
+            type="button"
+            onClick={handleCloseSidebar}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-white transition-colors hover:bg-white hover:text-primary-orange"
+            aria-label="Close sidebar"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* ================= PROFILE SECTION ================= */}
         <div className="flex flex-col items-center gap-2 border-b py-5">
           <div className="flex h-[68px] w-[67px] items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
             {showProfilePicture ? (
@@ -75,18 +132,18 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
 
           <div className="flex flex-col gap-2 text-center">
             <p className="text-sm font-bold text-white">{title}</p>
+
             {auth?.user?.name && (
-              <>
-                <p className="text-sm font-bold text-white">
-                  Hi,{auth?.user?.name}
-                </p>
-              </>
+              <p className="text-sm font-bold text-white">
+                Hi, {auth?.user?.name}
+              </p>
             )}
 
             <p className="text-sm font-bold text-white">{subtitle}</p>
           </div>
         </div>
 
+        {/* ================= NAVIGATION ================= */}
         <nav className="flex flex-1 flex-col gap-1 py-4">
           {navItems.map(({ label, icon: Icon, href }) => {
             const isActive = pathname === href;
@@ -95,6 +152,7 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
               <Link
                 key={label}
                 href={href}
+                onClick={handleNavClick}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-white text-primary-orange shadow-sm"
@@ -109,6 +167,7 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
           })}
         </nav>
 
+        {/* ================= BOTTOM BUTTONS ================= */}
         <div className="mt-auto flex flex-col gap-1 border-t border-white/20 pt-4">
           <button
             type="button"

@@ -16,11 +16,6 @@ export const mentorDashboardData = {
       icon: Users,
       href: "/mentor-dashboard/my-students",
     },
-    {
-      label: "Projects",
-      icon: Users,
-      href: "/mentor-dashboard/project",
-    },
   ],
 };
 

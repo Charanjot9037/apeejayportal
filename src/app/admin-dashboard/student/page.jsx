@@ -209,7 +209,7 @@ export default function Page() {
               onApplyFilters={handleApplyFilters}
               className="mt-0 shadow-sm"
               onRowClick={(student) => {
-                console.log("Selected student:", student);
+                router.push(`/view-profile/${student._id}`);
               }}
             />
           )}
