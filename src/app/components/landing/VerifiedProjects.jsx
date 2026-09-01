@@ -108,11 +108,6 @@ const VerifiedProjects = () => {
 
       const result = await response.json();
 
-      console.log(
-        "Verified projects response:",
-        result
-      );
-
       if (!response.ok) {
         throw new Error(
           result.message ||
@@ -281,10 +276,6 @@ const VerifiedProjects = () => {
       specialization,
     };
 
-    console.log(
-      "Applying project filters:",
-      filters
-    );
 
     // Reset to first page
     setPage(1);
@@ -369,7 +360,8 @@ const VerifiedProjects = () => {
           mx-auto
           mt-7
           grid
-          w-5/6
+          w-full
+          md:w-7/8
           grid-cols-1
           gap-7
           sm:grid-cols-2

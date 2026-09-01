@@ -7,15 +7,20 @@ import DetailCard from "../DetailCard";
 /* =========================================================
    TECHNOLOGIES SECTION
 ========================================================= */
-
 export default function TechnologiesSection({ project }) {
+  const technologies =
+    project.techStack?.filter((tech) => tech?.trim()) || [];
+
   return (
-    <DetailCard title="Technologies Used" icon={<Code2Icon />}>
-      {project.techStack?.length ? (
+    <DetailCard
+      title="Technologies Used"
+      icon={<Code2Icon />}
+    >
+      {technologies.length > 0 ? (
         <div className="flex flex-wrap gap-2">
-          {project.techStack.map((tech, index) => (
+          {technologies.map((tech) => (
             <span
-              key={index}
+              key={tech}
               className="rounded bg-slate-100 px-2.5 py-1 text-sm font-medium text-slate-700"
             >
               {tech}
@@ -23,7 +28,9 @@ export default function TechnologiesSection({ project }) {
           ))}
         </div>
       ) : (
-        <p className="text-xs text-slate-400">No technologies added.</p>
+        <p className="text-xs text-slate-400">
+          No technologies added.
+        </p>
       )}
     </DetailCard>
   );
