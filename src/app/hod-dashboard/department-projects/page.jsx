@@ -6,18 +6,24 @@ import { toast } from "sonner";
 import AuthGuardModal from "@/app/components/AuthGuardModal";
 import { DashboardHeader } from "@/app/components/elements";
 import { StatCards } from "@/app/components/elements";
-import { DEPARTEMENT_DASHBOARD_HEADER, HOD_DASHBOARD_HEADER } from "@/constants/hodData";
+import {
+  DEPARTEMENT_DASHBOARD_HEADER,
+  HOD_DASHBOARD_HEADER,
+} from "@/constants/hodData";
 import ExcelJS from "exceljs";
-import { programOptions,specializationOptions,semesterOptions } from "@/constants/gloabl";
+import {
+  programOptions,
+  specializationOptions,
+  semesterOptions,
+} from "@/constants/gloabl";
 import { getHODFilterConfig } from "@/lib/getHODFilterConfig";
-
 
 import {
   projectColumns,
   DEFAULT_PROJECT_FILTERS,
   HOD_PROJECT_FILTERS,
   mapProjectToRoster,
-  HOD_STAT_CARDS
+  HOD_STAT_CARDS,
 } from "@/constants/hodData";
 import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 import { useRouter } from "next/navigation";
@@ -32,8 +38,7 @@ const getHODProjectFilters = (department) => {
 
   const programs = programOptions[normalizedDepartment] || [];
 
-  const specializations =
-    specializationOptions[normalizedDepartment] || [];
+  const specializations = specializationOptions[normalizedDepartment] || [];
 
   return [
     // =========================
@@ -122,17 +127,47 @@ const getHODProjectFilters = (department) => {
 };
 
 export default function HODProjects() {
+  const getInitialHODProjectFilters = (department) => {
+    const normalizedDepartment = department?.toUpperCase();
+
+    if (!normalizedDepartment) {
+      return {
+        department: "",
+        program: "",
+        specialization: "",
+        semester: "",
+        status: "",
+      };
+    }
+
+    const programs = programOptions[normalizedDepartment] || [];
+    const specializations = specializationOptions[normalizedDepartment] || [];
+
+    return {
+      department: normalizedDepartment,
+
+      // Select first program automatically
+      program: programs[0]?.value || "",
+
+      // Select first specialization automatically
+      specialization: specializations[0]?.value || "",
+
+      // Select first semester automatically
+      semester: semesterOptions[0]?.value || "",
+
+      status: "",
+    };
+  };
+
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const department = useSelector((state) => state.mentor?.department);
+  const hodProjectFilters = getHODProjectFilters(department);
+  const initialHODFilters = getInitialHODProjectFilters(department);
 
-  const department = useSelector(
-  (state) => state.mentor?.department
-);
-const hodProjectFilters = getHODProjectFilters(department);
-
- const [authModal, setAuthModal] = useState({
+  const [authModal, setAuthModal] = useState({
     open: false,
     type: "authentication",
     message: "",
@@ -140,14 +175,14 @@ const hodProjectFilters = getHODProjectFilters(department);
   const [filters, setFilters] = useState({
     ...DEFAULT_PROJECT_FILTERS,
   });
-  const router=useRouter();
+  const router = useRouter();
   const [statistics, setStatistics] = useState({
-  students: 0,
-  mentors: 0,
-  projects: 0,
-  pendingReviews: 0,
-  mentorVerified: 0,
-});
+    students: 0,
+    mentors: 0,
+    projects: 0,
+    pendingReviews: 0,
+    mentorVerified: 0,
+  });
 
   // =========================================================
   // FETCH PROJECTS
@@ -159,7 +194,7 @@ const hodProjectFilters = getHODProjectFilters(department);
       setError("");
 
       const apiFilters = {
-        department:department,
+        department: department,
         program: selectedFilters.program,
         semester: selectedFilters.semester,
         specialization: selectedFilters.specialization,
@@ -188,7 +223,7 @@ const hodProjectFilters = getHODProjectFilters(department);
       });
 
       const data = await response.json();
-        if (response.status === 401) {
+      if (response.status === 401) {
         setAuthModal({
           open: true,
           type: "authentication",
@@ -204,33 +239,26 @@ const hodProjectFilters = getHODProjectFilters(department);
         setAuthModal({
           open: true,
           type: "unauthorized",
-          message:
-            data.message || "You are not authorized ",
+          message: data.message || "You are not authorized ",
         });
 
         return;
       }
 
       if (!response.ok || !data.success) {
-        throw new Error(
-          data.message || "Failed to fetch HOD projects"
-        );
+        throw new Error(data.message || "Failed to fetch HOD projects");
       }
       setStatistics(
-  data.statistics || {
-    students: 0,
-    mentors: 0,
-    projects: 0,
-    pendingReviews: 0,
-    mentorVerified: 0,
-  }
-);
-
-
-      const mappedProjects = (data.projects || []).map(
-        mapProjectToRoster
+        data.statistics || {
+          students: 0,
+          mentors: 0,
+          projects: 0,
+          pendingReviews: 0,
+          mentorVerified: 0,
+        },
       );
-      
+
+      const mappedProjects = (data.projects || []).map(mapProjectToRoster);
 
       setProjects(mappedProjects);
     } catch (error) {
@@ -238,9 +266,7 @@ const hodProjectFilters = getHODProjectFilters(department);
 
       toast.error(error.message || "Failed to fetch projects");
 
-      setError(
-        error.message || "Something went wrong"
-      );
+      setError(error.message || "Something went wrong");
 
       setProjects([]);
     } finally {
@@ -252,21 +278,21 @@ const hodProjectFilters = getHODProjectFilters(department);
   // INITIAL FETCH
   // =========================================================
 
- useEffect(() => {
-  if (!department) return;
+  useEffect(() => {
+    if (!department) return;
 
-  const initialFilters = {
-    ...DEFAULT_PROJECT_FILTERS,
-    department: department.toUpperCase(),
-    program: "",
-    specialization: "",
-    semester: "",
-  };
+    const initialFilters = {
+      ...DEFAULT_PROJECT_FILTERS,
+      department: department.toUpperCase(),
+      program: "",
+      specialization: "",
+      semester: "",
+    };
 
-  setFilters(initialFilters);
+    setFilters(initialFilters);
 
-  fetchProjects(initialFilters);
-}, [department]);
+    fetchProjects(initialFilters);
+  }, [department]);
 
   // =========================================================
   // APPLY FILTERS
@@ -280,7 +306,7 @@ const hodProjectFilters = getHODProjectFilters(department);
     fetchProjects(selectedFilters);
   };
 
-   const handleExportProjects = async (filteredProjects) => {
+  const handleExportProjects = async (filteredProjects) => {
     try {
       if (!filteredProjects || filteredProjects.length === 0) {
         toast.error("No projects available to export");
@@ -297,8 +323,7 @@ const hodProjectFilters = getHODProjectFilters(department);
 
       worksheet.mergeCells("A1:F1");
 
-      worksheet.getCell("A1").value =
-        "HOD Project Roster";
+      worksheet.getCell("A1").value = "HOD Project Roster";
 
       worksheet.getCell("A1").font = {
         bold: true,
@@ -380,12 +405,9 @@ const hodProjectFilters = getHODProjectFilters(department);
 
       const buffer = await workbook.xlsx.writeBuffer();
 
-      const blob = new Blob(
-        [buffer],
-        {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        }
-      );
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
 
       const url = window.URL.createObjectURL(blob);
 
@@ -405,7 +427,7 @@ const hodProjectFilters = getHODProjectFilters(department);
       window.URL.revokeObjectURL(url);
 
       toast.success(
-        `${filteredProjects.length} projects exported successfully`
+        `${filteredProjects.length} projects exported successfully`,
       );
     } catch (error) {
       console.error("EXPORT_PROJECTS_ERROR:", error);
@@ -422,47 +444,44 @@ const hodProjectFilters = getHODProjectFilters(department);
   };
 
   const statCards = HOD_STAT_CARDS.map((card) => {
-  if (card.title === "Total Students") {
-    return {
-      ...card,
-      value: statistics.students,
-    };
-  }
+    if (card.title === "Total Students") {
+      return {
+        ...card,
+        value: statistics.students,
+      };
+    }
 
-  if (card.title === "Total Mentors") {
-    return {
-      ...card,
-      value: statistics.mentors,
-    };
-  }
+    if (card.title === "Total Mentors") {
+      return {
+        ...card,
+        value: statistics.mentors,
+      };
+    }
 
-  if (card.title === "Total Projects") {
-    return {
-      ...card,
-      value: statistics.projects,
-    };
-  }
+    if (card.title === "Total Projects") {
+      return {
+        ...card,
+        value: statistics.projects,
+      };
+    }
 
-  if (card.title === "Pending Approvals") {
-    return {
-      ...card,
-      value: statistics.pendingReviews,
-    };
-  }
+    if (card.title === "Pending Approvals") {
+      return {
+        ...card,
+        value: statistics.pendingReviews,
+      };
+    }
 
-  return card;
-});
+    return card;
+  });
 
-   return (
+  return (
     <div className="w-full">
-
       {/* ================= HEADER ================= */}
 
       <DashboardHeader
         {...DEPARTEMENT_DASHBOARD_HEADER}
-        onAction={() =>
-          console.log("Pending Approvals")
-        }
+        onAction={() => console.log("Pending Approvals")}
       />
 
       {/* ================= STAT CARDS ================= */}
@@ -494,9 +513,7 @@ const hodProjectFilters = getHODProjectFilters(department);
 
       {error && (
         <div className="mb-4 rounded-xl bg-white p-5">
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
+          <p className="text-sm text-red-500">{error}</p>
 
           <button
             onClick={handleRetry}
@@ -514,63 +531,58 @@ const hodProjectFilters = getHODProjectFilters(department);
           <StudentRosterSkeleton />
         </div>
       ) : (
-//         <Roster
-//           title="Project Roster"
-//           data={projects}
-//           setData={setProjects}
-//           columns={projectColumns}
-//           searchPlaceholder="Search projects..."
-//           defaultFilters={DEFAULT_PROJECT_FILTERS}
-//           filterConfig={HOD_PROJECT_FILTERS}
-//            onExport={handleExportProjects}
-//           showApplyButton={true}
-//           onApplyFilters={handleApplyFilters}
-//           className="mt-4 shadow-sm"
-        
-//         onRowClick={(project) => {
-//   const projectId = project?.id || project?._id;
+        //         <Roster
+        //           title="Project Roster"
+        //           data={projects}
+        //           setData={setProjects}
+        //           columns={projectColumns}
+        //           searchPlaceholder="Search projects..."
+        //           defaultFilters={DEFAULT_PROJECT_FILTERS}
+        //           filterConfig={HOD_PROJECT_FILTERS}
+        //            onExport={handleExportProjects}
+        //           showApplyButton={true}
+        //           onApplyFilters={handleApplyFilters}
+        //           className="mt-4 shadow-sm"
 
-//   if (!projectId) {
-//     toast.error("Project ID not found");
-//     return;
-//   }
+        //         onRowClick={(project) => {
+        //   const projectId = project?.id || project?._id;
 
-//   router.push(`/hod-dashboard/projects/${projectId}`);
-// }}
-//         />
-<Roster
-  title="Project Roster"
-  data={projects}
-  setData={setProjects}
-  columns={projectColumns}
-  searchPlaceholder="Search projects..."
-  
-  defaultFilters={{
-    department: department?.toUpperCase() || "",
-    program: "",
-    specialization: "",
-    semester: "",
-    status: "",
-  }}
+        //   if (!projectId) {
+        //     toast.error("Project ID not found");
+        //     return;
+        //   }
 
-  filterConfig={hodProjectFilters}
+        //   router.push(`/hod-dashboard/projects/${projectId}`);
+        // }}
+        //         />
+        <Roster
+          title="Project Roster"
+          data={projects}
+          setData={setProjects}
+          columns={projectColumns}
+          searchPlaceholder="Search projects..."
+          filters={filters}
+          setFilters={setFilters}
+          defaultFilters={initialHODFilters}
 
-  onExport={handleExportProjects}
-  showApplyButton={true}
-  onApplyFilters={handleApplyFilters}
-  className="mt-4 shadow-sm"
+          filterConfig={hodProjectFilters}
 
-  onRowClick={(project) => {
-    const projectId = project?.id || project?._id;
+          onExport={handleExportProjects}
+          showApplyButton={true}
+          onApplyFilters={handleApplyFilters}
+          className="mt-4 shadow-sm"
 
-    if (!projectId) {
-      toast.error("Project ID not found");
-      return;
-    }
+          onRowClick={(project) => {
+            const projectId = project?.id || project?._id;
 
-    router.push(`/hod-dashboard/projects/${projectId}`);
-  }}
-/>
+            if (!projectId) {
+              toast.error("Project ID not found");
+              return;
+            }
+
+            router.push(`/hod-dashboard/projects/${projectId}`);
+          }}
+        />
       )}
     </div>
   );

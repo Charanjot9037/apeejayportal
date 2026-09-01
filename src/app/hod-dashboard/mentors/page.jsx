@@ -1,31 +1,30 @@
+"use client";
 
-'use client';
-
-import { useEffect, useState } from 'react';
-import { Users, UserRound } from 'lucide-react';
-import Roster from '@/app/components/elements/roaster';
-import StudentRosterSkeleton from '@/app/components/admin/skeleton/studentRosterSkeleton';
+import { useEffect, useState } from "react";
+import { Users, UserRound } from "lucide-react";
+import Roster from "@/app/components/elements/roaster";
+import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 
 const MENTOR_COLUMNS = [
   {
-    key: 'name',
-    label: 'Mentor',
+    key: "name",
+    label: "Mentor",
   },
   {
-    key: 'email',
-    label: 'Email',
+    key: "email",
+    label: "Email",
   },
   {
-    key: 'contact',
-    label: 'Contact',
+    key: "contact",
+    label: "Contact",
   },
   {
-    key: 'designation',
-    label: 'Designation',
+    key: "designation",
+    label: "Designation",
   },
   {
-    key: 'department',
-    label: 'Department',
+    key: "department",
+    label: "Department",
   },
 ];
 
@@ -35,156 +34,116 @@ const MENTOR_COLUMNS = [
 
 const MENTOR_FILTERS = [
   {
-    key: 'designation',
-    label: 'Designation',
-    placeholder: 'All Designations',
+    key: "designation",
+    label: "Designation",
+    placeholder: "All Designations",
 
     options: [
       {
-        value: 'HOD',
-        label: 'HOD',
+        value: "HOD",
+        label: "HOD",
       },
       {
-        value: 'Professor',
-        label: 'Professor',
+        value: "Professor",
+        label: "Professor",
       },
       {
-        value: 'Associate Professor',
-        label: 'Associate Professor',
+        value: "Associate Professor",
+        label: "Associate Professor",
       },
       {
-        value: 'Assistant-Professor',
-        label: 'Assistant Professor',
-      },
-      {
-        value: 'Lecturer',
-        label: 'Lecturer',
+        value: "Assistant-Professor",
+        label: "Assistant Professor",
       },
     ],
   },
 ];
 
 const DEFAULT_FILTERS = {
-  designation: '',
+  designation: "",
 };
 
 export default function Page() {
   const [mentors, setMentors] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const [hodDepartment, setHodDepartment] = useState('');
+  const [hodDepartment, setHodDepartment] = useState("");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
   /* =========================================================
      FETCH MENTORS FROM API
      ========================================================= */
 
-  const fetchMentors = async (
-    selectedFilters = DEFAULT_FILTERS
-  ) => {
+  const fetchMentors = async (selectedFilters = DEFAULT_FILTERS) => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
       // -------------------------------------------------------
       // SEND FILTERS TO BACKEND
       // -------------------------------------------------------
 
-      const response = await fetch('/api/hod/mentors', {
-        method: 'POST',
+      const response = await fetch("/api/hod/mentors", {
+        method: "POST",
 
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
 
-        credentials: 'include',
+        credentials: "include",
 
-        body: JSON.stringify(
-          selectedFilters || {}
-        ),
+        body: JSON.stringify(selectedFilters || {}),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(
-          data.message ||
-            'Failed to fetch mentors'
-        );
+        throw new Error(data.message || "Failed to fetch mentors");
       }
 
       // -------------------------------------------------------
       // HOD INFORMATION
       // -------------------------------------------------------
 
-      setHodDepartment(
-        data.hod?.department || ''
-      );
+      setHodDepartment(data.hod?.department || "");
 
       // -------------------------------------------------------
       // API ALREADY RETURNS FILTERED MENTORS
       // -------------------------------------------------------
 
-      const departmentMentors =
-        Array.isArray(data.mentors)
-          ? data.mentors
-          : [];
+      const departmentMentors = Array.isArray(data.mentors) ? data.mentors : [];
 
       // -------------------------------------------------------
       // MAP DATABASE DATA FOR ROSTER
       // -------------------------------------------------------
 
-      const mappedMentors =
-        departmentMentors.map((mentor) => ({
-          id: mentor._id
-            ? String(mentor._id)
-            : mentor.userId?._id
-              ? String(mentor.userId._id)
-              : '',
+      const mappedMentors = departmentMentors.map((mentor) => ({
+        id: mentor._id
+          ? String(mentor._id)
+          : mentor.userId?._id
+            ? String(mentor.userId._id)
+            : "",
 
-          _id: mentor._id
-            ? String(mentor._id)
-            : '',
+        _id: mentor._id ? String(mentor._id) : "",
 
-          name:
-            mentor.userId?.name ||
-            mentor.name ||
-            'Unknown Mentor',
+        name: mentor.userId?.name || mentor.name || "Unknown Mentor",
 
-          email:
-            mentor.userId?.email ||
-            mentor.email ||
-            '-',
+        email: mentor.userId?.email || mentor.email || "-",
 
-          contact:
-            mentor.mobileNumber ||
-            mentor.contact ||
-            '-',
+        contact: mentor.mobileNumber || mentor.contact || "-",
 
-          designation:
-            mentor.designation ||
-            '-',
+        designation: mentor.designation || "-",
 
-          department:
-            mentor.department ||
-            data.hod?.department ||
-            '-',
-        }));
+        department: mentor.department || data.hod?.department || "-",
+      }));
 
       setMentors(mappedMentors);
-
     } catch (error) {
-      console.error(
-        'FETCH_HOD_MENTORS_ERROR:',
-        error
-      );
+      console.error("FETCH_HOD_MENTORS_ERROR:", error);
 
-      setError(
-        error.message ||
-          'Something went wrong while loading mentors'
-      );
+      setError(error.message || "Something went wrong while loading mentors");
 
       setMentors([]);
     } finally {
@@ -204,9 +163,7 @@ export default function Page() {
      APPLY FILTER
      ========================================================= */
 
-  const handleApplyFilters = (
-    selectedFilters
-  ) => {
+  const handleApplyFilters = (selectedFilters) => {
     setFilters(selectedFilters);
 
     // -------------------------------------------------------
@@ -225,61 +182,41 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl">
-
+    <div className="min-h-full">
+      <div className="mx-auto ">
         {/* ===================================================
             PAGE HEADER
         =================================================== */}
 
         <div className="mb-6">
-
           <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400">
+            <span>Dashboard</span>
 
-            <span>
-              Dashboard
-            </span>
+            <span>/</span>
 
-            <span>
-              /
-            </span>
-
-            <span className="text-slate-500">
-              Mentors
-            </span>
-
+            <span className="text-slate-500">Mentors</span>
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-
             <div>
-
               <div className="flex items-center gap-2">
-
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-50">
-
                   <UserRound className="h-5 w-5 text-primary-orange" />
-
                 </div>
 
                 <h1 className="text-2xl font-bold text-[#1c3a5e]">
                   My Department Mentors
                 </h1>
-
               </div>
 
               <p className="mt-2 text-sm text-slate-500">
-
                 View all mentors belonging to your department.
-
                 {hodDepartment && (
                   <span className="ml-1 font-semibold text-[#1c3a5e]">
                     Department: {hodDepartment}
                   </span>
                 )}
-
               </p>
-
             </div>
 
             {/* =================================================
@@ -287,15 +224,11 @@ export default function Page() {
             ================================================= */}
 
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
-
                 <Users className="h-4 w-4 text-blue-600" />
-
               </div>
 
               <div>
-
                 <p className="text-xs font-medium text-slate-400">
                   Total Mentors
                 </p>
@@ -303,13 +236,9 @@ export default function Page() {
                 <p className="text-lg font-bold text-[#1c3a5e]">
                   {mentors.length}
                 </p>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
 
         {/* =====================================================
@@ -318,22 +247,16 @@ export default function Page() {
 
         {error && (
           <div className="mb-5 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
-
             <div className="flex flex-col items-center justify-center text-center">
-
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
-
                 <Users className="h-5 w-5 text-red-500" />
-
               </div>
 
               <h2 className="mt-4 text-base font-semibold text-slate-700">
                 Unable to load mentors
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
-                {error}
-              </p>
+              <p className="mt-1 text-sm text-slate-500">{error}</p>
 
               <button
                 type="button"
@@ -342,9 +265,7 @@ export default function Page() {
               >
                 Try Again
               </button>
-
             </div>
-
           </div>
         )}
 
@@ -353,10 +274,7 @@ export default function Page() {
         ===================================================== */}
 
         <div className="relative rounded-2xl">
-
-          {loading && (
-            <StudentRosterSkeleton/>
-          )}
+          {loading && <StudentRosterSkeleton />}
 
           <Roster
             title="Mentor Roster"
@@ -373,24 +291,17 @@ export default function Page() {
 
             showApplyButton={true}
 
-            onApplyFilters={
-              handleApplyFilters
-            }
+            onApplyFilters={handleApplyFilters}
 
             initialVisibleRows={5}
 
             className="mt-0 shadow-sm"
 
             onRowClick={(mentor) => {
-              console.log(
-                'Selected mentor:',
-                mentor
-              );
+              console.log("Selected mentor:", mentor);
             }}
           />
-
         </div>
-
       </div>
     </div>
   );

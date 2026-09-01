@@ -6,6 +6,7 @@ import Roster from "@/app/components/elements/roaster";
 import MentorRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 import AuthGuardModal from "@/app/components/AuthGuardModal";
 import { useRouter } from "next/navigation";
+
 import {
   MENTOR_ROSTER_COLUMNS,
   MENTOR_DEFAULT_FILTERS,
@@ -17,30 +18,52 @@ export default function MentorManagement() {
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [authModal, setAuthModal] = useState({
     open: false,
     type: "authentication",
     message: "",
   });
+
   const [filters, setFilters] = useState({
     ...MENTOR_DEFAULT_FILTERS,
   });
-  const router=useRouter();
 
-  const fetchMentors = async (selectedFilters) => {
+  const router = useRouter();
+
+  // =====================================================
+  // FETCH MENTORS
+  // =====================================================
+
+  const fetchMentors = async (selectedFilters = MENTOR_DEFAULT_FILTERS) => {
     try {
       setLoading(true);
       setError("");
+
+      // Prevent null / undefined filters
+      const filtersToSend = {
+        department:
+          selectedFilters?.department || MENTOR_DEFAULT_FILTERS.department,
+      };
+
+      console.log("FETCH MENTORS WITH:", filtersToSend);
 
       const response = await fetch("/api/mentors", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(selectedFilters),
+        body: JSON.stringify(filtersToSend),
       });
 
       const data = await response.json();
+
+      console.log("MENTOR API RESPONSE:", data);
+
+      // =====================================================
+      // AUTHENTICATION ERROR
+      // =====================================================
+
       if (response.status === 401) {
         setAuthModal({
           open: true,
@@ -52,9 +75,9 @@ export default function MentorManagement() {
         return;
       }
 
-      // ==============================
+      // =====================================================
       // AUTHORIZATION ERROR
-      // ==============================
+      // =====================================================
 
       if (response.status === 403) {
         setAuthModal({
@@ -66,12 +89,17 @@ export default function MentorManagement() {
         return;
       }
 
-      // ==============================
+      // =====================================================
       // OTHER ERRORS
-      // ==============================
+      // =====================================================
+
       if (!response.ok || !data.success) {
         throw new Error(data.message || "Failed to fetch mentors");
       }
+
+      // =====================================================
+      // MAP DATA
+      // =====================================================
 
       const mappedMentors = (data.mentors || []).map(mapMentorToRoster);
 
@@ -80,23 +108,40 @@ export default function MentorManagement() {
       console.error("FETCH_MENTORS_ERROR:", error);
 
       setError(error.message || "Something went wrong");
-
       setMentors([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // =====================================================
+  // INITIAL LOAD
+  // =====================================================
+
   useEffect(() => {
     fetchMentors(MENTOR_DEFAULT_FILTERS);
   }, []);
 
-  const handleApplyFilters = (selectedFilters) => {
-    setFilters({
-      ...selectedFilters,
-    });
+  // =====================================================
+  // APPLY FILTERS
+  // =====================================================
 
-    fetchMentors(selectedFilters);
+  const handleApplyFilters = (selectedFilters) => {
+    console.log("ROSTER SELECTED FILTERS:", selectedFilters);
+
+    // If Roster sends null, use default Engineering
+    const appliedFilters = {
+      department:
+        selectedFilters?.department || MENTOR_DEFAULT_FILTERS.department,
+    };
+
+    console.log("APPLIED FILTERS:", appliedFilters);
+
+    setFilters(appliedFilters);
+
+    fetchMentors(appliedFilters);
+
+    setFilters(appliedFilters);
   };
 
   const handleRetry = () => {
@@ -125,6 +170,10 @@ export default function MentorManagement() {
       />
 
       <div className="mx-auto max-w-7xl">
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
+
         <div className="mb-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -143,6 +192,8 @@ export default function MentorManagement() {
               </p>
             </div>
 
+            {/* TOTAL MENTORS */}
+
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
                 <Users className="h-4 w-4 text-blue-600" />
@@ -160,6 +211,10 @@ export default function MentorManagement() {
             </div>
           </div>
         </div>
+
+        {/* =====================================================
+            ERROR
+        ===================================================== */}
 
         {error && (
           <div className="mb-5 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
@@ -184,6 +239,11 @@ export default function MentorManagement() {
             </div>
           </div>
         )}
+
+        {/* =====================================================
+            ROSTER
+        ===================================================== */}
+
         <div className="rounded-2xl">
           {loading ? (
             <MentorRosterSkeleton />
@@ -194,10 +254,16 @@ export default function MentorManagement() {
               isMentor={true}
               showEdit={true}
               setData={setMentors}
+              filters={filters}
+              setFilters={setFilters}
               showDelete={true}
               columns={MENTOR_ROSTER_COLUMNS}
               searchPlaceholder="Search mentors..."
               filterConfig={MENTOR_FILTER_CONFIG}
+
+              // IMPORTANT
+              defaultFilters={MENTOR_DEFAULT_FILTERS}
+
               showApplyButton={true}
               onApplyFilters={handleApplyFilters}
               className="mt-0 shadow-sm"
