@@ -9,17 +9,15 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/redux/authSlice";
-import { Loader2 } from "lucide-react";
 import { DashboardHeader } from "./elements";
 import { setStudentProfile } from "@/redux/studentSlice";
-import { setMentorProfile } from "@/redux/mentorSlice";
 
 const Login = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -30,7 +28,6 @@ const Login = () => {
 
     onSubmit: async (values) => {
       try {
-        setLoading(true);
         const response = await fetch("/api/auth/login", {
           method: "POST",
           headers: {
@@ -56,43 +53,18 @@ const Login = () => {
           }),
         );
 
-        // dispatch(
-        //   setStudentProfile({
-        //     department: data.user?.department,
-        //     program: data.user?.program,
-        //     academicBatch: data?.user?.academicBatch,
-        //     profileImage: data?.user?.profileImage,
-        //   }),
-        // );
-        if (data?.user?.role === "student") {
-          dispatch(
-            setStudentProfile({
-              department: data.user?.department,
-              program: data.user?.program,
-              academicBatch: data.user?.academicBatch,
-              profileImage: data.user?.profileImage,
-            }),
-          );
-        }
+        dispatch(
+          setStudentProfile({
+            department: data.user?.department,
+            program: data.user?.program,
+            academicBatch: data?.user?.academicBatch,
+            profileImage: data?.user?.profileImage,
+          }),
+        );
 
-        // ==========================================
-        // MENTOR REDUX
-        // ==========================================
-
-        if (data?.user?.role === "mentor") {
-          dispatch(
-            setMentorProfile({
-              id: data.user?.id,
-              name: data.user?.name,
-              email: data.user?.email,
-              department: data.user?.mentorDepartment,
-              designation: data.user?.designation,
-            }),
-          );
-        }
         const role = data?.user?.role;
         const designation = data?.user?.designation;
-        console.log("designation: ", designation);
+        console.log("designation: ",designation);
 
         switch (role) {
           case "student":
@@ -131,8 +103,6 @@ const Login = () => {
       } catch (error) {
         console.log(error.message);
         alert(error.message);
-      } finally {
-        setLoading(false);
       }
     },
   });
@@ -140,7 +110,7 @@ const Login = () => {
   return (
     <div className="w-full max-w-md">
       {/* Login Card */}{" "}
-      <div className="rounded-2xl border border-gray-200 bg-transparent md:bg-white p-5 shadow-sm sm:p-7 md:p-8">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7 md:p-8">
         {/* Header */}{" "}
         <div className="flex justify-center items-center md:hidden">
           <Image
@@ -235,18 +205,11 @@ const Login = () => {
           {/* Login Button */}
           <Button
             type="submit"
-            disabled={loading}
-            className="h-10 w-full cursor-pointer bg-orange-500 text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70 sm:h-11"
+            className="h-10 w-full cursor-pointer bg-orange-500 text-white transition-colors hover:bg-orange-600 sm:h-11"
           >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Logging in...
-              </>
-            ) : (
-              "Login"
-            )}
+            Login
           </Button>
+
           {/* Divider */}
         </form>
       </div>
