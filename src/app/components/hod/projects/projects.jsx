@@ -14,6 +14,7 @@ import {
 import { mapMentorProjectToRoster } from "@/mappers/mentor";
 import { apiRequest } from "@/lib/apiRequest";
 import AuthGuardModal from "../../AuthGuardModal";
+import { HOD_DASHBOARD_HEADER } from "@/constants/hodData";
 
 export default function Hod() {
   const router = useRouter();
@@ -144,7 +145,7 @@ export default function Hod() {
   // =========================
 
   const hodDashboardHeader = {
-    ...MENTOR_DASHBOARD_HEADER,
+    ...HOD_DASHBOARD_HEADER,
     actionLabel: `${pendingProjects} Pending Reviews`,
   };
 

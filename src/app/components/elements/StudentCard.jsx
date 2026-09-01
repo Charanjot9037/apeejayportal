@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { getSkillList } from '@/utils/skillHandler';
+import Link from "next/link";
+import { getSkillList } from "@/utils/skillHandler";
 
-import { BriefcaseBusiness, CheckCircle2 } from 'lucide-react';
+import { BriefcaseBusiness, CheckCircle2 } from "lucide-react";
 
 const StudentCard = ({ student, onSave }) => {
   const {
@@ -50,7 +50,7 @@ const StudentCard = ({ student, onSave }) => {
         {profileImage ? (
           <img
             src={profileImage}
-            alt={fullName || 'Student'}
+            alt={fullName || "Student"}
             sizes="(max-width: 768px) 100vw, 33vw"
             className="
       object-fill
@@ -172,7 +172,7 @@ const StudentCard = ({ student, onSave }) => {
 
         <div className="pt-3">
           <Link
-            href={`/student/${_id}`}
+            href={`/view-profile/${_id}`}
             className="
               flex
               h-10

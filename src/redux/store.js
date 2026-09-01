@@ -4,16 +4,18 @@ import storage from "redux-persist/lib/storage";
 
 import authReducer from "./authSlice";
 import studentReducer from "./studentSlice";
+import mentorReducer from "./mentorSlice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   student: studentReducer,
+  mentor:mentorReducer,
 });
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "student"],
+  whitelist: ["auth", "student","mentor"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
