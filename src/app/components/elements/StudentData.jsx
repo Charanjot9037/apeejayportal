@@ -2,6 +2,10 @@
 
 import Image from 'next/image';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+
 function getAcademicYear(student) {
   const startYear = student?.academicBatch;
   const endYear = student?.lastYear;
@@ -21,29 +25,31 @@ function getAcademicYear(student) {
   return null;
 }
 
-function SectionCard({ children, className = '' }) {
-  return (
-    <div
-      className={`rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.04)] ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
+/* =========================================================
+   SECTION TITLE
+========================================================= */
 
 function SectionTitle({ symbol, children }) {
   return (
-    <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-[#07518a]">
+    <div className="flex items-center gap-3">
+      <div
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-100 
+      
+      from-blue-50 to-blue-100/70 text-sm font-bold text-[#07518a] shadow-sm"
+      >
         {symbol}
       </div>
 
-      <h2 className="text-[15px] font-bold tracking-tight text-slate-800">
+      <CardTitle className="text-[15px] font-bold tracking-tight text-slate-800">
         {children}
-      </h2>
+      </CardTitle>
     </div>
   );
 }
+
+/* =========================================================
+   SKILLS
+========================================================= */
 
 function SkillGroup({ title, skills }) {
   const validSkills = Array.isArray(skills)
@@ -68,20 +74,25 @@ function SkillGroup({ title, skills }) {
 
       <div className="flex flex-wrap gap-2">
         {validSkills.map((skill, index) => (
-          <span
+          <Badge
             key={`${String(skill)}-${index}`}
-            className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-[#07518a] transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+            variant="outline"
+            className="rounded-lg border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100/50 px-3 py-1.5 text-[11px] font-semibold text-[#07518a] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
           >
             {String(skill).trim()}
-          </span>
+          </Badge>
         ))}
       </div>
     </div>
   );
 }
 
+/* =========================================================
+   SOCIAL LINKS
+========================================================= */
+
 function SocialLink({ symbol, name, href }) {
-  if (!href) {
+  if (!href || typeof href !== 'string') {
     return null;
   }
 
@@ -95,56 +106,84 @@ function SocialLink({ symbol, name, href }) {
       href={formattedHref}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex items-center rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50"
+      className="group flex items-center rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/60 hover:shadow-sm"
     >
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[10px] font-bold text-[#07518a] shadow-sm">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-white text-[10px] font-bold text-[#07518a] shadow-sm">
         {symbol}
       </div>
 
-      <span className="ml-3 flex-1 text-[12px] font-semibold text-slate-600">
+      <span className="ml-3 flex-1 text-[12px] font-semibold text-slate-600 transition-colors group-hover:text-[#07518a]">
         {name}
       </span>
 
-      <span className="text-sm text-slate-300 transition group-hover:text-[#07518a]">
+      <span className="text-sm text-slate-300 transition group-hover:text-[#f97316]">
         ↗
       </span>
     </a>
   );
 }
 
+/* =========================================================
+   PROJECT STATUS
+========================================================= */
+
 function ProjectStatus({ status }) {
   if (status === 'Approved') {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[9px] font-bold text-emerald-700">
+      <Badge className="gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[9px] font-bold text-emerald-700 shadow-sm hover:bg-emerald-50">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
         Approved
-      </span>
+      </Badge>
     );
   }
 
   if (status === 'Rejected') {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-[9px] font-bold text-red-600">
+      <Badge className="gap-1.5 rounded-full border border-red-100 bg-red-50 px-3 py-1.5 text-[9px] font-bold text-red-600 shadow-sm hover:bg-red-50">
         <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
         Rejected
-      </span>
+      </Badge>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1.5 text-[9px] font-bold text-orange-600">
+    <Badge className="gap-1.5 rounded-full border border-orange-100 bg-orange-50 px-3 py-1.5 text-[9px] font-bold text-orange-600 shadow-sm hover:bg-orange-50">
       <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
       {status || 'Pending Approval'}
-    </span>
+    </Badge>
   );
 }
 
+/* =========================================================
+   PROJECT CARD
+========================================================= */
+
 function ProjectCard({ project }) {
   const image =
-    project.projectImages?.length > 0 ? project.projectImages[0]?.url : null;
+    Array.isArray(project.projectImages) && project.projectImages.length > 0
+      ? project.projectImages[0]?.url
+      : null;
+
+  const githubLink =
+    typeof project.githubLink === 'string' ? project.githubLink.trim() : '';
+
+  const deployedLink =
+    typeof project.deployedLink === 'string' ? project.deployedLink.trim() : '';
+
+  const validTechStack = Array.isArray(project.techStack)
+    ? project.techStack.filter(
+        (tech) =>
+          tech !== null &&
+          tech !== undefined &&
+          typeof tech !== 'object' &&
+          String(tech).trim() !== '',
+      )
+    : [];
 
   return (
-    <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-[0_10px_28px_rgba(15,23,42,0.09)]">
+    <Card className="group overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-[0_5px_18px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_14px_32px_rgba(249,115,22,0.12)]">
+      {/* PROJECT IMAGE */}
+
       <div className="relative h-[190px] overflow-hidden bg-slate-100">
         {image ? (
           <Image
@@ -155,8 +194,8 @@ function ProjectCard({ project }) {
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-lg font-bold text-[#07518a] shadow-sm">
+          <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-blue-100 bg-white text-lg font-bold text-[#07518a] shadow-sm">
               &lt;/&gt;
             </div>
 
@@ -167,31 +206,35 @@ function ProjectCard({ project }) {
         )}
 
         {image && (
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
         )}
+
+        {/* STATUS */}
 
         <div className="absolute left-4 top-4">
           {project.status === 'Approved' && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-sm">
+            <Badge className="border-0 bg-emerald-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-md hover:bg-emerald-500">
               ✓ Approved
-            </span>
+            </Badge>
           )}
 
           {project.status === 'Rejected' && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-sm">
+            <Badge className="border-0 bg-red-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-md hover:bg-red-500">
               Rejected
-            </span>
+            </Badge>
           )}
 
           {!['Approved', 'Rejected'].includes(project.status) && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-sm">
+            <Badge className="border-0 bg-orange-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-md hover:bg-orange-500">
               Pending
-            </span>
+            </Badge>
           )}
         </div>
       </div>
 
-      <div className="p-5">
+      {/* PROJECT CONTENT */}
+
+      <CardContent className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="truncate text-[17px] font-bold text-slate-800 transition-colors group-hover:text-[#07518a]">
@@ -206,9 +249,12 @@ function ProjectCard({ project }) {
           </div>
 
           {project.semester && (
-            <span className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1.5 text-[9px] font-semibold text-slate-500">
+            <Badge
+              variant="secondary"
+              className="shrink-0 rounded-lg border border-slate-100 bg-slate-100 px-2.5 py-1.5 text-[9px] font-semibold text-slate-500"
+            >
               Sem {project.semester}
-            </span>
+            </Badge>
           )}
         </div>
 
@@ -216,20 +262,27 @@ function ProjectCard({ project }) {
           {project.description || 'No project description available.'}
         </p>
 
-        {project.techStack?.length > 0 && (
+        {/* TECH STACK */}
+
+        {validTechStack.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-1.5">
-            {project.techStack.slice(0, 5).map((tech, index) => (
-              <span
-                key={`${tech}-${index}`}
-                className="rounded-md bg-slate-100 px-2.5 py-1 text-[9px] font-medium text-slate-600"
+            {validTechStack.slice(0, 5).map((tech, index) => (
+              <Badge
+                key={`${String(tech)}-${index}`}
+                variant="secondary"
+                className="rounded-md border border-slate-100 bg-slate-100 px-2.5 py-1 text-[9px] font-medium text-slate-600 transition-colors hover:border-orange-100 hover:bg-orange-50 hover:text-orange-600"
               >
-                {tech}
-              </span>
+                {String(tech).trim()}
+              </Badge>
             ))}
           </div>
         )}
 
-        <div className="mt-5 flex items-center border-t border-slate-100 pt-4">
+        <Separator className="my-5 bg-slate-100" />
+
+        {/* PROJECT FOOTER */}
+
+        <div className="flex items-center">
           <div>
             <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">
               Project Type
@@ -240,29 +293,49 @@ function ProjectCard({ project }) {
             </p>
           </div>
 
-          {project.githubLink && (
-            <a
-              href={project.githubLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-[#07518a] px-3.5 py-2 text-[10px] font-bold text-white transition-colors hover:bg-[#063f6b]"
-            >
-              View Project
-              <span>→</span>
-            </a>
+          {/* PROJECT LINKS */}
+
+          {(githubLink || deployedLink) && (
+            <div className="ml-auto flex items-center gap-2">
+              {githubLink && (
+                <a
+                  href={githubLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-8 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-[10px] font-bold text-slate-600 transition-all hover:border-[#07518a] hover:bg-blue-50 hover:text-[#07518a]"
+                >
+                  GitHub
+                </a>
+              )}
+
+              {deployedLink && (
+                <a
+                  href={deployedLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-8 items-center justify-center rounded-lg bg-[#07518a] px-3 text-[10px] font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#063f6b] hover:shadow-md"
+                >
+                  Live Demo →
+                </a>
+              )}
+            </div>
           )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
+/* =========================================================
+   PROJECT OVERVIEW ROW
+========================================================= */
+
 function ProjectOverviewRow({ project }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3.5 transition-all hover:border-blue-100 hover:bg-blue-50/30">
+    <div className="group rounded-xl border border-orange-100 bg-gradient-to-r from-orange-50/40 via-white to-white px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-[0_5px_18px_rgba(249,115,22,0.08)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="truncate text-[12px] font-bold text-slate-700">
+          <p className="truncate text-[12px] font-bold text-slate-700 transition-colors group-hover:text-[#07518a]">
             {project.title || 'Untitled Project'}
           </p>
 
@@ -277,6 +350,10 @@ function ProjectOverviewRow({ project }) {
     </div>
   );
 }
+
+/* =========================================================
+   ACADEMIC DETAIL
+========================================================= */
 
 function AcademicDetail({ label, value }) {
   if (!value) {
@@ -296,84 +373,107 @@ function AcademicDetail({ label, value }) {
   );
 }
 
+/* =========================================================
+   MAIN COMPONENT
+========================================================= */
+
 export default function StudentData({ student, projects = [] }) {
   if (!student) {
     return null;
   }
 
   const skills = Array.isArray(student.skills)
-    ? student.skills.filter((skill) => String(skill).trim() !== '')
+    ? student.skills.filter(
+        (skill) =>
+          skill !== null &&
+          skill !== undefined &&
+          typeof skill !== 'object' &&
+          String(skill).trim() !== '',
+      )
     : [];
 
   const interests = Array.isArray(student.interests)
-    ? student.interests.filter((interest) => String(interest).trim() !== '')
+    ? student.interests.filter(
+        (interest) =>
+          interest !== null &&
+          interest !== undefined &&
+          typeof interest !== 'object' &&
+          String(interest).trim() !== '',
+      )
     : [];
+
   const academicYear = getAcademicYear(student);
 
   return (
-    <div className="min-h-screen  text-slate-800">
-      <section className="relative mx-5 mt-5 overflow-hidden rounded-2xl bg-gradient-to-br from-[#f97316] via-[#f97316] to-[#ea580c] shadow-[0_8px_30px_rgba(15,23,42,0.08)] sm:mx-8 lg:mx-16 xl:mx-24">
-        <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10" />
+    <div className="min-h-screen  font-sans text-slate-800">
+      {/* =====================================================
+          PROFILE HEADER
+      ===================================================== */}
 
-        <div className="pointer-events-none absolute bottom-[-100px] right-[18%] h-64 w-64 rounded-full bg-orange-300/20 blur-3xl" />
+      <Card className="relative mx-5 mt-5 overflow-hidden rounded-2xl border-2 border-[#f97316]  shadow-[0_12px_35px_rgba(249,115,22,0.14)] sm:mx-8 lg:mx-16 xl:mx-24">
+        {/* DECORATIVE BACKGROUNDS */}
 
-        <div className="pointer-events-none absolute left-[35%] top-[-120px] h-48 w-48 rounded-full bg-white/5 blur-2xl" />
+        <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-orange-100/60 blur-2xl" />
 
-        <div className="relative mx-auto w-full max-w-[1200px] px-5 py-7 sm:px-7 lg:px-8 lg:py-8">
-          <div className="flex flex-col gap-7 lg:flex-row lg:items-center">
+        <div className="pointer-events-none absolute -bottom-24 left-[35%] h-48 w-48 rounded-full bg-orange-50/70 blur-3xl" />
+
+        <CardContent className="relative mx-auto w-full max-w-[1200px] px-5 py-5 sm:px-6 lg:px-7">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
+            {/* PROFILE IMAGE */}
+
             <div className="relative mx-auto shrink-0 lg:mx-0">
-              <div className="relative h-28 w-28 sm:h-32 sm:w-32">
-                <div className="absolute -inset-2 rounded-full bg-white/20 blur-sm" />
+              <div className="relative h-20 w-20 sm:h-24 sm:w-24">
+                <div className="absolute -inset-2 rounded-full bg-orange-100/80 blur-[1px]" />
 
-                <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-white bg-[#21428f] shadow-xl">
+                <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-[#f97316] bg-[#21428f] shadow-[0_5px_18px_rgba(249,115,22,0.25)]">
                   {student.profileImage ? (
                     <Image
                       src={student.profileImage}
                       alt={student.fullName || 'Student'}
                       fill
-                      sizes="128px"
+                      sizes="96px"
                       className="object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-4xl font-bold text-white">
-                      {student.fullName?.charAt(0)?.toUpperCase()}
+                    <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">
+                      {student.fullName?.charAt(0)?.toUpperCase() || 'S'}
                     </div>
                   )}
                 </div>
 
-                <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-4 border-[#f97316] bg-emerald-500 shadow-md">
-                  <span className="h-2.5 w-2.5 rounded-full bg-white" />
+                <span className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border-[3px] border-white bg-emerald-500 shadow-md">
+                  <span className="h-2 w-2 rounded-full bg-white" />
                 </span>
               </div>
             </div>
 
+            {/* STUDENT INFO */}
+
             <div className="min-w-0 flex-1 text-center lg:text-left">
-              <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-                <h1 className="text-3xl font-bold tracking-tight text-white sm:text-[34px]">
-                  {student.fullName || 'Student'}
-                </h1>
-              </div>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-800 sm:text-[28px]">
+                {student.fullName || 'Student'}
+              </h1>
 
               {student.program && (
-                <p className="mt-2 text-[14px] font-semibold text-white">
+                <p className="mt-1 text-[12px] font-bold text-[#07518a]">
                   {student.program}
                 </p>
               )}
 
-              <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px] text-white/90 lg:justify-start">
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-[10px] text-slate-500 lg:justify-start">
                 {student.department && (
-                  <span className="font-semibold text-white">
+                  <span className="font-semibold text-slate-600">
                     {student.department}
                   </span>
                 )}
 
                 {academicYear && (
                   <>
-                    <span className="text-white/50">•</span>
+                    <span className="text-orange-300">•</span>
 
                     <span>
                       Academic Year{' '}
-                      <span className="font-semibold text-white">
+                      <span className="font-semibold text-slate-700">
                         {academicYear}
                       </span>
                     </span>
@@ -382,11 +482,11 @@ export default function StudentData({ student, projects = [] }) {
 
                 {student.rollNumber && (
                   <>
-                    <span className="text-white/50">•</span>
+                    <span className="text-orange-300">•</span>
 
                     <span>
                       Roll No.{' '}
-                      <span className="font-semibold text-white">
+                      <span className="font-semibold text-slate-700">
                         {student.rollNumber}
                       </span>
                     </span>
@@ -394,12 +494,14 @@ export default function StudentData({ student, projects = [] }) {
                 )}
               </div>
 
+              {/* ACTIONS */}
+
               {(student.email || student.resume) && (
-                <div className="mt-5 flex flex-wrap justify-center gap-2.5 lg:justify-start">
+                <div className="mt-3 flex flex-wrap justify-center gap-2 lg:justify-start">
                   {student.email && (
                     <a
                       href={`mailto:${student.email}`}
-                      className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#07518a] px-4 text-[11px] font-bold text-white shadow-md transition-all hover:bg-[#063f6b] hover:shadow-lg"
+                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-[#07518a] px-3.5 text-[10px] font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#063f6b] hover:shadow-md"
                     >
                       <span>✉</span>
                       Contact Student
@@ -411,7 +513,7 @@ export default function StudentData({ student, projects = [] }) {
                       href={student.resume}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/30 bg-white/10 px-4 text-[11px] font-bold text-white backdrop-blur-sm transition-all hover:bg-white hover:text-[#07518a]"
+                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-orange-200 bg-white px-3.5 text-[10px] font-bold text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#f97316] hover:bg-orange-50 hover:text-[#07518a]"
                     >
                       <span>↓</span>
                       View Resume
@@ -421,46 +523,68 @@ export default function StudentData({ student, projects = [] }) {
               )}
             </div>
 
-            <div className="grid w-full shrink-0 grid-cols-2 gap-3 sm:w-[230px]">
-              <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-4 text-center backdrop-blur-md">
-                <p className="text-2xl font-bold text-white">
+            {/* STATS */}
+
+            <div className="grid w-full shrink-0 grid-cols-2 gap-2.5 sm:w-[190px]">
+              <div className="rounded-xl border border-orange-200 bg-gradient-to-br from-orange-50 to-white px-3 py-3.5 text-center shadow-sm">
+                <p className="text-xl font-bold text-[#f97316]">
                   {projects.length}
                 </p>
 
-                <p className="mt-1 text-[9px] font-bold uppercase tracking-[1.2px] text-white/75">
+                <p className="mt-0.5 text-[8px] font-bold uppercase tracking-[1px] text-slate-400">
                   Projects
                 </p>
               </div>
 
-              <div className="rounded-xl border border-white/20 bg-[#07518a]/25 px-4 py-4 text-center backdrop-blur-md">
-                <p className="text-2xl font-bold text-white">{skills.length}</p>
+              <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white px-3 py-3.5 text-center shadow-sm">
+                <p className="text-xl font-bold text-[#07518a]">
+                  {skills.length}
+                </p>
 
-                <p className="mt-1 text-[9px] font-bold uppercase tracking-[1.2px] text-white/75">
+                <p className="mt-0.5 text-[8px] font-bold uppercase tracking-[1px] text-slate-400">
                   Skills
                 </p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </CardContent>
+      </Card>
+
+      {/* =====================================================
+          MAIN CONTENT
+      ===================================================== */}
 
       <main className="mx-auto w-full max-w-[1200px] px-5 py-7 sm:px-7 sm:py-8 lg:px-8 lg:py-9">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+          {/* =================================================
+              LEFT SIDEBAR
+          ================================================= */}
+
           <aside className="space-y-5">
-            <SectionCard className="p-5">
-              <SectionTitle symbol="i">About</SectionTitle>
+            {/* ABOUT */}
 
-              <p className="mt-5 text-[12px] leading-[1.8] text-slate-500">
-                {interests.length > 0
-                  ? `Interested in ${interests.join(', ')}.`
-                  : 'No additional information has been provided by the student.'}
-              </p>
-            </SectionCard>
+            <Card className="rounded-2xl border border-orange-200 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-[0_10px_28px_rgba(249,115,22,0.09)]">
+              <CardHeader className="rounded-t-2xl bg-gradient-to-r from-orange-50/70 via-white to-white p-5 pb-4">
+                <SectionTitle symbol="i">About</SectionTitle>
+              </CardHeader>
 
-            <SectionCard className="p-5">
-              <SectionTitle symbol="<>">Skills &amp; Expertise</SectionTitle>
+              <CardContent className="p-5 pt-4">
+                <p className="text-[12px] leading-[1.8] text-slate-500">
+                  {interests.length > 0
+                    ? `Interested in ${interests.join(', ')}.`
+                    : 'No additional information has been provided by the student.'}
+                </p>
+              </CardContent>
+            </Card>
 
-              <div className="mt-5 space-y-6">
+            {/* SKILLS */}
+
+            <Card className="rounded-2xl border border-orange-200 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-[0_10px_28px_rgba(249,115,22,0.09)]">
+              <CardHeader className="rounded-t-2xl bg-gradient-to-r from-orange-50/70 via-white to-white p-5 pb-4">
+                <SectionTitle symbol="<>">Skills &amp; Expertise</SectionTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-6 p-5">
                 <SkillGroup title="Technical Skills" skills={skills} />
 
                 <SkillGroup title="Interests" skills={interests} />
@@ -468,13 +592,17 @@ export default function StudentData({ student, projects = [] }) {
                 {skills.length === 0 && interests.length === 0 && (
                   <p className="text-xs text-slate-400">No skills added yet.</p>
                 )}
-              </div>
-            </SectionCard>
+              </CardContent>
+            </Card>
 
-            <SectionCard className="p-5">
-              <SectionTitle symbol="A">Academic Information</SectionTitle>
+            {/* ACADEMIC INFORMATION */}
 
-              <div className="mt-3">
+            <Card className="rounded-2xl border border-orange-200 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-[0_10px_28px_rgba(249,115,22,0.09)]">
+              <CardHeader className="rounded-t-2xl bg-gradient-to-r from-orange-50/70 via-white to-white p-5 pb-4">
+                <SectionTitle symbol="A">Academic Information</SectionTitle>
+              </CardHeader>
+
+              <CardContent className="p-5 pt-3">
                 <AcademicDetail label="Program" value={student.program} />
 
                 <AcademicDetail label="Department" value={student.department} />
@@ -497,13 +625,17 @@ export default function StudentData({ student, projects = [] }) {
                   label="Specialization"
                   value={student.specialization}
                 />
-              </div>
-            </SectionCard>
+              </CardContent>
+            </Card>
 
-            <SectionCard className="p-5">
-              <SectionTitle symbol="↗">Online Presence</SectionTitle>
+            {/* ONLINE PRESENCE */}
 
-              <div className="mt-5 space-y-2.5">
+            <Card className="rounded-2xl border border-orange-200 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-[0_10px_28px_rgba(249,115,22,0.09)]">
+              <CardHeader className="rounded-t-2xl bg-gradient-to-r from-orange-50/70 via-white to-white p-5 pb-4">
+                <SectionTitle symbol="↗">Online Presence</SectionTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-2.5 p-5">
                 <SocialLink symbol="GH" name="GitHub" href={student.github} />
 
                 <SocialLink
@@ -523,58 +655,71 @@ export default function StudentData({ student, projects = [] }) {
                     No online profiles added.
                   </p>
                 )}
-              </div>
-            </SectionCard>
+              </CardContent>
+            </Card>
           </aside>
 
-          <section className="min-w-0">
-            {projects.length > 0 && (
-              <SectionCard className="mb-7 p-5">
-                <SectionTitle symbol="✓">Project Overview</SectionTitle>
+          {/* =================================================
+              RIGHT SIDE
+          ================================================= */}
 
-                <div className="mt-5 space-y-3">
+          <section className="min-w-0">
+            {/* PROJECT OVERVIEW */}
+
+            {projects.length > 0 && (
+              <Card className="mb-7 rounded-2xl border border-orange-200 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:border-orange-300 hover:shadow-[0_10px_28px_rgba(249,115,22,0.09)]">
+                <CardHeader className="rounded-t-2xl bg-gradient-to-r from-orange-50/70 via-white to-white p-5 pb-4">
+                  <SectionTitle symbol="✓">Project Overview</SectionTitle>
+                </CardHeader>
+
+                <CardContent className="space-y-3 p-5">
                   {projects.map((project, index) => (
                     <ProjectOverviewRow
                       key={project._id || `project-overview-${index}`}
                       project={project}
                     />
                   ))}
-                </div>
-              </SectionCard>
+                </CardContent>
+              </Card>
             )}
 
-            <SectionCard className="overflow-hidden">
-              <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-6 py-5">
+            {/* PROJECT PORTFOLIO */}
+
+            <Card className="overflow-hidden rounded-2xl border border-orange-200 bg-white shadow-[0_6px_24px_rgba(15,23,42,0.05)] transition-all duration-300 hover:border-orange-300 hover:shadow-[0_12px_32px_rgba(249,115,22,0.09)]">
+              <CardHeader className="flex flex-row items-center justify-between gap-4 border-b border-orange-100 bg-gradient-to-r from-orange-50/70 via-white to-white px-6 py-5">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                    <span className="h-2 w-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.45)]" />
 
                     <p className="text-[10px] font-bold uppercase tracking-[1.5px] text-orange-500">
                       Student Work
                     </p>
                   </div>
 
-                  <h2 className="mt-1.5 text-[23px] font-bold tracking-tight text-slate-800">
+                  <CardTitle className="mt-1.5 text-[23px] font-bold tracking-tight text-slate-800">
                     Project Portfolio
-                  </h2>
+                  </CardTitle>
 
                   <p className="mt-1 text-[11px] text-slate-400">
                     A collection of projects and academic work
                   </p>
                 </div>
 
-                <div className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-center">
-                  <p className="text-[15px] font-bold text-[#07518a]">
+                <Badge
+                  variant="outline"
+                  className="shrink-0 rounded-xl border-orange-200 bg-orange-50/60 px-4 py-2.5 text-center shadow-sm"
+                >
+                  <span className="text-[15px] font-bold text-[#07518a]">
                     {projects.length}
-                  </p>
+                  </span>
 
-                  <p className="mt-0.5 text-[8px] font-bold uppercase tracking-[1px] text-slate-400">
+                  <span className="ml-1 text-[8px] font-bold uppercase tracking-[1px] text-slate-400">
                     {projects.length === 1 ? 'Project' : 'Projects'}
-                  </p>
-                </div>
-              </div>
+                  </span>
+                </Badge>
+              </CardHeader>
 
-              <div className="p-5 sm:p-6">
+              <CardContent className="p-5 sm:p-6">
                 {projects.length > 0 ? (
                   <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
                     {projects.map((project, index) => (
@@ -585,8 +730,8 @@ export default function StudentData({ student, projects = [] }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 px-6 py-14 text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-xl font-bold text-[#07518a]">
+                  <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50/30 px-6 py-14 text-center">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-xl font-bold text-[#07518a] shadow-sm">
                       &lt;/&gt;
                     </div>
 
@@ -599,8 +744,8 @@ export default function StudentData({ student, projects = [] }) {
                     </p>
                   </div>
                 )}
-              </div>
-            </SectionCard>
+              </CardContent>
+            </Card>
           </section>
         </div>
       </main>
