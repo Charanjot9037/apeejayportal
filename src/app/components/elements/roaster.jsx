@@ -23,6 +23,9 @@ export default function Roster({
   data = [],
   showDelete = false,
   setData,
+  viewClick,
+  filters: externalFilters,
+  setFilters: setExternalFilters,
   isMentor,
   showEdit = false,
   columns = [],
@@ -45,7 +48,12 @@ export default function Roster({
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [filters, setFilters] = useState(defaultFilters);
+  // const [filters, setFilters] = useState(defaultFilters);
+  const [localFilters, setLocalFilters] = useState(defaultFilters);
+
+  const filters = externalFilters ?? localFilters;
+
+  const updateFilters = setExternalFilters ?? setLocalFilters;
   const router = useRouter();
   const handleDeleteClick = (student) => {
     setSelectedStudent(student);
@@ -89,9 +97,11 @@ export default function Roster({
     }
   };
   const handleFilterChange = (key, value) => {
-    setFilters((previousFilters) => {
+    updateFilters((previousFilters) => {
+      const currentFilters = previousFilters || defaultFilters;
+
       const updatedFilters = {
-        ...previousFilters,
+        ...currentFilters,
         [key]: value,
       };
 
@@ -219,6 +229,8 @@ export default function Roster({
           "bg-orange-50 text-orange-600 ring-1 ring-orange-100",
         Placed: "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100",
         Looking: "bg-orange-50 text-orange-primary",
+        active: "bg-green-200 text-green-800",
+        inactive: "bg-red-200 text-red-800  ",
         Approved: "bg-green text-emerald-600 ring-1 ring-emerald-100",
       };
 
@@ -278,6 +290,30 @@ export default function Roster({
      * ACTION COLUMN
      * =========================
      */
+    if (column.key === "view") {
+      return (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            viewClick?.(item);
+          }}
+          title="View"
+          aria-label="View"
+          className="
+            ml-auto flex h-8 w-8 items-center justify-center
+            rounded-lg text-slate-400
+            transition-all duration-200 ease-out
+            hover:bg-blue-50 hover:text-blue-600
+            hover:scale-105
+            active:scale-95
+            cursor-pointer
+          "
+        >
+          <Eye className="h-4 w-4" />
+        </button>
+      );
+    }
     if (column.key === "action") {
       return (
         <button
@@ -690,8 +726,6 @@ export default function Roster({
                       {renderCell(column, item)}
                     </td>
                   ))}
-
-                  {/* ACTION */}
 
                   <td className="px-5 py-3 text-right">
                     {showEdit ? (

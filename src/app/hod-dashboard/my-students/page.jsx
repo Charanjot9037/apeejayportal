@@ -20,7 +20,6 @@ import {
   semesterOptions,
 } from "@/constants/gloabl";
 
-
 // =====================================================
 // HOD STUDENT FILTER CONFIG
 // =====================================================
@@ -32,11 +31,9 @@ const getHODStudentFilters = (department) => {
     return [];
   }
 
-  const programs =
-    programOptions[normalizedDepartment] || [];
+  const programs = programOptions[normalizedDepartment] || [];
 
-  const specializations =
-    specializationOptions[normalizedDepartment] || [];
+  const specializations = specializationOptions[normalizedDepartment] || [];
 
   return [
     // =================================================
@@ -98,7 +95,6 @@ const getHODStudentFilters = (department) => {
   ];
 };
 
-
 export default function Page() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -109,68 +105,47 @@ export default function Page() {
   // GET HOD DEPARTMENT FROM REDUX
   // =====================================================
 
-  const department = useSelector(
-    (state) => state.mentor?.department
-  );
+  const department = useSelector((state) => state.mentor?.department);
 
   // =====================================================
   // CREATE FILTERS BASED ON HOD DEPARTMENT
   // =====================================================
 
-  const hodStudentFilters =
-    getHODStudentFilters(department);
-
+  const hodStudentFilters = getHODStudentFilters(department);
 
   const fetchStudents = async (selectedFilters = {}) => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        "/api/hod/my-students",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(selectedFilters),
-        }
-      );
+      const response = await fetch("/api/hod/my-students", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(selectedFilters),
+      });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(
-          data.message ||
-            "Failed to fetch HOD students"
-        );
+        throw new Error(data.message || "Failed to fetch HOD students");
       }
 
-      const mappedStudents = (
-        data.students || []
-      ).map(mapStudentToRoster);
+      const mappedStudents = (data.students || []).map(mapStudentToRoster);
 
       setStudents(mappedStudents);
-
     } catch (error) {
-      console.error(
-        "FETCH_HOD_STUDENTS_ERROR:",
-        error
-      );
+      console.error("FETCH_HOD_STUDENTS_ERROR:", error);
 
-      setError(
-        error.message ||
-          "Something went wrong"
-      );
+      setError(error.message || "Something went wrong");
 
       setStudents([]);
-
     } finally {
       setLoading(false);
     }
   };
-
 
   // =====================================================
   // INITIAL FETCH
@@ -190,21 +165,17 @@ export default function Page() {
     setFilters(initialFilters);
 
     fetchStudents(initialFilters);
-
   }, [department]);
-
 
   // =====================================================
   // APPLY FILTERS
   // =====================================================
 
   const handleApplyFilters = (selectedFilters) => {
-
     setFilters(selectedFilters);
 
     fetchStudents(selectedFilters);
   };
-
 
   // =====================================================
   // RETRY
@@ -214,29 +185,15 @@ export default function Page() {
     fetchStudents(filters);
   };
 
-
   return (
-    <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl">
-
+    <div className="min-h-full ">
+      <div className="mx-auto">
         {/* HEADER */}
 
         <div className="mb-6">
-
-          <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400">
-            <span>Dashboard</span>
-            <span>/</span>
-            <span className="text-slate-500">
-              Students
-            </span>
-          </div>
-
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-
             <div>
-
               <div className="flex items-center gap-2">
-
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-50">
                   <GraduationCap className="h-5 w-5 text-primary-orange" />
                 </div>
@@ -244,26 +201,22 @@ export default function Page() {
                 <h1 className="text-2xl font-bold text-[#1c3a5e]">
                   My Students
                 </h1>
-
               </div>
 
               <p className="mt-2 text-sm text-slate-500">
-                View students assigned to you based on your
-                department and mentor assignments.
+                View students assigned to you based on your department and
+                mentor assignments.
               </p>
-
             </div>
 
             {/* TOTAL STUDENTS */}
 
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
                 <Users className="h-4 w-4 text-blue-600" />
               </div>
 
               <div>
-
                 <p className="text-xs font-medium text-slate-400">
                   My Students
                 </p>
@@ -271,23 +224,16 @@ export default function Page() {
                 <p className="text-lg font-bold text-[#1c3a5e]">
                   {students.length}
                 </p>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
-
 
         {/* ERROR */}
 
         {error && (
           <div className="mb-5 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
-
             <div className="flex flex-col items-center justify-center text-center">
-
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
                 <Users className="h-5 w-5 text-red-500" />
               </div>
@@ -296,9 +242,7 @@ export default function Page() {
                 Unable to load students
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
-                {error}
-              </p>
+              <p className="mt-1 text-sm text-slate-500">{error}</p>
 
               <button
                 type="button"
@@ -307,20 +251,14 @@ export default function Page() {
               >
                 Try Again
               </button>
-
             </div>
-
           </div>
         )}
-
 
         {/* ROSTER */}
 
         <div className="relative rounded-2xl">
-
-          {loading && (
-            <StudentRosterSkeleton/>
-          )}
+          {loading && <StudentRosterSkeleton />}
 
           <Roster
             title="Student Roster"
@@ -342,15 +280,10 @@ export default function Page() {
             className="mt-0 shadow-sm"
 
             onRowClick={(student) => {
-              console.log(
-                "Selected student:",
-                student
-              );
+              console.log("Selected student:", student);
             }}
           />
-
         </div>
-
       </div>
     </div>
   );

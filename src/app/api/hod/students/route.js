@@ -22,16 +22,11 @@ export async function POST(request) {
         },
         {
           status: hod.response.status,
-        }
+        },
       );
     }
 
-    const {
-      user,
-      mentor,
-      department,
-      normalizedDepartment,
-    } = hod;
+    const { user, mentor, department, normalizedDepartment } = hod;
 
     // =====================================================
     // 2. GET FILTERS FROM FRONTEND
@@ -39,13 +34,8 @@ export async function POST(request) {
 
     const filters = await request.json();
 
-    const {
-      program,
-      semester,
-      specialization,
-    } = filters || {};
+    const { program, semester, specialization } = filters || {};
 
-    
     // =====================================================
     // 3. BUILD STUDENT CONDITIONS
     // =====================================================
@@ -146,10 +136,7 @@ export async function POST(request) {
       $and: studentConditions,
     };
 
-    console.log(
-      "STUDENT QUERY:",
-      JSON.stringify(studentQuery, null, 2)
-    );
+    console.log("STUDENT QUERY:", JSON.stringify(studentQuery, null, 2));
 
     // =====================================================
     // 5. GET FILTERED STUDENTS
@@ -158,7 +145,11 @@ export async function POST(request) {
     const students = await Student.find(studentQuery)
       .populate({
         path: "userId",
-        select: "name email status",
+        select: "name email status mentorId",
+        populate: {
+          path: "mentorId",
+          select: "name email status",
+        },
       })
       .lean();
 
@@ -166,7 +157,7 @@ export async function POST(request) {
     // 6. RESPONSE
     // =====================================================
 
-    console.log("FILTERED STUDENTS:", students.length);
+    console.log("FILTERED STUDENTS:", students);
 
     return NextResponse.json(
       {
@@ -191,24 +182,19 @@ export async function POST(request) {
       },
       {
         status: 200,
-      }
+      },
     );
   } catch (error) {
-    console.error(
-      "HOD STUDENTS API ERROR:",
-      error
-    );
+    console.error("HOD STUDENTS API ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message:
-          error?.message ||
-          "Failed to fetch students",
+        message: error?.message || "Failed to fetch students",
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
