@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Roster } from "@/app/components/elements";
 import { MENTOR_STUDENTS_COLUMNS } from "@/constants/mentorData";
 import { mapStudentsToRoster } from "@/mappers/mentor";
-
+import { DashboardHeader } from "@/app/components/elements";
+import { MENTORTO_DASHBOARD_HEADER } from "@/constants/mentorData";
 // =====================================================
 // FILTER CONFIG
 // =====================================================
@@ -373,14 +374,16 @@ export default function Student() {
   // ===================================================
   // UI
   // ===================================================
-
+  const studentDashboardHeader = {
+    ...MENTORTO_DASHBOARD_HEADER,
+  };
   return (
-    <div className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-3">
-      <main className="mx-auto max-w-7xl">
+    <div className="min-h-full ">
+      <main className="mx-auto ">
         {/* =========================================
             ERROR
         ========================================= */}
-
+        <DashboardHeader {...studentDashboardHeader} />
         {error && (
           <div className="mb-5 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
             <div className="flex flex-col items-center justify-center text-center">
