@@ -558,7 +558,7 @@ export default function HODProjects() {
               return;
             }
 
-            router.push(`/admin-dashboard/projects/${projectId}`);
+            router.push(`mentor-dashboard/projects/${projectId}`);
           }}
         />
       )}
