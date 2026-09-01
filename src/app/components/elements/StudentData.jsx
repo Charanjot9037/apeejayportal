@@ -394,14 +394,14 @@ export default function StudentData({ student, projects = [] }) {
                 )}
               </div>
 
-              {(student.phone || student.resume) && (
+              {(student.email || student.resume) && (
                 <div className="mt-5 flex flex-wrap justify-center gap-2.5 lg:justify-start">
-                  {student.phone && (
+                  {student.email && (
                     <a
-                      href={`tel:${student.phone}`}
+                      href={`mailto:${student.email}`}
                       className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#07518a] px-4 text-[11px] font-bold text-white shadow-md transition-all hover:bg-[#063f6b] hover:shadow-lg"
                     >
-                      <span>✆</span>
+                      <span>✉</span>
                       Contact Student
                     </a>
                   )}
