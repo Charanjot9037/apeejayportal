@@ -311,7 +311,7 @@ export default function StudentData({ student, projects = [] }) {
   const academicYear = getAcademicYear(student);
 
   return (
-    <div className="min-h-screen bg-[#f4f7fa] text-slate-800">
+    <div className="min-h-screen  text-slate-800">
       <section className="relative mx-5 mt-5 overflow-hidden rounded-2xl bg-gradient-to-br from-[#f97316] via-[#f97316] to-[#ea580c] shadow-[0_8px_30px_rgba(15,23,42,0.08)] sm:mx-8 lg:mx-16 xl:mx-24">
         <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10" />
 

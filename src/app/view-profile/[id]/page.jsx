@@ -4,20 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
 import StudentData from '@/app/components/elements/StudentData';
-
-function LoadingState() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f8fafc]">
-      <div className="text-center">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-700" />
-
-        <p className="mt-3 text-sm font-medium text-slate-600">
-          Loading student profile...
-        </p>
-      </div>
-    </div>
-  );
-}
+import StudentDataSkeleton from '@/app/components/skeletons/studentDataSkeleton';
 
 export default function StudentProfilePage() {
   const { id } = useParams();
@@ -59,7 +46,7 @@ export default function StudentProfilePage() {
   }, [id]);
 
   if (loading) {
-    return <LoadingState />;
+    return <StudentDataSkeleton />;
   }
 
   if (error || !student) {
