@@ -623,7 +623,7 @@ export default function Mentor() {
         options: ACADEMIC_YEAR_OPTIONS,
       },
     ],
-    [mentorProgramOptions,mentorSemesterOptions],
+    [mentorProgramOptions, mentorSemesterOptions],
   );
 
   useEffect(() => {
@@ -802,8 +802,8 @@ export default function Mentor() {
   // ===================================================
 
   return (
-    <div className="min-h-full bg-slate-50">
-      <main className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-4">
+    <div className="min-h-full ">
+      <main className="">
         {/* =========================================
             DASHBOARD HEADER
         ========================================= */}
@@ -821,7 +821,7 @@ export default function Mentor() {
         ========================================= */}
 
         {error && (
-          <div className="mt-6 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
+          <div className="mt-6 rounded-2xl ">
             <div className="flex flex-col items-center justify-center text-center">
               <h2 className="text-base font-semibold text-slate-700">
                 Unable to load projects
