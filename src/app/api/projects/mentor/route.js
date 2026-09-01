@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import Project from "@/models/projects";
-import Mentor from "@/models/mentor";
-import Student from "@/models/student";
-import { authenticateUser } from "@/lib/authentication";
+import { NextResponse } from 'next/server';
+import { connectDB } from '@/lib/db';
+import Project from '@/models/projects';
+import Student from '@/models/student';
+import { authenticateUser } from '@/lib/authentication';
 
 export async function GET(request) {
   try {
@@ -13,16 +12,23 @@ export async function GET(request) {
 
     if (!auth.success) {
       return NextResponse.json(
-        { success: false, message: auth.message },
-        { status: auth.status },
+        {
+          success: false,
+          message: auth.message,
+        },
+        {
+          status: auth.status,
+        },
       );
     }
+
     const user = auth.user;
-    if (user.role !== "mentor") {
+
+    if (user.role !== 'mentor') {
       return NextResponse.json(
         {
           success: false,
-          message: "Access denied. Students only are allowed.",
+          message: 'Access denied. Mentors only are allowed.',
         },
         {
           status: 403,
@@ -30,55 +36,102 @@ export async function GET(request) {
       );
     }
 
+    // =========================================
+    // GET ONLY PROJECTS OF LOGGED-IN MENTOR
+    // =========================================
+
     const projects = await Project.find({
       $or: [{ mentor: auth.user._id }, { mentor2: auth.user._id }],
     })
       .populate({
-        path: "student",
-        select: "name email",
+        path: 'student',
+        select: 'name email',
       })
       .sort({ createdAt: -1 })
       .lean();
 
-    // Get Student academic details for each project's student (User._id)
-    const studentUserIds = projects.map((p) => p.student?._id).filter(Boolean);
+    // =========================================
+    // GET STUDENT USER IDS
+    // =========================================
+
+    const studentUserIds = projects
+      .map((project) => project.student?._id)
+      .filter(Boolean);
+
+    // =========================================
+    // GET STUDENT ACADEMIC DETAILS
+    // =========================================
 
     const studentProfiles = await Student.find({
-      userId: { $in: studentUserIds },
-    }).select("userId department program rollNumber specialization");
+      userId: {
+        $in: studentUserIds,
+      },
+    }).select(
+      'userId department program rollNumber specialization academicBatch',
+    );
 
-    // Map userId -> student profile for quick lookup
+    // =========================================
+    // CREATE USER ID -> STUDENT PROFILE MAP
+    // =========================================
+
     const profileMap = {};
-    studentProfiles.forEach((sp) => {
-      profileMap[sp.userId.toString()] = sp;
+
+    studentProfiles.forEach((student) => {
+      profileMap[student.userId.toString()] = student;
     });
 
-    // Merge department/program into each project's student data
-    const enrichedProjects = projects.map((p) => ({
-      ...p,
-      student: p.student
-        ? {
-            ...p.student,
-            department: profileMap[p.student._id.toString()]?.department || "",
-            program: profileMap[p.student._id.toString()]?.program || "",
-            rollNumber: profileMap[p.student._id.toString()]?.rollNumber || "",
+    // =========================================
+    // MERGE PROJECT + STUDENT DETAILS
+    // =========================================
 
-            specialization:
-              profileMap[p.student._id.toString()]?.specialization || "",
-          }
-        : null,
-    }));
+    const enrichedProjects = projects.map((project) => {
+      const studentId = project.student?._id?.toString();
+
+      const profile = studentId ? profileMap[studentId] : null;
+
+      return {
+        ...project,
+
+        student: project.student
+          ? {
+              ...project.student,
+
+              department: profile?.department || '',
+
+              program: profile?.program || '',
+
+              rollNumber: profile?.rollNumber || '',
+
+              specialization: profile?.specialization || '',
+
+              academicBatch: profile?.academicBatch || '',
+            }
+          : null,
+
+        // Semester belongs to Project
+        semester: project.semester || '',
+      };
+    });
+
+    // =========================================
+    // RESPONSE
+    // =========================================
 
     return NextResponse.json({
       success: true,
       projects: enrichedProjects,
     });
   } catch (error) {
-    console.error("MENTOR_PROJECTS_GET_ERROR:", error);
+    console.error('MENTOR_PROJECTS_GET_ERROR:', error);
 
     return NextResponse.json(
-      { success: false, message: "Failed to fetch mentor's projects." },
-      { status: 500 },
+      {
+        success: false,
+        message: "Failed to fetch mentor's projects.",
+      },
+      {
+        status: 500,
+      },
     );
   }
 }
