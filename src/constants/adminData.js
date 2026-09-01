@@ -192,8 +192,45 @@ export const studentColumns = [
     key: "mentor",
     label: "Mentor",
   },
+  {
+    key: "view",
+    label: "View",
+  },
 ];
-
+export const hodstudentColumns = [
+  {
+    key: "name",
+    label: "Student Name",
+  },
+  {
+    key: "rollNumber",
+    label: "Roll Number",
+  },
+  {
+    key: "department",
+    label: "Department",
+  },
+  {
+    key: "program",
+    label: "Course",
+  },
+  {
+    key: "academicBatch",
+    label: "Batch",
+  },
+  {
+    key: "specialization",
+    label: "Specialization",
+  },
+  {
+    key: "status",
+    label: "Status",
+  },
+  {
+    key: "mentor",
+    label: "Mentor",
+  },
+];
 export const DEFAULT_FILTERS = {
   department: "ENGINEERING",
   program: "BTECH",
@@ -288,8 +325,8 @@ export const STUDENT_FILTERS = [
     ],
   },
 ];
-export const mapStudentToRoster = (student) => {
 
+export const mapStudentToRoster = (student) => {
   return {
     _id: student?._id,
 
@@ -311,9 +348,17 @@ export const mapStudentToRoster = (student) => {
 
     specialization: student?.specialization || "-",
 
-    mentor: student?.mentor?.userId?.name || student?.mentor?.name || "-",
+    mentor:
+      student?.mentor?.userId?.name ||
+      student?.mentor?.name ||
+      student?.mentor?.userId?.mentorId?.name ||
+      "-",
 
-    mentorId: student?.mentor?.userId?._id || student?.mentorId || "-",
+    mentorId:
+      student?.mentor?.userId?._id ||
+      student?.mentorId ||
+      student?.mentor?.userId?.mentorId?.name ||
+      "-",
   };
 };
 export const MENTOR_ROSTER_COLUMNS = [
@@ -400,5 +445,31 @@ export const newmapMentorToRoster = (mentor) => {
     department: mentor?.department || "-",
 
     designation: mentor?.designation || "-",
+  };
+};
+
+export const mapStudenthodToRoster = (student) => {
+  return {
+    _id: student?._id,
+
+    name: student?.fullName || student?.name || "-",
+
+    status: student?.userId?.status || "-",
+
+    email: student?.email || "-",
+
+    rollNumber: student?.rollNumber || "-",
+
+    phone: student?.phone || "-",
+
+    department: student?.department || "-",
+
+    program: student?.program || "-",
+
+    academicBatch: student?.academicBatch || "-",
+
+    specialization: student?.specialization || "-",
+
+    mentor: student?.userId?.mentorId?.name || "-",
   };
 };

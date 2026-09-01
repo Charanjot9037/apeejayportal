@@ -493,74 +493,86 @@ export default function HODProjects() {
 
       {/* ================= PROJECT ROSTER ================= */}
 
-      {loading ? (
+      {/* ================= PROJECT ROSTER ================= */}
+
+      {loading && projects.length === 0 ? (
         <div className="mt-4">
           <StudentRosterSkeleton />
         </div>
       ) : (
-        <Roster
-          title="Project Roster"
-          data={projects}
-          setData={setProjects}
-          columns={projectColumns}
-          searchPlaceholder="Search projects..."
+        <div className="relative mt-4">
+          <Roster
+            title="Project Roster"
+            data={projects}
+            setData={setProjects}
+            columns={projectColumns}
+            searchPlaceholder="Search projects..."
+            filters={filters}
+            setFilters={setFilters}
+            filterConfig={[
+              {
+                key: "department",
+                label: "Department",
+                placeholder: "All Departments",
+                options: Object.keys(programOptions).map((department) => ({
+                  value: department,
+                  label: department,
+                })),
+              },
+              {
+                key: "program",
+                label: "Program",
+                placeholder: "All Programs",
+                options: programOptions,
+                dependsOn: "department",
+              },
+              {
+                key: "specialization",
+                label: "Specialization",
+                placeholder: "All Specializations",
+                options: specializationOptions,
+                dependsOn: "department",
+              },
+              {
+                key: "academicYear",
+                label: "Academic Year",
+                placeholder: "All Academic Years",
+                options: generateAcademicYears(),
+              },
+              {
+                key: "semester",
+                label: "Semester",
+                placeholder: "All Semesters",
+                options: semesterOptions,
+                dependsOn: "program",
+              },
+            ]}
+            showApplyButton={true}
+            onApplyFilters={handleApplyFilters}
+            onExport={handleExportProjects}
+            onRowClick={(project) => {
+              const projectId = project?.id || project?._id;
 
-          filterConfig={[
-            {
-              key: "department",
-              label: "Department",
-              placeholder: "All Departments",
-              options: Object.keys(programOptions).map((department) => ({
-                value: department,
-                label: department,
-              })),
-            },
+              if (!projectId) {
+                toast.error("Project ID not found");
+                return;
+              }
 
-            {
-              key: "program",
-              label: "Program",
-              placeholder: "All Programs",
-              options: programOptions,
-              dependsOn: "department",
-            },
+              router.push(`mentor-dashboard/projects/${projectId}`);
+            }}
+          />
 
-            {
-              key: "specialization",
-              label: "Specialization",
-              placeholder: "All Specializations",
-              options: specializationOptions,
-              dependsOn: "department",
-            },
-            {
-              key: "academicYear",
-              label: "Academic Year",
-              placeholder: "All Academic Years",
-              options: generateAcademicYears(),
-            },
-            {
-              key: "semester",
-              label: "Semester",
-              placeholder: "All Semesters",
-              options: semesterOptions,
-              dependsOn: "program",
-            },
-          ]}
-
-          showApplyButton={true}
-          onApplyFilters={handleApplyFilters}
-          onExport={handleExportProjects}
-
-          onRowClick={(project) => {
-            const projectId = project?.id || project?._id;
-
-            if (!projectId) {
-              toast.error("Project ID not found");
-              return;
-            }
-
-            router.push(`mentor-dashboard/projects/${projectId}`);
-          }}
-        />
+          {loading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
+              <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-primary-orange" />
+                <span className="text-sm font-medium text-slate-600">
+                  Applying filters...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

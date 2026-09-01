@@ -9,14 +9,12 @@ import { StatCards } from "../elements";
 import { HOD_DASHBOARD_HEADER } from "@/constants/hodData";
 import ExcelJS from "exceljs";
 
-
-
 import {
   projectColumns,
   DEFAULT_PROJECT_FILTERS,
   HOD_PROJECT_FILTERS,
   mapProjectToRoster,
-  HOD_STAT_CARDS
+  HOD_STAT_CARDS,
 } from "@/constants/hodData";
 import StudentRosterSkeleton from "../admin/skeleton/studentRosterSkeleton";
 import { useRouter } from "next/navigation";
@@ -25,7 +23,7 @@ export default function HODProjects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
- const [authModal, setAuthModal] = useState({
+  const [authModal, setAuthModal] = useState({
     open: false,
     type: "authentication",
     message: "",
@@ -33,14 +31,14 @@ export default function HODProjects() {
   const [filters, setFilters] = useState({
     ...DEFAULT_PROJECT_FILTERS,
   });
-  const router=useRouter();
+  const router = useRouter();
   const [statistics, setStatistics] = useState({
-  students: 0,
-  mentors: 0,
-  projects: 0,
-  pendingReviews: 0,
-  mentorVerified: 0,
-});
+    students: 0,
+    mentors: 0,
+    projects: 0,
+    pendingReviews: 0,
+    mentorVerified: 0,
+  });
 
   // =========================================================
   // FETCH PROJECTS
@@ -80,7 +78,7 @@ export default function HODProjects() {
       });
 
       const data = await response.json();
-        if (response.status === 401) {
+      if (response.status === 401) {
         setAuthModal({
           open: true,
           type: "authentication",
@@ -96,33 +94,26 @@ export default function HODProjects() {
         setAuthModal({
           open: true,
           type: "unauthorized",
-          message:
-            data.message || "You are not authorized ",
+          message: data.message || "You are not authorized ",
         });
 
         return;
       }
 
       if (!response.ok || !data.success) {
-        throw new Error(
-          data.message || "Failed to fetch HOD projects"
-        );
+        throw new Error(data.message || "Failed to fetch HOD projects");
       }
       setStatistics(
-  data.statistics || {
-    students: 0,
-    mentors: 0,
-    projects: 0,
-    pendingReviews: 0,
-    mentorVerified: 0,
-  }
-);
-
-
-      const mappedProjects = (data.projects || []).map(
-        mapProjectToRoster
+        data.statistics || {
+          students: 0,
+          mentors: 0,
+          projects: 0,
+          pendingReviews: 0,
+          mentorVerified: 0,
+        },
       );
-      
+
+      const mappedProjects = (data.projects || []).map(mapProjectToRoster);
 
       setProjects(mappedProjects);
     } catch (error) {
@@ -130,9 +121,7 @@ export default function HODProjects() {
 
       toast.error(error.message || "Failed to fetch projects");
 
-      setError(
-        error.message || "Something went wrong"
-      );
+      setError(error.message || "Something went wrong");
 
       setProjects([]);
     } finally {
@@ -160,7 +149,7 @@ export default function HODProjects() {
     fetchProjects(selectedFilters);
   };
 
-   const handleExportProjects = async (filteredProjects) => {
+  const handleExportProjects = async (filteredProjects) => {
     try {
       if (!filteredProjects || filteredProjects.length === 0) {
         toast.error("No projects available to export");
@@ -177,8 +166,7 @@ export default function HODProjects() {
 
       worksheet.mergeCells("A1:F1");
 
-      worksheet.getCell("A1").value =
-        "HOD Project Roster";
+      worksheet.getCell("A1").value = "HOD Project Roster";
 
       worksheet.getCell("A1").font = {
         bold: true,
@@ -260,12 +248,9 @@ export default function HODProjects() {
 
       const buffer = await workbook.xlsx.writeBuffer();
 
-      const blob = new Blob(
-        [buffer],
-        {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        }
-      );
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
 
       const url = window.URL.createObjectURL(blob);
 
@@ -285,7 +270,7 @@ export default function HODProjects() {
       window.URL.revokeObjectURL(url);
 
       toast.success(
-        `${filteredProjects.length} projects exported successfully`
+        `${filteredProjects.length} projects exported successfully`,
       );
     } catch (error) {
       console.error("EXPORT_PROJECTS_ERROR:", error);
@@ -302,47 +287,44 @@ export default function HODProjects() {
   };
 
   const statCards = HOD_STAT_CARDS.map((card) => {
-  if (card.title === "Total Students") {
-    return {
-      ...card,
-      value: statistics.students,
-    };
-  }
+    if (card.title === "Total Students") {
+      return {
+        ...card,
+        value: statistics.students,
+      };
+    }
 
-  if (card.title === "Total Mentors") {
-    return {
-      ...card,
-      value: statistics.mentors,
-    };
-  }
+    if (card.title === "Total Mentors") {
+      return {
+        ...card,
+        value: statistics.mentors,
+      };
+    }
 
-  if (card.title === "Total Projects") {
-    return {
-      ...card,
-      value: statistics.projects,
-    };
-  }
+    if (card.title === "Total Projects") {
+      return {
+        ...card,
+        value: statistics.projects,
+      };
+    }
 
-  if (card.title === "Pending Approvals") {
-    return {
-      ...card,
-      value: statistics.pendingReviews,
-    };
-  }
+    if (card.title === "Pending Approvals") {
+      return {
+        ...card,
+        value: statistics.pendingReviews,
+      };
+    }
 
-  return card;
-});
+    return card;
+  });
 
-   return (
-    <div className="w-full px-6 py-6">
-
+  return (
+    <div className="w-full">
       {/* ================= HEADER ================= */}
 
       <DashboardHeader
         {...HOD_DASHBOARD_HEADER}
-        onAction={() =>
-          console.log("Pending Approvals")
-        }
+        onAction={() => console.log("Pending Approvals")}
       />
 
       {/* ================= STAT CARDS ================= */}
@@ -374,9 +356,7 @@ export default function HODProjects() {
 
       {error && (
         <div className="mb-4 rounded-xl bg-white p-5">
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
+          <p className="text-sm text-red-500">{error}</p>
 
           <button
             onClick={handleRetry}
@@ -402,21 +382,21 @@ export default function HODProjects() {
           searchPlaceholder="Search projects..."
           defaultFilters={DEFAULT_PROJECT_FILTERS}
           filterConfig={HOD_PROJECT_FILTERS}
-           onExport={handleExportProjects}
+          onExport={handleExportProjects}
           showApplyButton={true}
           onApplyFilters={handleApplyFilters}
           className="mt-4 shadow-sm"
-        
-        onRowClick={(project) => {
-  const projectId = project?.id || project?._id;
 
-  if (!projectId) {
-    toast.error("Project ID not found");
-    return;
-  }
+          onRowClick={(project) => {
+            const projectId = project?.id || project?._id;
 
-  router.push(`/hod-dashboard/projects/${projectId}`);
-}}
+            if (!projectId) {
+              toast.error("Project ID not found");
+              return;
+            }
+
+            router.push(`/hod-dashboard/projects/${projectId}`);
+          }}
         />
       )}
     </div>
