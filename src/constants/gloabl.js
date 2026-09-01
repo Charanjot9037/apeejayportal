@@ -70,7 +70,7 @@ export const programOptions = {
     },
   ],
 
-  IT: [
+  INFORMATIONTECHNOLOGY: [
     {
       value: "MCA",
       label: "MCA",
