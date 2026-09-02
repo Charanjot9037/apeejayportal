@@ -156,7 +156,7 @@ export default function MentorManagement() {
         message={authModal.message}
         onClose={() => {
           if (authModal.type === "unauthorized") {
-            router.back();
+            router.push("/");
           } else {
             setAuthModal((prev) => ({
               ...prev,
@@ -166,6 +166,9 @@ export default function MentorManagement() {
         }}
         onLogin={() => {
           router.push("/login");
+        }}
+        onBack={() => {
+          router.back();
         }}
       />
 

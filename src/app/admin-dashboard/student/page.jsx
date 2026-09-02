@@ -251,6 +251,7 @@ export default function Page() {
   });
 
   const router = useRouter();
+  const [departmentStats, setdepartmentStats] = useState();
 
   // =====================================================
   // AUTH MODAL
@@ -265,6 +266,40 @@ export default function Page() {
   // =====================================================
   // FETCH STUDENTS
   // =====================================================
+  const mapDepartmentStats = (departmentCounts = []) => {
+    const engineering =
+      departmentCounts.find((item) => item._id === "ENGINEERING")?.count || 0;
+
+    const management =
+      departmentCounts.find((item) => item._id === "MANAGEMENT")?.count || 0;
+
+    const it =
+      departmentCounts.find((item) => item._id === "INFORMATION TECHNOLOGY")
+        ?.count || 0;
+
+    return [
+      {
+        title: "Engineering",
+        value: engineering,
+        icon: "orange",
+      },
+      {
+        title: "IT",
+        value: it,
+        icon: "blue",
+      },
+      {
+        title: "Management",
+        value: management,
+        icon: "orange",
+      },
+      {
+        title: "Total",
+        value: engineering + it + management,
+        icon: "blue",
+      },
+    ];
+  };
 
   const fetchStudents = async (selectedFilters = DEFAULT_FILTERS) => {
     try {
@@ -293,9 +328,6 @@ export default function Page() {
 
       const data = await response.json();
 
-      console.log("STUDENT API RESPONSE:", data);
-
-      // =====================================================
       // AUTHENTICATION ERROR
       // =====================================================
 
@@ -338,6 +370,9 @@ export default function Page() {
 
       const mappedStudents = (data.students || []).map(mapStudentToRoster);
 
+      const departments = mapDepartmentStats(data.departmentCounts);
+
+      setdepartmentStats(departments);
       setStudents(mappedStudents);
     } catch (error) {
       console.error("FETCH_STUDENTS_ERROR:", error);
@@ -420,7 +455,7 @@ export default function Page() {
         ===================================================== */}
 
         <div className="mb-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row  sm:justify-between  lg:items-start">
             <div>
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-50">
@@ -431,30 +466,41 @@ export default function Page() {
                   Student Management
                 </h1>
               </div>
+            </div>
+            <div className="flex gap-5">
+              {departmentStats?.map((stat) => (
+                <div
+                  key={stat.title}
+                  className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+                >
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${
+                      stat.icon === "orange" ? "bg-orange-50" : "bg-blue-50"
+                    }`}
+                  >
+                    <Users
+                      className={`h-4 w-4 ${
+                        stat.icon === "orange"
+                          ? "text-orange-600"
+                          : "text-blue-600"
+                      }`}
+                    />
+                  </div>
 
-              <p className="mt-2 text-sm text-slate-500">
-                View and manage students according to their department, course
-                and academic batch.
-              </p>
+                  <div>
+                    <p className="text-xs font-medium text-slate-400">
+                      {stat.title}
+                    </p>
+
+                    <p className="text-lg font-bold text-[#1c3a5e]">
+                      {stat.value}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* TOTAL STUDENTS */}
-
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50">
-                <Users className="h-4 w-4 text-blue-600" />
-              </div>
-
-              <div>
-                <p className="text-xs font-medium text-slate-400">
-                  Total Students
-                </p>
-
-                <p className="text-lg font-bold text-[#1c3a5e]">
-                  {students.length}
-                </p>
-              </div>
-            </div>
           </div>
         </div>
 

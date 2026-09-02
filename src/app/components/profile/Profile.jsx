@@ -320,7 +320,11 @@ export default function Profile() {
       });
 
       const result = await response.json();
-
+      dispatch(
+        updateStudentProfile({
+          profileImage: uploadData.url,
+        }),
+      );
       if (!response.ok) {
         throw new Error(result.message || "Failed to update profile image");
       }

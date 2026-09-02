@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import { connectDB } from '@/lib/db';
-import Student from '@/models/student';
-import { authenticateUser } from '@/lib/authentication';
-import Mentor from '@/models/mentor';
-import User from '@/models/user';
+import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/db";
+import Student from "@/models/student";
+import { authenticateUser } from "@/lib/authentication";
+import Mentor from "@/models/mentor";
+import User from "@/models/user";
 
 export async function POST(request) {
   try {
@@ -15,12 +15,42 @@ export async function POST(request) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Authentication required',
+          message: "Authentication required",
         },
         { status: 401 },
       );
     }
 
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        { status: auth.status },
+      );
+    }
+
+    // =========================
+    // AUTHORIZATION
+    // =========================
+    const mentor = await Mentor.findOne({
+      userId: auth.user._id,
+    });
+
+    if (
+      auth.user.role !== "mentor" ||
+      !mentor ||
+      mentor.designation !== "Engineer"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "You are not authorized to validate mentors.",
+        },
+        { status: 403 },
+      );
+    }
     const body = await request.json();
 
     const { department, program, academicBatch, specialization } = body;
@@ -30,35 +60,35 @@ export async function POST(request) {
     if (department) {
       query.department = {
         $regex: `^${department}$`,
-        $options: 'i',
+        $options: "i",
       };
     }
 
     if (program) {
       query.program = {
         $regex: `^${program}$`,
-        $options: 'i',
+        $options: "i",
       };
     }
 
     if (academicBatch) {
       query.academicBatch = {
         $regex: `^${academicBatch}$`,
-        $options: 'i',
+        $options: "i",
       };
     }
 
     if (specialization) {
       query.specialization = {
         $regex: `^${specialization}$`,
-        $options: 'i',
+        $options: "i",
       };
     }
 
     const students = await Student.find(query)
       .populate({
-        path: 'userId',
-        select: 'name email mentorId status',
+        path: "userId",
+        select: "name email mentorId status",
       })
       .lean();
 
@@ -76,10 +106,10 @@ export async function POST(request) {
         const mentor = await Mentor.findOne({
           userId: mentorUserId,
         })
-          .select('_id userId mobileNumber department designation')
+          .select("_id userId mobileNumber department designation")
           .populate({
-            path: 'userId',
-            select: 'name email',
+            path: "userId",
+            select: "name email",
           })
           .lean();
 
@@ -89,18 +119,34 @@ export async function POST(request) {
         };
       }),
     );
+    const departmentCounts = await Student.aggregate([
+      {
+        $match: {
+          department: {
+            $in: ["ENGINEERING", "MANAGEMENT", "Information Technology"],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$department",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
     return NextResponse.json({
       success: true,
       students: studentsWithMentor,
+      departmentCounts,
     });
   } catch (error) {
-    console.error('TEAM_STUDENTS_GET_ERROR:', error);
+    console.error("TEAM_STUDENTS_GET_ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to fetch students',
+        message: error.message || "Failed to fetch students",
       },
       { status: 500 },
     );
@@ -128,11 +174,11 @@ export async function PATCH(request) {
       userId: auth.user._id,
     });
 
-    if (auth.user.role !== 'mentor' || mentor1.designation !== 'Engineer') {
+    if (auth.user.role !== "mentor" || mentor1.designation !== "Engineer") {
       return NextResponse.json(
         {
           success: false,
-          message: 'You are not authorized to validate mentors.',
+          message: "You are not authorized to validate mentors.",
         },
         { status: 403 },
       );
@@ -153,7 +199,7 @@ export async function PATCH(request) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Student ID is required',
+          message: "Student ID is required",
         },
         { status: 400 },
       );
@@ -163,7 +209,7 @@ export async function PATCH(request) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Mentor ID is required',
+          message: "Mentor ID is required",
         },
         { status: 400 },
       );
@@ -175,7 +221,7 @@ export async function PATCH(request) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Student not found',
+          message: "Student not found",
         },
         { status: 404 },
       );
@@ -187,7 +233,7 @@ export async function PATCH(request) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Student user not found',
+          message: "Student user not found",
         },
         { status: 404 },
       );
@@ -201,7 +247,7 @@ export async function PATCH(request) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Selected mentor not found',
+          message: "Selected mentor not found",
         },
         { status: 404 },
       );
@@ -222,39 +268,39 @@ export async function PATCH(request) {
 
     const updatedStudent = await Student.findById(student._id)
       .populate({
-        path: 'userId',
-        select: 'name email mentorId status',
+        path: "userId",
+        select: "name email mentorId status",
       })
       .lean();
 
     const updatedMentor = await Mentor.findOne({
       userId: mentorId,
     })
-      .select('_id userId mobileNumber department designation')
+      .select("_id userId mobileNumber department designation")
       .populate({
-        path: 'userId',
-        select: 'name email',
+        path: "userId",
+        select: "name email",
       })
       .lean();
 
     return NextResponse.json({
       success: true,
-      message: 'Student updated successfully',
+      message: "Student updated successfully",
 
       student: {
         ...updatedStudent,
         mentor: updatedMentor || null,
-        rollNumber: updatedStudent.rollNumber || '-',
+        rollNumber: updatedStudent.rollNumber || "-",
         mentorId: mentorId,
       },
     });
   } catch (error) {
-    console.error('STUDENT_UPDATE_ERROR:', error);
+    console.error("STUDENT_UPDATE_ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to update student',
+        message: "Failed to update student",
         error: error.message,
       },
       { status: 500 },
