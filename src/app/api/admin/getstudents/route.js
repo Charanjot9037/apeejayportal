@@ -4,13 +4,11 @@ import Student from "@/models/student";
 import { authenticateUser } from "@/lib/authentication";
 import Mentor from "@/models/mentor";
 import User from "@/models/user";
+
 export async function POST(request) {
   try {
     await connectDB();
 
-    // =========================
-    // AUTHENTICATION
-    // =========================
     const auth = await authenticateUser();
 
     if (!auth.success) {
@@ -23,16 +21,40 @@ export async function POST(request) {
       );
     }
 
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        { status: auth.status },
+      );
+    }
+
     // =========================
-    // GET FILTERS
+    // AUTHORIZATION
     // =========================
+    const mentor = await Mentor.findOne({
+      userId: auth.user._id,
+    });
+
+    if (
+      auth.user.role !== "mentor" ||
+      !mentor ||
+      mentor.designation !== "Engineer"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "You are not authorized to validate mentors.",
+        },
+        { status: 403 },
+      );
+    }
     const body = await request.json();
 
     const { department, program, academicBatch, specialization } = body;
 
-    // =========================
-    // BUILD QUERY
-    // =========================
     const query = {};
 
     if (department) {
@@ -69,6 +91,7 @@ export async function POST(request) {
         select: "name email mentorId status",
       })
       .lean();
+
     const studentsWithMentor = await Promise.all(
       students.map(async (student) => {
         const mentorUserId = student.userId?.mentorId;
@@ -96,10 +119,26 @@ export async function POST(request) {
         };
       }),
     );
+    const departmentCounts = await Student.aggregate([
+      {
+        $match: {
+          department: {
+            $in: ["ENGINEERING", "MANAGEMENT", "Information Technology"],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$department",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
     return NextResponse.json({
       success: true,
       students: studentsWithMentor,
+      departmentCounts,
     });
   } catch (error) {
     console.error("TEAM_STUDENTS_GET_ERROR:", error);
@@ -120,6 +159,7 @@ export async function PATCH(request) {
 
     const body = await request.json();
     const auth = await authenticateUser();
+
     if (!auth.success) {
       return NextResponse.json(
         { success: false, message: auth.message },
@@ -128,8 +168,11 @@ export async function PATCH(request) {
         },
       );
     }
+
     const adminuser = auth.user;
-    const mentor1 = await Mentor.findOne({ userId: auth.user._id });
+    const mentor1 = await Mentor.findOne({
+      userId: auth.user._id,
+    });
 
     if (auth.user.role !== "mentor" || mentor1.designation !== "Engineer") {
       return NextResponse.json(
@@ -211,9 +254,9 @@ export async function PATCH(request) {
     }
 
     user.name = fullName;
-
     user.mentorId = mentorId;
     user.status = status;
+
     await user.save();
 
     student.department = department;
@@ -222,10 +265,6 @@ export async function PATCH(request) {
     student.specialization = specialization;
 
     await student.save();
-
-    // =========================================
-    // GET UPDATED STUDENT WITH USER
-    // =========================================
 
     const updatedStudent = await Student.findById(student._id)
       .populate({
@@ -244,21 +283,14 @@ export async function PATCH(request) {
       })
       .lean();
 
-    // =========================================
-    // RETURN COMPLETE STUDENT
-    // =========================================
-
     return NextResponse.json({
       success: true,
       message: "Student updated successfully",
 
       student: {
         ...updatedStudent,
-
-        // Complete mentor object
         mentor: updatedMentor || null,
         rollNumber: updatedStudent.rollNumber || "-",
-        // Mentor User ID
         mentorId: mentorId,
       },
     });

@@ -24,7 +24,7 @@ import {
   DEFAULT_PROJECT_FILTERS,
   HOD_PROJECT_FILTERS,
   mapProjectToRoster,
-  HOD_STAT_CARDS,
+  admin_STAT_CARDS,
 } from "@/constants/hodData";
 import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 import { useRouter } from "next/navigation";
@@ -250,10 +250,11 @@ export default function HODProjects() {
 
     const initialFilters = {
       ...DEFAULT_PROJECT_FILTERS,
-      department: department.toUpperCase(),
-      program: "",
-      specialization: "",
-      semester: "",
+      department: "ENGINEERING",
+      program: "BTECH",
+      specialization: "CSE",
+      academicYear: new Date().getFullYear().toString(),
+      semester: "1",
     };
 
     setFilters(initialFilters);
@@ -410,7 +411,7 @@ export default function HODProjects() {
     fetchProjects(filters);
   };
 
-  const statCards = HOD_STAT_CARDS.map((card) => {
+  const statCards = admin_STAT_CARDS.map((card) => {
     if (card.title === "Total Students") {
       return {
         ...card,
@@ -463,13 +464,16 @@ export default function HODProjects() {
         message={authModal.message}
         onClose={() => {
           if (authModal.type === "unauthorized") {
-            router.back();
+            router.push("/");
           } else {
             setAuthModal((prev) => ({
               ...prev,
               open: false,
             }));
           }
+        }}
+        onBack={() => {
+          router.back();
         }}
         onLogin={() => {
           router.push("/login");
@@ -493,74 +497,86 @@ export default function HODProjects() {
 
       {/* ================= PROJECT ROSTER ================= */}
 
-      {loading ? (
+      {/* ================= PROJECT ROSTER ================= */}
+
+      {loading && projects.length === 0 ? (
         <div className="mt-4">
           <StudentRosterSkeleton />
         </div>
       ) : (
-        <Roster
-          title="Project Roster"
-          data={projects}
-          setData={setProjects}
-          columns={projectColumns}
-          searchPlaceholder="Search projects..."
+        <div className="relative mt-4">
+          <Roster
+            title="Project Roster"
+            data={projects}
+            setData={setProjects}
+            columns={projectColumns}
+            searchPlaceholder="Search projects..."
+            filters={filters}
+            setFilters={setFilters}
+            filterConfig={[
+              {
+                key: "department",
+                label: "Department",
+                placeholder: "All Departments",
+                options: Object.keys(programOptions).map((department) => ({
+                  value: department,
+                  label: department,
+                })),
+              },
+              {
+                key: "program",
+                label: "Program",
+                placeholder: "All Programs",
+                options: programOptions,
+                dependsOn: "department",
+              },
+              {
+                key: "specialization",
+                label: "Specialization",
+                placeholder: "All Specializations",
+                options: specializationOptions,
+                dependsOn: "department",
+              },
+              {
+                key: "academicYear",
+                label: "Academic Year",
+                placeholder: "All Academic Years",
+                options: generateAcademicYears(),
+              },
+              {
+                key: "semester",
+                label: "Semester",
+                placeholder: "All Semesters",
+                options: semesterOptions,
+                dependsOn: "program",
+              },
+            ]}
+            showApplyButton={true}
+            onApplyFilters={handleApplyFilters}
+            onExport={handleExportProjects}
+            onRowClick={(project) => {
+              const projectId = project?.id || project?._id;
 
-          filterConfig={[
-            {
-              key: "department",
-              label: "Department",
-              placeholder: "All Departments",
-              options: Object.keys(programOptions).map((department) => ({
-                value: department,
-                label: department,
-              })),
-            },
+              if (!projectId) {
+                toast.error("Project ID not found");
+                return;
+              }
 
-            {
-              key: "program",
-              label: "Program",
-              placeholder: "All Programs",
-              options: programOptions,
-              dependsOn: "department",
-            },
+              router.push(`mentor-dashboard/projects/${projectId}`);
+            }}
+          />
 
-            {
-              key: "specialization",
-              label: "Specialization",
-              placeholder: "All Specializations",
-              options: specializationOptions,
-              dependsOn: "department",
-            },
-            {
-              key: "academicYear",
-              label: "Academic Year",
-              placeholder: "All Academic Years",
-              options: generateAcademicYears(),
-            },
-            {
-              key: "semester",
-              label: "Semester",
-              placeholder: "All Semesters",
-              options: semesterOptions,
-              dependsOn: "program",
-            },
-          ]}
-
-          showApplyButton={true}
-          onApplyFilters={handleApplyFilters}
-          onExport={handleExportProjects}
-
-          onRowClick={(project) => {
-            const projectId = project?.id || project?._id;
-
-            if (!projectId) {
-              toast.error("Project ID not found");
-              return;
-            }
-
-            router.push(`mentor-dashboard/projects/${projectId}`);
-          }}
-        />
+          {loading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
+              <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-primary-orange" />
+                <span className="text-sm font-medium text-slate-600">
+                  Applying filters...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

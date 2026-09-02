@@ -88,7 +88,7 @@ const HeroSection = ({
    
 
   return (
-    <div className="relative w-full  min-h-screen bg-cover bg-center"  style={{
+    <div className="relative w-full  max-h-screen lg:min-h-screen bg-cover bg-center"  style={{
           backgroundImage: `url(${backgroundImage})`,
         }}>
 
@@ -97,7 +97,7 @@ const HeroSection = ({
       <div className="absolute inset-0 bg-black/40" />
 
       {/* Content */}
-      <div className="relative z-10 gap-0 lg:gap-2 backdrop-blur-sm/10 flex  flex-col items-center justify-center px-6  py-20 lg:py-40  text-center">
+      <div className="relative z-10 gap-0 lg:gap-2 backdrop-blur-sm/10 flex  flex-col items-center justify-center px-6  py-30 lg:py-40  text-center">
 
    <div className="max-w-3xl">
   <div className="animate-typing-wrapper">

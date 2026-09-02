@@ -5,7 +5,7 @@ import Login from "../components/login";
 export default function Page() {
   return (
     <main
-      className="relative min-h-screen bg-cover bg-center bg-no-repeat"
+      className="relative max-h-screen  bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage: "url('/landing-page/image.png')",
       }}
@@ -76,11 +76,17 @@ export default function Page() {
           {/* RIGHT SIDE - LOGIN */}
           {/* ========================================= */}
 
-          <section className="flex items-center justify-center bg-white px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
-
-            <Login />
-
-          </section>
+    
+          <section
+  className="
+    flex items-center justify-center
+    px-5 py-8
+    sm:px-8 sm:py-10
+    lg:bg-white lg:px-10 lg:py-8
+  "
+>
+  <Login />
+</section>
 
         </div>
       </div>

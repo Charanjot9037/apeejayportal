@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -28,14 +29,8 @@ export function useRecruiterProjectDetail() {
           }
         );
 
-        /*
-         * Prevent:
-         * Unexpected token '<', "<!DOCTYPE..."
-         *
-         * This happens when the API returns HTML instead of JSON,
-         * for example when the route does not exist.
-         */
-        const contentType = response.headers.get("content-type");
+        const contentType =
+          response.headers.get("content-type");
 
         if (!contentType?.includes("application/json")) {
           throw new Error(
@@ -57,84 +52,13 @@ export function useRecruiterProjectDetail() {
           throw new Error("Project not found");
         }
 
-        /*
-         * =====================================================
-         * NORMALIZE MENTORS
-         * =====================================================
-         *
-         * MentorSection expects:
-         *
-         * project.mentor
-         * project.mentor2
-         *
-         * and uses:
-         *
-         * key={mentor._id}
-         *
-         * Therefore we make sure every mentor has a unique _id.
-         */
-
-        const normalizeMentor = (mentor, fallbackId) => {
-          if (!mentor) return null;
-
-          /*
-           * If MongoDB ObjectId
-           */
-          const existingId =
-            mentor?._id?.toString?.() ||
-            mentor?.id?.toString?.() ||
-            mentor?.userId?.toString?.();
-
-          return {
-            ...mentor,
-            _id: existingId || fallbackId,
-          };
-        };
-
-        const mentor = normalizeMentor(
-          recruiterProject.mentor,
-          "recruiter-mentor-1"
-        );
-
-        let mentor2 = normalizeMentor(
-          recruiterProject.mentor2,
-          "recruiter-mentor-2"
-        );
-
-        /*
-         * =====================================================
-         * PREVENT DUPLICATE MENTOR KEYS
-         * =====================================================
-         *
-         * If mentor and mentor2 somehow contain the same
-         * MongoDB _id, remove mentor2.
-         */
-
-        if (
-          mentor &&
-          mentor2 &&
-          mentor._id.toString() === mentor2._id.toString()
-        ) {
-          mentor2 = null;
-        }
-
-        /*
-         * =====================================================
-         * FINAL PROJECT
-         * =====================================================
-         */
-
-        const normalizedProject = {
-          ...recruiterProject,
-          mentor,
-          mentor2,
-        };
-
-        setProject(normalizedProject);
+        // API already returns mentor as an object
+        setProject(recruiterProject);
 
         setViewerRole(
           result.viewerRole || "recruiter"
         );
+
       } catch (error) {
         console.error(
           "RECRUITER_PROJECT_FETCH_ERROR:",
@@ -143,6 +67,7 @@ export function useRecruiterProjectDetail() {
 
         setError(error.message);
         setProject(null);
+
       } finally {
         setLoading(false);
       }
@@ -158,4 +83,3 @@ export function useRecruiterProjectDetail() {
     error,
   };
 }
-

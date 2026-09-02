@@ -49,12 +49,9 @@ const StudentSearch = () => {
 
   const [department, setDepartment] = useState("all");
 
-  const [skill, setSkill] = useState("all");
-
   const [appliedFilters, setAppliedFilters] = useState({
     search: initialSearch,
     department: "all",
-    skill: "all",
   });
 
   // ============================================================
@@ -78,12 +75,13 @@ const StudentSearch = () => {
       } else {
         setLoadingStudents(true);
       }
-
+        
       const response = await fetch(`/api/students?page=${pageNumber}`, {
         cache: "no-store",
       });
 
       const result = await response.json();
+      console.log("result in students : ",result);
 
       if (!response.ok) {
         throw new Error(result.message || "Failed to fetch students");
@@ -102,6 +100,7 @@ const StudentSearch = () => {
       // ----------------------------------------------------------
       // NEXT PAGES
       // ----------------------------------------------------------
+
       else {
         setStudents((prev) => [...prev, ...newStudents]);
       }
@@ -161,7 +160,6 @@ const StudentSearch = () => {
       {
         root: null,
         rootMargin: "300px",
-
         threshold: 0,
       },
     );
@@ -186,18 +184,6 @@ const StudentSearch = () => {
   }, [students]);
 
   // ============================================================
-  // AVAILABLE SKILLS
-  // ============================================================
-
-  const availableSkills = useMemo(() => {
-    const values = students.flatMap((student) =>
-      Array.isArray(student.skills) ? student.skills : [],
-    );
-
-    return [...new Set(values)].filter(Boolean);
-  }, [students]);
-
-  // ============================================================
   // APPLY FILTER
   // ============================================================
 
@@ -205,7 +191,6 @@ const StudentSearch = () => {
     setAppliedFilters({
       search,
       department,
-      skill,
     });
   };
 
@@ -217,7 +202,9 @@ const StudentSearch = () => {
     return students.filter((student) => {
       const searchValue = appliedFilters.search.toLowerCase().trim();
 
-      const studentSkills = Array.isArray(student.skills) ? student.skills : [];
+      const studentSkills = Array.isArray(student.skills)
+        ? student.skills
+        : [];
 
       // ----------------------------------------------------------
       // SEARCH
@@ -240,18 +227,7 @@ const StudentSearch = () => {
         appliedFilters.department === "all" ||
         student.department === appliedFilters.department;
 
-      // ----------------------------------------------------------
-      // SKILL
-      // ----------------------------------------------------------
-
-      const matchesSkill =
-        appliedFilters.skill === "all" ||
-        studentSkills.some(
-          (item) =>
-            String(item).toLowerCase() === appliedFilters.skill.toLowerCase(),
-        );
-
-      return matchesSearch && matchesDepartment && matchesSkill;
+      return matchesSearch && matchesDepartment;
     });
   }, [students, appliedFilters]);
 
@@ -273,11 +249,9 @@ const StudentSearch = () => {
         params.set("department", appliedFilters.department);
       }
 
-      if (appliedFilters.skill !== "all") {
-        params.set("skill", appliedFilters.skill);
-      }
-
-      const response = await fetch(`/api/students/export?${params.toString()}`);
+      const response = await fetch(
+        `/api/students/export?${params.toString()}`,
+      );
 
       if (!response.ok) {
         throw new Error("Failed to download students");
@@ -357,11 +331,8 @@ const StudentSearch = () => {
           setSearch={setSearch}
           department={department}
           setDepartment={setDepartment}
-          skill={skill}
-          setSkill={setSkill}
           onFilter={handleFilter}
           departments={departments}
-          skills={availableSkills}
         />
 
         {/* ======================================================
@@ -411,7 +382,9 @@ const StudentSearch = () => {
             type="button"
             onClick={handleDownload}
             disabled={
-              downloading || loadingStudents || filteredStudents.length === 0
+              downloading ||
+              loadingStudents ||
+              filteredStudents.length === 0
             }
             className="
               inline-flex
@@ -504,6 +477,7 @@ const StudentSearch = () => {
 
             <div
               className="
+              justify-items-center
                 mt-4
                 grid
                 grid-cols-1
@@ -561,10 +535,10 @@ const StudentSearch = () => {
               {!hasMore && students.length > 0 && (
                 <p
                   className="
-                      text-xs
-                      font-medium
-                      text-slate-400
-                    "
+                    text-xs
+                    font-medium
+                    text-slate-400
+                  "
                 >
                   You have reached the end.
                 </p>

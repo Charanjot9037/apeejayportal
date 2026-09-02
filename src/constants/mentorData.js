@@ -16,11 +16,6 @@ export const mentorDashboardData = {
       icon: Users,
       href: "/mentor-dashboard/my-students",
     },
-    {
-      label: "Projects",
-      icon: Users,
-      href: "/mentor-dashboard/project",
-    },
   ],
 };
 
@@ -106,6 +101,10 @@ export const MENTOR_DASHBOARD_HEADER = {
   description:
     "Overview of your mentees, academic progress, and mentoring activities.",
   actionLabel: "5 Pending Reviews",
+};
+export const MENTORTO_DASHBOARD_HEADER = {
+  title: "Mentor Dashboard",
+  description: "Overview of your mentees, project progress.",
 };
 
 export const MENTOR_STUDENTS_COLUMNS = [

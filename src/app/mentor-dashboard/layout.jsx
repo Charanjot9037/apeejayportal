@@ -13,7 +13,7 @@ export default function MentorLayout({ children }) {
         setSidebarOpen={setSidebarOpen}
         sidebarData={mentorDashboardData}
       />
-      <main className="flex-1 overflow-y-auto p-4 pt-[68px] lg:pt-0">
+      <main className="flex-1 overflow-y-auto p-3 lg:p-4  ">
         {children}
       </main>{" "}
     </div>
