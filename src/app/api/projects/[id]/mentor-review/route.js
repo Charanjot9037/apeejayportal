@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/projects";
+import Student from "@/models/student";
 import { authenticateUser } from "@/lib/authentication";
+
 import {
   sendMentorFeedbackEmail,
   sendMentorStatusUpdateEmail,
@@ -32,18 +34,10 @@ export async function PATCH(request, context) {
       );
     }
 
-    // =====================================================
-    // LOGGED-IN USER
-    // auth.user._id is the User ID of the logged-in mentor
-    // =====================================================
-
-    const loggedInUserId = auth.user._id;
+    const loggedInUserId = auth.user._id.toString();
 
     // =====================================================
     // FIND PROJECT
-    //
-    // Project.mentor stores User._id
-    // Therefore mentor is populated directly as User
     // =====================================================
 
     const project = await Project.findById(id)
@@ -53,6 +47,10 @@ export async function PATCH(request, context) {
       })
       .populate({
         path: "mentor",
+        select: "name email",
+      })
+      .populate({
+        path: "mentor2",
         select: "name email",
       });
 
@@ -67,22 +65,63 @@ export async function PATCH(request, context) {
     }
 
     // =====================================================
+    // FIND STUDENT DEPARTMENT
+    //
+    // Project.student = User._id
+    // Student.userId = User._id
+    // =====================================================
 
-    if (
-      !project.mentor ||
-      project.mentor._id.toString() !== loggedInUserId.toString()
-    ) {
+    const studentRecord = await Student.findOne({
+      userId: project.student?._id,
+    }).select("department");
+
+    const projectDepartment = studentRecord?.department;
+
+    // =====================================================
+    // CHECK ASSIGNED MENTOR
+    // =====================================================
+
+    const isMentor =
+      project.mentor?._id?.toString() === loggedInUserId;
+
+    // =====================================================
+    // CHECK SECOND MENTOR
+    // =====================================================
+
+    const isMentor2 =
+      project.mentor2?._id?.toString() === loggedInUserId;
+
+    // =====================================================
+    // CHECK HOD
+    // =====================================================
+
+    const isHOD =
+      auth.user?.role === "mentor" &&
+      auth.user?.mentor?.designation?.toLowerCase() === "hod" &&
+      auth.user?.mentor?.department === projectDepartment;
+
+    // =====================================================
+    // AUTHORIZATION
+    //
+    // Allowed:
+    // 1. Assigned mentor
+    // 2. Assigned mentor2
+    // 3. HOD of student's department
+    // =====================================================
+
+    if (!isMentor && !isMentor2 && !isHOD) {
       return NextResponse.json(
         {
           success: false,
-          message: "You are not assigned to this project.",
+          message:
+            "You are not authorized to update this project.",
         },
         { status: 403 },
       );
     }
 
     // =====================================================
-    // GET REQUEST BODY
+    // REQUEST BODY
     // =====================================================
 
     const body = await request.json();
@@ -134,9 +173,7 @@ export async function PATCH(request, context) {
     const now = new Date();
 
     // =====================================================
-    // CREATE REVIEW ENTRY
-    //
-    // reviewedBy stores User._id
+    // CREATE REVIEW
     // =====================================================
 
     const reviewEntry = {
@@ -153,7 +190,7 @@ export async function PATCH(request, context) {
     }
 
     // =====================================================
-    // INITIALIZE REVIEWS
+    // ADD REVIEW
     // =====================================================
 
     if (!Array.isArray(project.mentorReviews)) {
@@ -163,7 +200,7 @@ export async function PATCH(request, context) {
     project.mentorReviews.push(reviewEntry);
 
     // =====================================================
-    // UPDATE CURRENT PROJECT STATE
+    // UPDATE PROJECT
     // =====================================================
 
     if (status) {
@@ -176,44 +213,33 @@ export async function PATCH(request, context) {
 
     project.mentorReviewedAt = now;
 
-    // =====================================================
-    // SAVE
-    // =====================================================
-
     await project.save();
 
     // =====================================================
-    // MENTOR NAME
-    //
-    // Project.mentor is populated User
+    // PERSON WHO PERFORMED ACTION
     // =====================================================
 
-    const mentorName = project.mentor?.name || auth.user.name || "Your Mentor";
+    const reviewerName =
+      auth.user?.name || "Mentor";
 
     // =====================================================
     // STATUS EMAIL
     // =====================================================
 
-    if (status) {
-      if (!project.student?.email) {
-        console.error("STATUS EMAIL ERROR: Student email not found.");
-      } else {
-        try {
-          await sendMentorStatusUpdateEmail({
-            email: project.student.email,
-            studentName: project.student.name,
-            projectTitle: project.title,
-            mentorName,
-            status: project.status,
-          });
-
-          console.log(
-            "STATUS EMAIL SENT SUCCESSFULLY to:",
-            project.student.email,
-          );
-        } catch (emailError) {
-          console.error("STATUS EMAIL FAILED:", emailError);
-        }
+    if (status && project.student?.email) {
+      try {
+        await sendMentorStatusUpdateEmail({
+          email: project.student.email,
+          studentName: project.student.name,
+          projectTitle: project.title,
+          mentorName: reviewerName,
+          status: project.status,
+        });
+      } catch (emailError) {
+        console.error(
+          "STATUS EMAIL FAILED:",
+          emailError,
+        );
       }
     }
 
@@ -221,26 +247,20 @@ export async function PATCH(request, context) {
     // FEEDBACK EMAIL
     // =====================================================
 
-    if (comment?.trim()) {
-      if (!project.student?.email) {
-        console.error("FEEDBACK EMAIL ERROR: Student email not found.");
-      } else {
-        try {
-          await sendMentorFeedbackEmail({
-            email: project.student.email,
-            studentName: project.student.name,
-            projectTitle: project.title,
-            mentorName,
-            comment: comment.trim(),
-          });
-
-          console.log(
-            "FEEDBACK EMAIL SENT SUCCESSFULLY to:",
-            project.student.email,
-          );
-        } catch (emailError) {
-          console.error("FEEDBACK EMAIL FAILED:", emailError);
-        }
+    if (comment?.trim() && project.student?.email) {
+      try {
+        await sendMentorFeedbackEmail({
+          email: project.student.email,
+          studentName: project.student.name,
+          projectTitle: project.title,
+          mentorName: reviewerName,
+          comment: comment.trim(),
+        });
+      } catch (emailError) {
+        console.error(
+          "FEEDBACK EMAIL FAILED:",
+          emailError,
+        );
       }
     }
 
@@ -258,17 +278,21 @@ export async function PATCH(request, context) {
         select: "name email",
       })
       .populate({
+        path: "mentor2",
+        select: "name email",
+      })
+      .populate({
         path: "teamMembers",
         select: "fullName profileImage",
         populate: {
           path: "userId",
           select: "name email",
         },
+      })
+      .populate({
+        path: "mentorReviews.reviewedBy",
+        select: "name email",
       });
-
-    // =====================================================
-    // RESPONSE
-    // =====================================================
 
     return NextResponse.json(
       {
@@ -279,12 +303,17 @@ export async function PATCH(request, context) {
       { status: 200 },
     );
   } catch (error) {
-    console.error("MENTOR_REVIEW_ERROR:", error);
+    console.error(
+      "MENTOR_REVIEW_ERROR:",
+      error,
+    );
 
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to update review.",
+        message:
+          error.message ||
+          "Failed to update review.",
       },
       { status: 500 },
     );
