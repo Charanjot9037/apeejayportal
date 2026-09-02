@@ -22,7 +22,7 @@ export default function Page() {
           {/* Hidden on mobile */}
           {/* ========================================= */}
 
-          <section className="relative hidden lg:flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-950 via-blue-900 to-primary px-8 py-10 xl:px-12">
+          <section className="relative hidden lg:flex items-center justify-center overflow-hidden bg-linear-to-br from-blue-950 via-blue-900 to-primary px-8 py-10 xl:px-12">
 
             {/* Subtle decorative background */}
             <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-orange-500/10 blur-2xl" />
