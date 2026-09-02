@@ -136,7 +136,7 @@ export default function ProjectImagesSection({ formik, isEdit }) {
         )}
         {/* UPLOAD */}
         <label
-          className={`flex min-h-[130px] flex-col items-center justify-center rounded-md border border-dashed ${
+          className={`flex min-h-32.5 flex-col items-center justify-center rounded-md border border-dashed ${
             uploading
               ? "cursor-not-allowed border-orange-300 bg-orange-50"
               : "cursor-pointer border-slate-300 bg-slate-50 hover:border-orange-400 hover:bg-orange-50"

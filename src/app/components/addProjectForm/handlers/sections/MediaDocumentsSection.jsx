@@ -3,6 +3,7 @@
 import { useState } from "react";
 import DocumentUpload from "../../DocumentUpload";
 import { toast } from "sonner";
+import { MAX_CERTIFICATE_SIZE, MAX_SYNOPSIS_SIZE, MAX_REPORT_SIZE, MAX_PRESENTATION_SIZE } from "@/constants/AddProjectConstant";
 
 export default function MediaDocumentsSection({
   formik,
@@ -22,42 +23,62 @@ export default function MediaDocumentsSection({
     certificateFile2: false,
   });
 
-  const uploadDocument = async (file, fieldName) => {
-    if (!file) return;
+const FILE_LIMITS = {
+  presentationFile: MAX_PRESENTATION_SIZE,
+  synopsisFile: MAX_SYNOPSIS_SIZE,
+  reportFile: MAX_REPORT_SIZE,
+  certificateFile: MAX_CERTIFICATE_SIZE,
+  presentationFile2: MAX_PRESENTATION_SIZE,
+  synopsisFile2: MAX_SYNOPSIS_SIZE,
+  reportFile2: MAX_REPORT_SIZE,
+  certificateFile2: MAX_CERTIFICATE_SIZE,
+};
+
+ const uploadDocument = async (file, fieldName) => {
+  if (!file) return;
+
+  const sizeLimit = FILE_LIMITS[fieldName];
+
+  if (sizeLimit && file.size > sizeLimit) {
+    toast.error(
+      `${file.name} is larger than ${(sizeLimit / (1024 * 1024)).toFixed(0)}MB.`
+    );
+    return; // stop — never even hits /api/upload
+  }
 
     try {
-      setUploading((prev) => ({ ...prev, [fieldName]: true }));
+    setUploading((prev) => ({ ...prev, [fieldName]: true }));
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("type", "project-document");
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "project-document");
 
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "File upload failed");
-      }
-
-      formik.setFieldValue(fieldName, {
-        url: data.url,
-        publicId: data.publicId,
-        originalName: data.originalName,
-        resourceType: data.resourceType,
-      });
-
-      formik.setFieldTouched(fieldName, true, false);
-      toast.success(`${file.name} uploaded successfully`);
-    } catch (error) {
-      console.error(`${fieldName} upload error:`, error);
-      toast.error(error.message || "File upload failed");
-    } finally {
-      setUploading((prev) => ({ ...prev, [fieldName]: false }));
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "File upload failed");
     }
+
+       formik.setFieldValue(fieldName, {
+      url: data.url,
+      publicId: data.publicId,
+      originalName: data.originalName,
+      resourceType: data.resourceType,
+    });
+
+    formik.setFieldTouched(fieldName, true, false);
+    toast.success(`${file.name} uploaded successfully`);
+  } catch (error) {
+    console.error(`${fieldName} upload error:`, error);
+    toast.error(error.message || "File upload failed");
+  } finally {
+    setUploading((prev) => ({ ...prev, [fieldName]: false }));
+  }
   };
 
   const removeFile = (fieldName) => {

@@ -1,17 +1,18 @@
 "use client";
 
-import { FileText, Link as LinkIcon, Upload, X } from "lucide-react";
+import { FileText, Link as LinkIcon, Upload, X,Loader2 } from "lucide-react";
 
 import InputField from "../elements/InputField";
 import { useSelector } from "react-redux";
 export default function OnlineProfilesTab({
-  formik,
+    formik,
   getError,
   resumeInputRef,
   handleResume,
   removeResume,
   onBack,
   onSubmit,
+  isSubmitting,
 }) {
   const department = formik.values.department;
   return (
@@ -137,13 +138,21 @@ export default function OnlineProfilesTab({
           Back
         </button>
 
-        <button
-          type="button"
-          onClick={onSubmit}
-          className="rounded-md bg-orange-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-orange-600"
-        >
-          Complete Profile
-        </button>
+       <button
+  type="button"
+  onClick={onSubmit}
+  disabled={isSubmitting}
+  className="rounded-md bg-orange-500 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
+>
+  {isSubmitting ? (
+    <span className="flex items-center gap-2">
+      <Loader2 className="h-4 w-4 animate-spin" />
+      Completing...
+    </span>
+  ) : (
+    "Complete Profile"
+  )}
+</button>
       </div>
     </div>
   );
