@@ -464,13 +464,16 @@ export default function HODProjects() {
         message={authModal.message}
         onClose={() => {
           if (authModal.type === "unauthorized") {
-            router.back();
+            router.push("/");
           } else {
             setAuthModal((prev) => ({
               ...prev,
               open: false,
             }));
           }
+        }}
+        onBack={() => {
+          router.back();
         }}
         onLogin={() => {
           router.push("/login");

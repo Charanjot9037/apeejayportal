@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { connectDB } from "@/lib/db";
 import User from "@/models/user";
+import Mentor from "@/models/mentor";
 import { generateTemporaryPassword } from "@/lib/generatePassword";
 import { authenticateUser } from "@/lib/authentication";
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,7 +22,7 @@ export async function POST(request) {
     }
 
     const user = auth.user;
-    console.log("user", user);
+
     if (user.role !== "mentor") {
       return NextResponse.json(
         {
@@ -34,6 +35,36 @@ export async function POST(request) {
       );
     }
 
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        { status: auth.status },
+      );
+    }
+
+    // =========================
+    // AUTHORIZATION
+    // =========================
+    const mentor = await Mentor.findOne({
+      userId: auth.user._id,
+    });
+
+    if (
+      auth.user.role !== "mentor" ||
+      !mentor ||
+      mentor.designation !== "Engineer"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "You are not authorized to validate mentors.",
+        },
+        { status: 403 },
+      );
+    }
     if (!Array.isArray(students)) {
       return NextResponse.json(
         {
