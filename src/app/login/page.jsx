@@ -82,7 +82,7 @@ export default function Page() {
     flex items-center justify-center
     px-5 py-8
     sm:px-8 sm:py-10
-    lg:bg-white lg:px-10 lg:py-8
+  bg-white lg:px-10 lg:py-8
   "
 >
   <Login />

@@ -73,7 +73,7 @@ export default function HelpCenterPage() {
           <div className="h-[3px] w-10 bg-[#f97822]" />
 
           <p className=" text-[15px] text-[#58718c]">
-            Get assistance with the AppEJay Project Portal, project submissions,
+            Get assistance with the Appeejay Project Portal, project submissions,
             mentoring and account management.
           </p>
         </section>
