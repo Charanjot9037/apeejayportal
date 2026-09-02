@@ -198,27 +198,28 @@ export async function POST(request) {
       .select("userId fullName program specialization")
       .lean();
 
-
-
     const studentUserIds = students
       .map((student) => student.userId)
       .filter(Boolean);
 
-    const mentorCount = await Mentor.countDocuments({
-      $expr: {
-        $eq: [
-          {
-            $toLower: {
-              $trim: {
-                input: {
-                  $ifNull: ["$department", ""],
-                },
-              },
-            },
-          },
-          normalizedDepartment,
-        ],
-      },
+    const totalStudents = await Student.countDocuments({});
+
+    // Total mentors
+    const totalMentors = await Mentor.countDocuments({});
+
+    // Total projects
+    const totalProjects = await Projects.countDocuments({});
+
+    // Pending reviews
+    const pendingReviews = await Projects.countDocuments({
+      // CHANGE THIS CONDITION according to your schema
+      status: "Pending Approval",
+    });
+
+    // Mentor verified projects
+    const mentorVerified = await Projects.countDocuments({
+      // CHANGE this field if your schema uses another name
+      status: "Approved",
     });
 
     let rawProjects = [];
@@ -263,8 +264,6 @@ export async function POST(request) {
         projectQuery.mentor = mentor;
       }
 
-
-
       rawProjects = await Projects.find(projectQuery)
         .select(
           "_id title subtitle semester student mentor status mentorReviewedAt createdAt updatedAt",
@@ -282,26 +281,6 @@ export async function POST(request) {
         })
         .lean();
     }
-
-
-
-    let pendingReviews = 0;
-    let mentorVerified = 0;
-
-    rawProjects.forEach((project) => {
-      const projectStatus = project.status?.trim().toLowerCase();
-
-      if (
-        projectStatus === "pending approval" ||
-        projectStatus === "in review"
-      ) {
-        pendingReviews++;
-      }
-
-      if (projectStatus === "approved") {
-        mentorVerified++;
-      }
-    });
 
     const projects = rawProjects.map((project) => {
       let approvalDate = "-";
@@ -353,9 +332,9 @@ export async function POST(request) {
       {
         success: true,
         statistics: {
-          students: students.length,
-          mentors: mentorCount,
-          projects: projects.length,
+          students: totalStudents,
+          mentors: totalMentors,
+          projects: totalProjects,
           pendingReviews,
           mentorVerified,
         },

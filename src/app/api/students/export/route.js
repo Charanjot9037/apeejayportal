@@ -1,12 +1,9 @@
-
 import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
-import { PassThrough } from "stream";
 
 import { connectDB } from "@/lib/db";
+import Student from "@/models/student";
 import User from "@/models/user";
-
-export const runtime = "nodejs";
 
 export async function GET(request) {
   try {
@@ -14,354 +11,327 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
 
-    const search =
-      searchParams.get("search")?.trim() || "";
+    const search = searchParams.get("search") || "";
+    const department = searchParams.get("department") || "";
 
-    const department =
-      searchParams.get("department") || "all";
+    // ============================================================
+    // GET STUDENTS
+    // ============================================================
 
-    const skill =
-      searchParams.get("skill") || "all";
+    const students = await Student.find(
+      department && department !== "all"
+        ? { department }
+        : {}
+    )
+      .sort({ createdAt: -1 })
+      .lean();
 
-    // ==================================================
-    // USER FILTER
-    // ==================================================
+    // ============================================================
+    // GET USER INFORMATION
+    // Student.userId -> User._id
+    // ============================================================
 
-    const userMatch = {
-      role: "student",
-    };
+    const userIds = students
+      .map((student) => student.userId)
+      .filter(Boolean);
 
-    // ==================================================
-    // AGGREGATION
-    // ==================================================
+    const users = await User.find({
+      _id: { $in: userIds },
+    })
+      .select("name email")
+      .lean();
 
-    const pipeline = [
-      // -----------------------------------------------
-      // 1. ONLY STUDENT USERS
-      // -----------------------------------------------
+    // Create quick lookup
+    const userMap = new Map(
+      users.map((user) => [
+        user._id.toString(),
+        user,
+      ])
+    );
 
-      {
-        $match: userMatch,
-      },
+    // ============================================================
+    // SEARCH FILTER
+    // ============================================================
 
-      // -----------------------------------------------
-      // 2. JOIN USER WITH STUDENT PROFILE
-      // User._id → Student.userId
-      // -----------------------------------------------
+    const filteredStudents = students.filter((student) => {
+      const user = userMap.get(
+        student.userId?.toString()
+      );
 
-      {
-        $lookup: {
-          from: "students",
+      const studentSkills = Array.isArray(student.skills)
+        ? student.skills
+        : [];
 
-          localField: "_id",
+      const studentInterests = Array.isArray(student.interests)
+        ? student.interests
+        : [];
 
-          foreignField: "userId",
+      if (!search.trim()) {
+        return true;
+      }
 
-          as: "studentProfile",
-        },
-      },
+      const searchValue = search
+        .toLowerCase()
+        .trim();
 
-      // -----------------------------------------------
-      // 3. ONE STUDENT PROFILE
-      // -----------------------------------------------
+      return (
+        (student.fullName || "")
+          .toLowerCase()
+          .includes(searchValue) ||
 
-      {
-        $unwind: {
-          path: "$studentProfile",
+        (user?.name || "")
+          .toLowerCase()
+          .includes(searchValue) ||
 
-          preserveNullAndEmptyArrays: false,
-        },
-      },
+        (user?.email || "")
+          .toLowerCase()
+          .includes(searchValue) ||
 
-      // -----------------------------------------------
-      // 4. SEARCH
-      // -----------------------------------------------
+        (student.program || "")
+          .toLowerCase()
+          .includes(searchValue) ||
 
-      ...(search
-        ? [
-            {
-              $match: {
-                $or: [
-                  // User name
-                  {
-                    name: {
-                      $regex:
-                        escapeRegex(search),
+        (student.department || "")
+          .toLowerCase()
+          .includes(searchValue) ||
 
-                      $options: "i",
-                    },
-                  },
+        (student.specialization || "")
+          .toLowerCase()
+          .includes(searchValue) ||
 
-                  // User email
-                  {
-                    email: {
-                      $regex:
-                        escapeRegex(search),
+        studentSkills.some((skill) =>
+          String(skill)
+            .toLowerCase()
+            .includes(searchValue)
+        ) ||
 
-                      $options: "i",
-                    },
-                  },
-
-                  // Student name
-                  {
-                    "studentProfile.fullName": {
-                      $regex:
-                        escapeRegex(search),
-
-                      $options: "i",
-                    },
-                  },
-
-                  // Department
-                  {
-                    "studentProfile.department": {
-                      $regex:
-                        escapeRegex(search),
-
-                      $options: "i",
-                    },
-                  },
-
-                  // Skills
-                  {
-                    "studentProfile.skills": {
-                      $regex:
-                        escapeRegex(search),
-
-                      $options: "i",
-                    },
-                  },
-                ],
-              },
-            },
-          ]
-        : []),
-
-      // -----------------------------------------------
-      // 5. DEPARTMENT FILTER
-      // -----------------------------------------------
-
-      ...(department !== "all"
-        ? [
-            {
-              $match: {
-                "studentProfile.department":
-                  department,
-              },
-            },
-          ]
-        : []),
-
-      // -----------------------------------------------
-      // 6. SKILL FILTER
-      // -----------------------------------------------
-
-      ...(skill !== "all"
-        ? [
-            {
-              $match: {
-                "studentProfile.skills": {
-                  $regex: new RegExp(
-                    `^${escapeRegex(skill)}$`,
-                    "i"
-                  ),
-                },
-              },
-            },
-          ]
-        : []),
-
-      // -----------------------------------------------
-      // 7. ONLY REQUIRED FIELDS
-      // -----------------------------------------------
-
-      {
-        $project: {
-          _id: 0,
-
-          // FROM USER
-          name: 1,
-
-          email: 1,
-
-          // FROM STUDENT
-          department:
-            "$studentProfile.department",
-
-          skills:
-            "$studentProfile.skills",
-
-          semester:
-            "$studentProfile.currentSemester",
-        },
-      },
-    ];
-
-    // ==================================================
-    // MONGODB CURSOR
-    // ==================================================
-
-    const cursor = User.aggregate(
-      pipeline
-    ).cursor({
-      batchSize: 100,
+        studentInterests.some((interest) =>
+          String(interest)
+            .toLowerCase()
+            .includes(searchValue)
+        )
+      );
     });
 
-    // ==================================================
-    // EXCEL STREAM
-    // ==================================================
+    // ============================================================
+    // CREATE EXCEL WORKBOOK
+    // ============================================================
 
-    const stream = new PassThrough();
+    const workbook = new ExcelJS.Workbook();
 
-    const workbook =
-      new ExcelJS.stream.xlsx.WorkbookWriter({
-        stream,
+    const worksheet = workbook.addWorksheet(
+      "Student Profiles"
+    );
 
-        useStyles: true,
-
-        useSharedStrings: true,
-      });
-
-    const worksheet =
-      workbook.addWorksheet("Students");
-
-    // ==================================================
-    // EXCEL COLUMNS
-    // ==================================================
+    // ============================================================
+    // COLUMNS
+    // ============================================================
 
     worksheet.columns = [
       {
-        header: "Student Name",
-
+        header: "Name",
         key: "name",
-
-        width: 28,
+        width: 22,
       },
-
       {
         header: "Email",
-
         key: "email",
-
-        width: 35,
+        width: 32,
       },
-
       {
         header: "Department",
-
         key: "department",
-
-        width: 25,
+        width: 18,
       },
-
+      {
+        header: "Program",
+        key: "program",
+        width: 15,
+      },
+      {
+        header: "Specialization",
+        key: "specialization",
+        width: 20,
+      },
+      {
+        header: "Academic Batch",
+        key: "academicBatch",
+        width: 18,
+      },
+      {
+        header: "Graduation Year",
+        key: "lastYear",
+        width: 18,
+      },
+      {
+        header: "Roll Number",
+        key: "rollNumber",
+        width: 16,
+      },
       {
         header: "Skills",
-
         key: "skills",
-
-        width: 50,
+        width: 40,
       },
-
       {
-        header: "Semester",
-
-        key: "semester",
-
-        width: 15,
+        header: "Interests",
+        key: "interests",
+        width: 35,
+      },
+      {
+        header: "LinkedIn",
+        key: "linkedin",
+        width: 35,
+      },
+      {
+        header: "GitHub",
+        key: "github",
+        width: 35,
+      },
+      {
+        header: "Portfolio",
+        key: "portfolio",
+        width: 40,
       },
     ];
 
-    // ==================================================
-    // HEADER
-    // ==================================================
+    // ============================================================
+    // HEADER STYLE
+    // ============================================================
 
-    worksheet.getRow(1).font = {
+    const headerRow = worksheet.getRow(1);
+
+    headerRow.font = {
       bold: true,
+      color: {
+        argb: "FFFFFFFF",
+      },
     };
 
-    worksheet.getRow(1).commit();
+    headerRow.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: {
+        argb: "FF064A82",
+      },
+    };
 
-    // ==================================================
-    // WRITE STUDENTS
-    // ==================================================
+    headerRow.alignment = {
+      vertical: "middle",
+      horizontal: "center",
+    };
 
-    for await (const student of cursor) {
-      const skills = Array.isArray(
-        student.skills
-      )
-        ? [
-            ...new Set(
-              student.skills
-                .filter(Boolean)
-                .map((item) =>
-                  String(item).trim()
-                )
-            ),
-          ].join(", ")
-        : "";
+    headerRow.height = 25;
 
-      worksheet
-        .addRow({
-          // User collection
-          name: student.name || "",
+    // ============================================================
+    // ADD STUDENTS
+    // ============================================================
 
-          // User collection
-          email: student.email || "",
+    filteredStudents.forEach((student) => {
+      const user = userMap.get(
+        student.userId?.toString()
+      );
 
-          // Student collection
-          department:
-            student.department || "",
+      worksheet.addRow({
+        name:
+          student.fullName ||
+          user?.name ||
+          "",
 
-          // Student collection
-          skills,
+        email:
+          user?.email ||
+          "",
 
-          // Student collection
-          semester:
-            student.semester || "",
-        })
-        .commit();
-    }
+        department:
+          student.department ||
+          "",
 
-    // ==================================================
-    // COMPLETE WORKBOOK
-    // ==================================================
+        program:
+          student.program ||
+          "",
 
-    await worksheet.commit();
+        specialization:
+          student.specialization ||
+          "",
 
-    await workbook.commit();
+        academicBatch:
+          student.academicBatch ||
+          "",
 
-    // ==================================================
-    // DOWNLOAD
-    // ==================================================
+        lastYear:
+          student.lastYear ||
+          "",
 
-    return new NextResponse(
-      new ReadableStream({
-        start(controller) {
-          stream.on("data", (chunk) => {
-            controller.enqueue(chunk);
-          });
+        rollNumber:
+          student.rollNumber ||
+          "",
 
-          stream.on("end", () => {
-            controller.close();
-          });
+        skills:
+          Array.isArray(student.skills)
+            ? student.skills.join(", ")
+            : "",
 
-          stream.on("error", (error) => {
-            controller.error(error);
-          });
-        },
-      }),
-      {
-        status: 200,
+        interests:
+          Array.isArray(student.interests)
+            ? student.interests.join(", ")
+            : "",
 
-        headers: {
-          "Content-Type":
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        linkedin:
+          student.linkedin ||
+          "",
 
-          "Content-Disposition":
-            'attachment; filename="student-profiles.xlsx"',
-        },
+        github:
+          student.github ||
+          "",
+
+        portfolio:
+          student.portfolio ||
+          "",
+      });
+    });
+
+    // ============================================================
+    // ROW STYLING
+    // ============================================================
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber !== 1) {
+        row.alignment = {
+          vertical: "middle",
+          wrapText: true,
+        };
+
+        row.height = 25;
       }
-    );
+    });
+
+    // ============================================================
+    // FREEZE HEADER
+    // ============================================================
+
+    worksheet.views = [
+      {
+        state: "frozen",
+        ySplit: 1,
+      },
+    ];
+
+    // ============================================================
+    // GENERATE FILE
+    // ============================================================
+
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    return new NextResponse(buffer, {
+      status: 200,
+      headers: {
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+        "Content-Disposition":
+          'attachment; filename="student-profiles.xlsx"',
+      },
+    });
   } catch (error) {
     console.error(
       "STUDENT_EXPORT_ERROR:",
@@ -370,23 +340,12 @@ export async function GET(request) {
 
     return NextResponse.json(
       {
-        message:
-          "Failed to export students",
+        success: false,
+        message: "Failed to export students",
       },
       {
         status: 500,
       }
     );
   }
-}
-
-// ==================================================
-// ESCAPE REGEX
-// ==================================================
-
-function escapeRegex(value) {
-  return value.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    "\\$&"
-  );
 }

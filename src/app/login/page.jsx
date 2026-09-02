@@ -5,7 +5,7 @@ import Login from "../components/login";
 export default function Page() {
   return (
     <main
-      className="relative min-h-screen bg-cover bg-center bg-no-repeat"
+      className="relative max-h-screen  bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage: "url('/landing-page/image.png')",
       }}

@@ -24,7 +24,7 @@ import {
   DEFAULT_PROJECT_FILTERS,
   HOD_PROJECT_FILTERS,
   mapProjectToRoster,
-  HOD_STAT_CARDS,
+  admin_STAT_CARDS,
 } from "@/constants/hodData";
 import StudentRosterSkeleton from "@/app/components/admin/skeleton/studentRosterSkeleton";
 import { useRouter } from "next/navigation";
@@ -250,10 +250,11 @@ export default function HODProjects() {
 
     const initialFilters = {
       ...DEFAULT_PROJECT_FILTERS,
-      department: department.toUpperCase(),
-      program: "",
-      specialization: "",
-      semester: "",
+      department: "ENGINEERING",
+      program: "BTECH",
+      specialization: "CSE",
+      academicYear: new Date().getFullYear().toString(),
+      semester: "1",
     };
 
     setFilters(initialFilters);
@@ -410,7 +411,7 @@ export default function HODProjects() {
     fetchProjects(filters);
   };
 
-  const statCards = HOD_STAT_CARDS.map((card) => {
+  const statCards = admin_STAT_CARDS.map((card) => {
     if (card.title === "Total Students") {
       return {
         ...card,
