@@ -128,7 +128,7 @@ export const semesterOptions = {
   })),
 };
 
-export const generateAcademicYears = (startYear = 2025) => {
+export const generateAcademicYears = (startYear = 2023) => {
   const currentYear = new Date().getFullYear();
 
   return Array.from(
