@@ -169,17 +169,17 @@ export default function DashboardContent() {
                           key={project._id || project.id || project.title}
                           className="flex items-center justify-between py-3"
                         >
-                          <div>
+                          <div className="min-w-2" >
                             <p className="text-sm font-medium text-slate-800">
                               {project.title}
                             </p>
 
-                            <p className="text-xs text-slate-500 line-clamp-1 w-2xl">
+                            <p className="text-xs text-slate-500 line-clamp-1 ">
                               {project.description}
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center flex-col md:flex-row gap-3">
                             <Badge
                               className={
                                 statusStyles[project.status] ||
