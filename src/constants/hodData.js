@@ -385,3 +385,35 @@ export const HOD_STAT_CARDS = [
     icon: "Clock3",
   },
 ];
+export const admin_STAT_CARDS = [
+  {
+    id: "students",
+    title: "Total Students",
+    value: 0,
+    href: "admin-dashboard/student",
+    description: "Students in your department",
+    icon: "GraduationCap",
+  },
+  {
+    id: "mentors",
+    title: "Total Mentors",
+    value: 0,
+    href: "admin-dashboard/mentor",
+    description: "Mentors in your department",
+    icon: "UserRound",
+  },
+  {
+    id: "projects",
+    title: "Total Projects",
+    value: 0,
+    description: "Projects in your department",
+    icon: "FolderKanban",
+  },
+  {
+    id: "pending",
+    title: "Pending Approvals",
+    value: 0,
+    description: "Projects awaiting approval",
+    icon: "Clock3",
+  },
+];
