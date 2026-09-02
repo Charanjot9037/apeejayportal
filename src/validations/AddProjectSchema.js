@@ -6,8 +6,32 @@ import {
   MAX_SYNOPSIS_SIZE,
   MAX_REPORT_SIZE,
   MAX_PROJECT_IMAGES,
+  MAX_CERTIFICATE_SIZE, // add this to AddProjectConstant (see note below)
 } from "@/constants/AddProjectConstant";
 import { isEmptyFile } from "@/app/components/addProjectForm/helper";
+
+/* =========================================================
+   FILE TYPE CONSTANTS
+========================================================= */
+
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const PDF_TYPE = "application/pdf";
+const PPT_TYPES = [
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+];
+
+/* =========================================================
+   IS ALREADY-UPLOADED CLOUDINARY FILE
+   Once a file has been uploaded, its Formik value becomes
+   a Cloudinary object ({ publicId, url, resourceType, ... })
+   instead of a raw browser File. It has no reliable .type or
+   .size to validate against, and it was already validated at
+   upload time — so we let these pass through untouched.
+========================================================= */
+
+const isCloudinaryFile = (file) =>
+  !!file && typeof file === "object" && ("publicId" in file || "url" in file);
 
 /* =========================================================
    YUP SCHEMA
@@ -48,6 +72,7 @@ export const validationSchema = Yup.object({
     .of(Yup.string().trim())
     .min(1, "Add at least one technology")
     .default([]),
+
   teamMembers: Yup.string()
     .nullable()
     .when("projectType", {
@@ -56,101 +81,142 @@ export const validationSchema = Yup.object({
       otherwise: (schema) => schema.notRequired(),
     }),
 
-  projectImages: Yup.array(),
-  // .test(
-  //   "max-images",
-  //   `Maximum ${MAX_PROJECT_IMAGES} images are allowed`,
-  //   (files) => {
-  //     if (!files) return true;
+  /* =======================================================
+     PROJECT IMAGES
+  ======================================================= */
 
-  //     return files.length <= MAX_PROJECT_IMAGES;
-  //   }
-  // )
-  // .test(
-  //   "image-types",
-  //   "Only JPG, JPEG, PNG and WEBP images are allowed",
-  //   (files) => {
-  //     if (!files || files.length === 0) {
-  //       return true;
-  //     }
+  projectImages: Yup.array()
+    .test(
+      "max-images",
+      `Maximum ${MAX_PROJECT_IMAGES} images are allowed`,
+      (files) => {
+        if (!files) return true;
+        return files.length <= MAX_PROJECT_IMAGES;
+      }
+    )
+    .test(
+      "image-types",
+      "Only JPG, JPEG, PNG and WEBP images are allowed",
+      (files) => {
+        if (!files || files.length === 0) return true;
 
-  //     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+        return files.every((file) => {
+          if (isCloudinaryFile(file)) return true;
+          if (!file?.type) return false;
+          return IMAGE_TYPES.includes(file.type);
+        });
+      }
+    )
+    .test(
+      "image-size",
+      "Each project image must be smaller than 5MB",
+      (files) => {
+        if (!files || files.length === 0) return true;
 
-  //     return files.every((file) => {
-  //       if (!file?.type) return false;
+        return files.every((file) => {
+          if (isCloudinaryFile(file)) return true;
+          return file.size <= MAX_IMAGE_SIZE;
+        });
+      }
+    ),
 
-  //       return allowedTypes.includes(file.type);
-  //     });
-  //   }
-  // )
-  // .test(
-  //   "image-size",
-  //   "Each project image must be smaller than 5MB",
-  //   (files) => {
-  //     if (!files || files.length === 0) {
-  //       return true;
-  //     }
+  /* =======================================================
+     PRESENTATION FILE (optional)
+  ======================================================= */
 
-  //     return files.every((file) => file.size <= MAX_IMAGE_SIZE);
-  //   }
-  // ),
-  presentationFile: Yup.mixed().nullable(),
-  // .nullable()
-  // .test(
-  //   "presentation-type",
-  //   "Only PPT and PPTX files are allowed",
-  //   (file) => {
-  //     if (isEmptyFile(file)) {
-  //       return true;
-  //     }
+  presentationFile: Yup.mixed()
+    .nullable()
+    .test(
+      "presentation-type",
+      "Only PPT and PPTX files are allowed",
+      (file) => {
+        if (isEmptyFile(file)) return true;
+        if (isCloudinaryFile(file)) return true;
 
-  //     const fileName = file.name?.toLowerCase() || "";
+        const fileName = file.name?.toLowerCase() || "";
 
-  //     return (
-  //       file.type === "application/vnd.ms-powerpoint" ||
-  //       file.type ===
-  //         "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
-  //       fileName.endsWith(".ppt") ||
-  //       fileName.endsWith(".pptx")
-  //     );
-  //   },
-  // )
-  synopsisFile: Yup.mixed().required(),
-  // .nullable()
-  // .test("synopsis-type", "Only PDF files are allowed", (file) => {
-  //   if (isEmptyFile(file)) {
-  //     return true;
-  //   }
+        return (
+          PPT_TYPES.includes(file.type) ||
+          fileName.endsWith(".ppt") ||
+          fileName.endsWith(".pptx")
+        );
+      }
+    )
+    .test(
+      "presentation-size",
+      "Presentation must be smaller than the allowed limit",
+      (file) => {
+        if (isEmptyFile(file)) return true;
+        if (isCloudinaryFile(file)) return true;
 
-  //   return (
-  //     file.type === "application/pdf" ||
-  //     file.name?.toLowerCase().endsWith(".pdf")
-  //   );
-  // })
-  // .test("synopsis-size", "Synopsis must be smaller than 5MB", (file) => {
-  //   if (isEmptyFile(file)) {
-  //     return true;
-  //   }
+        return file.size <= MAX_PRESENTATION_SIZE;
+      }
+    ),
 
-  //   return file.size <= MAX_SYNOPSIS_SIZE;
-  // })
-  reportFile: Yup.mixed().nullable(),
-  // .nullable()
-  // .test("report-type", "Only PDF files are allowed", (file) => {
-  //   if (isEmptyFile(file)) {
-  //     return true;
-  //   }
+  /* =======================================================
+     SYNOPSIS FILE (required)
+  ======================================================= */
 
-  //   return (
-  //     file.type === "application/pdf" ||
-  //     file.name?.toLowerCase().endsWith(".pdf")
-  //   );
-  // })
-  // .test("report-size", "Final report must be smaller than 20MB", (file) => {
-  //   if (isEmptyFile(file)) {
-  //     return true;
-  //   }
+  synopsisFile: Yup.mixed()
+    .required("Synopsis is required")
+    .test("synopsis-type", "Only PDF files are allowed", (file) => {
+      if (isEmptyFile(file)) return true;
+      if (isCloudinaryFile(file)) return true;
 
-  //   return file.size <= MAX_REPORT_SIZE;
-  // })
+      return (
+        file.type === PDF_TYPE || file.name?.toLowerCase().endsWith(".pdf")
+      );
+    })
+    .test("synopsis-size", "Synopsis must be smaller than 5MB", (file) => {
+      if (isEmptyFile(file)) return true;
+      if (isCloudinaryFile(file)) return true;
+
+      return file.size <= MAX_SYNOPSIS_SIZE;
+    }),
+
+  /* =======================================================
+     REPORT FILE (optional)
+  ======================================================= */
+
+  reportFile: Yup.mixed()
+    .nullable()
+    .test("report-type", "Only PDF files are allowed", (file) => {
+      if (isEmptyFile(file)) return true;
+      if (isCloudinaryFile(file)) return true;
+
+      return (
+        file.type === PDF_TYPE || file.name?.toLowerCase().endsWith(".pdf")
+      );
+    })
+    .test("report-size", "Final report must be smaller than 20MB", (file) => {
+      if (isEmptyFile(file)) return true;
+      if (isCloudinaryFile(file)) return true;
+
+      return file.size <= MAX_REPORT_SIZE;
+    }),
+
+  /* =======================================================
+     CERTIFICATE FILE (optional)
+  ======================================================= */
+
+  certificateFile: Yup.mixed()
+    .nullable()
+    .test("certificate-type", "Only PDF files are allowed", (file) => {
+      if (isEmptyFile(file)) return true;
+      if (isCloudinaryFile(file)) return true;
+
+      return (
+        file.type === PDF_TYPE || file.name?.toLowerCase().endsWith(".pdf")
+      );
+    })
+    .test(
+      "certificate-size",
+      "Certificate must be smaller than the allowed limit",
+      (file) => {
+        if (isEmptyFile(file)) return true;
+        if (isCloudinaryFile(file)) return true;
+
+        return file.size <= MAX_CERTIFICATE_SIZE;
+      }
+    ),
 });

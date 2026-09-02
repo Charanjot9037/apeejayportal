@@ -18,8 +18,8 @@ export default function FormActions({ formik, isEdit }) {
           Cancel
         </Button>
       </Link>
-
-      {/* <Button
+{/* 
+      <Button
         type="button"
         variant="outline"
         className="border-orange-500 text-orange-500 hover:bg-orange-50"
@@ -34,8 +34,7 @@ export default function FormActions({ formik, isEdit }) {
         type="submit"
         disabled={formik.isSubmitting}
         className="bg-orange-500 text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-        onClick={() => {
-          // Redirect after successful submit
+           onClick={() => {
           router.push("/student");
         }}
       >
