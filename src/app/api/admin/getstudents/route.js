@@ -21,6 +21,36 @@ export async function POST(request) {
       );
     }
 
+    if (!auth.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: auth.message,
+        },
+        { status: auth.status },
+      );
+    }
+
+    // =========================
+    // AUTHORIZATION
+    // =========================
+    const mentor = await Mentor.findOne({
+      userId: auth.user._id,
+    });
+
+    if (
+      auth.user.role !== "mentor" ||
+      !mentor ||
+      mentor.designation !== "Engineer"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "You are not authorized to validate mentors.",
+        },
+        { status: 403 },
+      );
+    }
     const body = await request.json();
 
     const { department, program, academicBatch, specialization } = body;

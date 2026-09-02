@@ -33,8 +33,6 @@ export async function POST(request) {
       academiYear,
     } = filters || {};
 
-    console.log(program, specialization, semester, department, academiYear);
-
     const auth = await authenticateUser();
 
     if (!auth?.success || !auth?.user?._id) {
