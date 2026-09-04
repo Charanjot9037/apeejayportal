@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
+import Image from "next/image";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 function getAcademicYear(student) {
   const startYear = student?.academicBatch;
@@ -26,7 +26,7 @@ function getAcademicYear(student) {
 }
 
 function getValidImageUrl(value) {
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return null;
   }
 
@@ -37,9 +37,9 @@ function getValidImageUrl(value) {
   }
 
   if (
-    url.startsWith('/') ||
-    url.startsWith('http://') ||
-    url.startsWith('https://')
+    url.startsWith("/") ||
+    url.startsWith("http://") ||
+    url.startsWith("https://")
   ) {
     return url;
   }
@@ -54,11 +54,11 @@ function getProjectImage(project) {
 
   const firstImage = project.projectImages[0];
 
-  if (typeof firstImage === 'string') {
+  if (typeof firstImage === "string") {
     return getValidImageUrl(firstImage);
   }
 
-  if (firstImage && typeof firstImage === 'object') {
+  if (firstImage && typeof firstImage === "object") {
     return getValidImageUrl(firstImage.url);
   }
 
@@ -66,17 +66,17 @@ function getProjectImage(project) {
 }
 
 function getSafeExternalLink(value) {
-  if (typeof value !== 'string') {
-    return '';
+  if (typeof value !== "string") {
+    return "";
   }
 
   const url = value.trim();
 
   if (!url) {
-    return '';
+    return "";
   }
 
-  if (url.startsWith('https://') || url.startsWith('http://')) {
+  if (url.startsWith("https://") || url.startsWith("http://")) {
     return url;
   }
 
@@ -103,8 +103,8 @@ function SkillGroup({ title, skills }) {
         (skill) =>
           skill !== null &&
           skill !== undefined &&
-          typeof skill !== 'object' &&
-          String(skill).trim() !== '',
+          typeof skill !== "object" &&
+          String(skill).trim() !== "",
       )
     : [];
 
@@ -163,7 +163,7 @@ function SocialLink({ symbol, name, href }) {
 }
 
 function ProjectStatus({ status }) {
-  if (status === 'Approved') {
+  if (status === "Approved") {
     return (
       <Badge className="gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[9px] font-bold text-emerald-700 shadow-sm hover:bg-emerald-50">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -172,7 +172,7 @@ function ProjectStatus({ status }) {
     );
   }
 
-  if (status === 'Rejected') {
+  if (status === "Rejected") {
     return (
       <Badge className="gap-1.5 rounded-full border border-red-100 bg-red-50 px-3 py-1.5 text-[9px] font-bold text-red-600 shadow-sm hover:bg-red-50">
         <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
@@ -184,7 +184,7 @@ function ProjectStatus({ status }) {
   return (
     <Badge className="gap-1.5 rounded-full border border-orange-100 bg-orange-50 px-3 py-1.5 text-[9px] font-bold text-orange-600 shadow-sm hover:bg-orange-50">
       <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-      {status || 'Pending Approval'}
+      {status || "Pending Approval"}
     </Badge>
   );
 }
@@ -201,8 +201,8 @@ function ProjectCard({ project }) {
         (tech) =>
           tech !== null &&
           tech !== undefined &&
-          typeof tech !== 'object' &&
-          String(tech).trim() !== '',
+          typeof tech !== "object" &&
+          String(tech).trim() !== "",
       )
     : [];
 
@@ -212,7 +212,7 @@ function ProjectCard({ project }) {
         {image ? (
           <Image
             src={image}
-            alt={project?.title || 'Project'}
+            alt={project?.title || "Project"}
             fill
             sizes="(max-width: 1280px) 100vw, 50vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -234,19 +234,19 @@ function ProjectCard({ project }) {
         )}
 
         <div className="absolute left-4 top-4">
-          {project?.status === 'Approved' && (
+          {project?.status === "Approved" && (
             <Badge className="border-0 bg-emerald-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-md hover:bg-emerald-500">
               ✓ Approved
             </Badge>
           )}
 
-          {project?.status === 'Rejected' && (
+          {project?.status === "Rejected" && (
             <Badge className="border-0 bg-red-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-md hover:bg-red-500">
               Rejected
             </Badge>
           )}
 
-          {!['Approved', 'Rejected'].includes(project?.status) && (
+          {!["Approved", "Rejected"].includes(project?.status) && (
             <Badge className="border-0 bg-orange-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-md hover:bg-orange-500">
               Pending
             </Badge>
@@ -258,7 +258,7 @@ function ProjectCard({ project }) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="truncate text-[17px] font-bold text-slate-800 transition-colors group-hover:text-[#07518a]">
-              {project?.title || 'Untitled Project'}
+              {project?.title || "Untitled Project"}
             </h3>
 
             {project?.subtitle && (
@@ -279,7 +279,7 @@ function ProjectCard({ project }) {
         </div>
 
         <p className="mt-3 min-h-[54px] line-clamp-3 text-[12px] leading-[1.7] text-slate-500">
-          {project?.description || 'No project description available.'}
+          {project?.description || "No project description available."}
         </p>
 
         {validTechStack.length > 0 && (
@@ -305,7 +305,7 @@ function ProjectCard({ project }) {
             </p>
 
             <p className="mt-1 text-[10px] font-semibold text-slate-600">
-              {project?.projectType || 'Individual'}
+              {project?.projectType || "Individual"}
             </p>
           </div>
 
@@ -346,12 +346,12 @@ function ProjectOverviewRow({ project }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="truncate text-[12px] font-bold text-slate-700 transition-colors group-hover:text-[#07518a]">
-            {project?.title || 'Untitled Project'}
+            {project?.title || "Untitled Project"}
           </p>
 
           <p className="mt-1 text-[10px] text-slate-400">
-            {project?.projectType || 'Individual'}
-            {project?.semester ? ` • Semester ${project.semester}` : ''}
+            {project?.projectType || "Individual"}
+            {project?.semester ? ` • Semester ${project.semester}` : ""}
           </p>
         </div>
 
@@ -362,7 +362,7 @@ function ProjectOverviewRow({ project }) {
 }
 
 function AcademicDetail({ label, value }) {
-  if (value === null || value === undefined || String(value).trim() === '') {
+  if (value === null || value === undefined || String(value).trim() === "") {
     return null;
   }
 
@@ -391,8 +391,8 @@ export default function StudentData({ student, projects = [] }) {
         (skill) =>
           skill !== null &&
           skill !== undefined &&
-          typeof skill !== 'object' &&
-          String(skill).trim() !== '',
+          typeof skill !== "object" &&
+          String(skill).trim() !== "",
       )
     : [];
 
@@ -401,14 +401,14 @@ export default function StudentData({ student, projects = [] }) {
         (interest) =>
           interest !== null &&
           interest !== undefined &&
-          typeof interest !== 'object' &&
-          String(interest).trim() !== '',
+          typeof interest !== "object" &&
+          String(interest).trim() !== "",
       )
     : [];
 
   const academicYear = getAcademicYear(student);
 
-  const email = typeof student.email === 'string' ? student.email.trim() : '';
+  const email = typeof student.email === "string" ? student.email.trim() : "";
 
   const resume = getSafeExternalLink(student.resume);
 
@@ -419,30 +419,28 @@ export default function StudentData({ student, projects = [] }) {
   const portfolio = getSafeExternalLink(student.portfolio);
 
   return (
-    <div className="min-h-screen font-sans text-slate-800">
-      <Card className="relative mx-5 mt-5 overflow-hidden rounded-2xl border-2 border-[#f97316] shadow-[0_12px_35px_rgba(249,115,22,0.14)] sm:mx-8 lg:mx-16 xl:mx-24">
-        <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-orange-100/60 blur-2xl" />
-
+    <div className="min-h-screen font-sans text-slate-800 bg-slate-100">
+      <Card className="relativeoverflow-hidden rounded-2xl mx-auto max-w-7xl border border-blue-800">
         <div className="pointer-events-none absolute -bottom-24 left-[35%] h-48 w-48 rounded-full bg-orange-50/70 blur-3xl" />
 
-        <CardContent className="relative mx-auto w-full max-w-[1200px] px-5 py-5 sm:px-6 lg:px-7">
+        <CardContent className="relative border mx-auto w-full px-5 py-5 sm:px-6 lg:px-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
             <div className="relative mx-auto shrink-0 lg:mx-0">
               <div className="relative h-20 w-20 sm:h-24 sm:w-24">
                 <div className="absolute -inset-2 rounded-full bg-orange-100/80 blur-[1px]" />
 
-                <div className="relative h-full w-full overflow-hidden rounded-full border-4 border-[#f97316] bg-[#21428f] shadow-[0_5px_18px_rgba(249,115,22,0.25)]">
+                <div className="relative h-full w-full  overflow-hidden rounded-full border-1 border-slate-100 ">
                   {profileImage ? (
                     <Image
                       src={profileImage}
-                      alt={student.fullName || 'Student'}
+                      alt={student.fullName || "Student"}
                       fill
                       sizes="96px"
                       className="object-cover"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">
-                      {student.fullName?.charAt(0)?.toUpperCase() || 'S'}
+                      {student.fullName?.charAt(0)?.toUpperCase() || "S"}
                     </div>
                   )}
                 </div>
@@ -455,7 +453,7 @@ export default function StudentData({ student, projects = [] }) {
 
             <div className="min-w-0 flex-1 text-center lg:text-left">
               <h1 className="text-2xl font-bold tracking-tight text-slate-800 sm:text-[28px]">
-                {student.fullName || 'Student'}
+                {student.fullName || "Student"}
               </h1>
 
               {student.program && (
@@ -476,7 +474,7 @@ export default function StudentData({ student, projects = [] }) {
                     <span className="text-orange-300">•</span>
 
                     <span>
-                      Academic Year{' '}
+                      Academic Year{" "}
                       <span className="font-semibold text-slate-700">
                         {academicYear}
                       </span>
@@ -489,7 +487,7 @@ export default function StudentData({ student, projects = [] }) {
                     <span className="text-orange-300">•</span>
 
                     <span>
-                      Roll No.{' '}
+                      Roll No.{" "}
                       <span className="font-semibold text-slate-700">
                         {student.rollNumber}
                       </span>
@@ -561,8 +559,8 @@ export default function StudentData({ student, projects = [] }) {
               <CardContent className="p-5 pt-4">
                 <p className="text-[12px] leading-[1.8] text-slate-500">
                   {interests.length > 0
-                    ? `Interested in ${interests.join(', ')}.`
-                    : 'No additional information has been provided by the student.'}
+                    ? `Interested in ${interests.join(", ")}.`
+                    : "No additional information has been provided by the student."}
                 </p>
               </CardContent>
             </Card>
@@ -686,7 +684,7 @@ export default function StudentData({ student, projects = [] }) {
                   </span>
 
                   <span className="ml-1 text-[8px] font-bold uppercase tracking-[1px] text-slate-400">
-                    {projects.length === 1 ? 'Project' : 'Projects'}
+                    {projects.length === 1 ? "Project" : "Projects"}
                   </span>
                 </Badge>
               </CardHeader>
