@@ -50,7 +50,7 @@ export default function CreateStudentProfile() {
       specialization: "",
       resume: "",
       resumeName: "",
-      resumeFile: null,
+      resumeFile: null, 
     },
 
     validationSchema: studentProfileSchema,
@@ -92,9 +92,8 @@ export default function CreateStudentProfile() {
 
     if (!file) return;
 
-    // Store actual file for displaying filename
     formik.setFieldValue("resumeFile", file);
-
+    console.log("erroors", formik.errors.resumeFile);
     const formData = new FormData();
     formData.append("file", file);
 
@@ -109,8 +108,6 @@ export default function CreateStudentProfile() {
       if (!response.ok) {
         throw new Error(data.message || "Resume upload failed");
       }
-
-      console.log("Resume Cloudinary URL:", data.url);
 
       formik.setFieldValue("resume", data.url);
     } catch (error) {
