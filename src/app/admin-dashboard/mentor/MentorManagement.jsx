@@ -60,9 +60,7 @@ export default function MentorManagement() {
 
       console.log("MENTOR API RESPONSE:", data);
 
-      // =====================================================
-      // AUTHENTICATION ERROR
-      // =====================================================
+
 
       if (response.status === 401) {
         setAuthModal({
