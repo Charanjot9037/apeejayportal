@@ -124,8 +124,6 @@ export async function POST(req) {
       uploadStream.end(buffer);
     });
 
-    console.log("Cloudinary upload result:", result);
-
     // ------------------------------------
     // RESPONSE
     // ------------------------------------

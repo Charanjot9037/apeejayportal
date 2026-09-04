@@ -50,7 +50,7 @@ export default function CreateStudentProfile() {
       specialization: "",
       resume: "",
       resumeName: "",
-      resumeFile: null, 
+      resumeFile: null,
     },
 
     validationSchema: studentProfileSchema,
@@ -61,6 +61,7 @@ export default function CreateStudentProfile() {
 
     if (!file) return;
     setIsUploadingImage(true);
+    alert("image upload");
     formik.setFieldValue("profileImageFile", file);
 
     const formData = new FormData();
@@ -92,12 +93,60 @@ export default function CreateStudentProfile() {
 
     if (!file) return;
 
-    formik.setFieldValue("resumeFile", file);
-    console.log("erroors", formik.errors.resumeFile);
+    formik.setFieldTouched("resumeFile", true, false);
+
+    if (file.size > 5 * 1024 * 1024) {
+      formik.setFieldError("resumeFile", "Resume must be less than 5MB");
+
+      formik.setFieldValue("resumeFile", null, false);
+      formik.setFieldValue("resume", "", false);
+
+      event.target.value = "";
+
+      return;
+    }
+
+    // ==========================================
+    // 2. VALIDATE FILE TYPE
+    // ==========================================
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      formik.setFieldError(
+        "resumeFile",
+        "Only PDF, DOC and DOCX files are allowed",
+      );
+
+      formik.setFieldValue("resumeFile", null, false);
+      formik.setFieldValue("resume", "", false);
+
+      // Reset input
+      event.target.value = "";
+
+      return; // 🚫 STOP - API WILL NOT BE CALLED
+    }
+
+    // ==========================================
+    // 3. FILE IS VALID
+    // ==========================================
+    formik.setFieldError("resumeFile", "");
+
+    // Store selected File in Formik
+    formik.setFieldValue("resumeFile", file, false);
+
+    // ==========================================
+    // 4. NOW CALL API
+    // ==========================================
     const formData = new FormData();
     formData.append("file", file);
 
     try {
+      setIsUploadingImage(true);
+
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -109,14 +158,29 @@ export default function CreateStudentProfile() {
         throw new Error(data.message || "Resume upload failed");
       }
 
-      formik.setFieldValue("resume", data.url);
+      // Save uploaded Cloudinary/server URL
+      formik.setFieldValue("resume", data.url, false);
+
+      // Clear any previous error
+      formik.setFieldError("resumeFile", "");
     } catch (error) {
       console.error("Resume upload failed:", error);
 
-      formik.setFieldValue("resumeFile", null);
-      formik.setFieldValue("resume", "");
+      formik.setFieldError(
+        "resumeFile",
+        error.message || "Resume upload failed",
+      );
+
+      formik.setFieldValue("resumeFile", null, false);
+      formik.setFieldValue("resume", "", false);
+
+      // Reset input
+      event.target.value = "";
+    } finally {
+      setIsUploadingImage(false);
     }
   };
+
   function removeProfileImage() {
     formik.setFieldValue("profileImage", null);
 
@@ -126,7 +190,8 @@ export default function CreateStudentProfile() {
   }
   function removeResume() {
     formik.setFieldValue("resume", null);
-
+    formik.setFieldValue("resumeName", "");
+    formik.setFieldValue("resumeFile", null);
     if (resumeInputRef.current) {
       resumeInputRef.current.value = "";
     }
@@ -356,9 +421,9 @@ export default function CreateStudentProfile() {
           value={activeTab}
           onValueChange={(value) => {
             // Prevent manually going to future tabs
-            if (!studentId && value !== "personal") {
-              return;
-            }
+            // if (!studentId && value !== "personal") {
+            //   return;
+            // }
 
             setActiveTab(value);
           }}
@@ -367,7 +432,7 @@ export default function CreateStudentProfile() {
           <TabsList className=" w-full h-10 flex overflow-x-auto no-scrollbar justify-start gap-1   sm:justify-center bg-white border  text-sm text-black">
             <TabsTrigger
               value="personal"
-              disabled={studentId}
+              // disabled={studentId}
               className="py-3 data-active:bg-primary-orange data-active:text-white"
             >
               Personal Information
@@ -389,7 +454,7 @@ export default function CreateStudentProfile() {
 
             <TabsTrigger
               value="profiles"
-              disabled={!studentId}
+              // disabled={!studentId}
               className="py-3 data-active:bg-primary-orange data-active:text-white"
             >
               Profiles & Resume
@@ -441,6 +506,7 @@ export default function CreateStudentProfile() {
           <TabsContent value="profiles">
             <OnlineProfilesTab
               formik={formik}
+              loading={isUploadingImage}
               getError={getError}
               resumeInputRef={resumeInputRef}
               handleResume={handleResume}
