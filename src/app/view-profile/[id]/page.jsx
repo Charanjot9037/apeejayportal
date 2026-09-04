@@ -1,23 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 
-import StudentData from "@/app/components/elements/StudentData";
-
-function LoadingState() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f8fafc]">
-      <div className="text-center">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-700" />
-
-        <p className="mt-3 text-sm font-medium text-slate-600">
-          Loading student profile...
-        </p>
-      </div>
-    </div>
-  );
-}
+import StudentData from '@/app/components/elements/StudentData';
+import StudentDataSkeleton from '@/app/components/skeletons/studentDataSkeleton';
 
 export default function StudentProfilePage() {
   const { id } = useParams();
@@ -26,7 +13,7 @@ export default function StudentProfilePage() {
   const [projects, setProjects] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -34,22 +21,22 @@ export default function StudentProfilePage() {
     const fetchStudentData = async () => {
       try {
         setLoading(true);
-        setError("");
+        setError('');
 
         const response = await fetch(`/api/studentData/${id}`);
 
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(result.message || "Failed to fetch student data");
+          throw new Error(result.message || 'Failed to fetch student data');
         }
 
         setStudent(result.student);
         setProjects(result.projects || []);
       } catch (error) {
-        console.error("FETCH_STUDENT_DATA_ERROR:", error);
+        console.error('FETCH_STUDENT_DATA_ERROR:', error);
 
-        setError(error.message || "Something went wrong");
+        setError(error.message || 'Something went wrong');
       } finally {
         setLoading(false);
       }
@@ -59,7 +46,7 @@ export default function StudentProfilePage() {
   }, [id]);
 
   if (loading) {
-    return <LoadingState />;
+    return <StudentDataSkeleton />;
   }
 
   if (error || !student) {
@@ -71,7 +58,7 @@ export default function StudentProfilePage() {
           </h2>
 
           <p className="mt-2 text-sm text-slate-500">
-            {error || "Unable to load this student profile."}
+            {error || 'Unable to load this student profile.'}
           </p>
         </div>
       </div>

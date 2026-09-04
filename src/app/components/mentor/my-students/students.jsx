@@ -1,389 +1,341 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Roster } from "@/app/components/elements";
-import { MENTOR_STUDENTS_COLUMNS } from "@/constants/mentorData";
-import { mapStudentsToRoster } from "@/mappers/mentor";
-import { DashboardHeader } from "@/app/components/elements";
-import { MENTORTO_DASHBOARD_HEADER } from "@/constants/mentorData";
-// =====================================================
-// FILTER CONFIG
-// =====================================================
+import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 
-const MENTOR_STUDENT_FILTERS = [
-  {
-    key: "department",
-    label: "Department",
-    placeholder: "All Departments",
-    options: [
-      {
-        value: "ENGINEERING",
-        label: "Engineering",
-      },
-      {
-        value: "MANAGEMENT",
-        label: "Management",
-      },
-      {
-        value: "IT",
-        label: "Information Technology",
-      },
-    ],
-  },
+import { Roster, DashboardHeader } from '@/app/components/elements';
 
-  {
-    key: "program",
-    label: "Program / Degree",
-    placeholder: "All Programs",
-    dependsOn: "department",
-    options: {
-      ENGINEERING: [
-        {
-          value: "BTECH",
-          label: "B.Tech",
-        },
-        {
-          value: "MTECH",
-          label: "M.Tech",
-        },
-      ],
+import RosterSkeleton from '@/app/components/skeletons/roasterSkeleton';
 
-      MANAGEMENT: [
-        {
-          value: "MBA",
-          label: "MBA",
-        },
-        {
-          value: "BBA",
-          label: "BBA",
-        },
-        {
-          value: "BCOM",
-          label: "B.Com",
-        },
-      ],
+import {
+  categories,
+  generateAcademicYears,
+  programOptions,
+  specializationOptions,
+} from '@/constants/gloabl';
 
-      IT: [
-        {
-          value: "MCA",
-          label: "MCA",
-        },
-        {
-          value: "BCA",
-          label: "BCA",
-        },
-      ],
-    },
-  },
+// import { DEFAULT_STUDENT_FILTERS } from '@/constants/mentorStudent';
 
-  {
-    key: "specialization",
-    label: "Specialization",
-    placeholder: "All Specializations",
-    dependsOn: "department",
-    options: {
-      ENGINEERING: [
-        {
-          value: "CSE",
-          label: "Computer Science & Engineering",
-        },
-        {
-          value: "ECE",
-          label: "Electronics & Communication Engineering",
-        },
-        {
-          value: "ME",
-          label: "Mechanical Engineering",
-        },
-        {
-          value: "CIVIL",
-          label: "Civil Engineering",
-        },
-      ],
+import {
+  MENTOR_STUDENTS_COLUMNS,
+  MENTORTO_DASHBOARD_HEADER,
+} from '@/constants/mentorData';
 
-      MANAGEMENT: [
-        {
-          value: "FINANCE",
-          label: "Finance",
-        },
-        {
-          value: "MARKETING",
-          label: "Marketing",
-        },
-        {
-          value: "HR",
-          label: "Human Resource Management",
-        },
-      ],
+import { mapStudentsToRoster } from '@/mappers/mentor';
+import { apiRequest } from '@/lib/apiRequest';
 
-      IT: [
-        {
-          value: "SOFTWARE_DEVELOPMENT",
-          label: "Software Development",
-        },
-        {
-          value: "DATA_SCIENCE",
-          label: "Data Science",
-        },
-        {
-          value: "AI_ML",
-          label: "Artificial Intelligence & Machine Learning",
-        },
-        {
-          value: "CYBER_SECURITY",
-          label: "Cyber Security",
-        },
-      ],
-    },
-  },
+const ACADEMIC_BATCH_OPTIONS = generateAcademicYears();
 
-  {
-    key: "academicBatch",
-    label: "Academic Batch",
-    placeholder: "All Batches",
-    options: [
-      {
-        value: "2023",
-        label: "2023",
-      },
-      {
-        value: "2024",
-        label: "2024",
-      },
-      {
-        value: "2025",
-        label: "2025",
-      },
-      {
-        value: "2026",
-        label: "2026",
-      },
-    ],
-  },
-];
-
-// =====================================================
-// DEFAULT FILTERS
-// Engineering + B.Tech + CSE
-// =====================================================
-
-const DEFAULT_FILTERS = {
-  department: "ENGINEERING",
-  program: "BTECH",
-  academicBatch: "",
-  specialization: "CSE",
+const DEFAULT_STUDENT_FILTERS = {
+  department: '',
+  program: '',
+  specialization: '',
+  academicBatch: '',
 };
-
-// =====================================================
-// FILTER STUDENTS
-// =====================================================
-
-const filterStudents = (students, selectedFilters) => {
-  let result = [...students];
-
-  if (selectedFilters.department) {
-    result = result.filter(
-      (student) =>
-        String(student.department || "")
-          .trim()
-          .toLowerCase() ===
-        String(selectedFilters.department).trim().toLowerCase(),
-    );
-  }
-
-  if (selectedFilters.program) {
-    result = result.filter(
-      (student) =>
-        String(student.program || "")
-          .trim()
-          .toLowerCase() ===
-        String(selectedFilters.program).trim().toLowerCase(),
-    );
-  }
-
-  if (selectedFilters.academicBatch) {
-    result = result.filter(
-      (student) =>
-        String(student.academicBatch || "")
-          .trim()
-          .toLowerCase() ===
-        String(selectedFilters.academicBatch).trim().toLowerCase(),
-    );
-  }
-
-  if (selectedFilters.specialization) {
-    result = result.filter(
-      (student) =>
-        String(student.specialization || "")
-          .trim()
-          .toLowerCase() ===
-        String(selectedFilters.specialization).trim().toLowerCase(),
-    );
-  }
-
-  return result;
-};
-
-// =====================================================
-// PAGE
-// =====================================================
 
 export default function Student() {
-  // All students returned by the API.
-  // IMPORTANT: API already restricts this to the
-  // currently logged-in mentor's assigned students.
-  const [allStudents, setAllStudents] = useState([]);
+  const user = useSelector((state) => state.mentor);
 
-  // Students currently displayed after filters.
+  const mentorDepartment = user?.department || '';
+
   const [students, setStudents] = useState([]);
-
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState(DEFAULT_STUDENT_FILTERS);
 
-  // ===================================================
-  // FETCH ASSIGNED STUDENTS
-  // ===================================================
+  const mentorDepartmentOptions = useMemo(() => {
+    if (!mentorDepartment) {
+      return [];
+    }
 
-  const fetchStudents = async () => {
+    const normalizeDepartment = (value) =>
+      String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/_/g, '');
+
+    const matchedCategory = categories.find(
+      (category) =>
+        normalizeDepartment(category.value) ===
+          normalizeDepartment(mentorDepartment) ||
+        normalizeDepartment(category.label) ===
+          normalizeDepartment(mentorDepartment) ||
+        normalizeDepartment(
+          category.value === 'it' ? 'INFORMATIONTECHNOLOGY' : category.value,
+        ) === normalizeDepartment(mentorDepartment),
+    );
+
+    if (!matchedCategory) {
+      return [];
+    }
+
+    let departmentValue = matchedCategory.value;
+
+    if (departmentValue === 'it') {
+      departmentValue = 'INFORMATIONTECHNOLOGY';
+    }
+
+    return [
+      {
+        value: departmentValue,
+        label: matchedCategory.label,
+      },
+    ];
+  }, [mentorDepartment]);
+
+  const mentorProgramOptions = useMemo(() => {
+    if (!mentorDepartment) {
+      return [];
+    }
+
+    const normalizeDepartment = (value) =>
+      String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/_/g, '');
+
+    let departmentKey = Object.keys(programOptions || {}).find(
+      (key) =>
+        normalizeDepartment(key) === normalizeDepartment(mentorDepartment),
+    );
+
+    if (!departmentKey && normalizeDepartment(mentorDepartment) === 'it') {
+      departmentKey = 'INFORMATIONTECHNOLOGY';
+    }
+
+    if (!departmentKey) {
+      return [];
+    }
+
+    const programs = programOptions[departmentKey];
+
+    if (!Array.isArray(programs)) {
+      return [];
+    }
+
+    return programs.map((program) => ({
+      value: program.value,
+      label: program.label,
+    }));
+  }, [mentorDepartment]);
+
+  const mentorSpecializationOptions = useMemo(() => {
+    if (!mentorDepartment) {
+      return [];
+    }
+
+    const normalizeDepartment = (value) =>
+      String(value || '')
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, '')
+        .replace(/_/g, '');
+
+    let departmentKey = Object.keys(specializationOptions || {}).find(
+      (key) =>
+        normalizeDepartment(key) === normalizeDepartment(mentorDepartment),
+    );
+
+    if (
+      !departmentKey &&
+      normalizeDepartment(mentorDepartment) === 'INFORMATIONTECHNOLOGY'
+    ) {
+      departmentKey = 'IT';
+    }
+
+    if (!departmentKey) {
+      return [];
+    }
+
+    const specializations = specializationOptions[departmentKey];
+
+    if (!Array.isArray(specializations)) {
+      return [];
+    }
+
+    return specializations.map((specialization) => ({
+      value: specialization.value,
+      label: specialization.label,
+    }));
+  }, [mentorDepartment]);
+
+  const MENTOR_STUDENT_FILTERS = useMemo(
+    () => [
+      {
+        key: 'department',
+        label: 'Department',
+        placeholder: 'Select Department',
+        options: mentorDepartmentOptions,
+      },
+      {
+        key: 'program',
+        label: 'Program',
+        placeholder: 'Select Program',
+        options: mentorProgramOptions,
+      },
+      {
+        key: 'specialization',
+        label: 'Specialization',
+        placeholder: 'All Specializations',
+        options: mentorSpecializationOptions,
+      },
+      {
+        key: 'academicBatch',
+        label: 'Academic Batch',
+        placeholder: 'All Academic Batches',
+        options: ACADEMIC_BATCH_OPTIONS,
+      },
+    ],
+    [
+      mentorDepartmentOptions,
+      mentorProgramOptions,
+      mentorSpecializationOptions,
+    ],
+  );
+
+  useEffect(() => {
+    if (!mentorDepartmentOptions.length) {
+      return;
+    }
+
+    setFilters((previousFilters) => ({
+      ...previousFilters,
+      department: mentorDepartmentOptions[0].value,
+    }));
+  }, [mentorDepartmentOptions]);
+
+  const fetchStudents = async (
+    filterValues = DEFAULT_STUDENT_FILTERS,
+    isInitialLoad = false,
+  ) => {
     try {
       setLoading(true);
-      setError("");
+      setError('');
 
-      const response = await fetch("/api/mentors/my-students", {
-        method: "GET",
+      const payload = {
+        department:
+          filterValues?.department || mentorDepartmentOptions?.[0]?.value || '',
+
+        program: filterValues?.program || '',
+
+        specialization: filterValues?.specialization || '',
+
+        academicBatch: filterValues?.academicBatch || '',
+      };
+
+      console.log('POST /api/mentors/my-students');
+
+      console.log('STUDENT FILTER PAYLOAD:', payload);
+
+      const result = await apiRequest('/api/mentors/my-students', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        cache: "no-store",
+        body: JSON.stringify(payload),
       });
 
-      // -----------------------------------------------
-      // Read response safely
-      // This prevents:
-      // "Unexpected end of JSON input"
-      // -----------------------------------------------
+      console.log('STUDENT POST RESULT:', result);
 
-      const responseText = await response.text();
-
-      console.log("Mentor students API status:", response.status);
-
-      console.log("Mentor students API response:", responseText);
-
-      if (!responseText) {
-        throw new Error(`API returned an empty response (${response.status})`);
+      if (!result?.success) {
+        throw new Error(result?.message || 'Failed to load mentor students.');
       }
 
-      let data;
+      const returnedStudents =
+        result?.data?.studentDetails || result?.data?.students || [];
 
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error("INVALID_JSON_RESPONSE:", responseText);
-
-        throw new Error("The server returned an invalid response.");
-      }
-
-      // -----------------------------------------------
-      // Authentication / API error
-      // -----------------------------------------------
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to fetch assigned students.");
-      }
-
-      // -----------------------------------------------
-      // API returns:
-      //
-      // {
-      //   success: true,
-      //   studentDetails: [...]
-      // }
-      // -----------------------------------------------
-
-      const assignedStudents = Array.isArray(data.studentDetails)
-        ? data.studentDetails
-        : [];
-
-      console.log("Students assigned to logged-in mentor:", assignedStudents);
-
-      // Store ONLY students returned by the mentor API.
-      setAllStudents(assignedStudents);
-
-      // Apply default filters.
-      const filteredStudents = filterStudents(
-        assignedStudents,
-        DEFAULT_FILTERS,
+      console.log(
+        isInitialLoad
+          ? 'INITIAL STUDENTS FROM BACKEND:'
+          : 'FILTERED STUDENTS FROM BACKEND:',
+        returnedStudents,
       );
 
-      setStudents(filteredStudents);
+      setStudents(returnedStudents);
     } catch (err) {
-      console.error("FETCH_MENTOR_STUDENTS_ERROR:", err);
+      console.error('MENTOR_STUDENT_ERROR:', err);
 
-      setError(err.message || "Something went wrong while fetching students.");
+      setError(err?.message || 'Something went wrong while fetching students.');
 
-      setAllStudents([]);
       setStudents([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // ===================================================
-  // INITIAL FETCH
-  // ===================================================
-
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    if (!mentorDepartmentOptions.length) {
+      return;
+    }
 
-  // ===================================================
-  // APPLY FILTERS
-  // ===================================================
+    fetchStudents(
+      {
+        department: mentorDepartmentOptions[0].value,
+        program: '',
+        specialization: '',
+        academicBatch: '',
+      },
+      true,
+    );
+  }, [mentorDepartmentOptions]);
 
-  const handleApplyFilters = (selectedFilters) => {
-    console.log("Applied student filters:", selectedFilters);
+  const handleApplyFilters = async (selectedFilters) => {
+    console.log('ROSTER SELECTED FILTERS:', selectedFilters);
 
-    setFilters(selectedFilters);
+    const appliedFilters = {
+      department:
+        selectedFilters?.department ||
+        filters?.department ||
+        mentorDepartmentOptions?.[0]?.value ||
+        '',
 
-    // IMPORTANT:
-    // Filter ONLY allStudents.
-    //
-    // allStudents already contains ONLY students
-    // assigned to the logged-in mentor.
-    const filteredStudents = filterStudents(allStudents, selectedFilters);
+      program: selectedFilters?.program || '',
 
-    setStudents(filteredStudents);
+      specialization: selectedFilters?.specialization || '',
+
+      academicBatch: selectedFilters?.academicBatch || '',
+    };
+
+    console.log('SENDING STUDENT FILTERS TO BACKEND:', appliedFilters);
+
+    setFilters(appliedFilters);
+
+    await fetchStudents(appliedFilters, false);
   };
-
-  // ===================================================
-  // RETRY
-  // ===================================================
 
   const handleRetry = () => {
-    fetchStudents();
+    if (!mentorDepartmentOptions.length) {
+      return;
+    }
+
+    fetchStudents(
+      {
+        department: mentorDepartmentOptions[0].value,
+        program: '',
+        specialization: '',
+        academicBatch: '',
+      },
+      true,
+    );
   };
 
-  // ===================================================
-  // MAP API DATA FOR ROSTER
-  // ===================================================
+  const rosterData = useMemo(
+    () => students.map(mapStudentsToRoster),
+    [students],
+  );
 
-  const rosterData = students.map(mapStudentsToRoster);
-
-  // ===================================================
-  // UI
-  // ===================================================
   const studentDashboardHeader = {
     ...MENTORTO_DASHBOARD_HEADER,
   };
+
   return (
-    <div className="min-h-full ">
-      <main className="mx-auto ">
-        {/* =========================================
-            ERROR
-        ========================================= */}
+    <div className="min-h-full">
+      <main className="mx-auto">
         <DashboardHeader {...studentDashboardHeader} />
+
         {error && (
           <div className="mb-5 rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
             <div className="flex flex-col items-center justify-center text-center">
@@ -404,36 +356,35 @@ export default function Student() {
           </div>
         )}
 
-        {/* =========================================
-            LOADING
-        ========================================= */}
-
-        {loading && (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-500">Loading students...</p>
+        {!error && (
+          <div className="relative mt-6">
+            {loading ? (
+              <RosterSkeleton
+                title="My Students"
+                columns={MENTOR_STUDENTS_COLUMNS}
+                rows={5}
+                showDelete={false}
+                showExport={true}
+                showFilters={true}
+              />
+            ) : (
+              <Roster
+                title="My Students"
+                data={rosterData}
+                columns={MENTOR_STUDENTS_COLUMNS}
+                searchPlaceholder="Search students..."
+                filterConfig={MENTOR_STUDENT_FILTERS}
+                filters={filters}
+                setFilters={setFilters}
+                showApplyButton={true}
+                onApplyFilters={handleApplyFilters}
+                onRowClick={(student) => {
+                  console.log('Selected student:', student);
+                }}
+                className="shadow-sm"
+              />
+            )}
           </div>
-        )}
-
-        {/* =========================================
-            ROSTER
-        ========================================= */}
-
-        {!loading && !error && (
-          <Roster
-            title="My Students"
-            data={rosterData}
-            setData={setStudents}
-            columns={MENTOR_STUDENTS_COLUMNS}
-            searchPlaceholder="Search students..."
-            filterConfig={MENTOR_STUDENT_FILTERS}
-            defaultFilters={filters}
-            showApplyButton={true}
-            onApplyFilters={handleApplyFilters}
-            onRowClick={(student) => {
-              console.log("Selected student:", student);
-            }}
-            className="mt-0 shadow-sm"
-          />
         )}
       </main>
     </div>
