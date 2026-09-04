@@ -21,6 +21,23 @@ export async function POST(request) {
     }
     const user = auth.user;
     const userId = user._id;
+     const studentProfile = await Student.findOne({ userId });
+
+    if (
+      !studentProfile ||
+      !studentProfile.department ||
+      !studentProfile.program
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Please complete your department and program in your profile before creating a project.",
+          code: "PROFILE_INCOMPLETE",
+        },
+        { status: 403 },
+      );
+    }
 
     const body = await request.json();
 

@@ -1,35 +1,35 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
 
-import { StatCards, Roster, DashboardHeader } from '@/app/components/elements';
+import { StatCards, Roster, DashboardHeader } from "@/app/components/elements";
 
-import RosterSkeleton from '@/app/components/skeletons/roasterSkeleton';
+import RosterSkeleton from "@/app/components/skeletons/roasterSkeleton";
 
 import {
   generateAcademicYears,
   programOptions,
   semesterOptions,
-} from '@/constants/gloabl';
+} from "@/constants/gloabl";
 
 import {
   MENTOR_STAT_CARDS,
   MENTOR_STUDENT_COLUMNS,
   MENTOR_DASHBOARD_HEADER,
-} from '@/constants/mentorData';
+} from "@/constants/mentorData";
 
-import { mapMentorProjectToRoster } from '@/mappers/mentor';
-import { apiRequest } from '@/lib/apiRequest';
-import AuthGuardModal from '../AuthGuardModal';
+import { mapMentorProjectToRoster } from "@/mappers/mentor";
+import { apiRequest } from "@/lib/apiRequest";
+import AuthGuardModal from "../AuthGuardModal";
 
 const ACADEMIC_YEAR_OPTIONS = generateAcademicYears();
 
 const DEFAULT_FILTERS = {
-  program: '',
-  semester: '',
-  academicYear: '',
+  program: "",
+  semester: "",
+  academicYear: "",
 };
 
 export default function Mentor() {
@@ -37,7 +37,7 @@ export default function Mentor() {
 
   const user = useSelector((state) => state.mentor);
 
-  const mentorDepartment = user?.department || '';
+  const mentorDepartment = user?.department || "";
 
   const [allProjects, setAllProjects] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -50,7 +50,7 @@ export default function Mentor() {
   const [authModal, setAuthModal] = useState({
     open: false,
     type: null,
-    message: '',
+    message: "",
   });
 
   const mentorProgramOptions = useMemo(() => {
@@ -59,10 +59,10 @@ export default function Mentor() {
     }
 
     const normalizeDepartment = (value) =>
-      String(value || '')
+      String(value || "")
         .trim()
         .toLowerCase()
-        .replace(/\s+/g, '');
+        .replace(/\s+/g, "");
 
     const departmentKey = Object.keys(programOptions).find(
       (key) =>
@@ -71,7 +71,7 @@ export default function Mentor() {
 
     if (!departmentKey) {
       console.warn(
-        'No program options found for department:',
+        "No program options found for department:",
         mentorDepartment,
       );
 
@@ -97,7 +97,7 @@ export default function Mentor() {
       setFilters((prev) => ({
         ...prev,
         program: mentorProgram,
-        semester: '',
+        semester: "",
       }));
     }
   }, [mentorProgramOptions, filters.program]);
@@ -115,21 +115,21 @@ export default function Mentor() {
   const MENTOR_PROJECT_FILTERS = useMemo(
     () => [
       {
-        key: 'program',
-        label: 'Program',
-        placeholder: 'Select Program',
+        key: "program",
+        label: "Program",
+        placeholder: "Select Program",
         options: mentorProgramOptions,
       },
       {
-        key: 'semester',
-        label: 'Semester',
-        placeholder: 'All Semesters',
+        key: "semester",
+        label: "Semester",
+        placeholder: "All Semesters",
         options: mentorSemesterOptions,
       },
       {
-        key: 'academicYear',
-        label: 'Academic Year',
-        placeholder: 'All Academic Years',
+        key: "academicYear",
+        label: "Academic Year",
+        placeholder: "All Academic Years",
         options: ACADEMIC_YEAR_OPTIONS,
       },
     ],
@@ -145,33 +145,33 @@ export default function Mentor() {
       setError(null);
 
       const payload = {
-        program: filterValues?.program || '',
-        semester: filterValues?.semester || '',
-        academicYear: filterValues?.academicYear || '',
+        program: filterValues?.program || "",
+        semester: filterValues?.semester || "",
+        academicYear: filterValues?.academicYear || "",
       };
 
-      console.log('POST /api/projects/mentor');
+      console.log("POST /api/projects/mentor");
 
-      console.log('FILTER PAYLOAD:', payload);
+      console.log("FILTER PAYLOAD:", payload);
 
-      const result = await apiRequest('/api/projects/mentor', {
-        method: 'POST',
+      const result = await apiRequest("/api/projects/mentor", {
+        method: "POST",
 
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
 
         body: JSON.stringify(payload),
       });
 
-      console.log('MENTOR PROJECT API RESULT:', result);
+      console.log("MENTOR PROJECT API RESULT:", result);
 
       if (result?.status === 401) {
         setAuthModal({
           open: true,
-          type: 'authentication',
+          type: "authentication",
           message:
-            result?.message || 'Your session has expired. Please login again.',
+            result?.message || "Your session has expired. Please login again.",
         });
 
         return;
@@ -180,25 +180,25 @@ export default function Mentor() {
       if (result?.status === 403) {
         setAuthModal({
           open: true,
-          type: 'unauthorized',
+          type: "unauthorized",
           message:
             result?.message ||
-            'You are not authorized to access the mentor dashboard.',
+            "You are not authorized to access the mentor dashboard.",
         });
 
         return;
       }
 
       if (!result?.success) {
-        throw new Error(result?.message || 'Failed to load mentor projects.');
+        throw new Error(result?.message || "Failed to load mentor projects.");
       }
 
       const returnedProjects = result?.data?.projects || [];
 
       console.log(
         isInitialLoad
-          ? 'INITIAL PROJECTS FROM BACKEND:'
-          : 'FILTERED PROJECTS FROM BACKEND:',
+          ? "INITIAL PROJECTS FROM BACKEND:"
+          : "FILTERED PROJECTS FROM BACKEND:",
         returnedProjects,
       );
 
@@ -208,10 +208,10 @@ export default function Mentor() {
 
       setProjects(returnedProjects);
     } catch (err) {
-      console.error('MENTOR_PROJECT_ERROR:', err);
+      console.error("MENTOR_PROJECT_ERROR:", err);
 
       setError(
-        err?.message || 'Something went wrong while fetching mentor projects.',
+        err?.message || "Something went wrong while fetching mentor projects.",
       );
 
       setProjects([]);
@@ -229,17 +229,17 @@ export default function Mentor() {
   }, []);
 
   const handleApplyFilters = async (selectedFilters) => {
-    console.log('ROSTER SELECTED FILTERS:', selectedFilters);
+    console.log("ROSTER SELECTED FILTERS:", selectedFilters);
 
     const appliedFilters = {
-      program: selectedFilters?.program || filters?.program || '',
+      program: selectedFilters?.program || filters?.program || "",
 
-      semester: selectedFilters?.semester || '',
+      semester: selectedFilters?.semester || "",
 
-      academicYear: selectedFilters?.academicYear || '',
+      academicYear: selectedFilters?.academicYear || "",
     };
 
-    console.log('SENDING FILTERS TO BACKEND:', appliedFilters);
+    console.log("SENDING FILTERS TO BACKEND:", appliedFilters);
 
     setFilters(appliedFilters);
 
@@ -251,15 +251,15 @@ export default function Mentor() {
   const totalProjects = allProjects.length;
 
   const pendingProjects = allProjects.filter(
-    (project) => project.status === 'Pending Approval',
+    (project) => project.status === "Pending Approval",
   ).length;
 
   const approvedProjects = allProjects.filter(
-    (project) => project.status === 'Approved',
+    (project) => project.status === "Approved",
   ).length;
 
   const inReviewProjects = allProjects.filter(
-    (project) => project.status === 'In Review',
+    (project) => project.status === "In Review",
   ).length;
 
   const mentorStatCards = MENTOR_STAT_CARDS.map((card) => {
@@ -339,7 +339,7 @@ export default function Mentor() {
                 setFilters={setFilters}
                 showApplyButton={true}
                 onApplyFilters={handleApplyFilters}
-                onViewAll={() => router.push('/mentor-dashboard/projects')}
+                onViewAll={() => router.push("/mentor-dashboard/projects")}
                 viewAllLabel="View All Projects"
                 className="shadow-sm"
               />
@@ -356,10 +356,10 @@ export default function Mentor() {
           setAuthModal({
             open: false,
             type: null,
-            message: '',
+            message: "",
           })
         }
-        onLogin={() => router.push('/login')}
+        onLogin={() => router.push("/login")}
         onBack={() => router.back()}
       />
     </div>

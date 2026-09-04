@@ -11,7 +11,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const ProjectCard = ({ project }) => {
-  console.log("in projectcard : ", JSON.stringify(project));
+
 
   const router = useRouter();
 
@@ -21,8 +21,7 @@ const ProjectCard = ({ project }) => {
 
   const student = project.studentInfo || {};
 
-  // Get the first image from projectImages array
-  const projectImage = project.projectImages?.[0];
+  const projectImage = project.projectImages?.[0]?.url;
 
   return (
     <div
@@ -69,19 +68,21 @@ const ProjectCard = ({ project }) => {
               "
             />
           ) : (
-            <div
+             <Image
+              src='/landing-page/fallback.png'
+              alt={project.title || "Project image"}
+              width={500}
+              height={300}
               className="
-                flex
                 h-full
-                items-center
-                justify-center
-                bg-slate-100
-                text-sm
-                text-slate-400
+                w-full
+                object-cover
+                transition-transform
+                duration-700
+                ease-out
+                group-hover:scale-105
               "
-            >
-              No Image
-            </div>
+            />
           )}
         </div>
 
@@ -173,7 +174,7 @@ const ProjectCard = ({ project }) => {
             className="
               mt-2
               text-center
-              text-[11px]
+              text-[12px]
               font-medium
               text-slate-500
             "
@@ -197,14 +198,11 @@ const ProjectCard = ({ project }) => {
               py-2
             "
           >
-            <GraduationCap className="h-3.5 w-3.5 text-white" />
+            <GraduationCap className="h-3.5 w-3.5 text-orange-500" />
 
             <div className="min-w-0">
-              <p className="text-[10px] uppercase font-medium tracking-wide text-slate-400">
-                Program
-              </p>
 
-              <p className="truncate text-[10px] font-medium text-slate-700">
+              <p className="truncate text-[12px] font-medium text-slate-700">
                 {student.program || project.program || "-"}
               </p>
             </div>
@@ -225,11 +223,7 @@ const ProjectCard = ({ project }) => {
             <BookOpen className="h-3.5 w-3.5 text-orange-500" />
 
             <div className="min-w-0">
-              <p className="text-[10px] uppercase font-medium tracking-wide text-slate-400">
-                Semester
-              </p>
-
-              <p className="truncate text-[10px] font-medium text-slate-700">
+              <p className="truncate text-[12px] font-medium text-slate-700">
                 {project.semester
                   ? `Semester ${project.semester}`
                   : "-"}

@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -21,11 +20,8 @@ const StudentFilters = ({
   setSearch,
   department,
   setDepartment,
-  skill,
-  setSkill,
   onFilter,
   departments = [],
-  skills = [],
 }) => {
   return (
     <div
@@ -50,7 +46,7 @@ const StudentFilters = ({
           grid-cols-1
           gap-5
 
-          md:grid-cols-[minmax(0,1fr)_170px_170px_auto]
+          md:grid-cols-[minmax(0,1fr)_170px_auto]
           md:items-end
         "
       >
@@ -187,76 +183,6 @@ const StudentFilters = ({
           </Select>
         </div>
 
-        {/* ================= Skills ================= */}
-
-        <div>
-          <p
-            className="
-              mb-1.5
-              text-sm
-              font-medium
-              text-slate-600
-            "
-          >
-            Skills
-          </p>
-
-          <Select
-            value={skill}
-            onValueChange={setSkill}
-          >
-            <SelectTrigger
-              className="
-                h-9
-                w-full
-                rounded-md
-                border-slate-300
-                bg-white
-                px-3
-                text-xs
-                font-normal
-                text-slate-700
-                shadow-none
-
-                transition-all
-                duration-200
-
-                hover:border-slate-400
-                hover:bg-slate-50
-
-                focus:ring-2
-                focus:ring-[#064a82]/10
-              "
-            >
-              <SelectValue placeholder="All Skills" />
-            </SelectTrigger>
-
-            <SelectContent
-              side="bottom"
-              sideOffset={6}
-              className="
-                rounded-md
-                border-slate-200
-                bg-white
-                shadow-lg
-              "
-            >
-              <SelectItem value="all">
-                All Skills
-              </SelectItem>
-
-              {skills.map((item) => (
-                <SelectItem
-                  key={item}
-                  value={item}
-                >
-                  {item}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* ================= Filter ================= */}
 
         <Button
@@ -297,8 +223,6 @@ const StudentFilters = ({
 
           Filter
         </Button>
-
-        
       </div>
     </div>
   );

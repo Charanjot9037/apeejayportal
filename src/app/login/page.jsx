@@ -5,7 +5,7 @@ import Login from "../components/login";
 export default function Page() {
   return (
     <main
-      className="relative min-h-screen bg-cover bg-center bg-no-repeat"
+      className="relative max-h-screen  bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage: "url('/landing-page/image.png')",
       }}
@@ -22,7 +22,7 @@ export default function Page() {
           {/* Hidden on mobile */}
           {/* ========================================= */}
 
-          <section className="relative hidden lg:flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-950 via-blue-900 to-primary px-8 py-10 xl:px-12">
+          <section className="relative hidden lg:flex items-center justify-center overflow-hidden bg-linear-to-br from-blue-950 via-blue-900 to-primary px-8 py-10 xl:px-12">
 
             {/* Subtle decorative background */}
             <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-orange-500/10 blur-2xl" />
@@ -82,7 +82,7 @@ export default function Page() {
     flex items-center justify-center
     px-5 py-8
     sm:px-8 sm:py-10
-    lg:bg-white lg:px-10 lg:py-8
+  bg-white lg:px-10 lg:py-8
   "
 >
   <Login />

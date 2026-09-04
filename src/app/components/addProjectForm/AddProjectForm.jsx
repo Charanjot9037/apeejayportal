@@ -1,5 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { toast } from "sonner";
+
 import { useAddProjectForm } from "@/hooks/useAddprojectForm";
 
 import FormHeader from "./handlers/sections/FormHearder";
@@ -10,25 +15,37 @@ import ProjectImagesSection from "./handlers/sections/ProjectImageSection";
 import MediaDocumentsSection from "./handlers/sections/MediaDocumentsSection";
 import FormActions from "./handlers/sections/FormAction";
 
-/* =========================================================
-   MAIN COMPONENT
-
-   All form state and handlers live in useAddProjectForm.
-   This component is just layout + composition of sections.
-
-   viewerRole / teamMemberName come from the parent page,
-   which fetches the project via GET /api/projects/[id]
-   (that route now returns { project, viewerRole }).
-========================================================= */
-
 export default function AddProjectForm({
   mode = "create",
   project = null,
   viewerRole = "owner",
 }) {
+  const router = useRouter();
+
+  const { department, program } = useSelector((state) => state.student);
+
+  const isEdit = mode === "edit";
+
+  /* =========================================================
+     PROFILE COMPLETION GUARD
+     Only relevant for creating a NEW project. If editing an
+     existing one, the profile was already complete when it
+     was created, so we skip this check.
+  ========================================================= */
+
+  const isProfileIncomplete = !isEdit && (!department || !program);
+
+  useEffect(() => {
+    if (isProfileIncomplete) {
+      toast.error(
+        "Please complete your department and program in your profile before creating a project."
+      );
+      router.push("/profile"); // adjust to your actual profile route
+    }
+  }, [isProfileIncomplete, router]);
+
   const {
     formik,
-    isEdit,
     addTechnology,
     removeTechnology,
     addTeamMember,
@@ -43,6 +60,11 @@ export default function AddProjectForm({
     project?.teamMembers?.fullName ||
     project?.teamMembers?.userId?.name ||
     (project?.teamMembers ? "Team Member" : null);
+
+  /* Don't render the form while redirecting */
+  if (isProfileIncomplete) {
+    return null;
+  }
 
   return (
     <div className="min-h-full">
