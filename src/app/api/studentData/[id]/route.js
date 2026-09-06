@@ -4,24 +4,13 @@ import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import Student from '@/models/student';
 import Project from '@/models/projects';
+import User from '@/models/user';
 
 export async function GET(request, { params }) {
   try {
-    // ==========================================
-    // CONNECT DATABASE
-    // ==========================================
-
     await connectDB();
 
-    // ==========================================
-    // GET STUDENT ID
-    // ==========================================
-
     const { id } = await params;
-
-    // ==========================================
-    // VALIDATE ID
-    // ==========================================
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -35,11 +24,8 @@ export async function GET(request, { params }) {
       );
     }
 
-    // ==========================================
-    // FIND STUDENT
-    // ==========================================
-
     const student = await Student.findById(id).lean();
+    const user = await User.findById(student.userId).select('email').lean();
 
     if (!student) {
       return NextResponse.json(
@@ -53,19 +39,11 @@ export async function GET(request, { params }) {
       );
     }
 
-    // ==========================================
-    // FIND STUDENT PROJECTS
-    // ==========================================
-
     const projects = await Project.find({
       student: student.userId,
     })
       .sort({ createdAt: -1 })
       .lean();
-
-    // ==========================================
-    // RESPONSE
-    // ==========================================
 
     return NextResponse.json(
       {
@@ -78,6 +56,7 @@ export async function GET(request, { params }) {
           // Personal Information
           fullName: student.fullName,
           phone: student.phone,
+          email: user.email,
           gender: student.gender,
           address: student.address,
           profileImage: student.profileImage,

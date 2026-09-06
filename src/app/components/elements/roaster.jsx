@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Search,
   Eye,
@@ -9,17 +9,17 @@ import {
   FolderKanban,
   ChevronDown,
   Trash2,
-} from "lucide-react";
-import MentorEditModal from "./MentorEditModal";
-import { mapStudentToRoster } from "@/constants/adminData";
-import StudentEditModal from "./StudentEditModal";
-import Avatar from "./avatar";
-import { toast } from "sonner";
-import { newmapMentorToRoster } from "@/constants/adminData";
-import SelectField from "./SelectFiled";
-import { useRouter } from "next/navigation";
+} from 'lucide-react';
+import MentorEditModal from './MentorEditModal';
+import { mapStudentToRoster } from '@/constants/adminData';
+import StudentEditModal from './StudentEditModal';
+import Avatar from './avatar';
+import { toast } from 'sonner';
+import { newmapMentorToRoster } from '@/constants/adminData';
+import SelectField from './SelectFiled';
+import { useRouter } from 'next/navigation';
 export default function Roster({
-  title = "Roster",
+  title = 'Roster',
   data = [],
   showDelete = false,
   setData,
@@ -31,17 +31,17 @@ export default function Roster({
   columns = [],
   onExport,
   setStudents,
-  searchPlaceholder = "Search...",
+  searchPlaceholder = 'Search...',
   onRowClick,
   onApplyFilters,
-  className = "",
+  className = '',
   defaultFilters = {},
   filterConfig = [],
   filterContext = {},
   showApplyButton = false,
   initialVisibleRows = 5,
 }) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   const [showAll, setShowAll] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
@@ -61,11 +61,11 @@ export default function Roster({
   };
   const handleDelete = async (id) => {
     try {
-      console.log("Student deleting:", id);
+      console.log('Student deleting:', id);
 
       const response = await fetch(`/api/student/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
 
         body: JSON.stringify({
           title,
@@ -75,16 +75,16 @@ export default function Roster({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to delete student");
+        throw new Error(data.message || 'Failed to delete student');
       }
 
-      toast.success("User deleted successfully");
+      toast.success('User deleted successfully');
       setData?.((prevData) =>
         prevData.map((item) =>
           item._id === id || item.id === id
             ? {
                 ...item,
-                status: "inactive",
+                status: 'inactive',
               }
             : item,
         ),
@@ -92,8 +92,8 @@ export default function Roster({
       setShowDeleteModal(false);
       setSelectedStudent(null);
     } catch (error) {
-      console.error("DELETE_STUDENT_ERROR:", error);
-      toast.error(error.message || "Failed to delete student");
+      console.error('DELETE_STUDENT_ERROR:', error);
+      toast.error(error.message || 'Failed to delete student');
     }
   };
   const handleFilterChange = (key, value) => {
@@ -105,18 +105,18 @@ export default function Roster({
         [key]: value,
       };
 
-      if (key === "department") {
-        updatedFilters.program = "";
-        updatedFilters.specialization = "";
-        updatedFilters.semester = "";
+      if (key === 'department') {
+        updatedFilters.program = '';
+        updatedFilters.specialization = '';
+        updatedFilters.semester = '';
       }
 
-      if (key === "program") {
-        updatedFilters.semester = "";
-        updatedFilters.specialization = "";
+      if (key === 'program') {
+        updatedFilters.semester = '';
+        updatedFilters.specialization = '';
       }
 
-      console.log("Roster - filter changed:", updatedFilters);
+      console.log('Roster - filter changed:', updatedFilters);
 
       return updatedFilters;
     });
@@ -126,7 +126,7 @@ export default function Roster({
    * Apply selected filters.
    */
   const handleApplyFilters = () => {
-    console.log("Roster - applying filters:", filters);
+    console.log('Roster - applying filters:', filters);
 
     onApplyFilters?.({
       ...filters,
@@ -139,7 +139,7 @@ export default function Roster({
      * PROJECT COLUMN
      * =========================
      */
-    if (column.key === "projectTitle") {
+    if (column.key === 'projectTitle') {
       return (
         <div className=" bg-red-5000 flex items-center gap-3">
           <div
@@ -162,16 +162,16 @@ export default function Roster({
                 group-hover:text-[#1c3a5e]
               "
             >
-              {item.projectTitle || "-"}
+              {item.projectTitle || '-'}
             </p>
           </div>
         </div>
       );
     }
-    if (column.key === "techStack") {
+    if (column.key === 'techStack') {
       return (
         <span className="text-sm text-slate-600">
-          {Array.isArray(item.techStack) ? item.techStack.join("") : "-"}
+          {Array.isArray(item.techStack) ? item.techStack.join('') : '-'}
         </span>
       );
     }
@@ -181,7 +181,7 @@ export default function Roster({
      * NAME / STUDENT COLUMN
      * =========================
      */
-    if (column.key === "name" || column.key === "student") {
+    if (column.key === 'name' || column.key === 'student') {
       const name = item.name || item.student;
 
       return (
@@ -203,7 +203,7 @@ export default function Roster({
                 group-hover:text-[#1c3a5e]
               "
             >
-              {name || "-"}
+              {name || '-'}
             </p>
             {/* 
             {(item.rollNo || item.id) && (
@@ -221,17 +221,17 @@ export default function Roster({
      * STATUS COLUMN
      * =========================
      */
-    if (column.key === "status") {
+    if (column.key === 'status') {
       const statusStyles = {
-        Verified: "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100",
-        "Pending Approval": "bg-amber-50 text-amber-600 ring-1 ring-amber-100",
-        "Changes Required":
-          "bg-orange-50 text-orange-600 ring-1 ring-orange-100",
-        Placed: "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100",
-        Looking: "bg-orange-50 text-orange-primary",
-        active: "bg-green-200 text-green-800",
-        inactive: "bg-red-200 text-red-800  ",
-        Approved: "bg-green text-emerald-600 ring-1 ring-emerald-100",
+        Verified: 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100',
+        'Pending Approval': 'bg-amber-50 text-amber-600 ring-1 ring-amber-100',
+        'Changes Required':
+          'bg-orange-50 text-orange-600 ring-1 ring-orange-100',
+        Placed: 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100',
+        Looking: 'bg-orange-50 text-orange-primary',
+        active: 'bg-green-200 text-green-800',
+        inactive: 'bg-red-200 text-red-800  ',
+        Approved: 'bg-green text-emerald-600 ring-1 ring-emerald-100',
       };
 
       return (
@@ -241,33 +241,33 @@ export default function Roster({
             px-2.5 py-1
             text-xs font-semibold
             transition-all duration-200
-            ${statusStyles[item.status] || "bg-slate-100 text-slate-600"}
+            ${statusStyles[item.status] || 'bg-slate-100 text-slate-600'}
           `}
         >
           <span
             className={`
               mr-1.5 h-1.5 w-1.5 rounded-full
               ${
-                item.status === "Verified" || item.status === "Placed"
-                  ? "bg-emerald-500"
-                  : item.status === "Pending"
-                    ? "bg-amber-500"
-                    : item.status === "Changes Required" ||
-                        item.status === "Looking"
-                      ? "bg-orange-500"
-                      : "bg-slate-400"
+                item.status === 'Verified' || item.status === 'Placed'
+                  ? 'bg-emerald-500'
+                  : item.status === 'Pending'
+                    ? 'bg-amber-500'
+                    : item.status === 'Changes Required' ||
+                        item.status === 'Looking'
+                      ? 'bg-orange-500'
+                      : 'bg-slate-400'
               }
             `}
           />
 
-          {item.status || "-"}
+          {item.status || '-'}
         </span>
       );
     }
-    if (column.key === "email") {
+    if (column.key === 'email') {
       return (
         <span className="whitespace-nowrap text-slate-600">
-          {item.email || "-"}
+          {item.email || '-'}
         </span>
       );
     }
@@ -277,10 +277,10 @@ export default function Roster({
      * CONTACT COLUMN
      * =========================
      */
-    if (column.key === "contact") {
+    if (column.key === 'contact') {
       return (
         <span className="whitespace-nowrap text-slate-600">
-          {item.contact || "-"}
+          {item.contact || '-'}
         </span>
       );
     }
@@ -290,7 +290,7 @@ export default function Roster({
      * ACTION COLUMN
      * =========================
      */
-    if (column.key === "view") {
+    if (column.key === 'view') {
       return (
         <button
           type="button"
@@ -314,7 +314,7 @@ export default function Roster({
         </button>
       );
     }
-    if (column.key === "action") {
+    if (column.key === 'action') {
       return (
         <button
           type="button"
@@ -342,7 +342,7 @@ export default function Roster({
     /*
      * Generic columns
      */
-    return item[column.key] ?? "-";
+    return item[column.key] ?? '-';
   };
 
   /*
@@ -408,7 +408,7 @@ export default function Roster({
     }
 
     return Object.values(item).some((value) =>
-      String(value ?? "")
+      String(value ?? '')
         .toLowerCase()
         .includes(searchValue),
     );
@@ -444,7 +444,7 @@ export default function Roster({
           <button
             type="button"
             onClick={() => {
-              console.log("EXPORT FILTERED DATA:", filteredData);
+              console.log('EXPORT FILTERED DATA:', filteredData);
 
               onExport(filteredData);
             }}
@@ -561,7 +561,7 @@ export default function Roster({
 
                       > */}
                       <select
-                        value={filters[key] ?? ""}
+                        value={filters[key] ?? ''}
                         onChange={(e) =>
                           handleFilterChange(key, e.target.value)
                         }
@@ -592,10 +592,10 @@ export default function Roster({
 
                         {options.map((option, index) => {
                           const value =
-                            typeof option === "object" ? option.value : option;
+                            typeof option === 'object' ? option.value : option;
 
                           const label =
-                            typeof option === "object" ? option.label : option;
+                            typeof option === 'object' ? option.label : option;
 
                           return (
                             <option
@@ -749,7 +749,7 @@ export default function Roster({
                     )}
                   </td>
                   <td className="px-5 py-3 text-right">
-                    {" "}
+                    {' '}
                     {showDelete && (
                       <button
                         type="button"
@@ -806,7 +806,7 @@ export default function Roster({
             cursor-pointer
           "
         >
-          {showAll ? "Show Less" : "View All"}
+          {showAll ? 'Show Less' : 'View All'}
         </button>
       )}
 
@@ -858,7 +858,7 @@ export default function Roster({
               </h2>
 
               <p className="mt-2 text-sm text-slate-500">
-                Are you sure you want to make status Inactive for{" "}
+                Are you sure you want to make status Inactive for{' '}
                 <span className="font-semibold text-slate-700">
                   {selectedStudent.fullName || selectedStudent.name}
                 </span>
@@ -887,7 +887,7 @@ export default function Roster({
                 type="button"
                 onClick={() =>
                   handleDelete(
-                    title === "Mentor Roster"
+                    title === 'Mentor Roster'
                       ? selectedStudent.id
                       : selectedStudent._id,
                   )
