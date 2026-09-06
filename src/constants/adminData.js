@@ -192,10 +192,6 @@ export const studentColumns = [
     key: "mentor",
     label: "Mentor",
   },
-  {
-    key: "view",
-    label: "View",
-  },
 ];
 export const hodstudentColumns = [
   {
