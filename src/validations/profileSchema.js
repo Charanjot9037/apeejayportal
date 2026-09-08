@@ -112,7 +112,7 @@ export const academicInformationSchema = Yup.object({
 });
 
 export const resumeDocumentsSchema = Yup.object({
-  resumeFile: Yup.mixed(),
+  resumeFile: Yup.mixed().nullable(),
 
   resumeUrl: Yup.string()
     .nullable()
