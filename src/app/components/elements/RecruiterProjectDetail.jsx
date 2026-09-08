@@ -187,38 +187,25 @@ export default function RecruiterProjectDetail({
                   alt={project.title || "Project image"}
                   className="
                     h-full
-                    min-h-[260px]
+                    h-[260px]
                     w-full
-                    object-cover
-                    lg:min-h-[340px]
+                    object-contain
+                    lg:h-[380px]
                   "
                 />
               ) : (
-                <div
+                 <img
+                  src='/landing-page/fallback.png'
+                  alt={project.title || "Project image"}
                   className="
-                    flex
                     h-full
-                    min-h-[260px]
-                    items-center
-                    justify-center
-                    bg-gradient-to-br
-                    from-slate-100
-                    to-slate-200
-                    lg:min-h-[340px]
+                    h-[270px]
+                    w-full
+                    object-cover
+                    lg:h-[390px]
                   "
-                >
-                  <div className="text-center">
-
-                    <FolderKanban
-                      className="mx-auto h-12 w-12 text-slate-300"
-                    />
-
-                    <p className="mt-2 text-sm font-medium text-slate-400">
-                      No project image
-                    </p>
-
-                  </div>
-                </div>
+                />
+                
               )}
 
               {/* Image overlay */}
@@ -311,11 +298,9 @@ export default function RecruiterProjectDetail({
 
                 <p
                   className="
-                    text-[10px]
                     font-semibold
                     uppercase
-                    tracking-[0.15em]
-                    text-slate-400
+                    text-blue-800
                   "
                 >
                   Project Overview
@@ -333,7 +318,7 @@ export default function RecruiterProjectDetail({
 
                     <div className="min-w-0">
 
-                      <p className="truncate text-xs font-semibold text-slate-700">
+                      <p className="truncate text-xs  text-slate-700">
                         {project?.studentInfo?.program ||
                           project?.program ||
                           "-"}
@@ -352,7 +337,7 @@ export default function RecruiterProjectDetail({
 
                     <div>
 
-                      <p className="text-xs font-semibold text-slate-700">
+                      <p className="text-xs  text-slate-700">
                         {project?.semester
                           ? `Semester ${project.semester}`
                           : project?.studentInfo?.semester
@@ -373,11 +358,11 @@ export default function RecruiterProjectDetail({
 
                     <div>
 
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[11px] text-slate-400">
                         Status
                       </p>
 
-                      <p className="text-xs font-semibold text-emerald-600">
+                      <p className="text-xs  text-emerald-600">
                         {project.status || "Approved"}
                       </p>
 
@@ -396,11 +381,11 @@ export default function RecruiterProjectDetail({
 
                     <div>
 
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[11px] text-slate-400">
                         Created At
                       </p>
 
-                      <p className="text-xs font-semibold">
+                      <p className="text-xs">
                        {project.createdAt ? formatDate(project.createdAt) : "Not available"}
                       </p>
 
