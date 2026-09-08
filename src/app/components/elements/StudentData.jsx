@@ -1,723 +1,567 @@
 "use client";
 
-import Image from "next/image";
+/* =========================================================
+   SECTION CARD
+   ========================================================= */
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-
-function getAcademicYear(student) {
-  const startYear = student?.academicBatch;
-  const endYear = student?.lastYear;
-
-  if (startYear && endYear) {
-    return `${startYear} – ${endYear}`;
-  }
-
-  if (startYear) {
-    return String(startYear);
-  }
-
-  if (endYear) {
-    return String(endYear);
-  }
-
-  return null;
-}
-
-function getValidImageUrl(value) {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const url = value.trim();
-
-  if (!url) {
-    return null;
-  }
-
-  if (
-    url.startsWith("/") ||
-    url.startsWith("http://") ||
-    url.startsWith("https://")
-  ) {
-    return url;
-  }
-
-  return null;
-}
-
-function getProjectImage(project) {
-  if (!Array.isArray(project?.projectImages)) {
-    return null;
-  }
-
-  const firstImage = project.projectImages[0];
-
-  if (typeof firstImage === "string") {
-    return getValidImageUrl(firstImage);
-  }
-
-  if (firstImage && typeof firstImage === "object") {
-    return getValidImageUrl(firstImage.url);
-  }
-
-  return null;
-}
-
-function getSafeExternalLink(value) {
-  if (typeof value !== "string") {
-    return "";
-  }
-
-  const url = value.trim();
-
-  if (!url) {
-    return "";
-  }
-
-  if (url.startsWith("https://") || url.startsWith("http://")) {
-    return url;
-  }
-
-  return `https://${url}`;
-}
-
-function SectionTitle({ symbol, children }) {
+function SectionCard({ children, className = "" }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-100 from-blue-50 to-blue-100/70 text-sm font-bold text-[#07518a] shadow-sm">
-        {symbol}
-      </div>
-
-      <CardTitle className="text-[15px] font-bold tracking-tight text-slate-800">
-        {children}
-      </CardTitle>
+    <div
+      className={`overflow-hidden rounded-2xl border border-slate-200 bg-white ${className}`}
+    >
+      {children}
     </div>
   );
 }
 
-function SkillGroup({ title, skills }) {
-  const validSkills = Array.isArray(skills)
-    ? skills.filter(
-        (skill) =>
-          skill !== null &&
-          skill !== undefined &&
-          typeof skill !== "object" &&
-          String(skill).trim() !== "",
-      )
-    : [];
+/* =========================================================
+   SECTION TITLE
+   ========================================================= */
 
-  if (validSkills.length === 0) {
+function SectionTitle({ symbol, children }) {
+  return (
+    <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-orange-50 text-[14px] font-bold text-orange-500">
+        {symbol}
+      </div>
+
+      <h2 className="text-[16px] font-bold tracking-tight text-[#07518a]">
+        {children}
+      </h2>
+    </div>
+  );
+}
+
+/* =========================================================
+   SKILL GROUP
+   ========================================================= */
+
+function SkillGroup({ title, skills }) {
+  if (!skills || skills.length === 0) {
     return null;
   }
 
   return (
     <div>
-      <p className="mb-3 text-[10px] font-bold uppercase tracking-[1.4px] text-slate-400">
+      <p className="mb-2 text-[14px] font-bold uppercase tracking-[1.2px] text-slate-400">
         {title}
       </p>
 
-      <div className="flex flex-wrap gap-2">
-        {validSkills.map((skill, index) => (
-          <Badge
-            key={`${String(skill)}-${index}`}
-            variant="outline"
-            className="rounded-lg border-blue-100 bg-gradient-to-r from-blue-50 to-blue-100/50 px-3 py-1.5 text-[11px] font-semibold text-[#07518a] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+      <div className="flex flex-wrap gap-1.5">
+        {skills.map((skill) => (
+          <span
+            key={skill}
+            className="rounded-md border border-orange-100 bg-orange-50 px-3 py-1.5 text-[15px] font-semibold text-orange-700"
           >
-            {String(skill).trim()}
-          </Badge>
+            {skill}
+          </span>
         ))}
       </div>
     </div>
   );
 }
 
-function SocialLink({ symbol, name, href }) {
-  const formattedHref = getSafeExternalLink(href);
+/* =========================================================
+   SOCIAL LINK
+   ========================================================= */
 
-  if (!formattedHref) {
+function SocialLink({ symbol, name, href }) {
+  if (!href) {
     return null;
   }
+
+  const formattedHref =
+    href.startsWith("http://") || href.startsWith("https://")
+      ? href
+      : `https://${href}`;
 
   return (
     <a
       href={formattedHref}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex items-center rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/60 hover:shadow-sm"
+      className="group flex items-center rounded-xl border border-slate-200 bg-white px-3.5 py-3 transition hover:border-blue-200 hover:bg-blue-50/50"
     >
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-white text-[10px] font-bold text-[#07518a] shadow-sm">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-50 text-[14px] font-bold text-[#07518a]">
         {symbol}
       </div>
 
-      <span className="ml-3 flex-1 text-[12px] font-semibold text-slate-600 transition-colors group-hover:text-[#07518a]">
+      <span className="ml-2.5 flex-1 text-[16px] font-semibold text-slate-600">
         {name}
       </span>
 
-      <span className="text-sm text-slate-300 transition group-hover:text-[#f97316]">
+      <span className="text-xs text-slate-300 transition group-hover:text-[#07518a]">
         ↗
       </span>
     </a>
   );
 }
 
-function ProjectStatus({ status }) {
-  if (status === "Approved") {
-    return (
-      <Badge className="gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[9px] font-bold text-emerald-700 shadow-sm hover:bg-emerald-50">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-        Approved
-      </Badge>
-    );
-  }
-
-  if (status === "Rejected") {
-    return (
-      <Badge className="gap-1.5 rounded-full border border-red-100 bg-red-50 px-3 py-1.5 text-[9px] font-bold text-red-600 shadow-sm hover:bg-red-50">
-        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-        Rejected
-      </Badge>
-    );
-  }
-
-  return (
-    <Badge className="gap-1.5 rounded-full border border-orange-100 bg-orange-50 px-3 py-1.5 text-[9px] font-bold text-orange-600 shadow-sm hover:bg-orange-50">
-      <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-      {status || "Pending Approval"}
-    </Badge>
-  );
-}
+/* =========================================================
+   PROJECT CARD
+   ========================================================= */
 
 function ProjectCard({ project }) {
-  const image = getProjectImage(project);
-
-  const githubLink = getSafeExternalLink(project?.githubLink);
-
-  const deployedLink = getSafeExternalLink(project?.deployedLink);
-
-  const validTechStack = Array.isArray(project?.techStack)
-    ? project.techStack.filter(
-        (tech) =>
-          tech !== null &&
-          tech !== undefined &&
-          typeof tech !== "object" &&
-          String(tech).trim() !== "",
-      )
-    : [];
+  const image =
+    project.projectImages?.length > 0 ? project.projectImages[0]?.url : null;
 
   return (
-    <Card className="group overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-[0_5px_18px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_14px_32px_rgba(249,115,22,0.12)]">
-      <div className="relative h-[190px] overflow-hidden bg-slate-100">
+    <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-0.5 hover:border-blue-100 hover:shadow-[0_8px_24px_rgba(7,81,138,0.10)]">
+      {/* IMAGE */}
+      <div className="relative h-[220px] overflow-hidden bg-slate-100">
         {image ? (
-          <Image
+          <img
             src={image}
-            alt={project?.title || "Project"}
-            fill
-            sizes="(max-width: 1280px) 100vw, 50vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            alt={project.title || "Project"}
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-blue-100 bg-white text-lg font-bold text-[#07518a] shadow-sm">
+          <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50">
+            <div className="mb-1.5 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-base font-bold text-[#07518a]">
               &lt;/&gt;
             </div>
 
-            <span className="mt-2 text-xs font-medium text-slate-400">
+            <span className="text-[16px] font-medium text-slate-400">
               No project image
             </span>
           </div>
         )}
 
-        {image && (
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+
+        {/* STATUS */}
+        {project.status === "Approved" && (
+          <span className="absolute left-2.5 top-2.5 rounded-full bg-orange-500 px-3 py-1.5 text-[14px] font-bold text-white shadow-sm">
+            ✓ Approved
+          </span>
         )}
 
-        <div className="absolute left-4 top-4">
-          {project?.status === "Approved" && (
-            <Badge className="border-0 bg-emerald-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-md hover:bg-emerald-500">
-              ✓ Approved
-            </Badge>
-          )}
+        {project.status === "Rejected" && (
+          <span className="absolute left-2.5 top-2.5 rounded-full bg-red-500 px-3 py-1.5 text-[14px] font-bold text-white shadow-sm">
+            Rejected
+          </span>
+        )}
 
-          {project?.status === "Rejected" && (
-            <Badge className="border-0 bg-red-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-md hover:bg-red-500">
-              Rejected
-            </Badge>
-          )}
-
-          {!["Approved", "Rejected"].includes(project?.status) && (
-            <Badge className="border-0 bg-orange-500 px-3 py-1.5 text-[9px] font-bold text-white shadow-md hover:bg-orange-500">
-              Pending
-            </Badge>
-          )}
-        </div>
+        {!["Approved", "Rejected"].includes(project.status) && (
+          <span className="absolute left-2.5 top-2.5 rounded-full bg-orange-500 px-3 py-1.5 text-[14px] font-bold text-white shadow-sm">
+            Pending
+          </span>
+        )}
       </div>
 
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-3">
+      {/* CONTENT */}
+      <div className="p-6">
+        <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="truncate text-[17px] font-bold text-slate-800 transition-colors group-hover:text-[#07518a]">
-              {project?.title || "Untitled Project"}
+            <h3 className="truncate text-[15px] font-bold text-slate-800 transition group-hover:text-[#07518a]">
+              {project.title}
             </h3>
 
-            {project?.subtitle && (
-              <p className="mt-1 text-[11px] font-semibold text-orange-500">
+            {project.subtitle && (
+              <p className="mt-0.5 truncate text-[14px] font-semibold text-orange-500">
                 {project.subtitle}
               </p>
             )}
           </div>
 
-          {project?.semester && (
-            <Badge
-              variant="secondary"
-              className="shrink-0 rounded-lg border border-slate-100 bg-slate-100 px-2.5 py-1.5 text-[9px] font-semibold text-slate-500"
-            >
+          {project.semester && (
+            <span className="shrink-0 rounded-md bg-slate-100 px-1.5 py-1 text-[14px] font-semibold text-slate-500">
               Sem {project.semester}
-            </Badge>
+            </span>
           )}
         </div>
 
-        <p className="mt-3 min-h-[54px] line-clamp-3 text-[12px] leading-[1.7] text-slate-500">
-          {project?.description || "No project description available."}
+        <p className="mt-2 line-clamp-2 min-h-[32px] text-[15px] leading-[1.55] text-slate-500">
+          {project.description || "No project description available."}
         </p>
 
-        {validTechStack.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            {validTechStack.slice(0, 5).map((tech, index) => (
-              <Badge
-                key={`${String(tech)}-${index}`}
-                variant="secondary"
-                className="rounded-md border border-slate-100 bg-slate-100 px-2.5 py-1 text-[9px] font-medium text-slate-600 transition-colors hover:border-orange-100 hover:bg-orange-50 hover:text-orange-600"
+        {/* TECH STACK */}
+        {project.techStack?.length > 0 && (
+          <div className="mt-5 flex flex-wrap gap-1">
+            {project.techStack.slice(0, 5).map((tech) => (
+              <span
+                key={tech}
+                className="rounded bg-blue-50 px-1.5 py-1 text-[16px] font-semibold text-[#07518a]"
               >
-                {String(tech).trim()}
-              </Badge>
+                {tech}
+              </span>
             ))}
           </div>
         )}
 
-        <Separator className="my-5 bg-slate-100" />
-
-        <div className="flex items-center">
-          <div>
-            <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-              Project Type
-            </p>
-
-            <p className="mt-1 text-[10px] font-semibold text-slate-600">
-              {project?.projectType || "Individual"}
-            </p>
+        {/* FOOTER */}
+        <div className="mt-5 flex items-center border-t border-slate-100 pt-2.5">
+          <div className="text-[14px] font-medium text-slate-400">
+            {project.projectType || "Individual"} Project
           </div>
 
-          {(githubLink || deployedLink) && (
-            <div className="ml-auto flex items-center gap-2">
-              {githubLink && (
-                <a
-                  href={githubLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-8 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-[10px] font-bold text-slate-600 transition-all hover:border-[#07518a] hover:bg-blue-50 hover:text-[#07518a]"
-                >
-                  GitHub
-                </a>
-              )}
-
-              {deployedLink && (
-                <a
-                  href={deployedLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex h-8 items-center justify-center rounded-lg bg-[#07518a] px-3 text-[10px] font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#063f6b] hover:shadow-md"
-                >
-                  Live Demo →
-                </a>
-              )}
-            </div>
+          {project.githubLink && (
+            <a
+              href={project.githubLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-auto inline-flex items-center gap-1 rounded-md bg-orange-500 px-3 py-1.5.5 text-[14px] font-bold text-white transition hover:bg-orange-600"
+            >
+              View Project
+              <span>→</span>
+            </a>
           )}
         </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ProjectOverviewRow({ project }) {
-  return (
-    <div className="group rounded-xl border border-orange-100 bg-gradient-to-r from-orange-50/40 via-white to-white px-4 py-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-[0_5px_18px_rgba(249,115,22,0.08)]">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <p className="truncate text-[12px] font-bold text-slate-700 transition-colors group-hover:text-[#07518a]">
-            {project?.title || "Untitled Project"}
-          </p>
-
-          <p className="mt-1 text-[10px] text-slate-400">
-            {project?.projectType || "Individual"}
-            {project?.semester ? ` • Semester ${project.semester}` : ""}
-          </p>
-        </div>
-
-        <ProjectStatus status={project?.status} />
       </div>
     </div>
   );
 }
 
-function AcademicDetail({ label, value }) {
-  if (value === null || value === undefined || String(value).trim() === "") {
-    return null;
-  }
-
-  return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-100 py-3 last:border-0">
-      <span className="text-[9px] font-semibold uppercase tracking-[0.8px] text-slate-400">
-        {label}
-      </span>
-
-      <span className="max-w-[60%] text-right text-[11px] font-semibold text-slate-700">
-        {String(value)}
-      </span>
-    </div>
-  );
-}
+/* =========================================================
+   MAIN COMPONENT
+   ========================================================= */
 
 export default function StudentData({ student, projects = [] }) {
   if (!student) {
     return null;
   }
 
-  const profileImage = getValidImageUrl(student?.profileImage);
-
-  const skills = Array.isArray(student.skills)
-    ? student.skills.filter(
-        (skill) =>
-          skill !== null &&
-          skill !== undefined &&
-          typeof skill !== "object" &&
-          String(skill).trim() !== "",
-      )
-    : [];
-
-  const interests = Array.isArray(student.interests)
-    ? student.interests.filter(
-        (interest) =>
-          interest !== null &&
-          interest !== undefined &&
-          typeof interest !== "object" &&
-          String(interest).trim() !== "",
-      )
-    : [];
-
-  const academicYear = getAcademicYear(student);
-
-  const email = typeof student.email === "string" ? student.email.trim() : "";
-
-  const resume = getSafeExternalLink(student.resume);
-
-  const github = getSafeExternalLink(student.github);
-
-  const linkedin = getSafeExternalLink(student.linkedin);
-
-  const portfolio = getSafeExternalLink(student.portfolio);
+  const skills = student.skills || [];
+  const interests = student.interests || [];
 
   return (
-    <div className="min-h-screen font-sans text-slate-800 bg-slate-100">
-      <Card className="relativeoverflow-hidden rounded-2xl mx-auto max-w-7xl border border-blue-800">
-        <div className="pointer-events-none absolute -bottom-24 left-[35%] h-48 w-48 rounded-full bg-orange-50/70 blur-3xl" />
+    <div className="min-h-screen bg-[#f7f7f6] text-slate-800">
+      {/* TOP ACCENT */}
+      <div className="h-1 w-full bg-orange-500" />
 
-        <CardContent className="relative border mx-auto w-full px-5 py-5 sm:px-6 lg:px-7">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
-            <div className="relative mx-auto shrink-0 lg:mx-0">
-              <div className="relative h-20 w-20 sm:h-24 sm:w-24">
-                <div className="absolute -inset-2 rounded-full bg-orange-100/80 blur-[1px]" />
+      {/* =====================================================
+          PROFILE HEADER
+      ====================================================== */}
 
-                <div className="relative h-full w-full  overflow-hidden rounded-full border-1 border-slate-100 ">
-                  {profileImage ? (
-                    <Image
-                      src={profileImage}
-                      alt={student.fullName || "Student"}
-                      fill
-                      sizes="96px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">
-                      {student.fullName?.charAt(0)?.toUpperCase() || "S"}
-                    </div>
-                  )}
-                </div>
-
-                <span className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border-[3px] border-white bg-emerald-500 shadow-md">
-                  <span className="h-2 w-2 rounded-full bg-white" />
-                </span>
+      <section className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+            {/* PROFILE IMAGE */}
+            <div className="relative shrink-0">
+              <div className="h-[96px] w-[96px] overflow-hidden rounded-full border border-slate-200 bg-slate-100 shadow-sm">
+                {student.profileImage ? (
+                  <img
+                    src={student.profileImage}
+                    alt={student.fullName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-blue-50 text-2xl font-bold text-[#07518a]">
+                    {student.fullName?.charAt(0)?.toUpperCase()}
+                  </div>
+                )}
               </div>
+
+              <span className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-emerald-500">
+                <span className="h-2 w-2 rounded-full bg-white" />
+              </span>
             </div>
 
-            <div className="min-w-0 flex-1 text-center lg:text-left">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-800 sm:text-[28px]">
-                {student.fullName || "Student"}
-              </h1>
+            {/* STUDENT INFO */}
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-3xl font-bold tracking-tight text-[#07518a] sm:text-4xl">
+                  {student.fullName}
+                </h1>
+
+                <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[16px] font-bold text-[#07518a]">
+                  ✓ Available for Hire
+                </span>
+              </div>
 
               {student.program && (
-                <p className="mt-1 text-[12px] font-bold text-[#07518a]">
+                <p className="mt-1 text-[16px] font-medium text-slate-500">
                   {student.program}
+                  {student.lastYear ? ` • ${student.lastYear}th Year` : ""}
+                  {student.academicBatch
+                    ? ` • ${student.academicBatch}`
+                    : ""}
                 </p>
               )}
 
-              <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-[10px] text-slate-500 lg:justify-start">
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] text-slate-400">
                 {student.department && (
-                  <span className="font-semibold text-slate-600">
+                  <span className="font-medium text-slate-500">
                     {student.department}
                   </span>
                 )}
 
-                {academicYear && (
-                  <>
-                    <span className="text-orange-300">•</span>
-
-                    <span>
-                      Academic Year{" "}
-                      <span className="font-semibold text-slate-700">
-                        {academicYear}
-                      </span>
-                    </span>
-                  </>
-                )}
-
                 {student.rollNumber && (
                   <>
-                    <span className="text-orange-300">•</span>
-
-                    <span>
-                      Roll No.{" "}
-                      <span className="font-semibold text-slate-700">
-                        {student.rollNumber}
-                      </span>
-                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span>Roll No. {student.rollNumber}</span>
                   </>
                 )}
               </div>
 
-              {(email || resume) && (
-                <div className="mt-3 flex flex-wrap justify-center gap-2 lg:justify-start">
-                  {email && (
-                    <a
-                      href={`mailto:${email}`}
-                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-[#07518a] px-3.5 text-[10px] font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#063f6b] hover:shadow-md"
-                    >
-                      <span>✉</span>
-                      Contact Student
-                    </a>
-                  )}
+              {/* BUTTONS */}
+              <div className="mt-5 flex flex-wrap gap-2">
+                {student.phone && (
+                  <a
+                    href={`tel:${student.phone}`}
+                    className="inline-flex h-10 items-center gap-1.5 rounded-md bg-orange-500 px-3 text-[14px] font-bold text-white transition hover:bg-orange-600"
+                  >
+                    <span>✆</span>
+                    Contact Student
+                  </a>
+                )}
 
-                  {resume && (
-                    <a
-                      href={resume}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-orange-200 bg-white px-3.5 text-[10px] font-bold text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#f97316] hover:bg-orange-50 hover:text-[#07518a]"
-                    >
-                      <span>↓</span>
-                      View Resume
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="grid w-full shrink-0 grid-cols-2 gap-2.5 sm:w-[190px]">
-              <div className="rounded-xl border border-orange-200 bg-gradient-to-br from-orange-50 to-white px-3 py-3.5 text-center shadow-sm">
-                <p className="text-xl font-bold text-[#f97316]">
-                  {Array.isArray(projects) ? projects.length : 0}
-                </p>
-
-                <p className="mt-0.5 text-[8px] font-bold uppercase tracking-[1px] text-slate-400">
-                  Projects
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white px-3 py-3.5 text-center shadow-sm">
-                <p className="text-xl font-bold text-[#07518a]">
-                  {skills.length}
-                </p>
-
-                <p className="mt-0.5 text-[8px] font-bold uppercase tracking-[1px] text-slate-400">
-                  Skills
-                </p>
+                {student.resume && (
+                  <a
+                    href={student.resume}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-[14px] font-bold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#07518a]"
+                  >
+                    <span>↓</span>
+                    View Profile
+                  </a>
+                )}
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <main className="mx-auto w-full max-w-[1200px] px-5 py-7 sm:px-7 sm:py-8 lg:px-8 lg:py-9">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="space-y-5">
-            <Card className="rounded-2xl border border-orange-200 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-[0_10px_28px_rgba(249,115,22,0.09)]">
-              <CardHeader className="rounded-t-2xl bg-gradient-to-r from-orange-50/70 via-white to-white p-5 pb-4">
-                <SectionTitle symbol="i">About</SectionTitle>
-              </CardHeader>
+      {/* =====================================================
+          MAIN CONTENT
+      ====================================================== */}
 
-              <CardContent className="p-5 pt-4">
-                <p className="text-[12px] leading-[1.8] text-slate-500">
-                  {interests.length > 0
-                    ? `Interested in ${interests.join(", ")}.`
-                    : "No additional information has been provided by the student."}
-                </p>
-              </CardContent>
-            </Card>
+      <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-6 py-8 sm:px-8 lg:grid-cols-[300px_minmax(0,1fr)]">
+        {/* LEFT COLUMN */}
+        <aside className="space-y-6">
+          {/* ABOUT */}
+          <SectionCard className="p-6">
+            <SectionTitle symbol="♙">About</SectionTitle>
 
-            <Card className="rounded-2xl border border-orange-200 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-[0_10px_28px_rgba(249,115,22,0.09)]">
-              <CardHeader className="rounded-t-2xl bg-gradient-to-r from-orange-50/70 via-white to-white p-5 pb-4">
-                <SectionTitle symbol="<>">Skills &amp; Expertise</SectionTitle>
-              </CardHeader>
+            <p className="mt-5 text-[15px] leading-[1.65] text-slate-500">
+              {interests.length > 0
+                ? `Interested in ${interests.join(", ")}.`
+                : "No additional information has been provided by the student."}
+            </p>
+          </SectionCard>
 
-              <CardContent className="space-y-6 p-5">
-                <SkillGroup title="Technical Skills" skills={skills} />
+          {/* SKILLS */}
+          <SectionCard className="p-6">
+            <SectionTitle symbol="<>">Skills &amp; Expertise</SectionTitle>
 
+            <div className="mt-5 space-y-6">
+              <SkillGroup title="Technical Skills" skills={skills} />
+
+              {interests.length > 0 && (
                 <SkillGroup title="Interests" skills={interests} />
+              )}
 
-                {skills.length === 0 && interests.length === 0 && (
-                  <p className="text-xs text-slate-400">No skills added yet.</p>
-                )}
-              </CardContent>
-            </Card>
+              {skills.length === 0 && interests.length === 0 && (
+                <p className="text-[15px] text-slate-400">
+                  No skills added yet.
+                </p>
+              )}
+            </div>
+          </SectionCard>
 
-            <Card className="rounded-2xl border border-orange-200 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-[0_10px_28px_rgba(249,115,22,0.09)]">
-              <CardHeader className="rounded-t-2xl bg-gradient-to-r from-orange-50/70 via-white to-white p-5 pb-4">
-                <SectionTitle symbol="A">Academic Information</SectionTitle>
-              </CardHeader>
+          {/* ACADEMIC INFORMATION */}
+          <SectionCard className="p-6">
+            <SectionTitle symbol="A">Academic Information</SectionTitle>
 
-              <CardContent className="p-5 pt-3">
-                <AcademicDetail label="Program" value={student.program} />
+            <div className="mt-5 space-y-2.5">
+              {[
+                ["Program", student.program],
+                ["Department", student.department],
+                ["Roll Number", student.rollNumber],
+                ["Batch", student.academicBatch],
+                ["Year", student.lastYear],
+                ["Specialization", student.specialization],
+              ].map(([label, value]) =>
+                value ? (
+                  <div
+                    key={label}
+                    className="flex items-start justify-between gap-2 border-b border-slate-100 pb-1.5 last:border-0 last:pb-0"
+                  >
+                    <span className="text-[14px] font-medium uppercase tracking-wide text-slate-400">
+                      {label}
+                    </span>
 
-                <AcademicDetail label="Department" value={student.department} />
+                    <span className="text-right text-[15px] font-semibold text-slate-700">
+                      {value}
+                    </span>
+                  </div>
+                ) : null
+              )}
+            </div>
+          </SectionCard>
 
-                <AcademicDetail
-                  label="Starting Year"
-                  value={student.academicBatch}
-                />
+          {/* ONLINE PRESENCE */}
+          <SectionCard className="p-6">
+            <SectionTitle symbol="↗">Online Presence</SectionTitle>
 
-                <AcademicDetail label="Ending Year" value={student.lastYear} />
+            <div className="mt-5 space-y-2.5">
+              <SocialLink
+                symbol="GH"
+                name="GitHub"
+                href={student.github}
+              />
 
-                <AcademicDetail label="Academic Year" value={academicYear} />
+              <SocialLink
+                symbol="in"
+                name="LinkedIn"
+                href={student.linkedin}
+              />
 
-                <AcademicDetail
-                  label="Roll Number"
-                  value={student.rollNumber}
-                />
+              <SocialLink
+                symbol="WWW"
+                name="Personal Portfolio"
+                href={student.portfolio}
+              />
 
-                <AcademicDetail
-                  label="Specialization"
-                  value={student.specialization}
-                />
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-2xl border border-orange-200 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-[0_10px_28px_rgba(249,115,22,0.09)]">
-              <CardHeader className="rounded-t-2xl bg-gradient-to-r from-orange-50/70 via-white to-white p-5 pb-4">
-                <SectionTitle symbol="↗">Online Presence</SectionTitle>
-              </CardHeader>
-
-              <CardContent className="space-y-2.5 p-5">
-                <SocialLink symbol="GH" name="GitHub" href={github} />
-
-                <SocialLink symbol="in" name="LinkedIn" href={linkedin} />
-
-                <SocialLink
-                  symbol="WWW"
-                  name="Personal Portfolio"
-                  href={portfolio}
-                />
-
-                {!github && !linkedin && !portfolio && (
-                  <p className="text-xs text-slate-400">
-                    No online profiles added.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </aside>
-
-          <section className="min-w-0">
-            {Array.isArray(projects) && projects.length > 0 && (
-              <Card className="mb-7 rounded-2xl border border-orange-200 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:border-orange-300 hover:shadow-[0_10px_28px_rgba(249,115,22,0.09)]">
-                <CardHeader className="rounded-t-2xl bg-gradient-to-r from-orange-50/70 via-white to-white p-5 pb-4">
-                  <SectionTitle symbol="✓">Project Overview</SectionTitle>
-                </CardHeader>
-
-                <CardContent className="space-y-3 p-5">
-                  {projects.map((project, index) => (
-                    <ProjectOverviewRow
-                      key={project?._id || `project-overview-${index}`}
-                      project={project}
-                    />
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
-            <Card className="overflow-hidden rounded-2xl border border-orange-200 bg-white shadow-[0_6px_24px_rgba(15,23,42,0.05)] transition-all duration-300 hover:border-orange-300 hover:shadow-[0_12px_32px_rgba(249,115,22,0.09)]">
-              <CardHeader className="flex flex-row items-center justify-between gap-4 border-b border-orange-100 bg-gradient-to-r from-orange-50/70 via-white to-white px-6 py-5">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.45)]" />
-
-                    <p className="text-[10px] font-bold uppercase tracking-[1.5px] text-orange-500">
-                      Student Work
+              {!student.github &&
+                !student.linkedin &&
+                !student.portfolio && (
+                  <div className="rounded-xl bg-slate-50 px-3 py-4 text-center">
+                    <p className="text-[15px] text-slate-400">
+                      No online profiles added.
                     </p>
                   </div>
+                )}
+            </div>
+          </SectionCard>
+        </aside>
 
-                  <CardTitle className="mt-1.5 text-[23px] font-bold tracking-tight text-slate-800">
-                    Project Portfolio
-                  </CardTitle>
+        {/* RIGHT COLUMN */}
+        <section className="min-w-0">
+          {/* CURRENT STANDING */}
+          <div className="relative mb-4 overflow-hidden rounded-2xl bg-[#07518a] px-4 py-3.5 text-white">
+            <div className="absolute -right-10 -top-14 h-32 w-32 rounded-full border border-white/10" />
+            <div className="absolute -right-2 -bottom-16 h-28 w-28 rounded-full border border-orange-400/10" />
 
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    A collection of projects and academic work
+            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[16px] font-bold uppercase tracking-[1.5px] text-blue-200">
+                  Current Standing
+                </p>
+
+                <h2 className="mt-0.5 text-base font-bold">
+                  {student.department || "Department not specified"}
+                </h2>
+
+                <p className="mt-0.5 text-[14px] text-blue-100">
+                  {student.program || "Program not specified"}
+                </p>
+              </div>
+
+              <div className="flex gap-6">
+                <div>
+                  <p className="text-3xl font-bold text-orange-400">
+                    {student.lastYear || "-"}
+                  </p>
+
+                  <p className="mt-0.5 text-[16px] font-bold uppercase tracking-wide text-blue-200">
+                    Year
                   </p>
                 </div>
 
-                <Badge
-                  variant="outline"
-                  className="shrink-0 rounded-xl border-orange-200 bg-orange-50/60 px-4 py-2.5 text-center shadow-sm"
-                >
-                  <span className="text-[15px] font-bold text-[#07518a]">
-                    {Array.isArray(projects) ? projects.length : 0}
-                  </span>
+                <div className="border-l border-white/15 pl-6">
+                  <p className="text-3xl font-bold text-white">
+                    {student.academicBatch || "-"}
+                  </p>
 
-                  <span className="ml-1 text-[8px] font-bold uppercase tracking-[1px] text-slate-400">
-                    {projects.length === 1 ? "Project" : "Projects"}
-                  </span>
-                </Badge>
-              </CardHeader>
+                  <p className="mt-0.5 text-[16px] font-bold uppercase tracking-wide text-blue-200">
+                    Batch
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <CardContent className="p-5 sm:p-6">
-                {Array.isArray(projects) && projects.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-                    {projects.map((project, index) => (
-                      <ProjectCard
-                        key={project?._id || `portfolio-${index}`}
-                        project={project}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50/30 px-6 py-14 text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-xl font-bold text-[#07518a] shadow-sm">
-                      &lt;/&gt;
+          {/* PROJECT PORTFOLIO */}
+          <div className="mb-5">
+            <div className="mb-4 flex items-end justify-between">
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-orange-500" />
+
+                  <p className="text-[14px] font-bold uppercase tracking-[1.3px] text-orange-500">
+                    Student Work
+                  </p>
+                </div>
+
+                <h2 className="mt-0.5 text-2xl font-bold tracking-tight text-[#07518a]">
+                  Project Portfolio
+                </h2>
+              </div>
+
+              <span className="rounded-md bg-white px-3 py-1.5 text-[14px] font-semibold text-slate-500 shadow-sm ring-1 ring-slate-200">
+                {projects.length}{" "}
+                {projects.length === 1 ? "Project" : "Projects"}
+              </span>
+            </div>
+
+            {projects.length > 0 ? (
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                {projects.map((project) => (
+                  <ProjectCard key={project._id} project={project} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-base font-bold text-[#07518a]">
+                  &lt;/&gt;
+                </div>
+
+                <p className="mt-5 text-[14px] font-bold text-slate-700">
+                  No projects available
+                </p>
+
+                <p className="mt-1 text-[15px] text-slate-400">
+                  This student has not added any projects yet.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* PROJECT OVERVIEW */}
+          {projects.length > 0 && (
+            <SectionCard className="p-6">
+              <SectionTitle symbol="✓">Project Overview</SectionTitle>
+
+              <div className="mt-5 space-y-2.5">
+                {projects.map((project) => (
+                  <div
+                    key={project._id}
+                    className="group rounded-xl border border-slate-200 bg-white px-3 py-2.5 transition hover:border-blue-100 hover:bg-blue-50/30"
+                  >
+                    <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="truncate text-[15px] font-bold text-slate-700 transition group-hover:text-[#07518a]">
+                          {project.title}
+                        </p>
+
+                        <p className="mt-0.5 text-[14px] text-slate-400">
+                          {project.projectType || "Individual"}
+                          {project.semester
+                            ? ` • Semester ${project.semester}`
+                            : ""}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`w-fit rounded-full px-3 py-1.5 text-[16px] font-bold ${
+                          project.status === "Approved"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : project.status === "Rejected"
+                              ? "bg-red-50 text-red-600"
+                              : "bg-orange-50 text-orange-600"
+                        }`}
+                      >
+                        {project.status || "Pending Approval"}
+                      </span>
                     </div>
-
-                    <p className="mt-4 text-sm font-bold text-slate-700">
-                      No projects available
-                    </p>
-
-                    <p className="mt-1 text-xs text-slate-400">
-                      This student has not added any projects yet.
-                    </p>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </section>
-        </div>
+                ))}
+              </div>
+            </SectionCard>
+          )}
+        </section>
       </main>
     </div>
   );
