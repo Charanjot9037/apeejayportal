@@ -13,8 +13,9 @@ export const mapMentorProjectToRoster = (project) => {
   };
 };
 export const mapStudentsToRoster = (student) => {
+  console.log(student);
   return {
-    id: student._id,
+    id: student?._id,
 
     name: student.fullName || "-",
     program: student.program || "-",

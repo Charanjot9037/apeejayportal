@@ -1,46 +1,46 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import { Roster, DashboardHeader } from "@/app/components/elements";
 
-import { Roster, DashboardHeader } from '@/app/components/elements';
-
-import RosterSkeleton from '@/app/components/skeletons/roasterSkeleton';
+import RosterSkeleton from "@/app/components/skeletons/roasterSkeleton";
 
 import {
   categories,
   generateAcademicYears,
   programOptions,
   specializationOptions,
-} from '@/constants/gloabl';
+} from "@/constants/gloabl";
 
 // import { DEFAULT_STUDENT_FILTERS } from '@/constants/mentorStudent';
 
 import {
   MENTOR_STUDENTS_COLUMNS,
   MENTORTO_DASHBOARD_HEADER,
-} from '@/constants/mentorData';
+} from "@/constants/mentorData";
 
-import { mapStudentsToRoster } from '@/mappers/mentor';
-import { apiRequest } from '@/lib/apiRequest';
+import { mapStudentsToRoster } from "@/mappers/mentor";
+import { apiRequest } from "@/lib/apiRequest";
 
 const ACADEMIC_BATCH_OPTIONS = generateAcademicYears();
 
 const DEFAULT_STUDENT_FILTERS = {
-  department: '',
-  program: '',
-  specialization: '',
-  academicBatch: '',
+  department: "",
+  program: "",
+  specialization: "",
+  academicBatch: "",
 };
 
 export default function Student() {
   const user = useSelector((state) => state.mentor);
 
-  const mentorDepartment = user?.department || '';
+  const mentorDepartment = user?.department || "";
 
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const [filters, setFilters] = useState(DEFAULT_STUDENT_FILTERS);
 
@@ -50,11 +50,11 @@ export default function Student() {
     }
 
     const normalizeDepartment = (value) =>
-      String(value || '')
+      String(value || "")
         .trim()
         .toLowerCase()
-        .replace(/\s+/g, '')
-        .replace(/_/g, '');
+        .replace(/\s+/g, "")
+        .replace(/_/g, "");
 
     const matchedCategory = categories.find(
       (category) =>
@@ -63,7 +63,7 @@ export default function Student() {
         normalizeDepartment(category.label) ===
           normalizeDepartment(mentorDepartment) ||
         normalizeDepartment(
-          category.value === 'it' ? 'INFORMATIONTECHNOLOGY' : category.value,
+          category.value === "it" ? "INFORMATIONTECHNOLOGY" : category.value,
         ) === normalizeDepartment(mentorDepartment),
     );
 
@@ -73,8 +73,8 @@ export default function Student() {
 
     let departmentValue = matchedCategory.value;
 
-    if (departmentValue === 'it') {
-      departmentValue = 'INFORMATIONTECHNOLOGY';
+    if (departmentValue === "it") {
+      departmentValue = "INFORMATIONTECHNOLOGY";
     }
 
     return [
@@ -91,19 +91,19 @@ export default function Student() {
     }
 
     const normalizeDepartment = (value) =>
-      String(value || '')
+      String(value || "")
         .trim()
         .toLowerCase()
-        .replace(/\s+/g, '')
-        .replace(/_/g, '');
+        .replace(/\s+/g, "")
+        .replace(/_/g, "");
 
     let departmentKey = Object.keys(programOptions || {}).find(
       (key) =>
         normalizeDepartment(key) === normalizeDepartment(mentorDepartment),
     );
 
-    if (!departmentKey && normalizeDepartment(mentorDepartment) === 'it') {
-      departmentKey = 'INFORMATIONTECHNOLOGY';
+    if (!departmentKey && normalizeDepartment(mentorDepartment) === "it") {
+      departmentKey = "INFORMATIONTECHNOLOGY";
     }
 
     if (!departmentKey) {
@@ -128,11 +128,11 @@ export default function Student() {
     }
 
     const normalizeDepartment = (value) =>
-      String(value || '')
+      String(value || "")
         .trim()
         .toUpperCase()
-        .replace(/\s+/g, '')
-        .replace(/_/g, '');
+        .replace(/\s+/g, "")
+        .replace(/_/g, "");
 
     let departmentKey = Object.keys(specializationOptions || {}).find(
       (key) =>
@@ -141,9 +141,9 @@ export default function Student() {
 
     if (
       !departmentKey &&
-      normalizeDepartment(mentorDepartment) === 'INFORMATIONTECHNOLOGY'
+      normalizeDepartment(mentorDepartment) === "INFORMATIONTECHNOLOGY"
     ) {
-      departmentKey = 'IT';
+      departmentKey = "IT";
     }
 
     if (!departmentKey) {
@@ -162,30 +162,31 @@ export default function Student() {
     }));
   }, [mentorDepartment]);
 
+  const router = useRouter();
   const MENTOR_STUDENT_FILTERS = useMemo(
     () => [
       {
-        key: 'department',
-        label: 'Department',
-        placeholder: 'Select Department',
+        key: "department",
+        label: "Department",
+        placeholder: "Select Department",
         options: mentorDepartmentOptions,
       },
       {
-        key: 'program',
-        label: 'Program',
-        placeholder: 'Select Program',
+        key: "program",
+        label: "Program",
+        placeholder: "Select Program",
         options: mentorProgramOptions,
       },
       {
-        key: 'specialization',
-        label: 'Specialization',
-        placeholder: 'All Specializations',
+        key: "specialization",
+        label: "Specialization",
+        placeholder: "All Specializations",
         options: mentorSpecializationOptions,
       },
       {
-        key: 'academicBatch',
-        label: 'Academic Batch',
-        placeholder: 'All Academic Batches',
+        key: "academicBatch",
+        label: "Academic Batch",
+        placeholder: "All Academic Batches",
         options: ACADEMIC_BATCH_OPTIONS,
       },
     ],
@@ -213,52 +214,43 @@ export default function Student() {
   ) => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
       const payload = {
         department:
-          filterValues?.department || mentorDepartmentOptions?.[0]?.value || '',
+          filterValues?.department || mentorDepartmentOptions?.[0]?.value || "",
 
-        program: filterValues?.program || '',
+        program: filterValues?.program || "",
 
-        specialization: filterValues?.specialization || '',
+        specialization: filterValues?.specialization || "",
 
-        academicBatch: filterValues?.academicBatch || '',
+        academicBatch: filterValues?.academicBatch || "",
       };
 
-      console.log('POST /api/mentors/my-students');
+      console.log("POST /api/mentors/my-students");
 
-      console.log('STUDENT FILTER PAYLOAD:', payload);
+      console.log("STUDENT FILTER PAYLOAD:", payload);
 
-      const result = await apiRequest('/api/mentors/my-students', {
-        method: 'POST',
+      const result = await apiRequest("/api/mentors/my-students", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
-      console.log('STUDENT POST RESULT:', result);
-
       if (!result?.success) {
-        throw new Error(result?.message || 'Failed to load mentor students.');
+        throw new Error(result?.message || "Failed to load mentor students.");
       }
 
       const returnedStudents =
         result?.data?.studentDetails || result?.data?.students || [];
 
-      console.log(
-        isInitialLoad
-          ? 'INITIAL STUDENTS FROM BACKEND:'
-          : 'FILTERED STUDENTS FROM BACKEND:',
-        returnedStudents,
-      );
-
       setStudents(returnedStudents);
     } catch (err) {
-      console.error('MENTOR_STUDENT_ERROR:', err);
+      console.error("MENTOR_STUDENT_ERROR:", err);
 
-      setError(err?.message || 'Something went wrong while fetching students.');
+      setError(err?.message || "Something went wrong while fetching students.");
 
       setStudents([]);
     } finally {
@@ -274,32 +266,32 @@ export default function Student() {
     fetchStudents(
       {
         department: mentorDepartmentOptions[0].value,
-        program: '',
-        specialization: '',
-        academicBatch: '',
+        program: "",
+        specialization: "",
+        academicBatch: "",
       },
       true,
     );
   }, [mentorDepartmentOptions]);
 
   const handleApplyFilters = async (selectedFilters) => {
-    console.log('ROSTER SELECTED FILTERS:', selectedFilters);
+    console.log("ROSTER SELECTED FILTERS:", selectedFilters);
 
     const appliedFilters = {
       department:
         selectedFilters?.department ||
         filters?.department ||
         mentorDepartmentOptions?.[0]?.value ||
-        '',
+        "",
 
-      program: selectedFilters?.program || '',
+      program: selectedFilters?.program || "",
 
-      specialization: selectedFilters?.specialization || '',
+      specialization: selectedFilters?.specialization || "",
 
-      academicBatch: selectedFilters?.academicBatch || '',
+      academicBatch: selectedFilters?.academicBatch || "",
     };
 
-    console.log('SENDING STUDENT FILTERS TO BACKEND:', appliedFilters);
+    console.log("SENDING STUDENT FILTERS TO BACKEND:", appliedFilters);
 
     setFilters(appliedFilters);
 
@@ -314,9 +306,9 @@ export default function Student() {
     fetchStudents(
       {
         department: mentorDepartmentOptions[0].value,
-        program: '',
-        specialization: '',
-        academicBatch: '',
+        program: "",
+        specialization: "",
+        academicBatch: "",
       },
       true,
     );
@@ -379,8 +371,9 @@ export default function Student() {
                 showApplyButton={true}
                 onApplyFilters={handleApplyFilters}
                 onRowClick={(student) => {
-                  console.log('Selected student:', student);
+                  router.push(`/view-profile/${student.id}`);
                 }}
+
                 className="shadow-sm"
               />
             )}
