@@ -34,26 +34,65 @@ export default function ResumeDocuments({ data, onSave }) {
     validationSchema: resumeDocumentsSchema,
 
     enableReinitialize: true,
-
     onSubmit: async (values) => {
       try {
-        if (!values.resumeUrl) {
+        let resumeUrl = values.resumeUrl;
+
+        // If user selected a NEW file, upload it now
+        if (values.resumeFile) {
+          setUploading(true);
+
+          const formData = new FormData();
+          formData.append("file", values.resumeFile);
+
+          const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+            credentials: "include",
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.message || "Resume upload failed");
+          }
+
+          resumeUrl = result.url;
+
+          console.log("Cloudinary URL:", resumeUrl);
+        }
+
+        // Make sure we have a resume
+        if (!resumeUrl) {
           throw new Error("Please upload a resume first");
         }
 
+        // Send Cloudinary URL to parent/backend
         if (onSave) {
           await onSave({
-            resume: values.resumeUrl,
+            resume: resumeUrl,
             resumeName: values.resumeName,
           });
         }
 
+        // Update Formik with uploaded URL
+        formik.setFieldValue("resumeUrl", resumeUrl);
+        formik.setFieldValue("resumeFile", null);
+
         setIsEditing(false);
       } catch (error) {
         console.error("Failed to save resume:", error);
+
+        formik.setFieldError(
+          "resumeFile",
+          error.message || "Resume upload failed",
+        );
+      } finally {
+        setUploading(false);
       }
     },
   });
+
   const hasResume =
     typeof formik.values.resumeUrl === "string" &&
     formik.values.resumeUrl.trim() !== "" &&
@@ -90,55 +129,11 @@ export default function ResumeDocuments({ data, onSave }) {
 
     if (!file) return;
 
-    // // Optional frontend validation
-    // if (file.type !== "application/pdf") {
-    //   formik.setFieldError("resumeFile", "Only PDF files are allowed");
-    //   return;
-    // }
-
-    // Set selected file
     formik.setFieldValue("resumeFile", file);
     formik.setFieldValue("resumeName", file.name);
 
     // Mark as touched
     formik.setFieldTouched("resumeFile", true, false);
-
-    try {
-      setUploading(true);
-
-      const formData = new FormData();
-
-      formData.append("file", file);
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Resume upload failed");
-      }
-
-      console.log("Resume uploaded:", result.url);
-
-      // IMPORTANT:
-      // Save Cloudinary URL in Formik
-      formik.setFieldValue("resumeUrl", result.url);
-
-      console.log("Resume URL:", result.url);
-    } catch (error) {
-      console.error("Resume upload failed:", error);
-
-      formik.setFieldError(
-        "resumeFile",
-        error.message || "Resume upload failed",
-      );
-    } finally {
-      setUploading(false);
-    }
   };
 
   return (

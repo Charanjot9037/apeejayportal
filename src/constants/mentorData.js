@@ -125,7 +125,7 @@ export const MENTOR_STUDENTS_COLUMNS = [
     label: "Specialization",
   },
   {
-    key: "academicYear",
+    key: "academicBatch",
     label: "Academic Year",
   },
   {
