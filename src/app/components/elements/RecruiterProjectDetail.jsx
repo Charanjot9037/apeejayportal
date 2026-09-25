@@ -179,7 +179,7 @@ export default function RecruiterProjectDetail({
                 PROJECT IMAGE
             ================================================= */}
 
-            <div className="relative h-[260px] overflow-hidden bg-slate-100 lg:h-[400px]">
+            <div className="relative h-[260px] overflow-hidden bg-slate-100 lg:h-[450px]">
 
               {projectImage ? (
                 <img
@@ -189,7 +189,7 @@ export default function RecruiterProjectDetail({
                     h-[260px]
                     w-full
                     object-cover
-                    lg:h-[400px]
+                    lg:h-[450px]
                   "
                 />
               ) : (
@@ -202,13 +202,13 @@ export default function RecruiterProjectDetail({
                     bg-gradient-to-br
                     from-slate-100
                     to-slate-200
-                    lg:h-[400px]
+                    lg:h-[450px]
                   "
                 >
                   <div className="text-center">
 
                     <FolderKanban
-                      className="mx-auto h-12 w-12 text-slate-300"
+                      className="mx-auto h-20 w-12 text-slate-300"
                     />
 
                     <p className="mt-2 text-sm font-medium text-slate-400">
