@@ -1,27 +1,59 @@
 import { NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 
-export default function proxy(request: Request) {
-  console.log("🔥🔥🔥 PROXY RUNNING 🔥🔥🔥");
+export async function proxy(request:Request) {
+  console.log("🔥 PROXY RUNNING");
 
-  const url = new URL(request.url);
-  console.log("PATH:", url.pathname);
+  const cookieHeader = request.headers.get("cookie");
 
-  // Read accessToken cookie
-  const accessToken = request.headers
-    .get("cookie")
+  const accessToken = cookieHeader
     ?.split(";")
     .map((cookie) => cookie.trim())
     .find((cookie) => cookie.startsWith("accessToken="))
-    ?.split("=")[1];
+    ?.split("=")
+    .slice(1)
+    .join("=");
 
-  console.log("Access token exists:", !!accessToken);
-
-  // No access token → send user to login
+  // No token
   if (!accessToken) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(
+      new URL("/login", request.url)
+    );
   }
 
-  return NextResponse.next();
+  try {
+    if (!process.env.JWT_ACCESS_SECRET) {
+      throw new Error("JWT_ACCESS_SECRET missing");
+    }
+
+    const secret = new TextEncoder().encode(
+      process.env.JWT_ACCESS_SECRET
+    );
+
+    const { payload } = await jwtVerify(
+      accessToken,
+      secret
+    );
+
+    console.log("Authenticated user:", payload.id);
+    console.log("Role:", payload.role);
+
+    // Authorization
+    if (payload.role !== "admin") {
+      return NextResponse.redirect(
+        new URL("/login", request.url)
+      );
+    }
+
+    return NextResponse.next();
+
+  } catch (error) {
+    console.error("INVALID ACCESS TOKEN:", error);
+
+    return NextResponse.redirect(
+      new URL("/login", request.url)
+    );
+  }
 }
 
 export const config = {
