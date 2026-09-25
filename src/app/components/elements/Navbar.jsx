@@ -170,7 +170,7 @@ export default function Navbar() {
   const handleDashboard = () => {
     const role = auth?.user?.role;
     const designation = auth?.user?.designation;
-
+console.o
     // Student
     if (role === "student") {
       router.push("/student");
@@ -201,7 +201,7 @@ export default function Navbar() {
       return;
     }
 
-    router.push("/dashboard");
+   
   };
 
   const hideAuthSection =
@@ -233,7 +233,7 @@ export default function Navbar() {
       </div>
 
 
-      {!hideAuthSection && (
+      {hideAuthSection && (
         <div className="mt-4 flex items-center gap-3 md:mt-0">
 
           {/* SESSION CHECKING */}

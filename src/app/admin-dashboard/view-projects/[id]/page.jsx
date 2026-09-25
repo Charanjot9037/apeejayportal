@@ -52,16 +52,16 @@ const [deleting,setDeleting]=useState(false);
     try {
       setDeleting(true);
 
-      // const response = await fetch(`/api/projects/${project._id}`, {
-      //   method: "DELETE",
-      //   credentials: "include",
-      // });
+      const response = await fetch(`/api/projects/${project._id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
-      // const result = await response.json();
+      const result = await response.json();
 
-      // if (!response.ok) {
-      //   throw new Error(result.message || "Failed to delete project");
-      // }
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete project");
+      }
 
       toast.success("Project deleted successfully.");
       router.push("/admin-dashboard/all-projects");
