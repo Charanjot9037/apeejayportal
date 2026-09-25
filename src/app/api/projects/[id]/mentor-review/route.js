@@ -91,6 +91,7 @@ export async function PATCH(request, context) {
     const isMentor2 =
       project.mentor2?._id?.toString() === loggedInUserId;
 
+
     // =====================================================
     // CHECK HOD
     // =====================================================
@@ -99,6 +100,8 @@ export async function PATCH(request, context) {
       auth.user?.role === "mentor" &&
       auth.user?.mentor?.designation?.toLowerCase() === "hod" &&
       auth.user?.mentor?.department === projectDepartment;
+      console.log(auth.user)
+const isAdmin=auth.user.role=="mentor";
 
     // =====================================================
     // AUTHORIZATION
@@ -109,7 +112,7 @@ export async function PATCH(request, context) {
     // 3. HOD of student's department
     // =====================================================
 
-    if (!isMentor && !isMentor2 && !isHOD) {
+    if (!isMentor && !isMentor2 && !isHOD && !isAdmin) {
       return NextResponse.json(
         {
           success: false,

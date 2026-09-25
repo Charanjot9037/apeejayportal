@@ -9,11 +9,11 @@ export default function DashboardHeader({
   return (
     <div className="flex items-start mt-9 lg:mt-0 justify-between">
       <div>
-        <h1 className="text-2xl font-bold text-[#1c3a5e]">{title}</h1>
+        <h1 className="text-sm lg:text-2xl font-bold text-[#1c3a5e]">{title}</h1>
 
         <div className="mt-1 h-1 w-10 bg-primary-orange" />
 
-        <p className="mt-3 text-sm text-slate-500">{description}</p>
+        <p className="mt-3 text-xs md:text-sm text-slate-500">{description}</p>
       </div>
 
       {actionLabel && (

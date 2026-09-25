@@ -15,7 +15,7 @@ export default function MentorLayout({ children }) {
         sidebarData={studentSidebarData}
       />
 
-      <main className="flex-1 overflow-y-auto px-6 py-4 ">{children}</main>
+      <main className="flex-1 overflow-y-auto px-6 py-10 lg:py-4 ">{children}</main>
     </div>
   );
 }

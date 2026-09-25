@@ -476,10 +476,15 @@ export async function GET(request, context) {
     });
 
     let viewerRole = "viewer";
+    
 
- if (project.student._id.toString() === auth.user._id.toString()) {
+if (
+  project.student?._id &&
+  auth.user?._id &&
+  project.student._id.toString() === auth.user._id.toString()
+) {
   viewerRole = "owner";
-} else if (
+}else if (
       currentStudentProfile &&
       project.teamMembers &&
       project.teamMembers._id?.toString() ===

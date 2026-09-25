@@ -1,34 +1,171 @@
+// "use client";
+
+// import Image from "next/image";
+// import { signOut } from "next-auth/react";
+// import { useSelector, useDispatch } from "react-redux";
+// import { useRouter, usePathname } from "next/navigation";
+// import { logout } from "@/redux/authSlice";
+
+// export default function Navbar() {
+//   const auth = useSelector((state) => state.auth);
+//   const dispatch = useDispatch();
+//   const router = useRouter();
+//   const pathname = usePathname();
+
+//   const isLoggedIn = !!auth?.user;
+
+//   const handleLogout = async () => {
+//     try {
+//       await fetch("/api/auth/logout", {
+//         method: "POST",
+//       });
+
+//       dispatch(logout());
+
+//       await signOut({
+//         callbackUrl: "/",
+//       });
+//     } catch (error) {
+//       console.error("Logout failed:", error);
+//     }
+//   };
+
+//   const handleDashboard = () => {
+//     const role = auth?.user?.role;
+//     const designation = auth?.user?.designation;
+
+//     // Student
+//     if (role === "student") {
+//       router.push("/student");
+//       return;
+//     }
+
+//     // Mentor
+//     if (role === "mentor") {
+//       router.push("/mentor-dashboard");
+//       return;
+//     }
+
+//     // Admin based on designation
+//     if (role === "admin" || designation === "Engineer") {
+//       router.push("/admin-dashboard");
+//       return;
+//     }
+
+//     if (role === "admin" || designation === "hod") {
+//       router.push("/hod-dashboard");
+//       return;
+//     }
+//     router.push("/dashboard");
+//   };
+
+//   // Hide authentication section on these pages
+//   const hideAuthSection = pathname === "/" || pathname === "/studentSearch";
+
+//   return (
+//     <nav className="flex  items-center justify-between border px-2 py-4 md:flex-row md:px-8">
+//       {/* Left Side */}
+//       <div className="flex gap-7 justify-end">
+//         <Image
+//           src="/logo.png"
+//           alt="Apeejay Logo"
+//           width={50}
+//           height={50}
+//           className="h-10 w-10 rounded-full lg:h-12 lg:w-12"
+//         />
+
+//         <div>
+//           <p className="text-md font-bold text-secondary md:text-xl">
+//             Apeejay Institute of Management & Engineering
+//           </p>
+
+//           <span className="hidden text-sm leading-relaxed md:flex">
+//             Technical campus Affiliated to I.K Gujral Punjab Technical
+//             University, Kapurthala
+//           </span>
+//         </div>
+//       </div>
+
+//       {/* Right Side */}
+
+//       <div className="mt-4 flex items-center gap-3 md:mt-0">
+//         {!isLoggedIn ? (
+//           /* Not Logged In */
+//           <button
+//             onClick={() => router.push("/login")}
+//             className="cursor-pointer rounded-md bg-secondary px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
+//           >
+//             Login
+//           </button>
+//         ) : (
+//           /* Logged In */
+//           <>
+//             <button
+//               onClick={handleDashboard}
+//               className="cursor-pointer rounded-md bg-primary px-5 py-2 text-sm font-medium text-white transition hover:opacity-90"
+//             >
+//               Dashboard
+//             </button>
+//           </>
+//         )}
+//       </div>
+//     </nav>
+//   );
+// }
 "use client";
 
 import Image from "next/image";
-import { signOut } from "next-auth/react";
+
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter, usePathname } from "next/navigation";
 import { logout } from "@/redux/authSlice";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const auth = useSelector((state) => state.auth);
+
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
 
-  const isLoggedIn = !!auth?.user;
+  // null = checking session
+  // true = logged in
+  // false = not logged in
+  const [authenticated, setAuthenticated] = useState(null);
 
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch("/api/auth/check-session", {
+          method: "GET",
+          cache: "no-store",
+        });
 
-      dispatch(logout());
+        const data = await response.json();
 
-      await signOut({
-        callbackUrl: "/",
-      });
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+        if (response.ok && data.authenticated === true) {
+          setAuthenticated(true);
+
+          // If your Redux already contains the user,
+          // no need to change it here.
+        } else {
+          setAuthenticated(false);
+
+          // Remove stale Redux user
+          dispatch(logout());
+        }
+      } catch (error) {
+        console.error("Session check failed:", error);
+
+        setAuthenticated(false);
+        dispatch(logout());
+      }
+    };
+
+    checkSession();
+  }, [dispatch]);
+
+
 
   const handleDashboard = () => {
     const role = auth?.user?.role;
@@ -40,32 +177,41 @@ export default function Navbar() {
       return;
     }
 
-    // Mentor
+    // Engineer → Admin dashboard
+    if (role === "mentor" && designation === "Engineer") {
+      router.push("/admin-dashboard");
+      return;
+    }
+
+    // HOD → HOD dashboard
+    if (role === "mentor" && designation === "hod") {
+      router.push("/hod-dashboard");
+      return;
+    }
+
+    // Normal Mentor
     if (role === "mentor") {
       router.push("/mentor-dashboard");
       return;
     }
 
-    // Admin based on designation
-    if (role === "admin" || designation === "Engineer") {
+    // Admin
+    if (role === "admin") {
       router.push("/admin-dashboard");
       return;
     }
 
-    if (role === "admin" || designation === "hod") {
-      router.push("/hod-dashboard");
-      return;
-    }
     router.push("/dashboard");
   };
 
-  // Hide authentication section on these pages
-  const hideAuthSection = pathname === "/" || pathname === "/studentSearch";
+  const hideAuthSection =
+    pathname === "/" || pathname === "/studentSearch";
 
   return (
-    <nav className="flex  items-center justify-between border px-2 py-4 md:flex-row md:px-8">
-      {/* Left Side */}
-      <div className="flex gap-7 justify-end">
+    <nav className="flex items-center justify-between border px-2 py-4 md:flex-row md:px-8">
+
+      {/* LEFT SIDE */}
+      <div className="flex justify-end gap-7">
         <Image
           src="/logo.png"
           alt="Apeejay Logo"
@@ -86,29 +232,46 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Right Side */}
 
-      <div className="mt-4 flex items-center gap-3 md:mt-0">
-        {!isLoggedIn ? (
-          /* Not Logged In */
-          <button
-            onClick={() => router.push("/login")}
-            className="cursor-pointer rounded-md bg-secondary px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
-          >
-            Login
-          </button>
-        ) : (
-          /* Logged In */
-          <>
-            <button
-              onClick={handleDashboard}
-              className="cursor-pointer rounded-md bg-primary px-5 py-2 text-sm font-medium text-white transition hover:opacity-90"
+      {!hideAuthSection && (
+        <div className="mt-4 flex items-center gap-3 md:mt-0">
+
+          {/* SESSION CHECKING */}
+          {authenticated === null && (
+               <button
+              onClick={() => router.push("/login")}
+              className="cursor-pointer rounded-md border-2 bg-secondary px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
             >
-              Dashboard
+              Login
             </button>
-          </>
-        )}
-      </div>
+          )}
+
+          {/* NOT LOGGED IN */}
+          {authenticated === false && (
+            <button
+              onClick={() => router.push("/login")}
+              className="cursor-pointer rounded-md border-2 bg-black bg-secondary px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
+            >
+              Login
+            </button>
+          )}
+
+          {/* LOGGED IN */}
+          {authenticated === true && (
+            <>
+              <button
+                onClick={handleDashboard}
+                className="cursor-pointer rounded-md bg-primary px-5 py-2 text-sm font-medium text-white transition hover:opacity-90"
+              >
+                Dashboard
+              </button>
+
+      
+            </>
+          )}
+
+        </div>
+      )}
     </nav>
   );
 }
