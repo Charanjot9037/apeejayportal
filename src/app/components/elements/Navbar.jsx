@@ -170,7 +170,7 @@ export default function Navbar() {
   const handleDashboard = () => {
     const role = auth?.user?.role;
     const designation = auth?.user?.designation;
-console.o
+
     // Student
     if (role === "student") {
       router.push("/student");
