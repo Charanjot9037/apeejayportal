@@ -160,7 +160,7 @@ export default function DetailHeader({
           </Link>
 
           {/* DELETE - OWNER ONLY */}
-          {isOwner && (
+          {/* {isOwner && (
             <Button
               variant="outline"
               onClick={onDelete}
@@ -171,7 +171,7 @@ export default function DetailHeader({
 
               {deleting ? "Deleting..." : "Delete"}
             </Button>
-          )}
+          )} */}
 
         </div>
       )}

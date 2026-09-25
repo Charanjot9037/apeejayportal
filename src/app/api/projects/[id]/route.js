@@ -419,97 +419,150 @@ export async function GET(request, context) {
       );
     }
 
-    const auth = await authenticateUser();
+const auth = await authenticateUser();
 
-    if (!auth.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: auth.message,
-        },
-        { status: auth.status },
-      );
-    }
+if (!auth.success) {
+  return NextResponse.json(
+    {
+      success: false,
+      message: auth.message,
+    },
+    { status: auth.status }
+  );
+}
 
-    const project = await Project.findById(id)
-      .populate({
-        path: "student",
-        select: "name email",
-      })
-      .populate({
-        path: "mentor",
-        select: "name",
-      })
-      .populate({
-        path: "mentorReviews.reviewedBy",
-        select: "name",
-      })
-      .populate({
-        path: "mentor2",
-        select: "name",
-      })
-      .populate({
-        path: "teamMembers",
-        select: "fullName profileImage",
-        populate: {
-          path: "userId",
-          select: "name email",
-        },
-      });
+const project = await Project.findById(id)
+  .populate({
+    path: "student",
+    select: "name email",
+  })
+  .populate({
+    path: "mentor",
+    select: "name",
+  })
+  .populate({
+    path: "mentor2",
+    select: "name",
+  })
+  .populate({
+    path: "mentorReviews.reviewedBy",
+    select: "name",
+  })
+  .populate({
+    path: "teamMembers",
+    select: "fullName profileImage userId",
+    populate: {
+      path: "userId",
+      select: "name email",
+    },
+  });
 
-    if (!project) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Project not found.",
-        },
-        { status: 404 },
-      );
-    }
+if (!project) {
+  return NextResponse.json(
+    {
+      success: false,
+      message: "Project not found.",
+    },
+    { status: 404 }
+  );
+}
 
-    /* =====================================================
-       DETERMINE VIEWER ROLE
-    ===================================================== */
+/* =====================================================
+   DETERMINE VIEWER ROLE
+===================================================== */
 
-    const currentStudentProfile = await Student.findOne({
-      userId: auth.user._id,
-    });
+const currentUserId = auth.user._id.toString();
 
-    let viewerRole = "viewer";
-    
+let viewerRole = "viewer";
+
+/* =========================
+   1. PROJECT OWNER
+========================= */
 
 if (
   project.student?._id &&
-  auth.user?._id &&
-  project.student._id.toString() === auth.user._id.toString()
+  project.student._id.toString() === currentUserId
 ) {
   viewerRole = "owner";
-}else if (
-      currentStudentProfile &&
-      project.teamMembers &&
-      project.teamMembers._id?.toString() ===
-        currentStudentProfile._id.toString()
+}
+
+/* =========================
+   2. TEAM MEMBER
+========================= */
+
+else {
+const currentStudentProfile = await Student.findOne({
+  userId: auth.user._id,
+}).select("_id");
+
+const isTeamMember =
+  currentStudentProfile &&
+  project.teamMembers &&
+  project.teamMembers.toString() ===
+    currentStudentProfile._id.toString();
+
+
+
+  if (isTeamMember) {
+    viewerRole = "teamMember";
+  }
+
+  /* =========================
+     3. MENTOR 1
+  ========================= */
+
+  else if (project.mentor) {
+    const mentorProfile = await Mentor.findOne({
+      userId: auth.user._id,
+    }).select("_id");
+
+    if (
+      mentorProfile &&
+      mentorProfile._id.toString() === project.mentor._id.toString()
     ) {
-      viewerRole = "teamMember";
-    } else if (project.mentor) {
-      const mentorProfile = await Mentor.findOne({ userId: auth.user._id });
-      if (
-        mentorProfile &&
-        mentorProfile._id.toString() === project.mentor._id?.toString()
-      ) {
-        viewerRole = "mentor";
-      }
+      viewerRole = "mentor";
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        project,
-        viewerRole,
-      },
-      { status: 200 },
-    );
-  } catch (error) {
+    /* =========================
+       4. MENTOR 2
+    ========================= */
+
+    else if (
+      project.mentor2 &&
+      mentorProfile &&
+      mentorProfile._id.toString() === project.mentor2._id.toString()
+    ) {
+      viewerRole = "mentor";
+    }
+  }
+}
+
+/* =====================================================
+   BLOCK UNAUTHORIZED USERS
+===================================================== */
+
+if (viewerRole === "viewer") {
+  return NextResponse.json(
+    {
+      success: false,
+      message: "You are not authorized to view this project.",
+    },
+    { status: 403 }
+  );
+}
+
+/* =====================================================
+   AUTHORIZED RESPONSE
+===================================================== */
+
+return NextResponse.json(
+  {
+    success: true,
+    project,
+    viewerRole,
+  },
+  { status: 200 }
+);}catch(error){
     console.error("PROJECT_SINGLE_GET_ERROR:", error);
 
     return NextResponse.json(
@@ -547,17 +600,77 @@ export async function DELETE(request, context) {
     ===================================================== */
 
     const auth = await authenticateUser();
-
-    if (!auth.success) {
+    if (!auth?.success || !auth?.user?._id) {
       return NextResponse.json(
         {
           success: false,
-          message: auth.message,
+          message: auth?.message || "Unauthorized",
         },
-        { status: auth.status },
+        {
+          status: auth?.status || 401,
+        },
       );
     }
 
+    const user = await User.findById(auth.user._id)
+      .select("name email role")
+      .lean();
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User not found",
+        },
+        {
+          status: 404,
+        },
+      );
+    }
+
+    if (user.role?.trim().toLowerCase() !== "mentor") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Access denied",
+        },
+        {
+          status: 403,
+        },
+      );
+    }
+
+    const mentorProfile = await Mentor.findOne({
+      userId: user._id,
+    })
+      .select("department designation")
+      .lean();
+
+    if (!mentorProfile) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Mentor profile not found",
+        },
+        {
+          status: 404,
+        },
+      );
+    }
+
+    const designation = mentorProfile.designation?.trim().toLowerCase();
+
+    if (designation !== "engineer") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Only admin can access this dashboard",
+        },
+        {
+          status: 403,
+        },
+      );
+    }
     const project = await Project.findById(id);
 
     if (!project) {
@@ -570,15 +683,7 @@ export async function DELETE(request, context) {
       );
     }
 
-    if (project.student.toString() !== auth.user._id.toString()) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Only the project owner can delete this project.",
-        },
-        { status: 403 },
-      );
-    }
+
 
     /* =====================================================
        DELETE PROJECT IMAGES
