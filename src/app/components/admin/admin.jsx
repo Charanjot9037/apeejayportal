@@ -560,7 +560,7 @@ export default function HODProjects() {
                 return;
               }
 
-              router.push(`mentor-dashboard/projects/${projectId}`);
+              router.push(`admin-dashboard/view-projects/${projectId}`);
             }}
           />
 

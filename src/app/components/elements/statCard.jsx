@@ -101,7 +101,7 @@ export default function StatCards({ cards = [] }) {
   const router = useRouter();
 
   return (
-    <div className="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 mt-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => {
         const Icon = iconMap[card.icon];
 
@@ -117,26 +117,26 @@ export default function StatCards({ cards = [] }) {
           >
             {/* Header */}
             <div className="flex items-start justify-between">
-              <p className="text-sm font-medium text-primary-orange">
+              <p className="text-xs md:text-sm font-medium text-primary-orange">
                 {card.title}
               </p>
 
               {Icon && (
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100">
+                <div className="flex h-4 w-4 md:h-9 md:w-9 items-center justify-center rounded-full bg-slate-100">
                   <Icon className="h-4 w-4 text-black" strokeWidth={2.25} />
                 </div>
               )}
             </div>
 
             {/* Value */}
-            <p className="mt-2 text-3xl font-bold text-[#1c3a5e]">
+            <p className="mt-2 text-sm md:text-3xl font-bold text-[#1c3a5e]">
               {card.value}
             </p>
 
             {/* Description */}
             {card.description && (
-              <p className="mt-2 flex items-center gap-1 text-xs font-medium text-black">
-                <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} />
+              <p className="mt-2 flex items-center gap-1 text-[10px] md:text-xs font-medium text-black">
+                <ArrowUpRight className="h-2 w-2 md:h-3.5 md:w-3.5" strokeWidth={2} />
 
                 {card.description}
               </p>
