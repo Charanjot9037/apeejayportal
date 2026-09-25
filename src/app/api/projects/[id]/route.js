@@ -475,11 +475,33 @@ const currentUserId = auth.user._id.toString();
 
 let viewerRole = "viewer";
 
+/* =====================================================
+   CHECK ADMIN
+   Engineer designation = Admin
+===================================================== */
+
+const adminProfile = await Mentor.findOne({
+  userId: auth.user._id,
+})
+  .select("designation")
+  .lean();
+
+const isAdmin =
+  adminProfile?.designation?.trim().toLowerCase() === "engineer";
+
+/* =========================
+   0. ADMIN
+========================= */
+
+if (isAdmin) {
+  viewerRole = "admin";
+}
+
 /* =========================
    1. PROJECT OWNER
 ========================= */
 
-if (
+else if (
   project.student?._id &&
   project.student._id.toString() === currentUserId
 ) {
@@ -491,46 +513,41 @@ if (
 ========================= */
 
 else {
-const currentStudentProfile = await Student.findOne({
-  userId: auth.user._id,
-}).select("_id");
+  const currentStudentProfile = await Student.findOne({
+    userId: auth.user._id,
+  }).select("_id");
 
-const isTeamMember =
-  currentStudentProfile &&
-  project.teamMembers &&
-  project.teamMembers.toString() ===
-    currentStudentProfile._id.toString();
-
-
+  const isTeamMember =
+    currentStudentProfile &&
+    project.teamMembers &&
+    project.teamMembers.toString() ===
+      currentStudentProfile._id.toString();
 
   if (isTeamMember) {
     viewerRole = "teamMember";
   }
 
   /* =========================
-     3. MENTOR 1
+     3. MENTOR 1 / MENTOR 2
   ========================= */
 
-  else if (project.mentor) {
+  else {
     const mentorProfile = await Mentor.findOne({
       userId: auth.user._id,
     }).select("_id");
 
     if (
       mentorProfile &&
-      mentorProfile._id.toString() === project.mentor._id.toString()
+      project.mentor &&
+      mentorProfile._id.toString() ===
+        project.mentor._id.toString()
     ) {
       viewerRole = "mentor";
-    }
-
-    /* =========================
-       4. MENTOR 2
-    ========================= */
-
-    else if (
-      project.mentor2 &&
+    } else if (
       mentorProfile &&
-      mentorProfile._id.toString() === project.mentor2._id.toString()
+      project.mentor2 &&
+      mentorProfile._id.toString() ===
+        project.mentor2._id.toString()
     ) {
       viewerRole = "mentor";
     }
@@ -538,7 +555,7 @@ const isTeamMember =
 }
 
 /* =====================================================
-   BLOCK UNAUTHORIZED USERS
+   BLOCK UNAUTHORIZED USER
 ===================================================== */
 
 if (viewerRole === "viewer") {
@@ -562,7 +579,9 @@ return NextResponse.json(
     viewerRole,
   },
   { status: 200 }
-);}catch(error){
+);
+
+}catch(error){
     console.error("PROJECT_SINGLE_GET_ERROR:", error);
 
     return NextResponse.json(
