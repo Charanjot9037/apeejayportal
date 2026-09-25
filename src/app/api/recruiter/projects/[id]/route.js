@@ -115,7 +115,7 @@ if (project.teamMembers) {
       .select("name email profileImage")
       .lean();
 
-    console.log("TEAM USER:", teamUser);
+  
 
     if (teamUser) {
       teamMemberInfo = {

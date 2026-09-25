@@ -21,7 +21,7 @@ export async function POST(request) {
     // =========================================================
 
     const filters = await request.json();
-    console.log("filters : ",filters);
+
 
     const {
       program,
@@ -138,7 +138,7 @@ console.log(program,specialization,semester);
         }
       );
     }
-console.log("teacher dep",department);
+
     const normalizedDepartment =
       department.toLowerCase();
 
@@ -343,11 +343,6 @@ rawProjects = await Projects.find(projectQuery)
 
 
 
-  
-      console.log(
-  "RAW PROJECTS:",
-  rawProjects
-);
 
   
 
@@ -432,7 +427,7 @@ rawProjects = await Projects.find(projectQuery)
         };
       }
     );
-console.log("projects: ",projects);
+
     // =========================================================
     // 17. RESPONSE
     // =========================================================

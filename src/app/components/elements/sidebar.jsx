@@ -30,7 +30,7 @@ export default function Sidebar({ sidebarData, sidebarOpen, setSidebarOpen }) {
 
       dispatch(logout());
 
-      router.push("/login");
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
     }
