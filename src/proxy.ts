@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 export async function proxy(request:Request) {
-  console.log("🔥🔥🔥 PROXY RUNNING 🔥🔥🔥");
+
 
   const url = new URL(request.url);
 
-  console.log("PATH:", url.pathname);
+
 
   // Get accessToken from cookies
   const cookieHeader = request.headers.get("cookie");
@@ -19,7 +19,7 @@ export async function proxy(request:Request) {
     .slice(1)
     .join("=");
 
-  console.log("Access token exists:", !!accessToken);
+
 
   // No access token
   if (!accessToken) {
@@ -48,15 +48,13 @@ export async function proxy(request:Request) {
       encodedSecret
     );
 
-    console.log("✅ JWT VERIFIED");
-    console.log("User ID:", payload.id);
-    console.log("Email:", payload.email);
+
 
     // Token is valid
     return NextResponse.next();
 
   } catch (error) {
-    console.error("❌ INVALID OR EXPIRED ACCESS TOKEN");
+  
 
 
     return NextResponse.redirect(

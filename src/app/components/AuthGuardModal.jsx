@@ -30,13 +30,13 @@ export default function AuthGuardModal({
             )}
           </div>
 
-          <button
+          {/* <button
             type="button"
             onClick={onClose}
             className="text-gray-400 hover:text-gray-700"
           >
             <X size={20} />
-          </button>
+          </button> */}
         </div>
 
         <h2 className="mt-4 text-lg font-semibold text-gray-800">
