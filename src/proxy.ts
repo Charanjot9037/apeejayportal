@@ -70,5 +70,7 @@ export const config = {
     "/admin-dashboard/:path*",
     "/mentor-dashboard/:path*",
     "/student/:path*",
+    "/profile/:path*",
+    "/help/:path*"
   ],
 };
