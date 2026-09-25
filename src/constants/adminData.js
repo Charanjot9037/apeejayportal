@@ -26,6 +26,11 @@ export const adminDashboardData = {
       icon: FileText,
       href: "/admin-dashboard/tools",
     },
+     {
+      label: "Content-Mangement",
+      icon: FileText,
+      href: "/admin-dashboard/content-management/footer",
+    },
   ],
 };
 export const STAT_CARDS = [

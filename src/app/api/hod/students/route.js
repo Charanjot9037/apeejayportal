@@ -136,7 +136,7 @@ export async function POST(request) {
       $and: studentConditions,
     };
 
-    console.log("STUDENT QUERY:", JSON.stringify(studentQuery, null, 2));
+
 
     // =====================================================
     // 5. GET FILTERED STUDENTS

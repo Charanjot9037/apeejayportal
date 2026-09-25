@@ -179,38 +179,36 @@ export default function RecruiterProjectDetail({
                 PROJECT IMAGE
             ================================================= */}
 
-            <div className="relative min-h-[260px] overflow-hidden bg-slate-100 lg:min-h-[340px]">
+            <div className="relative h-[260px] overflow-hidden bg-slate-100 lg:h-[450px]">
 
               {projectImage ? (
                 <img
                   src={projectImage}
                   alt={project.title || "Project image"}
                   className="
-                    h-full
-                    min-h-[260px]
+                    h-[260px]
                     w-full
                     object-cover
-                    lg:min-h-[340px]
+                    lg:h-[450px]
                   "
                 />
               ) : (
                 <div
                   className="
                     flex
-                    h-full
-                    min-h-[260px]
+                    h-[260px]
                     items-center
                     justify-center
                     bg-gradient-to-br
                     from-slate-100
                     to-slate-200
-                    lg:min-h-[340px]
+                    lg:h-[450px]
                   "
                 >
                   <div className="text-center">
 
                     <FolderKanban
-                      className="mx-auto h-12 w-12 text-slate-300"
+                      className="mx-auto h-20 w-12 text-slate-300"
                     />
 
                     <p className="mt-2 text-sm font-medium text-slate-400">
@@ -311,8 +309,7 @@ export default function RecruiterProjectDetail({
 
                 <p
                   className="
-                    text-[10px]
-                    font-semibold
+                    text-[12px]
                     uppercase
                     tracking-[0.15em]
                     text-slate-400
@@ -529,12 +526,13 @@ export default function RecruiterProjectDetail({
           ================================================= */}
 
           <aside className="space-y-5">
+             <StudentInfoSection project={project} />
 
             <MentorSection
               project={project}
             />
 
-            <StudentInfoSection project={project} />
+  
 
             <ApprovalHistorySection
               project={project}

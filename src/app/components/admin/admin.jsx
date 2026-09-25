@@ -497,8 +497,6 @@ export default function HODProjects() {
 
       {/* ================= PROJECT ROSTER ================= */}
 
-      {/* ================= PROJECT ROSTER ================= */}
-
       {loading && projects.length === 0 ? (
         <div className="mt-4">
           <StudentRosterSkeleton />

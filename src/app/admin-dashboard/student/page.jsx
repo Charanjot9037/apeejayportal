@@ -179,7 +179,7 @@ export default function Page() {
   // =====================================================
 
   const handleApplyFilters = (selectedFilters) => {
-    console.log("ROSTER SELECTED FILTERS:", selectedFilters);
+
 
     // Same flow as Mentor Management
     const appliedFilters = {
@@ -187,8 +187,7 @@ export default function Page() {
       ...selectedFilters,
     };
 
-    console.log("APPLIED STUDENT FILTERS:", appliedFilters);
-
+   
     // Save selected filters in parent
     setFilters(appliedFilters);
 

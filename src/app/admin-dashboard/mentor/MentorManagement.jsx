@@ -46,7 +46,7 @@ export default function MentorManagement() {
           selectedFilters?.department || MENTOR_DEFAULT_FILTERS.department,
       };
 
-      console.log("FETCH MENTORS WITH:", filtersToSend);
+  
 
       const response = await fetch("/api/mentors", {
         method: "POST",
@@ -58,7 +58,7 @@ export default function MentorManagement() {
 
       const data = await response.json();
 
-      console.log("MENTOR API RESPONSE:", data);
+    
 
 
 
@@ -125,15 +125,12 @@ export default function MentorManagement() {
   // =====================================================
 
   const handleApplyFilters = (selectedFilters) => {
-    console.log("ROSTER SELECTED FILTERS:", selectedFilters);
-
+ 
     // If Roster sends null, use default Engineering
     const appliedFilters = {
       department:
         selectedFilters?.department || MENTOR_DEFAULT_FILTERS.department,
     };
-
-    console.log("APPLIED FILTERS:", appliedFilters);
 
     setFilters(appliedFilters);
 

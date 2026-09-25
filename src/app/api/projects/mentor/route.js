@@ -323,7 +323,6 @@ export async function POST(request) {
 
     const filters = await request.json();
 
-    console.log("MENTOR FILTERS:", filters);
 
     const { program = "", semester = "", academicYear = "" } = filters || {};
 

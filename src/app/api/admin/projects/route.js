@@ -21,8 +21,7 @@ export async function POST(request) {
     // =========================================================
 
     const filters = await request.json();
-    console.log("filters : ", filters);
-
+   
     const {
       program,
       semester,

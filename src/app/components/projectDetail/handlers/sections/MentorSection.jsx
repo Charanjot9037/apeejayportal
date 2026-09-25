@@ -20,7 +20,7 @@ export default function MentorSection({ project }) {
 
  
   return (
-    <SideCard title="Assigned Mentor">
+    <SideCard title="Mentor">
       <div className="space-y-3">
         {mentors.length > 0 ? (
           mentors.map((mentor) => {

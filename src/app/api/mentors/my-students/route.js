@@ -30,7 +30,7 @@ export async function GET() {
 
     const mentorUserId = auth.user._id;
 
-    console.log('Logged-in mentor:', mentorUserId);
+  
 
     // ---------------------------------------------------
     // STEP 1: Find students assigned to this mentor
@@ -42,7 +42,7 @@ export async function GET() {
       role: 'student',
     }).lean();
 
-    console.log('Assigned students:', assignedStudents.length);
+    
 
     // ---------------------------------------------------
     // STEP 2: Get their User IDs
@@ -68,7 +68,7 @@ export async function GET() {
       })
       .lean();
 
-    console.log('Student details:', studentDetails.length);
+  
 
     return NextResponse.json(
       {
@@ -144,7 +144,7 @@ export async function POST(request) {
 
     const filters = await request.json();
 
-    console.log('MENTOR STUDENT FILTERS:', filters);
+  
 
     const {
       department = '',
@@ -167,7 +167,7 @@ export async function POST(request) {
       role: 'student',
     }).select('_id');
 
-    console.log('Assigned students:', assignedStudents.length);
+
 
     // ===================================================
     // STEP 2:
@@ -222,7 +222,7 @@ export async function POST(request) {
       studentQuery.academicBatch = String(academicBatch).trim();
     }
 
-    console.log('MENTOR STUDENT QUERY:', studentQuery);
+
 
     // ===================================================
     // STEP 4:
@@ -239,7 +239,7 @@ export async function POST(request) {
       })
       .lean();
 
-    console.log('Filtered student details:', students.length);
+
 
     // ===================================================
     // RESPONSE
