@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin-dashboard/
+Disallow: /mentor-dashboard/
+Disallow: /student/
+Disallow: /login/
+
+Disallow: /api/
