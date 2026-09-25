@@ -139,7 +139,7 @@ export default function Roster({
      * PROJECT COLUMN
      * =========================
      */
-    if (column.key === 'projectTitle') {
+    if (column.key === 'projectTitle' ) {
       return (
         <div className=" bg-red-5000 flex items-center gap-3">
           <div
@@ -699,7 +699,7 @@ export default function Roster({
             {displayedData.length > 0 ? (
               displayedData.map((item, index) => (
                 <tr
-                  key={item.id || index}
+                 key={item._id || item.id || index}
                   onClick={() => onRowClick?.(item)}
                   className="
                     group
