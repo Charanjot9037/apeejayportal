@@ -468,15 +468,12 @@ export default function Page() {
                 title="All Projects"
                 data={projects}
                 setData={setProjects}
-                showEdit={true}
+              
                 columns={projectColumns}
                 showDelete={true}
                 searchPlaceholder="Search projects..."
                 className="mt-0 shadow-sm"
-                showView={true}
-                viewClick={
-                  handleViewProject
-                }
+            
                    onRowClick={(project) => {
               const projectId = project?.id || project?._id;
 

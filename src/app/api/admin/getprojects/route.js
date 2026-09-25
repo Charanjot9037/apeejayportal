@@ -58,7 +58,15 @@ export async function POST(req) {
         }
       );
     }
-    const { status } =await req.json();
+    let status;
+
+try {
+  const body = await req.json();
+  status = body?.status;
+} catch {
+  status = undefined;
+}
+  
     // ---------------------------------------------------
     // GET ALL PROJECTS
     // ---------------------------------------------------
@@ -70,10 +78,6 @@ export async function POST(req) {
       query.status = status;
     }
 
-    // ---------------------------------------------------
-    // GET PROJECTS
-    // ---------------------------------------------------
-console.log(query)
     const projects = await Projects.find(query).lean();
 
 
