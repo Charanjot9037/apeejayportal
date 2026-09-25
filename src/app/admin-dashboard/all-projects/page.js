@@ -470,7 +470,7 @@ export default function Page() {
                 setData={setProjects}
               
                 columns={projectColumns}
-                showDelete={true}
+            
                 searchPlaceholder="Search projects..."
                 className="mt-0 shadow-sm"
             

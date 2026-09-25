@@ -570,15 +570,7 @@ export async function DELETE(request, context) {
       );
     }
 
-    if (project.student.toString() !== auth.user._id.toString()) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Only the project owner can delete this project.",
-        },
-        { status: 403 },
-      );
-    }
+
 
     /* =====================================================
        DELETE PROJECT IMAGES

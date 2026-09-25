@@ -96,6 +96,9 @@ export default function Roster({
       toast.error(error.message || 'Failed to delete student');
     }
   };
+
+
+  
   const handleFilterChange = (key, value) => {
     updateFilters((previousFilters) => {
       const currentFilters = previousFilters || defaultFilters;
