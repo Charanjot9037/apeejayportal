@@ -1,8 +1,9 @@
 export default function ImportSteps({ step }) {
   return (
-    <div className="mb-8 flex bg-white items-center">
+    <div className="mb-8 flex items-center bg-white">
+      {/* Step 1 */}
       <div
-        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
           step >= 1
             ? 'bg-primary-orange text-white'
             : 'bg-slate-200 text-slate-500'
@@ -13,8 +14,9 @@ export default function ImportSteps({ step }) {
 
       <div className="mx-3 h-px flex-1 bg-slate-200" />
 
+      {/* Step 2 */}
       <div
-        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
           step >= 2
             ? 'bg-primary-orange text-white'
             : 'bg-slate-200 text-slate-500'
@@ -25,8 +27,9 @@ export default function ImportSteps({ step }) {
 
       <div className="mx-3 h-px flex-1 bg-slate-200" />
 
+      {/* Step 3 */}
       <div
-        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
           step >= 3
             ? 'bg-primary-orange text-white'
             : 'bg-slate-200 text-slate-500'
