@@ -1,12 +1,15 @@
 export default function ValidationStep({
-  validatedStudents,
+  role = 'student',
+  validatedRows = [],
   validCount,
   invalidCount,
   fileName,
-  handleStudentChange,
+  handleChange,
   setStep,
-  setValidatedStudents,
+  setRows,
 }) {
+  const isMentor = role === 'mentor';
+
   return (
     <div className="flex h-[70vh] flex-col">
       {/* Header */}
@@ -14,7 +17,7 @@ export default function ValidationStep({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-800">
-              Validate Students
+              {isMentor ? 'Validate Mentors' : 'Validate Students'}
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
@@ -22,7 +25,11 @@ export default function ValidationStep({
             </p>
           </div>
 
-          <div className="text-sm text-slate-500">{fileName}</div>
+          {fileName && (
+            <div className="max-w-[250px] truncate text-sm text-slate-500">
+              {fileName}
+            </div>
+          )}
         </div>
 
         {/* Summary */}
@@ -30,7 +37,9 @@ export default function ValidationStep({
           <div className="rounded-lg bg-slate-50 px-5 py-3">
             <p className="text-xs text-slate-500">Total</p>
 
-            <p className="text-lg font-semibold">{validatedStudents.length}</p>
+            <p className="text-lg font-semibold text-slate-800">
+              {validatedRows.length}
+            </p>
           </div>
 
           <div className="rounded-lg bg-green-50 px-5 py-3">
@@ -48,103 +57,216 @@ export default function ValidationStep({
       </div>
 
       {/* Table */}
-      <div className="mt-5 min-h-0 flex-1 overflow-y-auto rounded-lg border border-slate-200">
-        <table className="w-full text-left text-sm">
+      <div className="mt-5 min-h-0 flex-1 overflow-auto rounded-lg border border-slate-200">
+        <table className="w-full min-w-[1000px] text-left text-sm">
           <thead className="sticky top-0 z-10 bg-slate-100">
             <tr>
               <th className="px-4 py-3">#</th>
-              <th className="px-4 py-3">Student Name</th>
+
+              <th className="px-4 py-3">
+                {isMentor ? 'Mentor Name' : 'Student Name'}
+              </th>
+
               <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">Guide Name</th>
-              <th className="px-4 py-3">Guide Email</th>
+
+              {isMentor ? (
+                <>
+                  <th className="px-4 py-3">Mobile</th>
+                  <th className="px-4 py-3">Department</th>
+                  <th className="px-4 py-3">Designation</th>
+                </>
+              ) : (
+                <>
+                  <th className="px-4 py-3">Guide Name</th>
+                  <th className="px-4 py-3">Guide Email</th>
+                </>
+              )}
+
               <th className="px-4 py-3">Validation</th>
             </tr>
           </thead>
 
           <tbody>
-            {validatedStudents.map((student, index) => (
+            {validatedRows.map((row, index) => (
               <tr key={index} className="border-t border-slate-200">
-                <td className="px-4 py-3">{index + 1}</td>
+                {/* Row number */}
+                <td className="px-4 py-3 text-slate-600">
+                  {row.rowNumber || index + 2}
+                </td>
 
+                {/* Name */}
                 <td className="px-4 py-3">
                   <input
                     type="text"
-                    value={student.name}
+                    value={row.name}
                     onChange={(event) =>
-                      handleStudentChange(index, "name", event.target.value)
+                      handleChange(index, 'name', event.target.value)
                     }
-                    className={`w-full rounded-md border px-3 py-2 outline-none ${
-                      student.errors.some((error) => error.includes("Name"))
-                        ? "border-red-400"
-                        : "border-slate-300"
+                    className={`w-full min-w-[150px] rounded-md border px-3 py-2 outline-none transition focus:ring-1 ${
+                      row.errors?.some((error) =>
+                        error.toLowerCase().includes('name'),
+                      )
+                        ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                        : 'border-slate-300 focus:border-primary-orange focus:ring-orange-200'
                     }`}
                   />
                 </td>
 
+                {/* Email */}
                 <td className="px-4 py-3">
                   <input
                     type="email"
-                    value={student.email}
+                    value={row.email}
                     onChange={(event) =>
-                      handleStudentChange(index, "email", event.target.value)
+                      handleChange(index, 'email', event.target.value)
                     }
-                    className={`w-full rounded-md border px-3 py-2 outline-none ${
-                      student.errors.some(
-                        (error) =>
-                          error.includes("email") || error.includes("Email"),
+                    className={`w-full min-w-[200px] rounded-md border px-3 py-2 outline-none transition focus:ring-1 ${
+                      row.errors?.some((error) =>
+                        error.toLowerCase().includes('email'),
                       )
-                        ? "border-red-400"
-                        : "border-slate-300"
+                        ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                        : 'border-slate-300 focus:border-primary-orange focus:ring-orange-200'
                     }`}
                   />
                 </td>
 
+                {/* Mentor fields */}
+                {isMentor ? (
+                  <>
+                    {/* Mobile */}
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={row.mobileNumber}
+                        onChange={(event) =>
+                          handleChange(
+                            index,
+                            'mobileNumber',
+                            event.target.value,
+                          )
+                        }
+                        className={`w-full min-w-[140px] rounded-md border px-3 py-2 outline-none transition focus:ring-1 ${
+                          row.errors?.some((error) =>
+                            error.toLowerCase().includes('mobile'),
+                          )
+                            ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                            : 'border-slate-300 focus:border-primary-orange focus:ring-orange-200'
+                        }`}
+                      />
+                    </td>
+
+                    {/* Department */}
+                    <td className="px-4 py-3">
+                      <select
+                        value={row.department}
+                        onChange={(event) =>
+                          handleChange(index, 'department', event.target.value)
+                        }
+                        className={`w-full min-w-[200px] rounded-md border px-3 py-2 outline-none transition focus:ring-1 ${
+                          row.errors?.some((error) =>
+                            error.toLowerCase().includes('department'),
+                          )
+                            ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                            : 'border-slate-300 focus:border-primary-orange focus:ring-orange-200'
+                        }`}
+                      >
+                        <option value="">Select Department</option>
+
+                        <option value="Information Technology">
+                          Information Technology
+                        </option>
+
+                        <option value="Management">Management</option>
+
+                        <option value="Engineering">Engineering</option>
+                      </select>
+                    </td>
+
+                    {/* Designation */}
+                    <td className="px-4 py-3">
+                      <select
+                        value={row.designation}
+                        onChange={(event) =>
+                          handleChange(index, 'designation', event.target.value)
+                        }
+                        className={`w-full min-w-[180px] rounded-md border px-3 py-2 outline-none transition focus:ring-1 ${
+                          row.errors?.some((error) =>
+                            error.toLowerCase().includes('designation'),
+                          )
+                            ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                            : 'border-slate-300 focus:border-primary-orange focus:ring-orange-200'
+                        }`}
+                      >
+                        <option value="">Select Designation</option>
+
+                        <option value="assistant_professor">
+                          Assistant Professor
+                        </option>
+
+                        <option value="HOD">HOD</option>
+
+                        <option value="Dean">Dean</option>
+
+                        <option value="Director">Director</option>
+
+                        <option value="Engineer">Engineer</option>
+                      </select>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    {/* Guide Name */}
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={row.guidename}
+                        onChange={(event) =>
+                          handleChange(index, 'guidename', event.target.value)
+                        }
+                        className={`w-full min-w-[150px] rounded-md border px-3 py-2 outline-none transition focus:ring-1 ${
+                          row.errors?.some((error) =>
+                            error.toLowerCase().includes('guide name'),
+                          )
+                            ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                            : 'border-slate-300 focus:border-primary-orange focus:ring-orange-200'
+                        }`}
+                      />
+                    </td>
+
+                    {/* Guide Email */}
+                    <td className="px-4 py-3">
+                      <input
+                        type="email"
+                        value={row.guideemail}
+                        onChange={(event) =>
+                          handleChange(index, 'guideemail', event.target.value)
+                        }
+                        className={`w-full min-w-[200px] rounded-md border px-3 py-2 outline-none transition focus:ring-1 ${
+                          row.errors?.some((error) =>
+                            error.toLowerCase().includes('guide email'),
+                          )
+                            ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                            : 'border-slate-300 focus:border-primary-orange focus:ring-orange-200'
+                        }`}
+                      />
+                    </td>
+                  </>
+                )}
+
+                {/* Validation */}
                 <td className="px-4 py-3">
-                  <input
-                    type="text"
-                    value={student.guidename}
-                    onChange={(event) =>
-                      handleStudentChange(
-                        index,
-                        "guidename",
-                        event.target.value,
-                      )
-                    }
-                    className={`w-full rounded-md border px-3 py-2 outline-none ${
-                      student.errors.some((error) =>
-                        error.includes("GuideName"),
-                      )
-                        ? "border-red-400"
-                        : "border-slate-300"
-                    }`}
-                  />
-                </td>
-                <td className="px-4 py-3">
-                  <input
-                    type="email"
-                    value={student.guideemail}
-                    onChange={(event) =>
-                      handleStudentChange(index, "guideemail", event.target.value)
-                    }
-                    className={`w-full rounded-md border px-3 py-2 outline-none ${
-                      student.errors.some(
-                        (error) =>
-                          error.includes("guideemail") || error.includes("GuideEmail"),
-                      )
-                        ? "border-red-400"
-                        : "border-slate-300"
-                    }`}
-                  />
-                </td>
-                <td className="px-4 py-3">
-                  {student.isValid ? (
-                    <span className="font-medium text-green-600">✓ Valid</span>
+                  {row.isValid ? (
+                    <span className="whitespace-nowrap font-medium text-green-600">
+                      ✓ Valid
+                    </span>
                   ) : (
                     <div>
-                      <span className="font-medium text-red-600">✗ Error</span>
+                      <span className="whitespace-nowrap font-medium text-red-600">
+                        ✗ Error
+                      </span>
 
-                      <div className="mt-1 text-xs text-red-500">
-                        {student.errors.join(", ")}
+                      <div className="mt-1 min-w-[180px] text-xs leading-5 text-red-500">
+                        {row.errors?.join(', ')}
                       </div>
                     </div>
                   )}
@@ -162,22 +284,22 @@ export default function ValidationStep({
             type="button"
             onClick={() => {
               setStep(1);
-              setValidatedStudents([]);
+              setRows([]);
             }}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           >
             Change File
           </button>
 
           <button
             type="button"
-            disabled={validatedStudents.length === 0 || invalidCount > 0}
+            disabled={validatedRows.length === 0 || invalidCount > 0}
             onClick={() => {
               if (invalidCount === 0) {
                 setStep(3);
               }
             }}
-            className="rounded-lg bg-primary-orange px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-primary-orange px-5 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Continue to Preview
           </button>

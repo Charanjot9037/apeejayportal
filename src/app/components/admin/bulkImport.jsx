@@ -1,398 +1,409 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Formik, Form } from "formik";
-import * as Yup from "yup";
-import * as XLSX from "xlsx";
-import { toast } from "sonner";
+import { useState } from 'react';
+import * as XLSX from 'xlsx';
+import { toast } from 'sonner';
+
 import {
   ImportSteps,
   UploadStep,
   ValidationStep,
   PreviewStep,
-} from "./bulkImport/index";
-import { apiRequest } from "@/lib/apiRequest";
-import AuthGuardModal from "../AuthGuardModal";
-import { studentValidationSchema } from "@/validations/admin/studentValidationSchema";
-import { useRouter } from "next/navigation";
-const validationSchema = Yup.object({
-  file: Yup.mixed()
-    .required("Please select a file")
-    .test("fileType", "Only CSV or XLSX files are allowed", (value) => {
-      if (!value) return false;
+} from './bulkImport/index';
 
-      const fileName = value.name?.toLowerCase();
-
-      return fileName.endsWith(".csv") || fileName.endsWith(".xlsx");
-    }),
-});
-
-const downloadTemplate = () => {
-  const csvContent =
-    "name,email,guidename,guideemail\n" +
-    "xyz,xyz@example.com,xyz,xyz@example.com";
-
-  const blob = new Blob([csvContent], {
-    type: "text/csv;charset=utf-8;",
-  });
-
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = "student-import-template.csv";
-
-  document.body.appendChild(link);
-
-  link.click();
-
-  document.body.removeChild(link);
-
-  URL.revokeObjectURL(url);
-};
-
-export default function BulkImport() {
+export default function BulkImport({ role = 'student' }) {
   const [step, setStep] = useState(1);
-  const [isUploading, setIsUploading] = useState(false);
-  const [validatedStudents, setValidatedStudents] = useState([]);
+  const [file, setFile] = useState(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [fileName, setFileName] = useState("");
-  const [authModal, setAuthModal] = useState({
-    open: false,
-    type: "authentication",
-    message: "",
-  });
-  const router = useRouter();
-  const handleFileParse = (file) => {
-    if (!file) return;
 
-    setFileName(file.name);
+  const isMentor = role === 'mentor';
+
+  // =========================================================
+  // 1. DOWNLOAD TEMPLATE
+  // =========================================================
+
+  const downloadTemplate = () => {
+    const data = isMentor
+      ? [
+          {
+            name: '',
+            email: '',
+            mobileNumber: '',
+            department: '',
+            designation: '',
+          },
+        ]
+      : [
+          {
+            name: '',
+            email: '',
+            guidename: '',
+            guideemail: '',
+          },
+        ];
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      isMentor ? 'Mentor Template' : 'Student Template',
+    );
+
+    XLSX.writeFile(
+      workbook,
+      isMentor ? 'mentor-template.xlsx' : 'student-template.xlsx',
+    );
+  };
+
+  // =========================================================
+  // 2. PARSE FILE
+  // =========================================================
+
+  const handleFileParse = (selectedFile) => {
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
 
     const reader = new FileReader();
 
-    reader.onload = async (event) => {
+    reader.onload = (event) => {
       try {
-        const data = event.target.result;
+        const data = new Uint8Array(event.target.result);
 
         const workbook = XLSX.read(data, {
-          type: "array",
+          type: 'array',
         });
 
-        if (!workbook.SheetNames.length) {
-          setValidatedStudents([]);
+        const sheetName = workbook.SheetNames[0];
+
+        if (!sheetName) {
+          toast.error('The uploaded file is empty.');
           return;
         }
 
-        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
 
-        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+          defval: '',
+        });
 
-        const rows = XLSX.utils.sheet_to_json(worksheet);
-        console.log("Excel rows:", rows);
-        const validatedRows = studentValidationSchema(rows);
-
-        const mentorResults = await validateMentors(validatedRows);
-
-        if (!mentorResults) {
+        if (!jsonData.length) {
+          toast.error('The uploaded file is empty.');
           return;
         }
 
-        const finalRows = validatedRows.map((student, index) => {
-          const mentor = mentorResults[index];
+        const formattedRows = isMentor
+          ? validateMentors(jsonData)
+          : validateStudents(jsonData);
 
-          return {
-            ...student,
-            errors: [...(student.errors || []), ...(mentor?.errors || [])],
-            isValid:
-              student.isValid &&
-              mentor?.exists === true &&
-              mentor?.nameMatches === true,
-          };
-        });
-
-        setValidatedStudents(finalRows);
+        setRows(formattedRows);
         setStep(2);
       } catch (error) {
-        console.error("Error reading file:", error);
+        console.error('FILE_PARSE_ERROR:', error);
 
-        setValidatedStudents([]);
-
-        toast.error("Unable to read the selected file.");
+        toast.error('Unable to read the file.');
       }
     };
 
-    reader.readAsArrayBuffer(file);
+    reader.readAsArrayBuffer(selectedFile);
   };
 
-  const handleStudentChange = (index, field, value) => {
-    const updatedStudents = [...validatedStudents];
+  // =========================================================
+  // 3. STUDENT VALIDATION
+  // =========================================================
 
-    updatedStudents[index] = {
-      ...updatedStudents[index],
-      [field]: value,
-    };
+  const validateStudents = (data) => {
+    return data.map((student, index) => {
+      const errors = [];
 
-    const revalidatedStudents = studentValidationSchema(
-      updatedStudents.map((student) => ({
-        name: student.name,
-        email: student.email,
-        guidename: student.guidename,
-        guideemail: student.guideemail,
-      })),
-    );
+      const name = String(student.name || '').trim();
 
-    setValidatedStudents(revalidatedStudents);
-  };
+      const email = String(student.email || '')
+        .trim()
+        .toLowerCase();
 
-  const handleFinalUpload = async () => {
-    try {
-      const validStudents = validatedStudents
-        .filter((student) => student.isValid)
-        .map((student) => ({
-          name: student.name,
-          email: student.email,
-          guidename: student.guidename,
-          guideemail: student.guideemail,
-        }));
+      const guidename = String(student.guidename || '').trim();
 
-      if (validStudents.length === 0) {
-        toast.error("No valid students to import.");
-        return;
+      const guideemail = String(student.guideemail || '')
+        .trim()
+        .toLowerCase();
+
+      if (!name) {
+        errors.push('Name is required');
       }
 
-      setIsUploading(true);
+      if (!email) {
+        errors.push('Email is required');
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push('Invalid email');
+      }
 
-      const BATCH_SIZE = 50;
+      if (!guidename) {
+        errors.push('Guide name is required');
+      }
 
-      let totalImported = 0;
-      let totalAlreadyExists = 0;
-      const handleAuthError = (response, data) => {
-        if (response.status === 401) {
-          setAuthModal({
-            open: true,
-            type: "authentication",
-            message:
-              data.message || "Your session has expired. Please log in again.",
-          });
+      if (!guideemail) {
+        errors.push('Guide email is required');
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guideemail)) {
+        errors.push('Invalid guide email');
+      }
 
-          return true;
-        }
-
-        if (response.status === 403) {
-          setAuthModal({
-            open: true,
-            type: "unauthorized",
-            message:
-              data.message || "You are not authorized to perform this action.",
-          });
-
-          return true;
-        }
-
-        return false;
+      return {
+        rowNumber: index + 2,
+        name,
+        email,
+        guidename,
+        guideemail,
+        errors,
+        isValid: errors.length === 0,
       };
-      for (let i = 0; i < validStudents.length; i += BATCH_SIZE) {
-        const batch = validStudents.slice(i, i + BATCH_SIZE);
-
-        const response = await fetch("/api/admin/bulkImport", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            students: batch,
-          }),
-        });
-
-        const data = await response.json();
-        if (handleAuthError(response, data)) {
-          return;
-        }
-        if (!response.ok) {
-          toast.error(data.message || "Failed to import students.");
-          return;
-        }
-
-        totalImported += data.summary?.imported || 0;
-
-        totalAlreadyExists += data.summary?.alreadyExists || 0;
-      }
-
-      toast.success(
-        `Import successful! Imported: ${totalImported}, Already Exists: ${totalAlreadyExists}`,
-      );
-    } catch (error) {
-      console.error("Bulk import error:", error);
-
-      toast.error("Something went wrong while importing students.");
-    } finally {
-      setIsUploading(false);
-    }
+    });
   };
 
-  const invalidCount = validatedStudents.filter(
-    (student) => !student.isValid,
-  ).length;
+  // =========================================================
+  // 4. MENTOR VALIDATION
+  // =========================================================
 
-  const validCount = validatedStudents.filter(
-    (student) => student.isValid,
-  ).length;
+  const validateMentors = (data) => {
+    const departments = ['Information Technology', 'Management', 'Engineering'];
 
-  const validateMentors = async (students) => {
+    const designations = [
+      'assistant_professor',
+      'HOD',
+      'Dean',
+      'Director',
+      'Engineer',
+    ];
+
+    return data.map((mentor, index) => {
+      const errors = [];
+
+      const name = String(mentor.name || '').trim();
+
+      const email = String(mentor.email || '')
+        .trim()
+        .toLowerCase();
+
+      const mobileNumber = String(mentor.mobileNumber || '').trim();
+
+      const department = String(mentor.department || '').trim();
+
+      const designation = String(mentor.designation || '').trim();
+
+      if (!name) {
+        errors.push('Name is required');
+      }
+
+      if (!email) {
+        errors.push('Email is required');
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push('Invalid email');
+      }
+
+      if (!mobileNumber) {
+        errors.push('Mobile number is required');
+      }
+
+      if (!department) {
+        errors.push('Department is required');
+      } else if (!departments.includes(department)) {
+        errors.push('Invalid department');
+      }
+
+      if (!designation) {
+        errors.push('Designation is required');
+      } else if (!designations.includes(designation)) {
+        errors.push('Invalid designation');
+      }
+
+      return {
+        rowNumber: index + 2,
+        name,
+        email,
+        mobileNumber,
+        department,
+        designation,
+        errors,
+        isValid: errors.length === 0,
+      };
+    });
+  };
+
+  // =========================================================
+  // 5. EDIT VALIDATION ROW
+  // =========================================================
+
+  const handleChange = (index, field, value) => {
+    const updatedRows = [...rows];
+
+    updatedRows[index][field] = value;
+
+    const validated = isMentor
+      ? validateMentors(
+          updatedRows.map((row) => ({
+            name: row.name,
+            email: row.email,
+            mobileNumber: row.mobileNumber,
+            department: row.department,
+            designation: row.designation,
+          })),
+        )
+      : validateStudents(
+          updatedRows.map((row) => ({
+            name: row.name,
+            email: row.email,
+            guidename: row.guidename,
+            guideemail: row.guideemail,
+          })),
+        );
+
+    setRows(validated);
+  };
+
+  // =========================================================
+  // 6. CONTINUE TO PREVIEW
+  // =========================================================
+
+  const goToPreview = () => {
+    const invalidRows = rows.filter((row) => !row.isValid);
+
+    if (invalidRows.length > 0) {
+      toast.error('Please fix all validation errors first.');
+      return;
+    }
+
+    setStep(3);
+  };
+
+  // =========================================================
+  // 7. FINAL UPLOAD
+  // =========================================================
+
+  const handleUpload = async () => {
     try {
-      // Get unique mentors by email
-      const uniqueMentors = [
-        ...new Map(
-          students
-            .map((student) => ({
-              name: student.guidename?.trim(),
-              email: student.guideemail?.trim().toLowerCase(),
-            }))
-            .filter((mentor) => mentor.email)
-            .map((mentor) => [mentor.email, mentor]),
-        ).values(),
-      ];
+      setLoading(true);
 
-      console.log("Unique mentors:", uniqueMentors);
+      const payload = rows.map((row) =>
+        isMentor
+          ? {
+              name: row.name,
+              email: row.email,
+              mobileNumber: row.mobileNumber,
+              department: row.department,
+              designation: row.designation,
+            }
+          : {
+              name: row.name,
+              email: row.email,
+              guidename: row.guidename,
+              guideemail: row.guideemail,
+            },
+      );
 
-      const response = await fetch("/api/admin/bulkImport/validate-mentor", {
-        method: "POST",
+      const response = await fetch('/api/admin/bulkImport', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
         body: JSON.stringify({
-          students: students,
-          mentors: uniqueMentors,
+          students: payload,
+          role: role,
         }),
       });
 
-      const data = await response.json();
-
-      if (response.status === 401) {
-        setAuthModal({
-          open: true,
-          type: "authentication",
-          message:
-            data.message || "Your session has expired. Please login again.",
-        });
-
-        return null;
-      }
-
-      if (response.status === 403) {
-        setAuthModal({
-          open: true,
-          type: "unauthorized",
-          message:
-            data.message || "You are not authorized to validate mentors.",
-        });
-
-        return null;
-      }
+      const result = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Failed to validate mentors.");
-        return null;
+        throw new Error(result.message || 'Upload failed');
       }
 
-      // Create map of validation result by email
-      const mentorResultMap = new Map(
-        data.mentors.map((mentor) => [
-          mentor.email?.trim().toLowerCase(),
-          mentor,
-        ]),
+      toast.success(
+        isMentor
+          ? 'Mentors imported successfully'
+          : 'Students imported successfully',
       );
 
-      // Return validation result for EACH student
-      return students.map((student) => {
-        const email = student.guideemail?.trim().toLowerCase();
-
-        return (
-          mentorResultMap.get(email) || {
-            email: student.guideemail,
-            name: student.guidename,
-            exists: false,
-            nameMatches: false,
-            errors: [`Mentor email "${student.guideemail}" does not exist`],
-          }
-        );
-      });
+      setRows([]);
+      setFile(null);
+      setStep(1);
     } catch (error) {
-      console.error("MENTOR_VALIDATION_ERROR:", error);
+      console.error('BULK_IMPORT_ERROR:', error);
 
-      toast.error("Unable to validate mentors.");
-
-      return null;
+      toast.error(error.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
     }
   };
+
+  // =========================================================
+  // COUNTS
+  // =========================================================
+
+  const invalidCount = rows.filter((row) => !row.isValid).length;
+
+  const validCount = rows.filter((row) => row.isValid).length;
+
+  // =========================================================
+  // RENDER
+  // =========================================================
+
   return (
-    <div>
-      <AuthGuardModal
-        open={authModal.open}
-        type={authModal.type}
-        message={authModal.message}
-        onClose={() => {
-          if (authModal.type === "unauthorized") {
-            router.back();
-          } else {
-            setAuthModal((prev) => ({
-              ...prev,
-              open: false,
-            }));
-          }
-        }}
-        onLogin={() => {
-          router.push("/login");
-        }}
-      />{" "}
-      <Formik
-        initialValues={{
-          file: null,
-        }}
-        validationSchema={validationSchema}
-        onSubmit={() => {}}
-      >
-        {({ setFieldValue }) => (
-          <Form className="py-4">
-            <div className="mx-auto w-full rounded-xl border border-slate-200 bg-white p-6">
-              <ImportSteps step={step} />
+    <div className="w-full">
+      <div className="mx-auto w-full rounded-xl border border-slate-200 bg-white p-6">
+        {/* STEP INDICATOR */}
 
-              {step === 1 && (
-                <UploadStep
-                  setFieldValue={setFieldValue}
-                  handleFileParse={handleFileParse}
-                  isDragging={isDragging}
-                  setIsDragging={setIsDragging}
-                  downloadTemplate={downloadTemplate}
-                />
-              )}
+        <ImportSteps step={step} />
 
-              {step === 2 && (
-                <ValidationStep
-                  validatedStudents={validatedStudents}
-                  validCount={validCount}
-                  invalidCount={invalidCount}
-                  fileName={fileName}
-                  handleStudentChange={handleStudentChange}
-                  setStep={setStep}
-                  setValidatedStudents={setValidatedStudents}
-                />
-              )}
+        {/* ================================================= */}
+        {/* STEP 1 - UPLOAD */}
+        {/* ================================================= */}
 
-              {step === 3 && (
-                <PreviewStep
-                  validatedStudents={validatedStudents}
-                  isUploading={isUploading}
-                  handleFinalUpload={handleFinalUpload}
-                  setStep={setStep}
-                />
-              )}
-            </div>
-          </Form>
+        {step === 1 && (
+          <UploadStep
+            role={role}
+            handleFileParse={handleFileParse}
+            isDragging={isDragging}
+            setIsDragging={setIsDragging}
+            downloadTemplate={downloadTemplate}
+          />
         )}
-      </Formik>
+
+        {/* ================================================= */}
+        {/* STEP 2 - VALIDATION */}
+        {/* ================================================= */}
+
+        {step === 2 && (
+          <ValidationStep
+            role={role}
+            validatedRows={rows}
+            validCount={validCount}
+            invalidCount={invalidCount}
+            fileName={file?.name || ''}
+            handleChange={handleChange}
+            setStep={setStep}
+            setRows={setRows}
+          />
+        )}
+
+        {/* ================================================= */}
+        {/* STEP 3 - PREVIEW */}
+        {/* ================================================= */}
+
+        {step === 3 && (
+          <PreviewStep
+            role={role}
+            validatedRows={rows}
+            isUploading={loading}
+            handleFinalUpload={handleUpload}
+            setStep={setStep}
+          />
+        )}
+      </div>
     </div>
   );
 }

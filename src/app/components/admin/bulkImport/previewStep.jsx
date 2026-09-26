@@ -1,9 +1,12 @@
 export default function PreviewStep({
-  validatedStudents,
+  role = 'student',
+  validatedRows = [],
   isUploading,
   handleFinalUpload,
   setStep,
 }) {
+  const isMentor = role === 'mentor';
+
   return (
     <div className="flex h-[70vh] flex-col">
       {/* Header */}
@@ -14,17 +17,20 @@ export default function PreviewStep({
           </h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Review the students before importing them.
+            Review the {isMentor ? 'mentors' : 'students'} before importing
+            them.
           </p>
         </div>
 
         {/* Summary */}
         <div className="mt-5 flex gap-4">
           <div className="rounded-lg bg-slate-50 px-5 py-3">
-            <p className="text-xs text-slate-500">Total Students</p>
+            <p className="text-xs text-slate-500">
+              Total {isMentor ? 'Mentors' : 'Students'}
+            </p>
 
             <p className="text-lg font-semibold text-slate-800">
-              {validatedStudents.length}
+              {validatedRows.length}
             </p>
           </div>
 
@@ -32,54 +38,94 @@ export default function PreviewStep({
             <p className="text-xs text-slate-500">Ready to Import</p>
 
             <p className="text-lg font-semibold text-green-600">
-              {validatedStudents.length}
+              {validatedRows.length}
             </p>
           </div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="mt-5 min-h-0 flex-1 overflow-y-auto rounded-lg border border-slate-200">
-        <table className="w-full text-left text-sm">
+      <div className="mt-5 min-h-0 flex-1 overflow-auto rounded-lg border border-slate-200">
+        <table className="w-full min-w-[900px] text-left text-sm">
           <thead className="sticky top-0 z-10 bg-slate-100">
             <tr>
               <th className="px-4 py-3 font-semibold text-slate-700">#</th>
 
               <th className="px-4 py-3 font-semibold text-slate-700">
-                Student Name
+                {isMentor ? 'Mentor Name' : 'Student Name'}
               </th>
 
               <th className="px-4 py-3 font-semibold text-slate-700">Email</th>
-              <th className="px-4 py-3 font-semibold text-slate-700">
-                Guide Name
-              </th>
 
-              <th className="px-4 py-3 font-semibold text-slate-700">
-                Guide Email
-              </th>
+              {isMentor ? (
+                <>
+                  <th className="px-4 py-3 font-semibold text-slate-700">
+                    Mobile
+                  </th>
+
+                  <th className="px-4 py-3 font-semibold text-slate-700">
+                    Department
+                  </th>
+
+                  <th className="px-4 py-3 font-semibold text-slate-700">
+                    Designation
+                  </th>
+                </>
+              ) : (
+                <>
+                  <th className="px-4 py-3 font-semibold text-slate-700">
+                    Guide Name
+                  </th>
+
+                  <th className="px-4 py-3 font-semibold text-slate-700">
+                    Guide Email
+                  </th>
+                </>
+              )}
 
               <th className="px-4 py-3 font-semibold text-slate-700">Status</th>
             </tr>
           </thead>
 
           <tbody>
-            {validatedStudents.map((student, index) => (
+            {validatedRows.map((row, index) => (
               <tr key={index} className="border-t border-slate-200">
                 <td className="px-4 py-3 text-slate-600">{index + 1}</td>
 
-                <td className="px-4 py-3 text-slate-800">{student.name}</td>
+                <td className="px-4 py-3 text-slate-800">{row.name}</td>
 
-                <td className="px-4 py-3 text-slate-600">{student.email}</td>
-                <td className="px-4 py-3 text-slate-800">
-                  {student.guidename}
-                </td>
+                <td className="px-4 py-3 text-slate-600">{row.email}</td>
 
-                <td className="px-4 py-3 text-slate-600">
-                  {student.guideemail}
-                </td>
+                {isMentor ? (
+                  <>
+                    <td className="px-4 py-3 text-slate-600">
+                      {row.mobileNumber}
+                    </td>
+
+                    <td className="px-4 py-3 text-slate-800">
+                      {row.department}
+                    </td>
+
+                    <td className="px-4 py-3 text-slate-800">
+                      {row.designation}
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td className="px-4 py-3 text-slate-800">
+                      {row.guidename}
+                    </td>
+
+                    <td className="px-4 py-3 text-slate-600">
+                      {row.guideemail}
+                    </td>
+                  </>
+                )}
 
                 <td className="px-4 py-3">
-                  <span className="font-medium text-green-600">✓ Ready</span>
+                  <span className="whitespace-nowrap font-medium text-green-600">
+                    ✓ Ready
+                  </span>
                 </td>
               </tr>
             ))}
@@ -88,13 +134,13 @@ export default function PreviewStep({
       </div>
 
       {/* Footer */}
-      <div className="p-4">
+      <div className="shrink-0 p-4">
         <div className="flex justify-end gap-3">
           <button
             type="button"
             disabled={isUploading}
             onClick={() => setStep(2)}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Back to Edit
           </button>
@@ -103,7 +149,7 @@ export default function PreviewStep({
             type="button"
             onClick={handleFinalUpload}
             disabled={isUploading}
-            className="flex items-center justify-center gap-2 rounded-lg bg-primary-orange px-5 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-lg bg-primary-orange px-5 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isUploading ? (
               <>
@@ -111,7 +157,7 @@ export default function PreviewStep({
                 Uploading...
               </>
             ) : (
-              "Upload Students"
+              `Upload ${isMentor ? 'Mentors' : 'Students'}`
             )}
           </button>
         </div>
