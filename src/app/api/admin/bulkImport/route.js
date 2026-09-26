@@ -332,13 +332,6 @@ async function importMentors(mentors) {
     }
   }
 
-  console.log('New mentors:', newMentors);
-  console.log('Already exists:', alreadyExists);
-
-  // =====================================================
-  // CREATE USERS + MENTOR PROFILES
-  // =====================================================
-
   const importedMentors = [];
   const credentials = [];
 

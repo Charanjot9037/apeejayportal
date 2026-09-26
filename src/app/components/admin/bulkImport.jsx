@@ -133,24 +133,30 @@ export default function BulkImport({ role = 'student' }) {
         .trim()
         .toLowerCase();
 
+      // NAME
       if (!name) {
         errors.push('Name is required');
+      } else if (name.length < 2) {
+        errors.push('Name must be at least 2 characters');
       }
 
+      // EMAIL
       if (!email) {
         errors.push('Email is required');
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        errors.push('Invalid email');
+        errors.push('Enter a valid email');
       }
 
+      // GUIDE NAME
       if (!guidename) {
         errors.push('Guide name is required');
       }
 
+      // GUIDE EMAIL
       if (!guideemail) {
         errors.push('Guide email is required');
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guideemail)) {
-        errors.push('Invalid guide email');
+        errors.push('Enter a valid guide email');
       }
 
       return {
@@ -195,25 +201,49 @@ export default function BulkImport({ role = 'student' }) {
 
       const designation = String(mentor.designation || '').trim();
 
+      // =====================================================
+      // NAME
+      // =====================================================
+
       if (!name) {
         errors.push('Name is required');
+      } else if (name.length < 2) {
+        errors.push('Name must be at least 2 characters');
       }
+
+      // =====================================================
+      // EMAIL
+      // =====================================================
 
       if (!email) {
         errors.push('Email is required');
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        errors.push('Invalid email');
+        errors.push('Enter a valid email');
       }
+
+      // =====================================================
+      // MOBILE NUMBER
+      // =====================================================
 
       if (!mobileNumber) {
         errors.push('Mobile number is required');
+      } else if (!/^[6-9][0-9]{9}$/.test(mobileNumber)) {
+        errors.push('Enter a valid 10-digit mobile number');
       }
+
+      // =====================================================
+      // DEPARTMENT
+      // =====================================================
 
       if (!department) {
         errors.push('Department is required');
       } else if (!departments.includes(department)) {
         errors.push('Invalid department');
       }
+
+      // =====================================================
+      // DESIGNATION
+      // =====================================================
 
       if (!designation) {
         errors.push('Designation is required');
@@ -241,7 +271,20 @@ export default function BulkImport({ role = 'student' }) {
   const handleChange = (index, field, value) => {
     const updatedRows = [...rows];
 
+    // -------------------------------------------------------
+    // MOBILE NUMBER
+    // Only allow digits and maximum 10 characters
+    // -------------------------------------------------------
+
+    if (isMentor && field === 'mobileNumber') {
+      value = String(value).replace(/\D/g, '').slice(0, 10);
+    }
+
     updatedRows[index][field] = value;
+
+    // -------------------------------------------------------
+    // REVALIDATE ALL ROWS
+    // -------------------------------------------------------
 
     const validated = isMentor
       ? validateMentors(
