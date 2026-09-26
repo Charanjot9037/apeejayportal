@@ -359,15 +359,9 @@ export default function Profile() {
         open={authModal.open}
         type={authModal.type}
         message={authModal.message}
-        onClose={() =>
-          setAuthModal({
-            open: false,
-            type: null,
-            message: "",
-          })
-        }
+    
         onLogin={() => router.push("/login")}
-        onBack={() => router.back()}
+        onBack={() => router.push("/login")}
       />
       <main className="min-h-screen">
         <div className="mx-auto  flex flex-col gap-3">
